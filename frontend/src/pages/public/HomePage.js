@@ -37,6 +37,7 @@ import "../../STYLES/HomePage.css";
 import { toDisplayDate } from "../../utils/apiDateFormat";
 import { getPublicFeaturedOffers, getActiveOffers } from "../../services/adminFeaturedOffersService";
 import { getPopularBusRoutesFromSearchHistory } from "../../services/busSearchHistoryService";
+import { listHotFlightRoutes } from "../../services/flightBookingService";
 import { toApiUrl } from "../../services/apiClient";
 import { usePromo } from "../../contexts/PromoContext";
 
@@ -152,7 +153,7 @@ const POPULAR_FLIGHTS = [
     summary: "Competitive fares on popular Gulf routes.",
     price: "INR 18,300",
   },
-   {
+  {
     id: "flight-9",
     image: flight3,
     route: "Hyderabad to Proddatur",
@@ -160,6 +161,58 @@ const POPULAR_FLIGHTS = [
     price: "INR 8,300",
   },
 ];
+
+const FALLBACK_BUS_ROUTES = [
+  {
+    id: "bus-fallback-1",
+    fromCity: "Mumbai",
+    toCity: "Pune",
+    searches: 1842,
+  },
+  {
+    id: "bus-fallback-2",
+    fromCity: "Bengaluru",
+    toCity: "Chennai",
+    searches: 1520,
+  },
+  {
+    id: "bus-fallback-3",
+    fromCity: "Delhi",
+    toCity: "Jaipur",
+    searches: 1480,
+  },
+  {
+    id: "bus-fallback-4",
+    fromCity: "Hyderabad",
+    toCity: "Bengaluru",
+    searches: 1390,
+  },
+  {
+    id: "bus-fallback-5",
+    fromCity: "Chennai",
+    toCity: "Bengaluru",
+    searches: 1210,
+  },
+  {
+    id: "bus-fallback-6",
+    fromCity: "Pune",
+    toCity: "Goa",
+    searches: 980,
+  },
+  {
+    id: "bus-fallback-7",
+    fromCity: "Hyderabad",
+    toCity: "Vijayawada",
+    searches: 870,
+  },
+  {
+    id: "bus-fallback-8",
+    fromCity: "Delhi",
+    toCity: "Agra",
+    searches: 750,
+  },
+];
+
 
 const AIRLINE_BRANDS = [
   { id: "brand-1", image: indigo, name: "IndiGo", scale: 1.2 },
@@ -849,6 +902,9 @@ export default function HomePage() {
   const [popularRoutes, setPopularRoutes] = useState([]);
   const [popularRoutesLoading, setPopularRoutesLoading] = useState(false);
   const [popularRoutesError, setPopularRoutesError] = useState("");
+  const [popularFlights, setPopularFlights] = useState([]);
+  const [popularFlightsLoading, setPopularFlightsLoading] = useState(false);
+  const [popularFlightsError, setPopularFlightsError] = useState("");
   const [isDealsDialogOpen, setIsDealsDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -1006,11 +1062,15 @@ export default function HomePage() {
         const routes = await getPopularBusRoutesFromSearchHistory({ limit: 12 });
 
         if (isMounted) {
-          setPopularRoutes(routes);
+          if (routes && routes.length > 0) {
+            setPopularRoutes(routes);
+          } else {
+            setPopularRoutes(FALLBACK_BUS_ROUTES);
+          }
         }
       } catch (error) {
         if (isMounted) {
-          setPopularRoutesError("Unable to load popular routes.");
+          setPopularRoutes(FALLBACK_BUS_ROUTES);
         }
       } finally {
         if (isMounted) {
@@ -1020,6 +1080,54 @@ export default function HomePage() {
     };
 
     loadPopularRoutes();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadPopularFlights = async () => {
+      setPopularFlightsLoading(true);
+      setPopularFlightsError("");
+
+      try {
+        const routes = await listHotFlightRoutes();
+        if (isMounted) {
+          if (routes && routes.length > 0) {
+            const mapped = routes.map((route, index) => {
+              const images = [flight1, flight2, flight3, flight4];
+              const image = images[index % images.length];
+              const from = route.fromCity || "Hyderabad";
+              const to = route.toCity || "Bengaluru";
+              return {
+                id: route.routeId || `flight-hot-${index}`,
+                image,
+                route: `${from} to ${to}`,
+                fromCity: from,
+                toCity: to,
+                summary: `Trending flight from search history. Score: ${route.score || 0}`,
+                price: `INR ${(3500 + (index * 450) % 6000).toLocaleString()}`,
+              };
+            });
+            setPopularFlights(mapped);
+          } else {
+            setPopularFlights(POPULAR_FLIGHTS);
+          }
+        }
+      } catch (error) {
+        if (isMounted) {
+          setPopularFlights(POPULAR_FLIGHTS);
+        }
+      } finally {
+        if (isMounted) {
+          setPopularFlightsLoading(false);
+        }
+      }
+    };
+
+    loadPopularFlights();
     return () => {
       isMounted = false;
     };
@@ -2279,27 +2387,35 @@ export default function HomePage() {
           </div>
         </div>
 
-        <AutoMarquee
-          items={POPULAR_FLIGHTS}
-          className="popular-marquee"
-          duration={44}
-          renderItem={(flight) => (
-            <article className="popular-card">
-              <img src={flight.image} alt={flight.route} />
-              <div className="popular-content">
-                <h3>{flight.route}</h3>
-                <p>{flight.summary}</p>
-                <span>{flight.price}</span>
-                <button
-                  type="button"
-                  onClick={() => handlePopularFlightBooking(flight)}
-                >
-                  Book flight
-                </button>
-              </div>
-            </article>
-          )}
-        />
+        {popularFlightsLoading ? (
+          <div className="popular-routes-loading">Loading popular flights...</div>
+        ) : popularFlightsError ? (
+          <div className="popular-routes-error">{popularFlightsError}</div>
+        ) : popularFlights.length === 0 ? (
+          <div className="popular-routes-empty">No popular flights available.</div>
+        ) : (
+          <AutoMarquee
+            items={popularFlights}
+            className="popular-marquee"
+            duration={44}
+            renderItem={(flight) => (
+              <article className="popular-card">
+                <img src={flight.image} alt={flight.route} />
+                <div className="popular-content">
+                  <h3>{flight.route}</h3>
+                  <p>{flight.summary}</p>
+                  <span>{flight.price}</span>
+                  <button
+                    type="button"
+                    onClick={() => handlePopularFlightBooking(flight)}
+                  >
+                    Book flight
+                  </button>
+                </div>
+              </article>
+            )}
+          />
+        )}
       </section>
 
       <section className="brands-section section-shell">

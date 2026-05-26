@@ -2506,6 +2506,18 @@ select.field-control option {
   .rtc-card { min-height: 220px; }
   .rtc-card-content h3 { font-size: 15.3px; }
   .rtc-card-content p { font-size: 9.9px; }
+  .hero-metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .section-header { align-items: flex-start; flex-direction: column; }
+  .section-header h2 { font-size: 27px; }
+  .offer-marquee .marquee-slide { width: 300px; }
+  .popular-routes-marquee .marquee-slide { width: 320px; }
+  .ad-banner { grid-template-columns: 1fr; }
+  .ad-banner-image { height: 146px; }
+  .popular-marquee .marquee-slide, .review-marquee .marquee-slide { width: 286px; }
+  .rtc-marquee .marquee-slide { width: 198px; }
+  .rtc-card { min-height: 220px; }
+  .rtc-card-content h3 { font-size: 15.3px; }
+  .rtc-card-content p { font-size: 9.9px; }
   .rtc-card-content button { font-size: 9px; }
   .brand-marquee .marquee-slide, .payment-marquee .marquee-slide { width: 160px; }
   .signup-form { grid-template-columns: 1fr; }
@@ -2599,7 +2611,7 @@ select.field-control option {
   .home-ai-chat-message.typing span { transition: none; animation: none; }
 }
 
-/* Unified orange travel theme */
+/* Unified orange travel theme & Compact Layout Refresh */
 .homepage {
   --page-bg: var(--theme-page, #fff7f2);
   --surface: var(--theme-surface, #ffffff);
@@ -2612,10 +2624,22 @@ select.field-control option {
   --accent: var(--theme-primary, #f04423);
   --success: var(--theme-primary, #f04423);
   --danger: var(--theme-primary-strong, #df3f1f);
-  --shadow-xl: 0 28px 60px rgba(125, 59, 31, 0.16);
-  --shadow-lg: 0 18px 38px rgba(125, 59, 31, 0.12);
-  --shadow-md: 0 12px 24px rgba(125, 59, 31, 0.08);
+  --shadow-xl: 0 20px 40px rgba(125, 59, 31, 0.12);
+  --shadow-lg: 0 12px 24px rgba(125, 59, 31, 0.08);
+  --shadow-md: 0 6px 12px rgba(125, 59, 31, 0.04);
   background: transparent;
+}
+
+/* Reduced Container Sizes & Gaps in Hero Section */
+.hero-section {
+  min-height: auto !important;
+  padding: 30px 20px 40px !important;
+}
+
+.hero-content {
+  width: min(100%, 1240px) !important;
+  max-width: 1240px !important;
+  margin: 0 auto !important;
 }
 
 .hero-overlay {
@@ -2624,207 +2648,619 @@ select.field-control option {
     linear-gradient(185deg, rgba(125, 59, 31, 0.16), transparent 56%);
 }
 
-.hero-kicker,
-.hero-tag,
+.hero-copy-block h1 {
+  font-size: clamp(22px, 3vw, 36px) !important;
+  margin: 8px 0 0 !important;
+  white-space: normal !important;
+}
+
+.hero-copy-block p {
+  font-size: 13px !important;
+  margin: 10px 0 0 !important;
+  white-space: normal !important;
+  color: rgba(222, 234, 251, 0.8) !important;
+}
+
+.hero-metric-grid {
+  margin-top: 18px !important;
+  gap: 8px !important;
+}
+
 .hero-metric-card {
+  padding: 8px 10px !important;
+  border-radius: 10px !important;
+  background: rgba(31, 42, 68, 0.45) !important;
+}
+
+.hero-metric-card strong {
+  font-size: 14.5px !important;
+}
+
+.hero-metric-card span {
+  font-size: 9px !important;
+  margin-top: 3px !important;
+}
+
+.hero-kicker,
+.hero-tag {
   border-color: rgba(255, 255, 255, 0.34);
   background: rgba(31, 42, 68, 0.42);
 }
 
+/* Glassmorphic Search Panel Container */
 .search-panel {
-  border-color: rgba(242, 203, 191, 0.72);
-  background: linear-gradient(156deg, rgba(255, 255, 255, 0.82), rgba(255, 250, 246, 0.74));
-  box-shadow: 0 22px 54px rgba(125, 59, 31, 0.16);
-}
-
-.tabs {
-  border-color: #ffd5c7;
-  background: rgba(255, 250, 246, 0.92);
-}
-
-.tab {
-  color: var(--theme-navy, #1f2a44);
-}
-
-.tab.active,
-.trip-chip.active,
-.search-btn,
-.home-ai-toggle,
-.home-ai-chat.open .home-ai-toggle,
-.home-ai-chat-form button {
-  background: linear-gradient(135deg, var(--theme-primary, #f04423), var(--theme-primary-strong, #df3f1f));
-  color: #ffffff;
-  box-shadow: 0 14px 28px rgba(240, 68, 35, 0.22);
-}
-
-.trip-chip,
-.field-control,
-.traveller-trigger,
-.swap-btn,
-.action-circle,
-.insight-card,
-.signup-card,
-.offer-card,
-.popular-card,
-.review-slide,
-.ad-banner {
-  border-color: var(--theme-border, #f2cbbf);
-  background: #ffffff;
-}
-
-.field label {
-  color: #7c3f2b;
-}
-
-.field-control,
-.traveller-trigger {
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--theme-navy, #1f2a44);
-  box-shadow: 0 7px 16px rgba(125, 59, 31, 0.055);
-}
-
-.field-control:focus,
-.traveller-trigger:focus {
-  border-color: #ffb29c;
-  box-shadow: 0 0 0 4px rgba(240, 68, 35, 0.12);
-}
-
-.swap-btn,
-.action-add,
-.section-link {
-  color: var(--theme-primary-strong, #df3f1f);
-}
-
-.insight-card::before {
-  background: linear-gradient(90deg, var(--theme-primary, #f04423), var(--theme-primary-strong, #df3f1f));
-}
-
-.home-ai-chat-panel {
-  border-color: var(--theme-border, #f2cbbf);
-  background: linear-gradient(180deg, #ffffff 0%, #fffaf6 100%);
-}
-
-.home-ai-chat-message.user,
-.home-ai-cameo-core {
-  background: linear-gradient(135deg, var(--theme-primary, #f04423), var(--theme-primary-strong, #df3f1f));
+  padding: 16px 20px !important;
+  border-radius: 18px !important;
+  border-color: rgba(242, 203, 191, 0.72) !important;
+  background: linear-gradient(156deg, rgba(255, 255, 255, 0.95), rgba(255, 250, 246, 0.9)) !important;
+  box-shadow: 0 20px 48px rgba(125, 59, 31, 0.14) !important;
+  margin-top: 0 !important;
 }
 
 .search-panel::after {
   display: none;
 }
 
+/* Premium Navigation Tabs */
+.search-panel .tabs {
+  background: #fdf2ee !important;
+  border-radius: 99px !important;
+  padding: 4px !important;
+  border: 1px solid #fbdad0 !important;
+  display: inline-flex !important;
+  gap: 4px !important;
+  margin-bottom: 16px !important;
+}
+
+.search-panel .tab {
+  border-radius: 99px !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #8c6d62 !important;
+  padding: 6px 24px !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.search-panel .tab.active {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(240, 68, 35, 0.2) !important;
+}
+
+.trip-switch {
+  margin-bottom: 10px !important;
+}
+
+/* Base card cell sizing and styles */
+.search-panel .field,
+.search-panel .place-autocomplete,
+.search-panel .traveller-field,
+.search-panel .class-field,
+.bus-standard-grid .field,
+.bus-standard-grid .place-autocomplete {
+  border: none !important;
+  border-radius: 0px !important;
+  padding: 8px 14px 6px 14px !important;
+  min-height: 60px !important;
+  height: 60px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.search-panel .field:hover,
+.search-panel .place-autocomplete:hover,
+.search-panel .traveller-field:hover,
+.search-panel .class-field:hover,
+.bus-standard-grid .field:hover,
+.bus-standard-grid .place-autocomplete:hover {
+  background: #fffaf7 !important;
+}
+
+.search-panel .field:focus-within,
+.search-panel .place-autocomplete:focus-within,
+.search-panel .traveller-field:focus-within,
+.search-panel .class-field:focus-within,
+.bus-standard-grid .field:focus-within,
+.bus-standard-grid .place-autocomplete:focus-within {
+  background: #ffffff !important;
+  box-shadow: inset 0 0 0 2px rgba(240, 68, 35, 0.15) !important;
+}
+
+/* Card Cell Sub-labels and Inputs Styling */
+.search-panel .field label,
+.bus-standard-grid label {
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  color: #a67c70 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 1px !important;
+  background: transparent !important;
+  border: none !important;
+}
+
 .search-panel .field-control,
-.search-panel .traveller-trigger {
-  border: 1px solid #f0b9a8;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: none;
+.search-panel .traveller-trigger,
+.bus-standard-grid .field-control {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: var(--text) !important;
+  padding: 1px 0 0 0 !important;
+  margin: 0 !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  outline: none !important;
+}
+
+.search-panel .field-control:focus,
+.search-panel .traveller-trigger:focus,
+.bus-standard-grid .field-control:focus {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  background: transparent !important;
 }
 
 .search-panel .field-control.watermark-field:disabled {
-  border: 1px solid #f0b9a8;
-  background: rgba(255, 255, 255, 0.34);
-  box-shadow: none;
-  opacity: 1;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #a7b7c9 !important;
+  opacity: 0.8 !important;
+  cursor: default !important;
 }
 
-/* Featured offers dialog */
-.deals-dialog-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 5000;
-  padding: 28px 16px;
-  display: grid;
-  place-items: center;
-  background: rgba(8, 18, 35, 0.58);
-  backdrop-filter: blur(8px);
+/* Traveller Trigger Details */
+.traveller-trigger {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
 }
 
-.deals-dialog {
-  width: min(1080px, 100%);
-  max-height: min(760px, calc(100vh - 56px));
-  border: 1px solid rgba(242, 203, 191, 0.9);
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at 0% 0%, rgba(240, 90, 40, 0.08), transparent 32%),
-    #ffffff;
-  box-shadow: 0 28px 80px rgba(8, 18, 35, 0.28);
-  overflow: hidden;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+.traveller-summary span {
+  font-size: 14px !important;
+  font-weight: 800 !important;
 }
 
-.deals-dialog-header {
-  min-height: 86px;
-  padding: 20px 22px;
-  border-bottom: 1px solid #f1d8cf;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  background: #fff8f4;
+/* Premium Search Button */
+.search-panel .search-btn {
+  background: linear-gradient(135deg, #f04423 0%, #d83416 100%) !important;
+  border-radius: 99px !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.05em !important;
+  height: 46px !important;
+  padding: 0 42px !important;
+  box-shadow: 0 6px 18px rgba(240, 68, 35, 0.25) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  margin-top: 16px !important;
 }
 
-.deals-dialog-header h2 {
-  margin: 3px 0 0;
-  color: #173561;
-  font-size: clamp(1.25rem, 2vw, 1.75rem);
-  line-height: 1.1;
+.search-panel .search-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 24px rgba(240, 68, 35, 0.35) !important;
 }
 
-.deals-dialog-close {
-  border: 1px solid #f0c7ba;
-  border-radius: 999px;
-  min-height: 42px;
-  padding: 0 14px;
-  background: #ffffff;
-  color: #e63f22;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.78rem;
-  font-weight: 900;
-  cursor: pointer;
-  text-transform: uppercase;
+/* Premium Cards elevations & Hover Effects */
+.offer-card {
+  border: 1px solid #f3e6e2 !important;
+  border-radius: 20px !important;
+  background: #ffffff !important;
+  box-shadow: 0 10px 30px rgba(125, 59, 31, 0.03) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.deals-dialog-grid {
-  min-height: 0;
-  padding: 20px;
-  overflow-y: auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 16px;
+.offer-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 15px 35px rgba(125, 59, 31, 0.08) !important;
+  border-color: #ebd0c7 !important;
 }
 
-.deals-dialog-card {
-  min-height: 188px;
-  box-shadow: 0 12px 28px rgba(20, 45, 80, 0.1);
+.offer-card button {
+  background: #fff2ee !important;
+  border: 1px solid #fcdad0 !important;
+  color: var(--primary) !important;
+  font-weight: 800 !important;
+  border-radius: 99px !important;
+  transition: all 0.2s ease !important;
 }
 
-@media (max-width: 640px) {
-  .deals-dialog-backdrop {
-    padding: 12px;
-    align-items: stretch;
+.offer-card button:hover {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+}
+
+.pop-route-card {
+  border: 1px solid #f3e6e2 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 10px 30px rgba(125, 59, 31, 0.03) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.pop-route-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 15px 35px rgba(125, 59, 31, 0.08) !important;
+  border-color: #ebd0c7 !important;
+}
+
+.pop-route-book-btn {
+  background: linear-gradient(135deg, #f04423 0%, #d83416 100%) !important;
+  border-radius: 12px !important;
+  transition: all 0.2s ease !important;
+}
+
+.pop-route-book-btn:hover {
+  background: linear-gradient(135deg, #ff5733 0%, #f04423 100%) !important;
+}
+
+
+/* ── SCREEN COMPATIBILITY & RESPONSIVE GRID STYLING ── */
+
+/* 1. DESKTOP SCREENS (Width >= 1025px) */
+@media (min-width: 1025px) {
+  .standard-grid {
+    display: grid !important;
+    grid-template-columns: 1.15fr 1.15fr 0.85fr 0.85fr 1fr 0.8fr !important;
+    grid-template-rows: auto !important;
+    gap: 0px !important;
+    border: 1px solid #f2cbbf !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 16px rgba(125, 59, 31, 0.03) !important;
+    background: #ffffff !important;
+    position: relative !important;
   }
 
-  .deals-dialog {
-    max-height: calc(100vh - 24px);
-    border-radius: 18px;
+  .bus-standard-grid {
+    display: grid !important;
+    grid-template-columns: 1.25fr 1.25fr 0.9fr 0.9fr !important;
+    grid-template-rows: auto !important;
+    gap: 0px !important;
+    border: 1px solid #f2cbbf !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 16px rgba(125, 59, 31, 0.03) !important;
+    background: #ffffff !important;
+    position: relative !important;
   }
 
-  .deals-dialog-header {
-    align-items: flex-start;
-    flex-direction: column;
-    padding: 16px;
+  /* Desktop Placements */
+  .standard-grid .place-autocomplete:nth-child(1) { grid-column: 1 !important; grid-row: 1 !important; }
+  .standard-grid .swap-field                       { grid-column: 1 / 3 !important; grid-row: 1 !important; }
+  .standard-grid .place-autocomplete:nth-child(3)  { grid-column: 2 !important; grid-row: 1 !important; }
+  .standard-grid .field:nth-child(4)               { grid-column: 3 !important; grid-row: 1 !important; }
+  .standard-grid .field:nth-child(5)               { grid-column: 4 !important; grid-row: 1 !important; }
+  .standard-grid .traveller-field                  { grid-column: 5 !important; grid-row: 1 !important; }
+  .standard-grid .class-field                      { grid-column: 6 !important; grid-row: 1 !important; }
+
+  .bus-standard-grid .place-autocomplete:nth-child(1) { grid-column: 1 !important; grid-row: 1 !important; }
+  .bus-standard-grid .swap-field                       { grid-column: 1 / 3 !important; grid-row: 1 !important; }
+  .bus-standard-grid .place-autocomplete:nth-child(3)  { grid-column: 2 !important; grid-row: 1 !important; }
+  .bus-standard-grid .field:nth-child(4)               { grid-column: 3 !important; grid-row: 1 !important; }
+  .bus-standard-grid .field:nth-child(5)               { grid-column: 4 !important; grid-row: 1 !important; }
+
+  /* Divider line borders between cells on Desktop */
+  .search-panel .field,
+  .search-panel .place-autocomplete,
+  .search-panel .traveller-field,
+  .search-panel .class-field,
+  .bus-standard-grid .field,
+  .bus-standard-grid .place-autocomplete {
+    border-right: 1px solid #fbdad0 !important;
+    border-bottom: none !important;
   }
 
-  .deals-dialog-close {
-    width: 100%;
-    justify-content: center;
+  .search-panel .class-field,
+  .bus-standard-grid .field:last-child {
+    border-right: none !important;
   }
 
-  .deals-dialog-grid {
-    grid-template-columns: 1fr;
-    padding: 14px;
+  /* Desktop Absolute floating swap pill centered on vertical divider */
+  .search-panel .swap-field,
+  .bus-standard-grid .swap-field {
+    justify-self: center !important;
+    align-self: center !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 50 !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .search-panel .swap-btn,
+  .bus-standard-grid .swap-btn {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    border: 1px solid #f2cbbf !important;
+    background: #ffffff !important;
+    color: var(--primary) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(125, 59, 31, 0.1) !important;
+    z-index: 100 !important;
+  }
+
+  .search-panel .swap-btn:hover,
+  .bus-standard-grid .swap-btn:hover {
+    transform: translate(-50%, -50%) rotate(180deg) scale(1.08) !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 4px 12px rgba(240, 68, 35, 0.2) !important;
   }
 }
+
+/* 2. TABLET SCREENS (769px to 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  /* Flights tab goes to a beautiful 2x4 grid layout */
+  .standard-grid {
+    display: grid !important;
+    grid-template-columns: 1.15fr 1.15fr 0.85fr 0.85fr !important;
+    grid-template-rows: auto auto !important;
+    gap: 0px !important;
+    border: 1px solid #f2cbbf !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 16px rgba(125, 59, 31, 0.03) !important;
+    background: #ffffff !important;
+    position: relative !important;
+  }
+
+  /* Tablet Placements for Flights */
+  .standard-grid .place-autocomplete:nth-child(1) { grid-column: 1 !important; grid-row: 1 !important; }
+  .standard-grid .swap-field                       { grid-column: 1 / 3 !important; grid-row: 1 !important; }
+  .standard-grid .place-autocomplete:nth-child(3)  { grid-column: 2 !important; grid-row: 1 !important; }
+  .standard-grid .field:nth-child(4)               { grid-column: 3 !important; grid-row: 1 !important; }
+  .standard-grid .field:nth-child(5)               { grid-column: 4 !important; grid-row: 1 !important; }
+  .standard-grid .traveller-field                  { grid-column: 1 / 3 !important; grid-row: 2 !important; }
+  .standard-grid .class-field                      { grid-column: 3 / 5 !important; grid-row: 2 !important; }
+
+  /* Buses tab stays on 1 row (4 columns) on Tablet */
+  .bus-standard-grid {
+    display: grid !important;
+    grid-template-columns: 1.25fr 1.25fr 0.9fr 0.9fr !important;
+    grid-template-rows: auto !important;
+    gap: 0px !important;
+    border: 1px solid #f2cbbf !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 16px rgba(125, 59, 31, 0.03) !important;
+    background: #ffffff !important;
+    position: relative !important;
+  }
+
+  .bus-standard-grid .place-autocomplete:nth-child(1) { grid-column: 1 !important; grid-row: 1 !important; }
+  .bus-standard-grid .swap-field                       { grid-column: 1 / 3 !important; grid-row: 1 !important; }
+  .bus-standard-grid .place-autocomplete:nth-child(3)  { grid-column: 2 !important; grid-row: 1 !important; }
+  .bus-standard-grid .field:nth-child(4)               { grid-column: 3 !important; grid-row: 1 !important; }
+  .bus-standard-grid .field:nth-child(5)               { grid-column: 4 !important; grid-row: 1 !important; }
+
+  /* Cell borders for Flights (2-row grid) */
+  .standard-grid .field,
+  .standard-grid .place-autocomplete,
+  .standard-grid .traveller-field,
+  .standard-grid .class-field {
+    border-right: 1px solid #fbdad0 !important;
+    border-bottom: 1px solid #fbdad0 !important;
+  }
+
+  /* Turn off right borders on edge columns */
+  .standard-grid .field:nth-child(5), /* Return date (col 4, row 1) */
+  .standard-grid .class-field {       /* Class select (col 3-4, row 2) */
+    border-right: none !important;
+  }
+
+  /* Turn off bottom borders on row 2 */
+  .standard-grid .traveller-field,
+  .standard-grid .class-field {
+    border-bottom: none !important;
+  }
+
+  /* Cell borders for Buses (1-row grid) */
+  .bus-standard-grid .field,
+  .bus-standard-grid .place-autocomplete {
+    border-right: 1px solid #fbdad0 !important;
+    border-bottom: none !important;
+  }
+
+  .bus-standard-grid .field:last-child {
+    border-right: none !important;
+  }
+
+  /* Tablet Floating swap pill (positioned between Source and Destination in row 1) */
+  .search-panel .swap-field,
+  .bus-standard-grid .swap-field {
+    justify-self: center !important;
+    align-self: center !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 50 !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .search-panel .swap-btn,
+  .bus-standard-grid .swap-btn {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    border: 1px solid #f2cbbf !important;
+    background: #ffffff !important;
+    color: var(--primary) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(125, 59, 31, 0.1) !important;
+    z-index: 100 !important;
+  }
+
+  .search-panel .swap-btn:hover,
+  .bus-standard-grid .swap-btn:hover {
+    transform: translate(-50%, -50%) rotate(180deg) scale(1.08) !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 4px 12px rgba(240, 68, 35, 0.2) !important;
+  }
+}
+
+/* 3. MOBILE SCREENS (Width <= 768px) */
+@media (max-width: 768px) {
+  /* Complete single-column stacked grids on mobile to prevent squishing */
+  .standard-grid,
+  .bus-standard-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+    gap: 0px !important;
+    border: 1px solid #f2cbbf !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 16px rgba(125, 59, 31, 0.03) !important;
+    background: #ffffff !important;
+    position: relative !important;
+  }
+
+  /* Reset grid areas so elements stack naturally in source order */
+  .standard-grid .place-autocomplete:nth-child(1),
+  .standard-grid .place-autocomplete:nth-child(3),
+  .standard-grid .field:nth-child(4),
+  .standard-grid .field:nth-child(5),
+  .standard-grid .traveller-field,
+  .standard-grid .class-field,
+  .bus-standard-grid .place-autocomplete:nth-child(1),
+  .bus-standard-grid .place-autocomplete:nth-child(3),
+  .bus-standard-grid .field:nth-child(4),
+  .bus-standard-grid .field:nth-child(5) {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  /* Stacked cell borders: turn off right borders, add bottom borders */
+  .search-panel .field,
+  .search-panel .place-autocomplete,
+  .search-panel .traveller-field,
+  .search-panel .class-field,
+  .bus-standard-grid .field,
+  .bus-standard-grid .place-autocomplete {
+    border-right: none !important;
+    border-bottom: 1px solid #fbdad0 !important;
+    border-radius: 0px !important;
+    padding: 8px 14px 6px 14px !important;
+  }
+
+  /* Disable bottom border on the last stacked cell */
+  .search-panel .class-field,
+  .bus-standard-grid .field:last-child {
+    border-bottom: none !important;
+  }
+
+  /* Floating swap pill: positioned horizontally on the dividing line between Source and Destination */
+  .standard-grid .swap-field,
+  .bus-standard-grid .swap-field {
+    position: absolute !important;
+    top: 60px !important; /* height of first cell (Source) is 60px */
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: visible !important;
+    z-index: 100 !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  .standard-grid .swap-btn,
+  .bus-standard-grid .swap-btn {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) rotate(90deg) !important; /* rotate 90deg so arrows point vertically */
+    margin: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    border: 1px solid #f2cbbf !important;
+    background: #ffffff !important;
+    color: var(--primary) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(125, 59, 31, 0.1) !important;
+    z-index: 100 !important;
+  }
+
+  .standard-grid .swap-btn:hover,
+  .bus-standard-grid .swap-btn:hover {
+    transform: translate(-50%, -50%) rotate(270deg) scale(1.08) !important; /* animation works cleanly from 90deg */
+    border-color: var(--primary) !important;
+    box-shadow: 0 4px 12px rgba(240, 68, 35, 0.2) !important;
+  }
+}
+
+/* Decrease size of containers and reduce section gaps */
+.section-shell {
+  width: min(100% - 40px, 1240px) !important;
+  max-width: 1240px !important;
+  padding: 16px 0 !important;
+}
+
+.section-header {
+  margin-bottom: 10px !important;
+}
+
+.section-header h2 {
+  font-size: clamp(20px, 2.2vw, 28px) !important;
+}
+
+.hero-section {
+  padding: 24px 20px 24px !important;
+}
+
+.ads-section {
+  padding-top: 6px !important;
+  gap: 12px !important;
+}
+
+.signup-section {
+  padding: 12px 0 !important;
+}
+
+.insights-grid {
+  gap: 12px !important;
+}
+
+.insight-card {
+  min-height: 200px !important;
+  padding: 14px 14px 12px !important;
+}
+
+
