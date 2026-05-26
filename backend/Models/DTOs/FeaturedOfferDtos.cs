@@ -15,6 +15,7 @@ public class FeaturedOfferDto
     public int CouponUsedCount { get; set; }
     public int RemainingCouponUsage { get; set; }
     public bool IsCouponActive { get; set; }
+    public int? PromotionId { get; set; }
     public string ImageUrl { get; set; } = string.Empty;
     public string BookingType { get; set; } = string.Empty;
     public decimal PreviewFinalPrice { get; set; }

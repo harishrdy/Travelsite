@@ -1,0 +1,95 @@
+.admin-flight-remark-page {
+  gap: 12px;
+}
+
+.admin-flight-remark-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-flight-remark-header h1 {
+  font-size: 1.85rem;
+}
+
+.admin-flight-remark-actions-row {
+  gap: 6px;
+}
+
+.admin-flight-remark-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-flight-remark-btn.secondary {
+  background: linear-gradient(135deg, var(--admin-primary-strong), var(--admin-primary)) !important;
+}
+
+.admin-flight-remark-table-head,
+.admin-flight-remark-table-row {
+  grid-template-columns: 0.35fr 0.4fr 1.05fr 1.05fr 0.95fr 1.05fr 1.7fr 0.75fr 0.75fr;
+}
+
+.admin-flight-remark-action-cell {
+  grid-auto-flow: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.admin-flight-remark-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.admin-flight-remark-icon-btn.edit {
+  background: linear-gradient(135deg, var(--admin-primary-strong), var(--admin-primary));
+}
+
+.admin-flight-remark-icon-btn.delete {
+  background: linear-gradient(135deg, var(--admin-danger), var(--admin-primary-strong));
+}
+
+.admin-flight-remark-status {
+  min-height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--admin-success);
+  background: var(--admin-success-soft);
+  color: var(--admin-success);
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.admin-flight-remark-status.inactive {
+  border-color: var(--admin-danger);
+  background: var(--admin-danger-soft);
+  color: var(--admin-danger);
+}
+
+@media (max-width: 1040px) {
+  .admin-flight-remark-table-head,
+  .admin-flight-remark-table-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-flight-remark-table-head,
+  .admin-flight-remark-table-row {
+    grid-template-columns: 1fr;
+  }
+}
+

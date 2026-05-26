@@ -26,11 +26,28 @@ export function PromoProvider({ children }) {
     setSelectedOfferState(null);
     sessionStorage.removeItem("selectedOffer");
   };
+  const selectedFeaturedOfferId =
+    selectedOffer?.selectedFeaturedOfferId ??
+    selectedOffer?.id ??
+    selectedOffer?.offerId ??
+    selectedOffer?.promotionId;
+  const selectedPromotionId =
+    selectedFeaturedOfferId !== undefined &&
+    selectedFeaturedOfferId !== null &&
+    selectedFeaturedOfferId !== ""
+      ? Number(selectedFeaturedOfferId)
+      : null;
 
   return (
     <PromoContext.Provider
       value={{
         selectedOffer,
+        selectedFeaturedOfferId: Number.isFinite(selectedPromotionId)
+          ? selectedPromotionId
+          : null,
+        selectedPromotionId: Number.isFinite(selectedPromotionId)
+          ? selectedPromotionId
+          : null,
         setSelectedOffer,
         clearSelectedOffer,
       }}

@@ -1,0 +1,75 @@
+.admin-flight-pending-page {
+  gap: 12px;
+}
+
+.admin-flight-pending-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-flight-pending-header h1 {
+  font-size: 1.85rem;
+}
+
+.admin-flight-pending-actions-row {
+  gap: 6px;
+}
+
+.admin-flight-pending-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-flight-pending-btn.secondary {
+  background: linear-gradient(135deg, var(--admin-primary-strong), var(--admin-primary)) !important;
+}
+
+.admin-flight-pending-table-head,
+.admin-flight-pending-table-row {
+  grid-template-columns: 0.35fr 0.4fr 0.85fr 1fr 1.2fr 1.05fr 1.7fr 0.7fr;
+}
+
+.admin-flight-pending-action-cell {
+  grid-auto-flow: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.admin-flight-pending-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.admin-flight-pending-icon-btn.edit {
+  background: linear-gradient(135deg, var(--admin-primary-strong), var(--admin-primary));
+}
+
+.admin-flight-pending-icon-btn.delete {
+  background: linear-gradient(135deg, var(--admin-danger), var(--admin-primary-strong));
+}
+
+@media (max-width: 980px) {
+  .admin-flight-pending-table-head,
+  .admin-flight-pending-table-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-flight-pending-table-head,
+  .admin-flight-pending-table-row {
+    grid-template-columns: 1fr;
+  }
+}
+

@@ -2,11 +2,16 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PickNBook.Api.Constants;
 using PickNBook.Api.Data;
 using PickNBook.Api.Models;
+using PickNBook.Api.Models.DTOs;
 using PickNBook.Api.Services;
 using System.Security.Claims;
 using System.Security.Cryptography;
+
+
+
 
 namespace PickNBook.Api.Controllers
 {
@@ -45,6 +50,274 @@ namespace PickNBook.Api.Controllers
                 10);
         }
 
+        private string GenerateOtp()
+        {
+            return RandomNumberGenerator
+                .GetInt32(100000, 1000000)
+                .ToString();
+        }
+
+        [HttpPost("send-registration-otp")]
+        public async Task<IActionResult> SendRegistrationOtp(
+    SendRegistrationOtpRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+            var existingUser = await _context.Users
+    .AnyAsync(x => x.Email.ToLower() == normalizedEmail);
+
+            if (existingUser)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Email already registered"
+                });
+            }
+            var oldOtps = _context.OTPs.Where(x =>
+    x.Email == normalizedEmail &&
+    x.Purpose == OtpPurposes.Registration &&
+    !x.IsUsed);
+
+            _context.OTPs.RemoveRange(oldOtps);
+            var otpCode = GenerateOtp();
+
+            var hashedOtp = BCrypt.Net.BCrypt.HashPassword(otpCode);
+
+            var otpEntity = new OTP
+            {
+                Email = normalizedEmail,
+                Code = hashedOtp,
+                Expiry = DateTime.UtcNow.AddMinutes(5),
+                IsUsed = false,
+                IsVerified = false,
+                Purpose = OtpPurposes.Registration,
+                FailedAttempts = 0
+            };
+
+            _context.OTPs.Add(otpEntity);
+
+            await _context.SaveChangesAsync();
+
+            await _emailService.SendEmailAsync(
+               normalizedEmail,
+                "Registration OTP",
+                $"Your OTP is: {otpCode}"
+            );
+
+            return Ok(new
+            {
+                success = true,
+                message = "OTP sent successfully"
+            });
+        }
+
+        [HttpPost("verify-registration-otp")]
+        public async Task<IActionResult> VerifyRegistrationOtp(
+    VerifyRegistrationOtpRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+
+            var otpRecord = await _context.OTPs
+                .Where(x =>
+                    x.Email == normalizedEmail &&
+                    x.Purpose == OtpPurposes.Registration &&
+                    !x.IsUsed &&
+                    x.Expiry > DateTime.UtcNow)
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefaultAsync();
+
+            if (otpRecord == null)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "OTP expired or invalid"
+                });
+            }
+            if (otpRecord.FailedAttempts >= 5)
+            {
+                otpRecord.IsUsed = true;
+
+                await _context.SaveChangesAsync();
+
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "OTP attempt limit exceeded"
+                });
+            }
+
+            var isOtpValid = BCrypt.Net.BCrypt.Verify(
+                request.Otp,
+                otpRecord.Code);
+       
+
+            if (!isOtpValid)
+            {
+                otpRecord.FailedAttempts++;
+
+                await _context.SaveChangesAsync();
+
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Invalid OTP"
+                });
+            }
+           
+
+            otpRecord.IsUsed = true;
+
+            otpRecord.IsVerified = true;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "OTP verified successfully"
+            });
+        }
+        [HttpPost("forgot-password/send-otp")]
+        public async Task<IActionResult> ForgotPasswordSendOtp(
+    ForgotPasswordSendOtpRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(x => x.Email.ToLower() == normalizedEmail);
+
+            if (user == null)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Email not registered"
+                });
+            }
+
+            var oldOtps = _context.OTPs.Where(x =>
+                x.Email == normalizedEmail &&
+                x.Purpose == OtpPurposes.PasswordReset &&
+                !x.IsUsed);
+
+            _context.OTPs.RemoveRange(oldOtps);
+
+            var otpCode = GenerateOtp();
+
+            var hashedOtp = BCrypt.Net.BCrypt.HashPassword(otpCode);
+
+            var otpEntity = new OTP
+            {
+                UserId = user.Id,
+                Email = normalizedEmail,
+                Code = hashedOtp,
+                Expiry = DateTime.UtcNow.AddMinutes(5),
+                IsUsed = false,
+                IsVerified = false,
+                Purpose = OtpPurposes.PasswordReset,
+                FailedAttempts = 0
+            };
+
+            _context.OTPs.Add(otpEntity);
+
+            await _context.SaveChangesAsync();
+
+            await _emailService.SendEmailAsync(
+                normalizedEmail,
+                "Password Reset OTP",
+                $"Your OTP is: {otpCode}"
+            );
+
+            return Ok(new
+            {
+                success = true,
+                message = "OTP sent successfully"
+            });
+        }
+        [HttpPost("forgot-password/verify-otp")]
+        public async Task<IActionResult> ForgotPasswordVerifyOtp(
+    ForgotPasswordVerifyOtpRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+
+            var otpRecord = await _context.OTPs
+                .Where(x =>
+                    x.Email == normalizedEmail &&
+                    x.Purpose == OtpPurposes.PasswordReset &&
+                    !x.IsUsed &&
+                    x.Expiry > DateTime.UtcNow)
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefaultAsync();
+
+            if (otpRecord == null)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "OTP expired or invalid"
+                });
+            }
+            if (otpRecord.FailedAttempts >= 5)
+            {
+                otpRecord.IsUsed = true;
+
+                await _context.SaveChangesAsync();
+
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "OTP attempt limit exceeded"
+                });
+            }
+            var isOtpValid = BCrypt.Net.BCrypt.Verify(
+                request.Otp,
+                otpRecord.Code);
+
+            if (!isOtpValid)
+            {
+                otpRecord.FailedAttempts++;
+
+                await _context.SaveChangesAsync();
+
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Invalid OTP"
+                });
+            }
+
+            otpRecord.IsVerified = true;
+
+            otpRecord.IsUsed = true;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "OTP verified successfully"
+            });
+        }
+   
         // ---------------- REGISTER ----------------
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequest request)
@@ -52,7 +325,26 @@ namespace PickNBook.Api.Controllers
             var normalizedEmail = request.Email.Trim().ToLowerInvariant();
 
             if (await _context.Users.AnyAsync(u => u.Email.ToLower() == normalizedEmail))
-                return BadRequest("Email already exists");
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Email already exists"
+                });
+            var verifiedOtp = await _context.OTPs
+    .FirstOrDefaultAsync(x =>
+        x.Email == normalizedEmail &&
+        x.Purpose == OtpPurposes.Registration &&
+        x.IsVerified &&
+        x.Expiry > DateTime.UtcNow);
+
+            if (verifiedOtp == null)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "OTP verification required"
+                });
+            }
 
             var user = new User
             {
@@ -68,8 +360,22 @@ namespace PickNBook.Api.Controllers
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+            verifiedOtp.IsUsed = true;
+            await _context.OTPs
+    .Where(x =>
+        x.Email == normalizedEmail &&
+        x.Purpose == OtpPurposes.PasswordReset &&
+        !x.IsUsed)
+    .ExecuteUpdateAsync(setters => setters
+        .SetProperty(x => x.IsUsed, true));
 
-            return Ok("User registered successfully");
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "User registered successfully"
+            });
         }
 
         // ---------------- LOGIN ----------------
@@ -415,7 +721,11 @@ namespace PickNBook.Api.Controllers
 
             if (await _context.Users.AnyAsync(u => u.Email.ToLower() == normalizedEmail))
             {
-                return BadRequest("Email already exists");
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Email already exists"
+                });
             }
 
             var adminUser = new User
@@ -505,79 +815,73 @@ namespace PickNBook.Api.Controllers
             });
         }
 
-        // ---------------- FORGOT PASSWORD ----------------
-        [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request)
-        {
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == request.Email);
+       
 
-            // Prevent email enumeration attack
-            if (user == null)
-                return Ok("If the email is registered, an OTP has been sent.");
-
-            var otpCode = new Random().Next(100000, 999999).ToString();
-
-            var otp = new OTP
-            {
-                UserId = user.Id,
-                Code = BCrypt.Net.BCrypt.HashPassword(otpCode), // Hash OTP
-                Expiry = DateTime.UtcNow.AddMinutes(10),
-                IsUsed = false,
-                Purpose = "PasswordReset",
-                ChallengeId = null,
-                FailedAttempts = 0
-            };
-
-            _context.OTPs.Add(otp);
-            await _context.SaveChangesAsync();
-
-            var emailBody = $@"
-                <h3>Password Reset Request</h3>
-                <p>Your OTP is:</p>
-                <h2 style='color:#2d89ef'>{otpCode}</h2>
-                <p>This OTP will expire in 10 minutes.</p>
-                <br/>
-                <p>If you did not request this, please ignore this email.</p>
-            ";
-
-            await _emailService.SendEmailAsync(
-                user.Email,
-                "PickNBook Password Reset OTP",
-                emailBody);
-
-            return Ok("If the email is registered, an OTP has been sent.");
-        }
-
-        // ---------------- RESET PASSWORD ----------------
         [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
+        public async Task<IActionResult> ResetPassword(
+       ForgotPasswordResetRequest request)
         {
-            var otpRecords = await _context.OTPs
-                .Include(o => o.User)
-                .Where(o =>
-                    o.Purpose == "PasswordReset" &&
-                    !o.IsUsed &&
-                    o.Expiry > DateTime.UtcNow)
-                .OrderByDescending(o => o.Id)
-                .ToListAsync();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            var otpRecord = otpRecords
-                .FirstOrDefault(o => BCrypt.Net.BCrypt.Verify(request.OTP, o.Code));
+            var normalizedEmail = request.Email.Trim().ToLowerInvariant();
 
-            if (otpRecord == null)
-                return BadRequest("Invalid or expired OTP");
+            var user = await _context.Users
+                .FirstOrDefaultAsync(x => x.Email.ToLower() == normalizedEmail);
 
-            var user = otpRecord.User;
+            if (user == null)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "User not found"
+                });
+            }
 
-            user!.PasswordHash =
+            var verifiedOtp = await _context.OTPs
+                .FirstOrDefaultAsync(x =>
+                    x.Email == normalizedEmail &&
+                    x.Purpose == OtpPurposes.PasswordReset &&
+                    x.IsVerified &&
+                    x.Expiry > DateTime.UtcNow);
+
+            if (verifiedOtp == null)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "OTP verification required"
+                });
+            }
+            var passwordCheck = _passwordHasher.VerifyHashedPassword(
+    user,
+    user.PasswordHash,
+    request.NewPassword);
+
+            if (passwordCheck != PasswordVerificationResult.Failed)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "New password must be different from current password"
+                });
+            }
+
+            user.PasswordHash =
                 _passwordHasher.HashPassword(user, request.NewPassword);
 
-            otpRecord.IsUsed = true;
+            await _context.SaveChangesAsync();
+            verifiedOtp.IsUsed = true;
 
             await _context.SaveChangesAsync();
 
-            return Ok("Password reset successful");
+            return Ok(new
+            {
+                success = true,
+                message = "Password reset successful"
+            });
         }
 
         // ---------------- CHANGE PASSWORD ----------------

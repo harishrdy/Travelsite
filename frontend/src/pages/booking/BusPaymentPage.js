@@ -86,12 +86,21 @@ function buildBookingPayload(flowState) {
     passengerPhone: mobile,
     passengerEmail: String(flowState.contact?.email || "").trim(),
     couponCode: (() => {
-      const pId = flowState.promotionId ?? flowState.selectedOffer?.promotionId;
+      const pId =
+        flowState.selectedFeaturedOfferId ??
+        flowState.promotionId ??
+        flowState.selectedOffer?.promotionId ??
+        flowState.selectedOffer?.offerId;
       const hasPromo = pId !== undefined && pId !== null && pId !== "";
       return hasPromo ? null : (flowState.couponCode || null);
     })(),
-    promotionId: (() => {
-      const pId = flowState.promotionId ?? flowState.selectedOffer?.promotionId;
+    promotionId: null,
+    selectedFeaturedOfferId: (() => {
+      const pId =
+        flowState.selectedFeaturedOfferId ??
+        flowState.promotionId ??
+        flowState.selectedOffer?.promotionId ??
+        flowState.selectedOffer?.offerId;
       if (pId !== undefined && pId !== null && pId !== "") {
         const numericId = Number(pId);
         return Number.isNaN(numericId) ? null : numericId;
@@ -199,9 +208,23 @@ function buildBusTicketPayload(
       gstPercent: Number(flowState.pricingPreview?.gstPercent || fareSummary.gstPercent || 0),
       gstAmount: Number(flowState.pricingPreview?.gstAmount || fareSummary.gstAmount || fareSummary.tax || 0),
       convenienceFee: Number(flowState.pricingPreview?.convenienceFee || fareSummary.convenienceFee || 0),
-      totalFare: Number(flowState.pricingPreview?.grandTotal || flowState.payableAmount || fareSummary.grandTotal || fareSummary.totalFare || 0),
+      totalFare: Number(
+        flowState.pricingPreview?.finalAmount ||
+          flowState.pricingPreview?.grandTotal ||
+          flowState.payableAmount ||
+          fareSummary.grandTotal ||
+          fareSummary.totalFare ||
+          0
+      ),
     },
-    totalPaid: Number(flowState.pricingPreview?.grandTotal || flowState.payableAmount || fareSummary.grandTotal || fareSummary.totalFare || 0),
+    totalPaid: Number(
+      flowState.pricingPreview?.finalAmount ||
+        flowState.pricingPreview?.grandTotal ||
+        flowState.payableAmount ||
+        fareSummary.grandTotal ||
+        fareSummary.totalFare ||
+        0
+    ),
     notifications: {
       email: "Queued",
       sms: "Queued",
@@ -243,7 +266,12 @@ export default function BusPaymentPage() {
   const passengers = flowState.passengers || [];
   const fareSummary = flowState.fareSummary || {};
   const payableAmount = Number(
-    flowState.pricingPreview?.grandTotal || flowState.payableAmount || fareSummary.grandTotal || fareSummary.totalFare || 0
+    flowState.pricingPreview?.finalAmount ||
+      flowState.pricingPreview?.grandTotal ||
+      flowState.payableAmount ||
+      fareSummary.grandTotal ||
+      fareSummary.totalFare ||
+      0
   );
 
   const [selectedMethod, setSelectedMethod] = useState("upi");
@@ -553,18 +581,21 @@ export default function BusPaymentPage() {
                   const effectiveCouponDiscount =
                     Number(flowState.pricingPreview?.couponDiscountAmount) > 0
                       ? Number(flowState.pricingPreview.couponDiscountAmount)
-                      : Math.max(
-                          0,
-                          Number(flowState.pricingPreview?.couponAmount || 0) -
-                            Number(flowState.pricingPreview?.autoDiscountAmount || 0)
-                        ) || Number(flowState.couponDiscount) || 0;
+                      : Number(flowState.pricingPreview?.manualDiscountAmount) ||
+                        Number(flowState.couponDiscount) ||
+                        0;
 
-                  const appliedCode = flowState.pricingPreview?.appliedPromotionCode || flowState.selectedOffer?.couponCode || flowState.couponCode;
-                  const isPromotion = Boolean(flowState.selectedOffer?.promotionId || flowState.promotionId);
+                  const appliedCode = flowState.pricingPreview?.appliedPromotionCode || flowState.couponCode;
+                  const isPromotion = Boolean(
+                    flowState.selectedFeaturedOfferId ||
+                      flowState.selectedOffer?.selectedFeaturedOfferId ||
+                      flowState.selectedOffer?.id ||
+                      flowState.selectedOffer?.offerId
+                  );
                   const label = appliedCode
                     ? `Coupon Discount (${appliedCode})`
                     : isPromotion
-                    ? `Promotion Discount (${flowState.selectedOffer?.promotionId || flowState.promotionId})`
+                    ? `Offer Discount (${flowState.selectedOffer?.title || flowState.selectedFeaturedOfferId || ""})`
                     : "Coupon Discount";
 
                   return effectiveCouponDiscount > 0 ? (

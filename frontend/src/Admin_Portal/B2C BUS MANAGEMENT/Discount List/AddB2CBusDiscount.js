@@ -3,41 +3,158 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import './AddB2CBusDiscount.css';
 import { createDiscount, updateDiscount } from '../../../services/adminBusService';
 
+const DEFAULT_FORM = {
+  code: '',
+  title: '',
+  description: '',
+  value: '',
+  discountType: 'Percentage',
+  isAutoApply: true,
+  isExclusive: false,
+  priority: '0',
+  minBookingAmount: '0',
+  startDateUtc: '',
+  endDateUtc: '',
+  status: 'Active',
+  remark: '',
+};
+
+function toDatetimeLocal(value) {
+  if (!value) {
+    return '';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return localDate.toISOString().slice(0, 16);
+}
+
+function toUtcIso(value) {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function toBoolean(value, fallback = false) {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  return String(value).trim().toLowerCase() === 'true';
+}
+
+function buildInitialForm(row) {
+  if (!row) {
+    return DEFAULT_FORM;
+  }
+
+  return {
+    code: row.code || '',
+    title: row.title || '',
+    description: row.description || '',
+    value: row.value !== undefined && row.value !== null ? String(row.value) : '',
+    discountType: row.type || row.discountType || 'Percentage',
+    isAutoApply: toBoolean(row.isAutoApply, true),
+    isExclusive: toBoolean(row.isExclusive, false),
+    priority: row.priority !== undefined && row.priority !== null ? String(row.priority) : '0',
+    minBookingAmount:
+      row.minBookingAmount !== undefined && row.minBookingAmount !== null
+        ? String(row.minBookingAmount)
+        : '0',
+    startDateUtc: toDatetimeLocal(row.startDateUtc),
+    endDateUtc: toDatetimeLocal(row.endDateUtc),
+    status: row.status || 'Active',
+    remark: row.remark || '',
+  };
+}
+
 function AddB2CBusDiscount() {
   const navigate = useNavigate();
   const location = useLocation();
   const editingRow = useMemo(() => location.state?.row || null, [location.state]);
 
-  const [formType, setFormType] = useState(editingRow?.type || 'Percentage');
-  const [formValue, setFormValue] = useState(editingRow ? String(editingRow.value) : '');
-  const [formRemark, setFormRemark] = useState(editingRow?.remark || '');
-  const [formStatus, setFormStatus] = useState(editingRow?.status || 'Active');
+  const [formValues, setFormValues] = useState(() => buildInitialForm(editingRow));
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const handleChange = (field) => (event) => {
+    const value =
+      field === 'isAutoApply' || field === 'isExclusive'
+        ? event.target.value === 'true'
+        : event.target.value;
+
+    setFormValues((previous) => ({ ...previous, [field]: value }));
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
 
-    if (!formValue) {
-      setError('Value is required.');
+    const code = String(formValues.code || '').trim().toUpperCase();
+    const title = String(formValues.title || '').trim();
+    const val = Number(formValues.value);
+    const priority = Number(formValues.priority) || 0;
+    const minBookingAmount = Number(formValues.minBookingAmount) || 0;
+    const startTimestamp = formValues.startDateUtc ? new Date(formValues.startDateUtc).getTime() : null;
+    const endTimestamp = formValues.endDateUtc ? new Date(formValues.endDateUtc).getTime() : null;
+
+    if (!code) {
+      setError('Discount code is required.');
       return;
     }
 
-    const val = Number(formValue);
+    if (!title) {
+      setError('Discount title is required.');
+      return;
+    }
+
     if (Number.isNaN(val) || val <= 0) {
       setError('Please enter a valid value greater than 0.');
+      return;
+    }
+
+    if (minBookingAmount < 0) {
+      setError('Minimum booking amount cannot be negative.');
+      return;
+    }
+
+    if (
+      startTimestamp &&
+      endTimestamp &&
+      Number.isFinite(startTimestamp) &&
+      Number.isFinite(endTimestamp) &&
+      startTimestamp > endTimestamp
+    ) {
+      setError('End date should be after start date.');
       return;
     }
 
     setSubmitting(true);
     try {
       const payload = {
+        code,
+        title,
+        description: String(formValues.description || '').trim(),
         value: val,
-        discountType: formType,
-        remark: formRemark.trim() || (editingRow?.remark || 'B2C Bus Discount'),
-        status: formStatus,
+        discountType: formValues.discountType,
+        isAutoApply: Boolean(formValues.isAutoApply),
+        isExclusive: Boolean(formValues.isExclusive),
+        priority,
+        minBookingAmount,
+        startDateUtc: toUtcIso(formValues.startDateUtc),
+        endDateUtc: toUtcIso(formValues.endDateUtc),
+        status: formValues.status,
         updatedBy: 'admin',
+        remark: String(formValues.remark || '').trim(),
       };
 
       if (editingRow) {
@@ -55,10 +172,7 @@ function AddB2CBusDiscount() {
   };
 
   const handleReset = () => {
-    setFormType(editingRow?.type || 'Percentage');
-    setFormValue(editingRow ? String(editingRow.value) : '');
-    setFormRemark(editingRow?.remark || '');
-    setFormStatus(editingRow?.status || 'Active');
+    setFormValues(buildInitialForm(editingRow));
     setError('');
   };
 
@@ -67,7 +181,7 @@ function AddB2CBusDiscount() {
       <header className="add-discount-header">
         <div>
           <p className="add-discount-title">{editingRow ? 'Edit B2C Bus Discount' : 'Add B2C Bus Discount'}</p>
-          <p className="add-discount-subtitle">Configure discount value and remark details.</p>
+          <p className="add-discount-subtitle">Configure auto-apply discounts, validity, and pricing rules.</p>
         </div>
         <button type="button" className="ghost-btn" onClick={() => navigate('/admin/b2c-bus/discounts')}>
           B2C Bus Discount List
@@ -76,10 +190,37 @@ function AddB2CBusDiscount() {
 
       <form className="add-discount-form" onSubmit={handleSubmit}>
         <label className="add-field">
+          <span>Discount Code</span>
+          <input
+            type="text"
+            placeholder="DISC-NEW"
+            value={formValues.code}
+            onChange={(event) =>
+              setFormValues((previous) => ({
+                ...previous,
+                code: event.target.value.toUpperCase().replace(/\s+/g, ''),
+              }))
+            }
+            disabled={submitting}
+          />
+        </label>
+
+        <label className="add-field">
+          <span>Title</span>
+          <input
+            type="text"
+            placeholder="Sleeper Special"
+            value={formValues.title}
+            onChange={handleChange('title')}
+            disabled={submitting}
+          />
+        </label>
+
+        <label className="add-field">
           <span>Discount Type</span>
           <select
-            value={formType}
-            onChange={(event) => setFormType(event.target.value)}
+            value={formValues.discountType}
+            onChange={handleChange('discountType')}
             disabled={submitting}
           >
             <option value="Percentage">Percentage</option>
@@ -93,8 +234,76 @@ function AddB2CBusDiscount() {
             type="number"
             min="0"
             placeholder="0"
-            value={formValue}
-            onChange={(event) => setFormValue(event.target.value)}
+            value={formValues.value}
+            onChange={handleChange('value')}
+            disabled={submitting}
+          />
+        </label>
+
+        <label className="add-field">
+          <span>Min Booking Amount</span>
+          <input
+            type="number"
+            min="0"
+            placeholder="500"
+            value={formValues.minBookingAmount}
+            onChange={handleChange('minBookingAmount')}
+            disabled={submitting}
+          />
+        </label>
+
+        <label className="add-field">
+          <span>Priority</span>
+          <input
+            type="number"
+            min="0"
+            placeholder="5"
+            value={formValues.priority}
+            onChange={handleChange('priority')}
+            disabled={submitting}
+          />
+        </label>
+
+        <label className="add-field">
+          <span>Auto Apply</span>
+          <select
+            value={String(formValues.isAutoApply)}
+            onChange={handleChange('isAutoApply')}
+            disabled={submitting}
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </label>
+
+        <label className="add-field">
+          <span>Exclusive</span>
+          <select
+            value={String(formValues.isExclusive)}
+            onChange={handleChange('isExclusive')}
+            disabled={submitting}
+          >
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+          </select>
+        </label>
+
+        <label className="add-field">
+          <span>Start Date</span>
+          <input
+            type="datetime-local"
+            value={formValues.startDateUtc}
+            onChange={handleChange('startDateUtc')}
+            disabled={submitting}
+          />
+        </label>
+
+        <label className="add-field">
+          <span>End Date</span>
+          <input
+            type="datetime-local"
+            value={formValues.endDateUtc}
+            onChange={handleChange('endDateUtc')}
             disabled={submitting}
           />
         </label>
@@ -102,8 +311,8 @@ function AddB2CBusDiscount() {
         <label className="add-field">
           <span>Status</span>
           <select
-            value={formStatus}
-            onChange={(event) => setFormStatus(event.target.value)}
+            value={formValues.status}
+            onChange={handleChange('status')}
             disabled={submitting}
           >
             <option value="Active">Active</option>
@@ -112,12 +321,23 @@ function AddB2CBusDiscount() {
         </label>
 
         <label className="add-field add-field-wide">
+          <span>Description</span>
+          <input
+            type="text"
+            placeholder="10% off sleeper bookings"
+            value={formValues.description}
+            onChange={handleChange('description')}
+            disabled={submitting}
+          />
+        </label>
+
+        <label className="add-field add-field-wide">
           <span>Remark</span>
           <input
             type="text"
             placeholder="Remark"
-            value={formRemark}
-            onChange={(event) => setFormRemark(event.target.value)}
+            value={formValues.remark}
+            onChange={handleChange('remark')}
             disabled={submitting}
           />
         </label>

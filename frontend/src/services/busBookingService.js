@@ -67,6 +67,7 @@ function resolveApiBaseUrl() {
 
 const API_BASE_URL = resolveApiBaseUrl();
 const BUS_BOOKINGS_ROOT = "/api/BusBookings";
+const LEGACY_BUS_BOOKINGS_ROOT = "/api/bus";
 const ADMIN_BUS_ROOT = "/api/admin/bus";
 
 function toAbsoluteUrl(urlOrPath) {
@@ -125,6 +126,7 @@ function shouldUseFallbackBuses(error) {
 
   return (
     message.includes("cannot get /api/busbookings") ||
+    message.includes("cannot get /api/bus") ||
     message.includes("err_ngrok_3200") ||
     (message.includes("endpoint") && message.includes("offline")) ||
     message.includes("failed to fetch") ||
@@ -146,7 +148,105 @@ function pickFirst(source, keys, fallback = null) {
   return fallback;
 }
 
+function normalizePointList(value) {
+  if (!value) {
+    return [];
+  }
+
+  const values = Array.isArray(value) ? value : String(value).split(",");
+
+  return values
+    .map((item) => {
+      if (typeof item === "string") {
+        return item.trim();
+      }
+
+      if (item && typeof item === "object") {
+        return String(
+          pickFirst(
+            item,
+            [
+              "name",
+              "Name",
+              "point",
+              "Point",
+              "pointName",
+              "PointName",
+              "stopName",
+              "StopName",
+              "address",
+              "Address",
+              "boardingPoint",
+              "BoardingPoint",
+              "droppingPoint",
+              "DroppingPoint",
+              "cityName",
+              "CityName",
+              "location",
+              "Location",
+            ],
+            ""
+          ) || ""
+        ).trim();
+      }
+
+      return "";
+    })
+    .filter(Boolean);
+}
+
 function normalizeBusSearchRecord(record, index = 0) {
+  const boardingPoint = String(
+    pickFirst(record, ["boardingPoint", "BoardingPoint"], "") || ""
+  ).trim();
+  const droppingPoint = String(
+    pickFirst(record, ["droppingPoint", "DroppingPoint"], "") || ""
+  ).trim();
+  const boardingPoints = normalizePointList(
+    pickFirst(
+      record,
+      [
+        "boardingPoints",
+        "BoardingPoints",
+        "boardingPointList",
+        "BoardingPointList",
+        "boardingStops",
+        "BoardingStops",
+        "pickupPointList",
+        "PickupPointList",
+        "pickupPoints",
+        "PickupPoints",
+        "pickUpPoints",
+        "PickUpPoints",
+        "boardingLocations",
+        "BoardingLocations",
+      ],
+      null
+    )
+  );
+  const droppingPoints = normalizePointList(
+    pickFirst(
+      record,
+      [
+        "droppingPoints",
+        "DroppingPoints",
+        "droppingPointList",
+        "DroppingPointList",
+        "droppingStops",
+        "DroppingStops",
+        "dropPointList",
+        "DropPointList",
+        "dropPoints",
+        "DropPoints",
+        "dropOffPoints",
+        "DropOffPoints",
+        "droppingLocations",
+        "DroppingLocations",
+      ],
+      null
+    )
+  );
+
   return {
     id: pickFirst(record, ["id", "Id", "busId", "BusId"], null) || `bus-${index + 1}`,
     busNumber: String(
@@ -161,12 +261,10 @@ function normalizeBusSearchRecord(record, index = 0) {
     toCity: String(
       pickFirst(record, ["toCity", "ToCity", "destination", "Destination"], "") || ""
     ),
-    boardingPoint: String(
-      pickFirst(record, ["boardingPoint", "BoardingPoint"], "") || ""
-    ),
-    droppingPoint: String(
-      pickFirst(record, ["droppingPoint", "DroppingPoint"], "") || ""
-    ),
+    boardingPoint,
+    droppingPoint,
+    boardingPoints: Array.from(new Set([boardingPoint, ...boardingPoints].filter(Boolean))),
+    droppingPoints: Array.from(new Set([droppingPoint, ...droppingPoints].filter(Boolean))),
     departureTimeIst: pickFirst(
       record,
       [
@@ -318,11 +416,38 @@ function normalizeBusPricingPreview(payload) {
     fareBeforeTax: Number(pickFirst(seat, ["fareBeforeTax", "FareBeforeTax"], 0)) || 0,
   })) : [];
 
+  const finalAmount =
+    Number(pickFirst(payload, ["finalAmount", "FinalAmount", "grandTotal", "GrandTotal"], 0)) ||
+    0;
+  const couponDiscountAmount =
+    Number(
+      pickFirst(
+        payload,
+        ["couponDiscountAmount", "CouponDiscountAmount", "couponDiscountAmountInr", "CouponDiscountAmountInr"],
+        0
+      )
+    ) || 0;
+  const autoDiscountAmount =
+    Number(
+      pickFirst(
+        payload,
+        ["autoDiscountAmount", "AutoDiscountAmount", "autoDiscountAmountInr", "AutoDiscountAmountInr"],
+        0
+      )
+    ) || 0;
+  const manualDiscountAmount =
+    Number(pickFirst(payload, ["manualDiscountAmount", "ManualDiscountAmount"], 0)) || 0;
+  const totalDiscount =
+    Number(pickFirst(payload, ["totalDiscount", "TotalDiscount"], 0)) ||
+    couponDiscountAmount + autoDiscountAmount + manualDiscountAmount;
+
   return {
+    busId: pickFirst(payload, ["busId", "BusId"], null),
+    gstCategory: pickFirst(payload, ["gstCategory", "GstCategory"], null),
     subtotalBeforeCoupon:
       Number(pickFirst(payload, ["subtotalBeforeCoupon", "SubtotalBeforeCoupon"], 0)) || 0,
     couponAmount:
-      Number(pickFirst(payload, ["couponAmount", "CouponAmount"], 0)) || 0,
+      Number(pickFirst(payload, ["couponAmount", "CouponAmount"], 0)) || totalDiscount,
     taxableFare:
       Number(pickFirst(payload, ["taxableFare", "TaxableFare"], 0)) || 0,
     gstPercent:
@@ -331,14 +456,18 @@ function normalizeBusPricingPreview(payload) {
       Number(pickFirst(payload, ["gstAmount", "GstAmount"], 0)) || 0,
     convenienceFee:
       Number(pickFirst(payload, ["convenienceFee", "ConvenienceFee"], 0)) || 0,
-    grandTotal:
-      Number(pickFirst(payload, ["grandTotal", "GrandTotal"], 0)) || 0,
+    grandTotal: finalAmount,
+    finalAmount,
+    totalDiscount,
     discountSource: pickFirst(payload, ["discountSource", "DiscountSource"], null),
     discountLabel: pickFirst(payload, ["discountLabel", "DiscountLabel"], null),
-    couponDiscountAmount: Number(pickFirst(payload, ["couponDiscountAmount", "CouponDiscountAmount"], 0)) || 0,
-    autoDiscountAmount: Number(pickFirst(payload, ["autoDiscountAmount", "AutoDiscountAmount"], 0)) || 0,
+    couponDiscountAmount,
+    autoDiscountAmount,
+    manualDiscountAmount,
     appliedPromotionCode: pickFirst(payload, ["appliedPromotionCode", "AppliedPromotionCode"], null),
+    autoPromotionCode: pickFirst(payload, ["autoPromotionCode", "AutoPromotionCode"], null),
     appliedPromotionTitle: pickFirst(payload, ["appliedPromotionTitle", "AppliedPromotionTitle"], null),
+    appliedPromotionType: pickFirst(payload, ["appliedPromotionType", "AppliedPromotionType"], null),
     couponAllowed: pickFirst(payload, ["couponAllowed", "CouponAllowed"], true) !== false,
     seats,
   };
@@ -437,9 +566,12 @@ function normalizeBusCouponRecord(record) {
   const couponType = normalizeCouponTypeForApi(
     pickFirst(record, ["couponType", "CouponType", "cpnType", "CpnType"], "")
   );
+  const rawStatus = String(pickFirst(record, ["status", "Status"], "Active") || "Active");
 
   return {
-    id: pickFirst(record, ["id", "Id"], null),
+    id: pickFirst(record, ["id", "Id", "couponId", "CouponId"], null),
+    sourceId: pickFirst(record, ["sourceId", "SourceId"], null),
+    busPromotionId: pickFirst(record, ["busPromotionId", "BusPromotionId", "promotionId", "PromotionId"], null),
     value: Number(pickFirst(record, ["value", "Value"], 0)) || 0,
     couponType,
     cpnType: couponType,
@@ -450,11 +582,22 @@ function normalizeBusCouponRecord(record) {
     expiryDate: String(pickFirst(record, ["expiryDate", "ExpiryDate"], "") || ""),
     useLimit: Number(pickFirst(record, ["useLimit", "UseLimit"], 0)) || 0,
     usedCount: Number(pickFirst(record, ["usedCount", "UsedCount"], 0)) || 0,
-    status: String(pickFirst(record, ["status", "Status"], "Active") || "Active").toLowerCase(),
+    status: rawStatus.toLowerCase() === "inactive" ? "inactive" : "active",
     maxUsagePerUser:
       Number(pickFirst(record, ["maxUsagePerUser", "MaxUsagePerUser"], 0)) || 0,
     minBookingAmount:
       Number(pickFirst(record, ["minBookingAmount", "MinBookingAmount"], 0)) || 0,
+    isAutoApply:
+      String(pickFirst(record, ["isAutoApply", "IsAutoApply"], false)).toLowerCase() === "true",
+    isExclusive:
+      String(pickFirst(record, ["isExclusive", "IsExclusive"], false)).toLowerCase() === "true",
+    priority: Number(pickFirst(record, ["priority", "Priority"], 0)) || 0,
+    triggerType: String(
+      pickFirst(record, ["triggerType", "TriggerType"], "ManualCode") || "ManualCode"
+    ),
+    promotionCategory: String(
+      pickFirst(record, ["promotionCategory", "PromotionCategory"], "Coupon") || "Coupon"
+    ),
     remark: String(
       pickFirst(record, ["remark", "Remark", "description", "Description"], "") || ""
     ),
@@ -504,7 +647,29 @@ function normalizeBusCouponPayload(coupon) {
     remark: String(coupon?.remark || "").trim(),
     maxUsagePerUser: maxUsagePerUser,
     minBookingAmount: minBookingAmount,
+    isAutoApply: Boolean(coupon?.isAutoApply),
+    isExclusive: Boolean(coupon?.isExclusive),
+    priority: Number(coupon?.priority) || 0,
+    triggerType: String(coupon?.triggerType || "ManualCode").trim() || "ManualCode",
+    promotionCategory: String(coupon?.promotionCategory || "Coupon").trim() || "Coupon",
   };
+}
+
+function unwrapArrayResponse(data) {
+  if (Array.isArray(data)) return data;
+
+  const candidates = [
+    data?.value,
+    data?.Value,
+    data?.items,
+    data?.Items,
+    data?.data,
+    data?.Data,
+    data?.results,
+    data?.Results,
+  ];
+
+  return candidates.find(Array.isArray) || [];
 }
 
 function normalizeCouponType(coupon) {
@@ -716,13 +881,51 @@ async function requestJson(urlOrPath, options = {}) {
   if (!response.ok) {
     const normalizedMessage = normalizeErrorMessage(payload);
     if (normalizedMessage) {
-      throw new Error(normalizedMessage);
+      const error = new Error(normalizedMessage);
+      error.status = response.status;
+      throw error;
     }
 
-    throw new Error("Request failed. Please try again.");
+    const error = new Error("Request failed. Please try again.");
+    error.status = response.status;
+    throw error;
   }
 
   return payload;
+}
+
+function shouldFallbackRequest(error) {
+  const status = Number(error?.status);
+  if (status) {
+    return [404, 405, 502, 503, 504].includes(status);
+  }
+
+  const message = String(error?.message || "").toLowerCase();
+  return (
+    message.includes("failed to fetch") ||
+    message.includes("network") ||
+    message.includes("offline") ||
+    message.includes("cannot get") ||
+    message.includes("endpoint")
+  );
+}
+
+async function requestJsonWithFallback(paths, options = {}) {
+  const candidates = Array.isArray(paths) ? paths : [paths];
+  let lastError = null;
+
+  for (const path of candidates) {
+    try {
+      return await requestJson(path, options);
+    } catch (error) {
+      lastError = error;
+      if (!shouldFallbackRequest(error)) {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError || new Error("Request failed. Please try again.");
 }
 
 export async function searchBuses({ from, to, date }) {
@@ -733,12 +936,43 @@ export async function searchBuses({ from, to, date }) {
     toCity: to,
     date: toDdMmYyyy(date),
   });
+  const legacyUrl = buildUrl(LEGACY_BUS_BOOKINGS_ROOT, {
+    from,
+    fromCity: from,
+    to,
+    toCity: to,
+    date: toDdMmYyyy(date),
+  });
 
   try {
-    const data = await requestJson(url, { method: "GET" });
+    const data = await requestJsonWithFallback([url, legacyUrl], { method: "GET" });
 
-    if (Array.isArray(data)) {
-      return data.map((record, index) => normalizeBusSearchRecord(record, index));
+    const records = Array.isArray(data)
+      ? data
+      : Array.isArray(data?.buses)
+      ? data.buses
+      : Array.isArray(data?.Buses)
+      ? data.Buses
+      : Array.isArray(data?.items)
+      ? data.items
+      : Array.isArray(data?.Items)
+      ? data.Items
+      : Array.isArray(data?.data)
+      ? data.data
+      : Array.isArray(data?.Data)
+      ? data.Data
+      : Array.isArray(data?.value)
+      ? data.value
+      : Array.isArray(data?.Value)
+      ? data.Value
+      : Array.isArray(data?.results)
+      ? data.results
+      : Array.isArray(data?.Results)
+      ? data.Results
+      : null;
+
+    if (records) {
+      return records.map((record, index) => normalizeBusSearchRecord(record, index));
     }
 
     const responseText = String(data || "").toLowerCase();
@@ -760,9 +994,10 @@ export async function searchBuses({ from, to, date }) {
 
 export async function getBusSeatMap(busId) {
   try {
-    const data = await requestJson(`${BUS_BOOKINGS_ROOT}/${busId}/seats`, {
-      method: "GET",
-    });
+    const data = await requestJsonWithFallback(
+      [`${BUS_BOOKINGS_ROOT}/${busId}/seats`, `${LEGACY_BUS_BOOKINGS_ROOT}/${busId}/seats`],
+      { method: "GET" }
+    );
 
     return {
       tripId: pickFirst(data, ["tripId", "TripId"], busId),
@@ -789,50 +1024,67 @@ export async function getBusSeatMap(busId) {
   }
 }
 
-export async function getBusPricingPreview({ busId, seatCodes, couponCode, promotionId } = {}) {
+export async function getBusPricingPreview({ busId, seatCodes, couponCode, promotionId, selectedFeaturedOfferId } = {}) {
   const normalizedSeatCodes = Array.isArray(seatCodes)
     ? seatCodes.map((seatCode) => String(seatCode || "").trim()).filter(Boolean)
     : [];
 
   let finalCouponCode = couponCode ? String(couponCode).trim().toUpperCase() : null;
-  let finalPromotionId = (promotionId !== undefined && promotionId !== null && promotionId !== "") ? Number(promotionId) : null;
-  if (finalPromotionId !== null && Number.isNaN(finalPromotionId)) {
-    finalPromotionId = null;
+  let finalFeaturedOfferId =
+    selectedFeaturedOfferId !== undefined &&
+    selectedFeaturedOfferId !== null &&
+    selectedFeaturedOfferId !== ""
+      ? Number(selectedFeaturedOfferId)
+      : promotionId !== undefined && promotionId !== null && promotionId !== ""
+      ? Number(promotionId)
+      : null;
+  if (finalFeaturedOfferId !== null && Number.isNaN(finalFeaturedOfferId)) {
+    finalFeaturedOfferId = null;
   }
 
-  if (finalPromotionId) {
+  if (finalFeaturedOfferId) {
     finalCouponCode = null;
   } else if (finalCouponCode) {
-    finalPromotionId = null;
+    finalFeaturedOfferId = null;
   }
 
-  const data = await requestJson(`${BUS_BOOKINGS_ROOT}/pricing-preview`, {
-    method: "POST",
-    body: JSON.stringify({
-      busId,
-      seatCodes: normalizedSeatCodes,
-      couponCode: finalCouponCode,
-      promotionId: finalPromotionId,
-    }),
-  });
+  const data = await requestJsonWithFallback(
+    [`${BUS_BOOKINGS_ROOT}/pricing-preview`, `${LEGACY_BUS_BOOKINGS_ROOT}/pricing-preview`],
+    {
+      method: "POST",
+      body: JSON.stringify({
+        busId,
+        seatCodes: normalizedSeatCodes,
+        couponCode: finalCouponCode,
+        promotionId: null,
+        selectedFeaturedOfferId: finalFeaturedOfferId,
+      }),
+    }
+  );
 
   return normalizeBusPricingPreview(data && typeof data === "object" ? data : {});
 }
 
 export async function bookBus({ busId, payload }) {
   const updatedPayload = { ...payload };
-  if (updatedPayload.promotionId) {
+  const featuredOfferId = updatedPayload.selectedFeaturedOfferId || updatedPayload.promotionId;
+  if (featuredOfferId) {
     updatedPayload.couponCode = null;
-    const numericId = Number(updatedPayload.promotionId);
-    updatedPayload.promotionId = Number.isNaN(numericId) ? null : numericId;
+    const numericId = Number(featuredOfferId);
+    updatedPayload.selectedFeaturedOfferId = Number.isNaN(numericId) ? null : numericId;
+    updatedPayload.promotionId = null;
   } else if (updatedPayload.couponCode) {
     updatedPayload.promotionId = null;
+    updatedPayload.selectedFeaturedOfferId = null;
   }
 
-  const data = await requestJson(`${BUS_BOOKINGS_ROOT}/${busId}/book`, {
-    method: "POST",
-    body: JSON.stringify(updatedPayload),
-  });
+  const data = await requestJsonWithFallback(
+    [`${BUS_BOOKINGS_ROOT}/${busId}/book`, `${LEGACY_BUS_BOOKINGS_ROOT}/${busId}/book`],
+    {
+      method: "POST",
+      body: JSON.stringify(updatedPayload),
+    }
+  );
 
   return normalizeBusActionResponse(data);
 }
@@ -841,22 +1093,19 @@ export async function listBusCoupons() {
   try {
     const data = await requestJson(`${ADMIN_BUS_ROOT}/coupons`, { method: "GET" });
 
-    return Array.isArray(data)
-      ? data.map((record) => normalizeBusCouponRecord(record))
-      : [];
+    return unwrapArrayResponse(data).map((record) => normalizeBusCouponRecord(record));
   } catch {
     return listAvailableBusCoupons();
   }
 }
 
 export async function listAvailableBusCoupons() {
-  const data = await requestJson(`${BUS_BOOKINGS_ROOT}/user/available`, {
-    method: "GET",
-  });
+  const data = await requestJsonWithFallback(
+    [`${BUS_BOOKINGS_ROOT}/user/available`, `${LEGACY_BUS_BOOKINGS_ROOT}/user/available`],
+    { method: "GET" }
+  );
 
-  return Array.isArray(data)
-    ? data.map((record) => normalizeBusCouponRecord(record))
-    : [];
+  return unwrapArrayResponse(data).map((record) => normalizeBusCouponRecord(record));
 }
 
 export async function validateBusCoupon({ couponCode, totalFare }) {
@@ -914,9 +1163,13 @@ export async function listBusBookings({ passengerPhone, status } = {}) {
     passengerPhone,
     status,
   });
+  const legacyUrl = buildUrl(`${LEGACY_BUS_BOOKINGS_ROOT}/bookings`, {
+    passengerPhone,
+    status,
+  });
 
   try {
-    const data = await requestJson(url, { method: "GET" });
+    const data = await requestJsonWithFallback([url, legacyUrl], { method: "GET" });
     return Array.isArray(data)
       ? data.map((record) => normalizeBusBookingRecord(record))
       : [];
@@ -930,9 +1183,10 @@ export async function listBusBookings({ passengerPhone, status } = {}) {
 }
 
 export async function getBusBookingById(bookingId) {
-  const data = await requestJson(`${BUS_BOOKINGS_ROOT}/bookings/${bookingId}`, {
-    method: "GET",
-  });
+  const data = await requestJsonWithFallback(
+    [`${BUS_BOOKINGS_ROOT}/bookings/${bookingId}`, `${LEGACY_BUS_BOOKINGS_ROOT}/bookings/${bookingId}`],
+    { method: "GET" }
+  );
 
   return normalizeBusBookingRecord(data);
 }
@@ -941,14 +1195,18 @@ export async function cancelBusBooking(bookingId, reason) {
   const url = buildUrl(`${BUS_BOOKINGS_ROOT}/bookings/${bookingId}/cancel`, {
     reason,
   });
+  const legacyUrl = buildUrl(`${LEGACY_BUS_BOOKINGS_ROOT}/bookings/${bookingId}/cancel`, {
+    reason,
+  });
 
-  const data = await requestJson(url, { method: "POST" });
+  const data = await requestJsonWithFallback([url, legacyUrl], { method: "POST" });
   return normalizeBusActionResponse(data);
 }
 
 export async function listHotBusRoutes({ metric = "score" } = {}) {
   const url = buildUrl(`${BUS_BOOKINGS_ROOT}/hot-routes`, { metric });
-  const data = await requestJson(url, { method: "GET" });
+  const legacyUrl = buildUrl(`${LEGACY_BUS_BOOKINGS_ROOT}/hot-routes`, { metric });
+  const data = await requestJsonWithFallback([url, legacyUrl], { method: "GET" });
 
   if (!Array.isArray(data)) {
     return [];
@@ -970,18 +1228,6 @@ export async function listHotBusRoutes({ metric = "score" } = {}) {
   }));
 }
 
-export async function applyOfferCoupon({ offerId, couponCode, currentPrice } = {}) {
-  const data = await requestJson("/api/FeaturedOffers/apply-coupon", {
-    method: "POST",
-    body: JSON.stringify({
-      offerId,
-      couponCode: couponCode ? String(couponCode).trim().toUpperCase() : null,
-      currentPrice: Number(currentPrice) || 0,
-    }),
-  });
-  return data;
-}
-
 function normalizeFeaturedOffer(record) {
   const imageUrl = String(pickFirst(record, ["imageUrl", "ImageUrl"], "") || "");
   const apiBase = resolveApiBaseUrl();
@@ -993,10 +1239,19 @@ function normalizeFeaturedOffer(record) {
 
   const rawId = pickFirst(record, ["id", "Id"], null);
   const rawOfferId = pickFirst(record, ["offerId", "OfferId"], null);
+  const rawPromotionId = pickFirst(record, ["promotionId", "PromotionId"], null);
 
   return {
     id: rawId !== null ? Number(rawId) : null,
     offerId: rawOfferId || rawId,
+    selectedFeaturedOfferId: rawId || rawOfferId,
+    promotionId:
+      rawPromotionId !== null &&
+      rawPromotionId !== undefined &&
+      rawPromotionId !== "" &&
+      Number.isFinite(Number(rawPromotionId))
+        ? Number(rawPromotionId)
+        : null,
     title: String(pickFirst(record, ["title", "Title"], "") || ""),
     subtitle: String(pickFirst(record, ["subtitle", "Subtitle"], "") || ""),
     description: String(pickFirst(record, ["description", "Description"], "") || ""),
@@ -1025,7 +1280,7 @@ export async function getFeaturedBusOffers() {
       .map(normalizeFeaturedOffer)
       .filter(
         (offer) =>
-          offer.couponCode &&
+          (offer.id || offer.offerId || offer.selectedFeaturedOfferId) &&
           offer.isCouponActive &&
           String(offer.bookingType).toLowerCase() === "bus"
       );
@@ -1033,23 +1288,3 @@ export async function getFeaturedBusOffers() {
     return [];
   }
 }
-
-export async function calculateBookingPrice({ basePrice, autoDiscountId, promoType, promoCode }) {
-  return await requestJson("/api/booking/calculate-price", {
-    method: "POST",
-    body: JSON.stringify({
-      basePrice: Number(basePrice) || 0,
-      autoDiscountId: autoDiscountId ? Number(autoDiscountId) : null,
-      promoType: promoType || null,
-      promoCode: promoCode || null,
-    }),
-  });
-}
-
-export async function confirmBooking(payload) {
-  return await requestJson("/api/booking/confirm", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-

@@ -9,5 +9,6 @@ public interface IBusPromotionEngineService
         List<string> seatCodes,
         string? couponCode,
         int? promotionId,
-        int? userId = null);
+        int? userId = null,
+         int? selectedFeaturedOfferId = null);
 }

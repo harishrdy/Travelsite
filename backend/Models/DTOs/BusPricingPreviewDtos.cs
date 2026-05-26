@@ -8,6 +8,7 @@
 
         public string? CouponCode { get; set; }
         public int? PromotionId { get; set; }
+        public int? SelectedFeaturedOfferId { get; set; }
     }
 
     public class BusSeatPriceBreakdownDto
@@ -30,9 +31,7 @@
         public string GstCategory { get; set; } = string.Empty;
 
         public decimal SubtotalBeforeCoupon { get; set; }
-
         public decimal CouponAmount { get; set; }
-
         public decimal TaxableFare { get; set; }
 
         public decimal GstPercent { get; set; }
@@ -57,5 +56,8 @@
         public decimal AutoDiscountAmount { get; set; }
 
         public decimal CouponDiscountAmount { get; set; }
+        public decimal ManualDiscountAmount { get; set; }
+        public decimal TotalDiscount { get; set; }
+        public decimal FinalAmount { get; set; }
     }
 }

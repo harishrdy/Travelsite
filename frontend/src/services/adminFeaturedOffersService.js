@@ -6,6 +6,17 @@ const PUBLIC_FEATURED_OFFERS_PATHS = [
   "/api/FeaturedOffers/active",
 ];
 
+function buildActiveOffersPaths(bookingType) {
+  const encodedBookingType = encodeURIComponent(String(bookingType || "").trim());
+  const query = encodedBookingType ? `?bookingType=${encodedBookingType}` : "";
+
+  return [
+    `/api/offers/active${query}`,
+    `/api/FeaturedOffers/active${query}`,
+    "/api/FeaturedOffers",
+  ];
+}
+
 const offersApi = axios.create({
   headers: {
     Accept: "application/json",
@@ -72,8 +83,18 @@ export async function getPublicFeaturedOffers() {
 }
 
 export async function getActiveOffers(bookingType = "Bus") {
-  const response = await offersApi.get(`/api/offers/active?bookingType=${bookingType}`);
-  return response.data;
+  for (const path of buildActiveOffersPaths(bookingType)) {
+    try {
+      const response = await offersApi.get(path);
+      return response.data;
+    } catch (error) {
+      if (!shouldTryNextPublicEndpoint(error)) {
+        throw error;
+      }
+    }
+  }
+
+  return getPublicFeaturedOffers();
 }
 
 export async function getAdminFeaturedOffers() {

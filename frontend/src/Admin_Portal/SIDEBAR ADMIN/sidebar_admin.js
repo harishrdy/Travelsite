@@ -35,6 +35,12 @@ const icons = {
       <circle cx="17" cy="18" r="1.5" />
     </svg>
   ),
+  flight: (
+    <svg {...iconProps}>
+      <path d="M22 2L11 13" />
+      <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+    </svg>
+  ),
   blog: (
     <svg {...iconProps}>
       <path d="M12 20h9" />
@@ -166,6 +172,36 @@ const navItems = [
       { label: 'Search History', to: adminPath('b2c-bus/search-history') },
       { label: 'Voucher Settings', to: adminPath('b2c-bus/voucher-settings') },
       { label: 'Popular Bus Routes', to: adminPath('b2c-bus/popular-routes') }
+    ]
+  },
+  {
+    label: 'B2C Flight Management',
+    to: adminPath('b2c-flight'),
+    icon: icons.flight,
+    submenu: [
+      { label: 'Booking List', to: adminPath('b2c-flight/booking-list') },
+      { label: 'Discount List', to: adminPath('b2c-flight/discounts') },
+      { label: 'Add Discount', to: adminPath('b2c-flight/discounts/new') },
+      { label: 'Markup List', to: adminPath('b2c-flight/markup') },
+      { label: 'Coupon List', to: adminPath('b2c-flight/coupon-list') },
+      { label: 'Used Coupon List', to: adminPath('b2c-flight/used-coupon-list') },
+      { label: 'Convenience Fee', to: adminPath('b2c-flight/convenience-fee') },
+      { label: 'Add Convenience Fee', to: adminPath('b2c-flight/convenience-fee/add') },
+      { label: 'Edit Convenience Fee', to: adminPath('b2c-flight/convenience-fee/edit') },
+      { label: 'Cancellation Request List', to: adminPath('b2c-flight/cancellation-requests') },
+      { label: 'Remark List', to: adminPath('b2c-flight/remark-list') },
+      { label: 'Add Remark', to: adminPath('b2c-flight/remark-list/add') },
+      { label: 'Edit Remark', to: adminPath('b2c-flight/remark-list/edit') },
+      { label: 'Amendments List', to: adminPath('b2c-flight/amendments') },
+      { label: 'Allowed Fare Types', to: adminPath('b2c-flight/allowed-fare-types') },
+      { label: 'Flight Search History', to: adminPath('b2c-flight/search-history') },
+      { label: 'Pending Airline List', to: adminPath('b2c-flight/pending-airlines') },
+      { label: 'Add Pending Airline', to: adminPath('b2c-flight/pending-airlines/add') },
+      { label: 'Edit Pending Airline', to: adminPath('b2c-flight/pending-airlines/edit') },
+      { label: 'Airline Web Check Links', to: adminPath('b2c-flight/airline-webcheck-links') },
+      { label: 'Airline Brand List', to: adminPath('b2c-flight/airline-brands') },
+      { label: 'Popular Routes', to: adminPath('b2c-flight/popular-routes') },
+      { label: 'Popular Destinations', to: adminPath('b2c-flight/popular-destinations') }
     ]
   },
   {

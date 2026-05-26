@@ -11,9 +11,6 @@ import {
   getBusPricingPreview,
   listAvailableBusCoupons,
   getFeaturedBusOffers,
-  applyOfferCoupon,
-  calculateBookingPrice,
-  confirmBooking,
 } from "../../services/busBookingService";
 import { usePromo } from "../../contexts/PromoContext";
 
@@ -86,13 +83,14 @@ function buildPassengerSeed(selectedSeats, passengers) {
 
   return (selectedSeats || []).map((seat, index) => {
     const isFemaleRestricted = seat.bookedGender === "Female" || hasAdjacentFemaleSeat(seat);
+    const isMaleRestricted = seat.bookedGender === "Male" || hasAdjacentMaleSeat(seat);
     return {
       seatLabel: seat.label,
       title: isFemaleRestricted ? "Ms" : "Mr",
       firstName: "",
       lastName: "",
       age: "",
-      gender: isFemaleRestricted ? "Female" : "", // Gender will be selected by user in passenger details
+      gender: isFemaleRestricted ? "Female" : (isMaleRestricted ? "Male" : ""),
       selectedTravelerId: "",
       id: `p-${seat.label}-${index + 1}`,
     };
@@ -125,6 +123,16 @@ function getFemaleAdjacentSeatMessage(seatLabel) {
   return `Seat ${seatLabel || ""} is beside a female-booked seat. Only female passengers can book this seat.`;
 }
 
+function hasAdjacentMaleSeat(seat) {
+  return Array.isArray(seat?.adjacentBookedGenders)
+    ? seat.adjacentBookedGenders.some((gender) => normalizeGender(gender) === "Male")
+    : false;
+}
+
+function getMaleAdjacentSeatMessage(seatLabel) {
+  return `Seat ${seatLabel || ""} is beside a male-booked seat. Only male passengers can book this seat.`;
+}
+
 function getGenderSeatConflict(passengers, selectedSeats) {
   for (let index = 0; index < passengers.length; index += 1) {
     const passenger = passengers[index] || {};
@@ -138,6 +146,19 @@ function getGenderSeatConflict(passengers, selectedSeats) {
         passengerNumber: index + 1,
         seatLabel: passenger.seatLabel || passenger.seatNumber || seat.label || "",
         isReserved: seat.bookedGender === "Female",
+        isMaleAdjacentConflict: false,
+      };
+    }
+
+    if (
+      normalizeGender(passenger.gender) === "Female" &&
+      (seat.bookedGender === "Male" || hasAdjacentMaleSeat(seat))
+    ) {
+      return {
+        passengerNumber: index + 1,
+        seatLabel: passenger.seatLabel || passenger.seatNumber || seat.label || "",
+        isReserved: seat.bookedGender === "Male",
+        isMaleAdjacentConflict: true,
       };
     }
   }
@@ -172,6 +193,60 @@ function isCouponVisible(coupon) {
   const status = getCouponStatus(coupon);
 
   return Boolean(code) && (!status || status === "active");
+}
+
+function getFeaturedOfferIdentity(offer) {
+  return String(
+    offer?.selectedFeaturedOfferId ||
+      offer?.id ||
+      offer?.offerId ||
+      offer?.promotionId ||
+      offer?.offerCode ||
+      offer?.couponCode ||
+      ""
+  )
+    .trim()
+    .toLowerCase();
+}
+
+function isSameFeaturedOffer(leftOffer, rightOffer) {
+  const leftIdentity = getFeaturedOfferIdentity(leftOffer);
+  const rightIdentity = getFeaturedOfferIdentity(rightOffer);
+
+  if (leftIdentity && rightIdentity && leftIdentity === rightIdentity) {
+    return true;
+  }
+
+  const leftCode = String(leftOffer?.offerCode || leftOffer?.couponCode || "").trim().toLowerCase();
+  const rightCode = String(rightOffer?.offerCode || rightOffer?.couponCode || "").trim().toLowerCase();
+  if (leftCode && rightCode && leftCode === rightCode) {
+    return true;
+  }
+
+  const leftTitle = String(leftOffer?.title || "").trim().toLowerCase();
+  const rightTitle = String(rightOffer?.title || "").trim().toLowerCase();
+  return Boolean(leftTitle && rightTitle && leftTitle === rightTitle);
+}
+
+function getPromotionDiscountAmount(pricingPreview, fallbackDiscount = 0) {
+  const totalDiscount = Number(pricingPreview?.totalDiscount) || 0;
+  const autoDiscount = Number(pricingPreview?.autoDiscountAmount) || 0;
+  const nonAutoDiscount = Math.max(0, totalDiscount - autoDiscount);
+
+  return Math.max(
+    Number(fallbackDiscount) || 0,
+    Number(pricingPreview?.couponDiscountAmount) || 0,
+    Number(pricingPreview?.manualDiscountAmount) || 0,
+    nonAutoDiscount
+  );
+}
+
+function hasBackendConfirmedPromotion(pricingPreview) {
+  return Boolean(
+    pricingPreview?.appliedPromotionCode ||
+      pricingPreview?.appliedPromotionTitle ||
+      getPromotionDiscountAmount(pricingPreview, 0) > 0
+  );
 }
 
 /** Read + normalize travelers from localStorage so structure always matches API shape */
@@ -278,8 +353,8 @@ export default function BusPassengerDetailsPage() {
       gstAmount: Number(pricingPreview.gstAmount) || 0,
       tax: Number(pricingPreview.gstAmount) || 0,
       convenienceFee: Number(pricingPreview.convenienceFee) || 0,
-      grandTotal: Number(pricingPreview.grandTotal) || 0,
-      totalFare: Number(pricingPreview.grandTotal) || 0,
+      grandTotal: Number(pricingPreview.finalAmount || pricingPreview.grandTotal) || 0,
+      totalFare: Number(pricingPreview.finalAmount || pricingPreview.grandTotal) || 0,
     }),
     [pricingPreview]
   );
@@ -353,18 +428,36 @@ export default function BusPassengerDetailsPage() {
       return {
         ...validatedContextOffer,
         isFeaturedOffer: true,
-        promotionId: validatedContextOffer.promotionId || validatedContextOffer.offerId || null,
-        couponCode: validatedContextOffer.couponCode || validatedContextOffer.offerCode || null,
+        promotionId: null,
+        selectedFeaturedOfferId:
+          validatedContextOffer.selectedFeaturedOfferId ||
+          validatedContextOffer.id ||
+          validatedContextOffer.offerId ||
+          validatedContextOffer.promotionId ||
+          null,
+        couponCode: null,
       };
     }
     const saved = flowState.selectedOffer;
-    if (saved?.isFeaturedOffer || Boolean(saved?.promotionId) || Boolean(flowState.promotionId)) {
+    if (
+      saved?.isFeaturedOffer ||
+      Boolean(saved?.selectedFeaturedOfferId) ||
+      Boolean(flowState.selectedFeaturedOfferId) ||
+      Boolean(saved?.promotionId) ||
+      Boolean(flowState.promotionId)
+    ) {
       return saved;
     }
     return null;
   });
   const [manualCouponCode, setManualCouponCode] = useState(() => {
-    const isFeatured = (validatedContextOffer !== null) || flowState.selectedOffer?.isFeaturedOffer || Boolean(flowState.selectedOffer?.promotionId) || Boolean(flowState.promotionId);
+    const isFeatured =
+      validatedContextOffer !== null ||
+      flowState.selectedOffer?.isFeaturedOffer ||
+      Boolean(flowState.selectedOffer?.selectedFeaturedOfferId) ||
+      Boolean(flowState.selectedFeaturedOfferId) ||
+      Boolean(flowState.selectedOffer?.promotionId) ||
+      Boolean(flowState.promotionId);
     if (isFeatured) return "";
     return flowState.selectedOffer?.couponCode || flowState.couponCode || "";
   });
@@ -372,7 +465,13 @@ export default function BusPassengerDetailsPage() {
     return Number(flowState.couponDiscount) || 0;
   });
   const [appliedCoupon, setAppliedCoupon] = useState(() => {
-    const isFeatured = (validatedContextOffer !== null) || flowState.selectedOffer?.isFeaturedOffer || Boolean(flowState.selectedOffer?.promotionId) || Boolean(flowState.promotionId);
+    const isFeatured =
+      validatedContextOffer !== null ||
+      flowState.selectedOffer?.isFeaturedOffer ||
+      Boolean(flowState.selectedOffer?.selectedFeaturedOfferId) ||
+      Boolean(flowState.selectedFeaturedOfferId) ||
+      Boolean(flowState.selectedOffer?.promotionId) ||
+      Boolean(flowState.promotionId);
     if (isFeatured) return null;
     return flowState.appliedCoupon || (flowState.selectedOffer?.couponCode ? { couponCode: flowState.selectedOffer.couponCode } : null);
   });
@@ -448,9 +547,11 @@ export default function BusPassengerDetailsPage() {
     return () => { isMounted = false; };
   }, []);
 
-  const totalAfterDiscount = Number(pricingPreview.grandTotal) || Number(fareSummary.grandTotal) || 0;
+  const totalAfterDiscount = Number(pricingPreview.finalAmount || pricingPreview.grandTotal) || Number(fareSummary.grandTotal) || 0;
 
-  const loadPricingPreview = async ({ promotionId = null, couponCode = null } = {}, currentBase = null) => {
+  const loadPricingPreview = async (
+    { selectedFeaturedOfferId = null, promotionId = null, couponCode = null } = {}
+  ) => {
     const busId = bus?.id ?? bus?.busId;
     const seatCodes = selectedSeats
       .map((seat) => seat.label || seat.seatCode || seat)
@@ -461,8 +562,17 @@ export default function BusPassengerDetailsPage() {
       throw new Error("Seat selection is missing. Please select seats again.");
     }
 
-    const couponCodeParam = couponCode ? String(couponCode).trim().toUpperCase() : null;
-    const promotionIdParam = promotionId != null ? promotionId : null;
+    const featuredOfferIdParam =
+      selectedFeaturedOfferId !== null && selectedFeaturedOfferId !== undefined && selectedFeaturedOfferId !== ""
+        ? selectedFeaturedOfferId
+        : promotionId !== null && promotionId !== undefined && promotionId !== ""
+        ? promotionId
+        : null;
+    const couponCodeParam = featuredOfferIdParam
+      ? null
+      : couponCode
+      ? String(couponCode).trim().toUpperCase()
+      : null;
 
     setIsCalculatingPrice(true);
     try {
@@ -470,83 +580,40 @@ export default function BusPassengerDetailsPage() {
         busId,
         seatCodes,
         couponCode: couponCodeParam,
-        promotionId: promotionIdParam,
+        promotionId: null,
+        selectedFeaturedOfferId: featuredOfferIdParam,
       });
 
-      if (!couponCodeParam && !promotionIdParam) {
+      if (!couponCodeParam && !featuredOfferIdParam) {
         setBasePricingPreview(preview);
       }
 
-      // Check if we should call the new calculateBookingPrice endpoint to get the database calculations
-      const hasPromo = Boolean(couponCodeParam || promotionIdParam);
-      if (hasPromo) {
-        // Resolve promoType and promoCode
-        const isFeatured = Boolean(promotionIdParam);
-        const promoType = isFeatured ? "offer" : "coupon";
-
-        let promoCodeVal = null;
-        if (isFeatured) {
-          // Find matching offer code
-          const matchingOffer = featuredOffers.find(o => Number(o.id) === Number(promotionIdParam) || Number(o.promotionId) === Number(promotionIdParam)) 
-            || selectedFeaturedOffer 
-            || (validatedContextOffer && (Number(validatedContextOffer.promotionId) === Number(promotionIdParam) || Number(validatedContextOffer.offerId) === Number(promotionIdParam) ? validatedContextOffer : null));
-          promoCodeVal = matchingOffer?.couponCode || matchingOffer?.offerCode || null;
-        } else {
-          promoCodeVal = couponCodeParam;
-        }
-
-        if (promoCodeVal) {
-          const calcResult = await calculateBookingPrice({
-            basePrice: preview.subtotalBeforeCoupon,
-            autoDiscountId: null,
-            promoType,
-            promoCode: promoCodeVal,
-          });
-
-          // Override pricing preview fields to match BookingController.cs
-          const updatedPreview = {
-            ...preview,
-            subtotalBeforeCoupon: calcResult.basePrice,
-            autoDiscountAmount: calcResult.autoDiscount,
-            couponDiscountAmount: calcResult.promoDiscount,
-            couponAmount: calcResult.autoDiscount + calcResult.promoDiscount,
-            taxableFare: calcResult.finalPrice,
-            gstPercent: 0,
-            gstAmount: 0,
-            convenienceFee: 0,
-            grandTotal: calcResult.finalPrice,
-            appliedPromotionCode: promoCodeVal,
-            appliedPromotionTitle: isFeatured 
-              ? (selectedFeaturedOffer?.title || validatedContextOffer?.title || "Offer Discount") 
-              : (appliedCoupon?.title || promoCodeVal),
-            discountSource: isFeatured ? "Offer" : "Coupon",
-          };
-
-          setPricingPreview(updatedPreview);
-          setCouponDiscount(calcResult.promoDiscount);
-          
-          writeBusBookingFlowState({
-            pricingPreview: updatedPreview,
-            couponCode: isFeatured ? null : promoCodeVal,
-            promotionId: isFeatured ? promotionIdParam : null,
-            couponDiscount: calcResult.promoDiscount,
-            appliedCoupon: isFeatured ? null : { couponCode: promoCodeVal },
-            selectedOffer: isFeatured ? (selectedFeaturedOffer || validatedContextOffer) : null,
-          });
-
-          return updatedPreview;
-        }
-      }
+      const backendCouponDiscount =
+        Number(preview.couponDiscountAmount) ||
+        Number(preview.manualDiscountAmount) ||
+        0;
+      const activeOffer =
+        featuredOfferIdParam
+          ? selectedFeaturedOffer ||
+            featuredOffers.find(
+              (offer) =>
+                Number(offer.id) === Number(featuredOfferIdParam) ||
+                Number(offer.offerId) === Number(featuredOfferIdParam) ||
+                Number(offer.selectedFeaturedOfferId) === Number(featuredOfferIdParam)
+            ) ||
+            validatedContextOffer
+          : null;
 
       setPricingPreview(preview);
-      setCouponDiscount(0); // clear if no promotion
+      setCouponDiscount(backendCouponDiscount);
       writeBusBookingFlowState({
         pricingPreview: preview,
-        couponCode: null,
+        couponCode: featuredOfferIdParam ? null : couponCodeParam,
         promotionId: null,
-        couponDiscount: 0,
-        appliedCoupon: null,
-        selectedOffer: null,
+        selectedFeaturedOfferId: featuredOfferIdParam,
+        couponDiscount: backendCouponDiscount,
+        appliedCoupon: featuredOfferIdParam || !couponCodeParam ? null : { couponCode: couponCodeParam },
+        selectedOffer: featuredOfferIdParam ? activeOffer : null,
       });
 
       return preview;
@@ -561,11 +628,25 @@ export default function BusPassengerDetailsPage() {
   useEffect(() => {
     let isMounted = true;
 
-    const initialPromotionId = validatedContextOffer
-      ? (validatedContextOffer.promotionId || validatedContextOffer.offerId || null)
-      : (flowState.promotionId || flowState.selectedOffer?.promotionId || null);
-    const initialCouponCode = initialPromotionId ? null : (flowState.couponCode || null);
-    loadPricingPreview({ promotionId: initialPromotionId, couponCode: initialCouponCode })
+    const initialFeaturedOfferId = validatedContextOffer
+      ? (
+          validatedContextOffer.selectedFeaturedOfferId ||
+          validatedContextOffer.id ||
+          validatedContextOffer.offerId ||
+          validatedContextOffer.promotionId ||
+          null
+        )
+      : (
+          flowState.selectedFeaturedOfferId ||
+          flowState.selectedOffer?.selectedFeaturedOfferId ||
+          flowState.selectedOffer?.id ||
+          flowState.selectedOffer?.offerId ||
+          flowState.promotionId ||
+          flowState.selectedOffer?.promotionId ||
+          null
+        );
+    const initialCouponCode = initialFeaturedOfferId ? null : (flowState.couponCode || null);
+    loadPricingPreview({ selectedFeaturedOfferId: initialFeaturedOfferId, couponCode: initialCouponCode })
       .then((preview) => {
         if (isMounted) {
           setPricingPreview(preview);
@@ -636,6 +717,20 @@ export default function BusPassengerDetailsPage() {
       return;
     }
 
+    if (
+      field === "gender" &&
+      normalizeGender(value) === "Female" &&
+      (seat.bookedGender === "Male" || hasAdjacentMaleSeat(seat))
+    ) {
+      const isReserved = seat.bookedGender === "Male";
+      setFormError(
+        isReserved
+          ? `Seat ${seat.label || seat.seatLabel || ""} is reserved for males. Only male passengers can book this seat.`
+          : getMaleAdjacentSeatMessage(seat.label || seat.seatLabel)
+      );
+      return;
+    }
+
     setFormError("");
     setPassengers((previous) =>
       previous.map((passenger, i) =>
@@ -649,19 +744,20 @@ export default function BusPassengerDetailsPage() {
       prev.map((mode, i) => (i === index ? isExisting : mode))
     );
     setPassengers((prev) =>
-      prev.map((passenger, i) =>
-        i === index
-          ? {
-              ...passenger,
-              selectedTravelerId: "",
-              title: (selectedSeats[index]?.bookedGender === "Female" || hasAdjacentFemaleSeat(selectedSeats[index])) ? "Ms" : "Mr",
-              firstName: "",
-              lastName: "",
-              age: "",
-              gender: (selectedSeats[index]?.bookedGender === "Female" || hasAdjacentFemaleSeat(selectedSeats[index])) ? "Female" : "",
-            }
-          : passenger
-      )
+      prev.map((passenger, i) => {
+        if (i !== index) return passenger;
+        const isFemaleRestricted = selectedSeats[index]?.bookedGender === "Female" || hasAdjacentFemaleSeat(selectedSeats[index]);
+        const isMaleRestricted = selectedSeats[index]?.bookedGender === "Male" || hasAdjacentMaleSeat(selectedSeats[index]);
+        return {
+          ...passenger,
+          selectedTravelerId: "",
+          title: isFemaleRestricted ? "Ms" : "Mr",
+          firstName: "",
+          lastName: "",
+          age: "",
+          gender: isFemaleRestricted ? "Female" : (isMaleRestricted ? "Male" : ""),
+        };
+      })
     );
   };
 
@@ -683,6 +779,16 @@ export default function BusPassengerDetailsPage() {
         isReserved
           ? `Seat ${seat.label || seat.seatLabel || ""} is reserved for females. Only female passengers can book this seat.`
           : getFemaleAdjacentSeatMessage(seat.label || seat.seatLabel)
+      );
+      return;
+    }
+
+    if (travelerGender === "Female" && (seat.bookedGender === "Male" || hasAdjacentMaleSeat(seat))) {
+      const isReserved = seat.bookedGender === "Male";
+      setFormError(
+        isReserved
+          ? `Seat ${seat.label || seat.seatLabel || ""} is reserved for males. Only male passengers can book this seat.`
+          : getMaleAdjacentSeatMessage(seat.label || seat.seatLabel)
       );
       return;
     }
@@ -711,62 +817,48 @@ export default function BusPassengerDetailsPage() {
     setCouponMessage("");
     setCouponMessageType("");
 
-    // Clear manual coupon and set featured offer
-    setSelectedFeaturedOffer(offer);
+    const featuredOfferId = offer?.id || offer?.selectedFeaturedOfferId || offer?.offerId || offer?.promotionId;
+    if (!featuredOfferId) {
+      setCouponMessage("Offer is missing an ID.");
+      setCouponMessageType("error");
+      setIsApplyingCoupon(false);
+      return;
+    }
+
+    const pendingOffer = {
+      ...offer,
+      selectedFeaturedOfferId: featuredOfferId,
+      promotionId: null,
+      isFeaturedOffer: true,
+    };
+
+    setSelectedFeaturedOffer(pendingOffer);
     setManualCouponCode("");
     setCouponDiscount(0);
     setAppliedCoupon(null);
     if (snapshotBase) setPricingPreview(snapshotBase);
 
     try {
-      // Call featured offer validation API
-      const res = await applyOfferCoupon({
-        offerId: offer.offerId,
-        couponCode: offer.couponCode,
-        currentPrice: snapshotBase?.subtotalBeforeCoupon || pricingPreview?.subtotalBeforeCoupon || 0,
-      });
-
-      if (!res || res.isSuccess === false) {
-        throw new Error(res?.message || "Offer coupon could not be applied.");
-      }
-
-      const numericPromotionId = offer.id !== undefined && offer.id !== null ? Number(offer.id) : null;
-
       const preview = await loadPricingPreview(
-        { promotionId: numericPromotionId, couponCode: null },
-        snapshotBase
+        { selectedFeaturedOfferId: featuredOfferId, couponCode: null }
       );
 
-      // Validate using appliedPromotionCode or discountSource — NOT couponDiscountAmount
-      const isOfferApplied =
-        preview.appliedPromotionCode != null ||
-        preview.discountSource === "Offer" ||
-        (snapshotBase && Number(preview.grandTotal) < Number(snapshotBase.grandTotal));
-
-      if (!isOfferApplied) {
-        setSelectedFeaturedOffer(null);
-        if (snapshotBase) setPricingPreview(snapshotBase);
-        setCouponMessage("Offer could not be applied to this booking.");
-        setCouponMessageType("error");
-        return;
-      }
-
-      const appliedOffer = {
-        ...offer,
-        promotionId: numericPromotionId,
-        isFeaturedOffer: true,
-      };
-      setSelectedFeaturedOffer(appliedOffer);
+      setSelectedFeaturedOffer(pendingOffer);
       setManualCouponCode("");
       setAppliedCoupon(null);
-      setCouponMessage(res.message || "Offer applied successfully.");
-      setCouponMessageType("success");
+      if (hasBackendConfirmedPromotion(preview)) {
+        setCouponMessage("Offer discount applied successfully.");
+        setCouponMessageType("success");
+      } else {
+        setCouponMessage("Offer selected. Backend did not return a discount for this seat yet.");
+        setCouponMessageType("error");
+      }
     } catch (error) {
-      setSelectedFeaturedOffer(null);
+      setSelectedFeaturedOffer(pendingOffer);
       setManualCouponCode("");
       setAppliedCoupon(null);
       if (snapshotBase) setPricingPreview(snapshotBase);
-      setCouponMessage(error.message || "Failed to apply offer.");
+      setCouponMessage(error.message || "Offer saved, but pricing preview failed.");
       setCouponMessageType("error");
     } finally {
       setIsApplyingCoupon(false);
@@ -820,20 +912,13 @@ export default function BusPassengerDetailsPage() {
     try {
       const snapshotBase = basePricingPreview;
       const preview = await loadPricingPreview(
-        { promotionId: null, couponCode: normalized },
-        snapshotBase
+        { selectedFeaturedOfferId: null, couponCode: normalized }
       );
-
-      const baseTotal = snapshotBase ? Number(snapshotBase.grandTotal) : null;
-      const newTotal = Number(preview.grandTotal) || 0;
-      const priceActuallyDecreased = baseTotal !== null && newTotal < baseTotal;
 
       const effectiveDiscount =
         Number(preview.couponDiscountAmount) > 0
           ? Number(preview.couponDiscountAmount)
-          : priceActuallyDecreased
-          ? baseTotal - newTotal
-          : Math.max(0, Number(preview.couponAmount) - Number(preview.autoDiscountAmount));
+          : Number(preview.manualDiscountAmount) || 0;
 
       if (effectiveDiscount <= 0) {
         setAppliedCoupon(null);
@@ -873,20 +958,13 @@ export default function BusPassengerDetailsPage() {
         setManualCouponCode(couponCodeValue);
 
         const preview = await loadPricingPreview(
-          { promotionId: null, couponCode: couponCodeValue },
-          snapshotBase
+          { selectedFeaturedOfferId: null, couponCode: couponCodeValue }
         );
-
-        const baseTotal = snapshotBase ? Number(snapshotBase.grandTotal) : null;
-        const newTotal = Number(preview.grandTotal) || 0;
-        const priceActuallyDecreased = baseTotal !== null && newTotal < baseTotal;
 
         const effectiveDiscount =
           Number(preview.couponDiscountAmount) > 0
             ? Number(preview.couponDiscountAmount)
-            : priceActuallyDecreased
-            ? baseTotal - newTotal
-            : Math.max(0, Number(preview.couponAmount) - Number(preview.autoDiscountAmount));
+            : Number(preview.manualDiscountAmount) || 0;
 
         if (effectiveDiscount <= 0) {
           setManualCouponCode("");
@@ -944,11 +1022,19 @@ export default function BusPassengerDetailsPage() {
     }
     const genderSeatConflict = getGenderSeatConflict(passengers, selectedSeats);
     if (genderSeatConflict) {
-      setFormError(
-        genderSeatConflict.isReserved
-          ? `Seat ${genderSeatConflict.seatLabel} is reserved for females. Only female passengers can book this seat.`
-          : getFemaleAdjacentSeatMessage(genderSeatConflict.seatLabel)
-      );
+      if (genderSeatConflict.isMaleAdjacentConflict) {
+        setFormError(
+          genderSeatConflict.isReserved
+            ? `Seat ${genderSeatConflict.seatLabel} is reserved for males. Only male passengers can book this seat.`
+            : getMaleAdjacentSeatMessage(genderSeatConflict.seatLabel)
+        );
+      } else {
+        setFormError(
+          genderSeatConflict.isReserved
+            ? `Seat ${genderSeatConflict.seatLabel} is reserved for females. Only female passengers can book this seat.`
+            : getFemaleAdjacentSeatMessage(genderSeatConflict.seatLabel)
+        );
+      }
       return;
     }
     if (!isValidEmail(contact.email)) {
@@ -992,8 +1078,14 @@ export default function BusPassengerDetailsPage() {
 
     const isFeatured = Boolean(selectedFeaturedOffer);
     const finalCouponCode = isFeatured ? null : (appliedCoupon?.couponCode || manualCouponCode || null);
-    const finalPromotionId = isFeatured
-      ? (selectedFeaturedOffer.promotionId || selectedFeaturedOffer.offerId || null)
+    const finalFeaturedOfferId = isFeatured
+      ? (
+          selectedFeaturedOffer.selectedFeaturedOfferId ||
+          selectedFeaturedOffer.id ||
+          selectedFeaturedOffer.offerId ||
+          selectedFeaturedOffer.promotionId ||
+          null
+        )
       : null;
 
     const payload = {
@@ -1001,7 +1093,8 @@ export default function BusPassengerDetailsPage() {
       passengers: cleanedPassengers,
       contact,
       couponCode: finalCouponCode,
-      promotionId: finalPromotionId,
+      promotionId: null,
+      selectedFeaturedOfferId: finalFeaturedOfferId,
       couponDiscount,
       appliedCoupon: isFeatured ? null : (appliedCoupon || (finalCouponCode ? { couponCode: finalCouponCode } : null)),
       selectedOffer: isFeatured ? selectedFeaturedOffer : null,
@@ -1013,77 +1106,13 @@ export default function BusPassengerDetailsPage() {
     };
 
     writeBusBookingFlowState(payload);
-
-    // Bypass check: if a promotion (featured offer or manual coupon) is present
-    const hasPromo = Boolean(selectedFeaturedOffer || appliedCoupon || finalCouponCode);
-    if (hasPromo) {
-      setIsApplyingCoupon(true); // Reuse spinner state to indicate processing
-      try {
-        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-        const userIdVal = String(storedUser?.id || storedUser?.userId || localStorage.getItem("userId") || "guest");
-        const routeVal = `${bus.fromCity} to ${bus.toCity}`;
-        const seatTypeVal = String(selectedSeats[0]?.seatType || selectedSeats[0]?.type || "Seater");
-        const promoTypeVal = isFeatured ? "offer" : "coupon";
-        const promoCodeVal = isFeatured 
-          ? (selectedFeaturedOffer.couponCode || selectedFeaturedOffer.offerCode) 
-          : (appliedCoupon?.couponCode || finalCouponCode);
-
-        const confirmRes = await confirmBooking({
-          userId: userIdVal,
-          bookingType: "Bus",
-          route: routeVal,
-          seatType: seatTypeVal,
-          basePrice: Number(pricingPreview.subtotalBeforeCoupon) || 0,
-          autoDiscountId: null,
-          promoType: promoTypeVal,
-          promoCode: promoCodeVal,
-        });
-
-        // Clear active offer from PromoContext
-        clearSelectedOffer();
-
-        // Navigate directly to BookingConfirmationPage
-        navigate("/booking/confirmation", {
-          state: {
-            bookingId: confirmRes.bookingId,
-            status: confirmRes.status || "Confirmed",
-            priceBreakdown: confirmRes.priceBreakdown || {
-              basePrice: Number(pricingPreview.subtotalBeforeCoupon) || 0,
-              autoDiscount: Number(pricingPreview.autoDiscountAmount) || 0,
-              promoDiscount: couponDiscount,
-              finalPrice: totalAfterDiscount
-            },
-            journeyDetails: {
-              fromCity: bus.fromCity,
-              toCity: bus.toCity,
-              departureTime: bus.departureTime,
-              arrivalTime: bus.arrivalTime,
-              duration: bus.duration,
-              boardingPoint: boardingPoint?.name || bus.boardingPoint,
-              droppingPoint: droppingPoint?.name || bus.droppingPoint,
-              busNumber: bus.busNumber,
-              operatorName: bus.operatorName,
-              busType: bus.busType,
-              seatsBooked: selectedSeats.map(s => s.label || s.seatCode || s).join(", "),
-            },
-            passengers: cleanedPassengers,
-            contact,
-          }
-        });
-      } catch (err) {
-        console.error("Direct confirmation error:", err);
-        setFormError(err.message || "Failed to confirm booking. Please try again.");
-      } finally {
-        setIsApplyingCoupon(false);
-      }
-    } else {
-      navigate("/bus/payment", { state: payload });
-    }
+    navigate("/bus/payment", { state: payload });
   };
 
   const renderPassengerFields = (passenger, index) => {
     const seat = selectedSeats[index] || {};
     const isFemaleOnlySeat = hasAdjacentFemaleSeat(seat);
+    const isMaleOnlySeat = hasAdjacentMaleSeat(seat);
 
     return (
       <div className="passenger-fields">
@@ -1138,11 +1167,16 @@ export default function BusPassengerDetailsPage() {
           >
             <option value="">Gender</option>
             <option value="Male" disabled={isFemaleOnlySeat}>Male</option>
-            <option value="Female">Female</option>
+            <option value="Female" disabled={isMaleOnlySeat}>Female</option>
           </select>
           {isFemaleOnlySeat && (
             <small className="passenger-restriction-note">
               Female passenger required for this seat.
+            </small>
+          )}
+          {isMaleOnlySeat && (
+            <small className="passenger-restriction-note">
+              Male passenger required for this seat.
             </small>
           )}
         </label>
@@ -1433,16 +1467,19 @@ export default function BusPassengerDetailsPage() {
                     )}
                     {/* Discount row — uses appliedPromotionCode / discountSource for featured offers */}
                     {(() => {
-                      const displayDiscount = Math.max(
-                        couponDiscount,
-                        Number(pricingPreview.couponDiscountAmount) || 0
-                      );
-                      const appliedCode = pricingPreview.appliedPromotionCode || appliedCoupon?.couponCode;
                       const isFeaturedActive = Boolean(selectedFeaturedOffer);
-                      const label = appliedCode
+                      const displayDiscount = getPromotionDiscountAmount(pricingPreview, couponDiscount);
+                      const appliedCode = pricingPreview.appliedPromotionCode || appliedCoupon?.couponCode;
+                      const featuredTitle =
+                        selectedFeaturedOffer?.title ||
+                        pricingPreview.appliedPromotionTitle ||
+                        selectedFeaturedOffer?.offerCode ||
+                        selectedFeaturedOffer?.selectedFeaturedOfferId ||
+                        "";
+                      const label = isFeaturedActive
+                        ? `Featured Offer${featuredTitle ? ` (${featuredTitle})` : ""}`
+                        : appliedCode
                         ? `Coupon Discount (${appliedCode})`
-                        : isFeaturedActive
-                        ? `Offer Discount (${selectedFeaturedOffer.title || selectedFeaturedOffer.offerId || ""})`
                         : "Coupon Discount";
                       return displayDiscount > 0 ? (
                         <div>
@@ -1484,7 +1521,7 @@ export default function BusPassengerDetailsPage() {
                     <p style={{ fontSize: "12px", color: "#6b7280", marginBottom: "8px", fontWeight: "600" }}>Featured Offers:</p>
                     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                       {featuredOffers.map((offer) => {
-                        const isThisSelected = selectedFeaturedOffer?.id === offer.id || selectedFeaturedOffer?.offerId === offer.offerId;
+                        const isThisSelected = isSameFeaturedOffer(selectedFeaturedOffer, offer);
                         const anotherOfferSelected = Boolean(selectedFeaturedOffer) && !isThisSelected;
                         const discountLabel = offer.isPercentageDiscount
                           ? `${offer.discountValue}% OFF`
@@ -1532,7 +1569,6 @@ export default function BusPassengerDetailsPage() {
                                 )}
                               </div>
                               <p style={{ fontSize: "11px", color: "#6b7280", margin: "2px 0 0" }}>{offer.subtitle || offer.description}</p>
-                              <code style={{ fontSize: "11px", color: "#047857", fontWeight: "700" }}>{offer.couponCode}</code>
                             </div>
                             {isThisSelected ? (
                               <button
@@ -1555,7 +1591,7 @@ export default function BusPassengerDetailsPage() {
                                   background: anotherOfferSelected ? "#9ca3af" : "#10b981", color: "#fff", fontSize: "11px",
                                   fontWeight: "600", cursor: anotherOfferSelected ? "not-allowed" : "pointer", flexShrink: 0,
                                 }}
-                              >{isApplyingCoupon && selectedFeaturedOffer?.offerId === offer.offerId ? "Applying..." : "Apply"}</button>
+                              >{isApplyingCoupon && isThisSelected ? "Applying..." : "Apply"}</button>
                             )}
                           </div>
                         );
@@ -1601,9 +1637,29 @@ export default function BusPassengerDetailsPage() {
                   )}
                 </div>
                 {selectedFeaturedOffer && (
-                  <p style={{ marginTop: "6px", fontSize: "12px", color: "#6b7280" }}>
-                    An offer is auto-applied. Remove the active offer above to use a manual coupon.
-                  </p>
+                  <div style={{ marginTop: "8px", display: "flex", gap: "8px", alignItems: "center", justifyContent: "space-between" }}>
+                    <p style={{ margin: 0, fontSize: "12px", color: "#6b7280", lineHeight: 1.35 }}>
+                      Featured offer applied. Remove it to use a manual coupon.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleRemoveOffer}
+                      disabled={isApplyingCoupon}
+                      style={{
+                        padding: "6px 10px",
+                        borderRadius: "6px",
+                        border: "none",
+                        background: "#ef4444",
+                        color: "#fff",
+                        fontSize: "11px",
+                        fontWeight: "700",
+                        cursor: isApplyingCoupon ? "not-allowed" : "pointer",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
                 )}
 
                 {couponMessage && (
@@ -1729,16 +1785,19 @@ export default function BusPassengerDetailsPage() {
                       )}
                       {/* Discount row in confirmation modal */}
                       {(() => {
-                        const displayDiscount = Math.max(
-                          couponDiscount,
-                          Number(pricingPreview.couponDiscountAmount) || 0
-                        );
-                        const appliedCode = pricingPreview.appliedPromotionCode || appliedCoupon?.couponCode;
                         const isFeaturedActive = Boolean(selectedFeaturedOffer);
-                        const label = appliedCode
+                        const displayDiscount = getPromotionDiscountAmount(pricingPreview, couponDiscount);
+                        const appliedCode = pricingPreview.appliedPromotionCode || appliedCoupon?.couponCode;
+                        const featuredTitle =
+                          selectedFeaturedOffer?.title ||
+                          pricingPreview.appliedPromotionTitle ||
+                          selectedFeaturedOffer?.offerCode ||
+                          selectedFeaturedOffer?.selectedFeaturedOfferId ||
+                          "";
+                        const label = isFeaturedActive
+                          ? `Featured Offer${featuredTitle ? ` (${featuredTitle})` : ""}`
+                          : appliedCode
                           ? `Coupon Discount (${appliedCode})`
-                          : isFeaturedActive
-                          ? `Offer Discount (${selectedFeaturedOffer.title || selectedFeaturedOffer.offerId || ""})`
                           : "Coupon Discount";
                         return displayDiscount > 0 ? (
                           <div>

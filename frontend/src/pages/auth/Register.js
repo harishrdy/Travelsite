@@ -8,7 +8,12 @@ import {
 import "../../STYLES/Login.css";
 import "../../STYLES/Register.css";
 import { requestAuth } from "../../services/authService";
-import authHeroImage from "../../assets/images/loginimage.png";
+import {
+  validateLowercaseEmail,
+  validateStrongPassword,
+} from "../../utils/authValidation";
+// import flightCarImage from "../../assets/images/flightcar.png";
+import flightCarImage from "../../assets/images/loginimage.png";
 
 const COUNTRY_CODE_OPTIONS = [
   { value: "", label: "Select code", mobileLength: null },
@@ -27,11 +32,19 @@ const COUNTRY_CODE_MAP = COUNTRY_CODE_OPTIONS.reduce((map, option) => {
 }, new Map());
 
 const NAME_REGEX = /^[A-Za-z]+$/;
-const EMAIL_REGEX = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
-const STRONG_PASSWORD_REGEX =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/;
 const OTP_LENGTH = 6;
 const OTP_TIMER_SECONDS = 60;
+const REQUIRED_FIELD_NAMES = new Set([
+  "firstName",
+  "lastName",
+  "countryCode",
+  "mobile",
+  "password",
+  "confirmPassword",
+  "email",
+  "emailOtp",
+  "agree",
+]);
 
 const formatOtpTime = (seconds) => {
   const minutes = Math.floor(seconds / 60);
@@ -46,11 +59,26 @@ const normalizeForm = (form) => ({
   firstName: form.firstName.trim(),
   lastName: form.lastName.trim(),
   mobile: form.mobile.trim(),
-  email: form.email.trim(),
-  password: form.password.trim(),
-  confirmPassword: form.confirmPassword.trim(),
+  email: form.email,
+  password: form.password,
+  confirmPassword: form.confirmPassword,
   emailOtp: (form.emailOtp || "").trim()
 });
+
+const REQUIRED_FIELDS_MESSAGE = "Please fill all required";
+
+const hasAnyEnteredRegisterDetail = (form, { includeOtp = false } = {}) => {
+  return Boolean(
+    form.firstName ||
+      form.lastName ||
+      form.countryCode ||
+      form.mobile ||
+      form.email ||
+      form.password ||
+      form.confirmPassword ||
+      (includeOtp && form.emailOtp)
+  );
+};
 
 const validateRegisterForm = (form, { requireOtp = false } = {}) => {
   const nextErrors = {};
@@ -94,31 +122,24 @@ const validateRegisterForm = (form, { requireOtp = false } = {}) => {
     }
   }
 
-  if (!form.email) {
-    nextErrors.email = "Email address is required";
-  } else if (/\s/.test(form.email)) {
-    nextErrors.email = "Email format is incorrect";
-  } else if (/[A-Z]/.test(form.email)) {
-    nextErrors.email = "Only lowercase letters are allowed";
-  } else if (!EMAIL_REGEX.test(form.email)) {
-    nextErrors.email = "Enter a valid email address";
+  const emailError = validateLowercaseEmail(
+    form.email,
+    "Email address is required"
+  );
+
+  if (emailError) {
+    nextErrors.email = emailError;
   }
 
-  if (!form.password) {
-    nextErrors.password = "Password is required";
-  } else if (form.password.length < 8) {
-    nextErrors.password = "Password must be at least 8 characters";
-  } else if (form.password.length > 64) {
-    nextErrors.password = "Password cannot exceed 64 characters";
-  } else if (/\s/.test(form.password)) {
-    nextErrors.password = "Password cannot contain spaces";
-  } else if (!STRONG_PASSWORD_REGEX.test(form.password)) {
-    nextErrors.password =
-      "Password must include uppercase, lowercase, number and special character";
+  const passwordError = validateStrongPassword(form.password);
+  if (passwordError) {
+    nextErrors.password = passwordError;
   }
 
   if (!form.confirmPassword) {
     nextErrors.confirmPassword = "Please confirm your password";
+  } else if (/\s/.test(form.confirmPassword)) {
+    nextErrors.confirmPassword = "Confirm password cannot contain spaces";
   } else if (form.confirmPassword !== form.password) {
     nextErrors.confirmPassword = "Passwords do not match";
   }
@@ -143,7 +164,7 @@ const Register = () => {
   const firstNameRef = useRef(null);
   const otpInputRefs = useRef([]);
   const authPageStyle = {
-    backgroundImage: `url(${authHeroImage})`
+    backgroundImage: `url(${flightCarImage})`
   };
 
   useEffect(() => {
@@ -156,10 +177,10 @@ const Register = () => {
   const [apiMessage, setApiMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [serverErrors, setServerErrors] = useState({});
-  const [submitAttempted, setSubmitAttempted] = useState(false);
   const [emailOtpSent, setEmailOtpSent] = useState(false);
   const [otpSecondsLeft, setOtpSecondsLeft] = useState(0);
   const [resendingOtp, setResendingOtp] = useState(false);
+  const [highlightRequiredFields, setHighlightRequiredFields] = useState(false);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -202,15 +223,20 @@ const Register = () => {
       return serverErrors[fieldName];
     }
 
-    if (!submitAttempted) {
+    if (!touched[fieldName]) {
       return "";
     }
 
-    return validationErrors[fieldName] || "";
+    return touched[fieldName] && validationErrors[fieldName];
   };
 
+  const shouldHighlightRequiredField = (fieldName) =>
+    highlightRequiredFields &&
+    REQUIRED_FIELD_NAMES.has(fieldName) &&
+    (fieldName !== "emailOtp" || emailOtpSent);
+
   const getFieldHasError = (fieldName) =>
-    Boolean(getFieldError(fieldName));
+    shouldHighlightRequiredField(fieldName) || Boolean(getFieldError(fieldName));
 
   const getStatusMessage = () => {
     if (apiMessage) {
@@ -221,8 +247,7 @@ const Register = () => {
   };
 
   const statusMessage = getStatusMessage();
-  const hasInlineServerError = Object.values(serverErrors).some(Boolean);
-  const showGlobalError = statusMessage && !isSuccess && !hasInlineServerError;
+  const showGlobalError = statusMessage && !isSuccess;
 
   const sanitizeValue = (name, value) => {
     if (name === "firstName" || name === "lastName") {
@@ -234,7 +259,7 @@ const Register = () => {
     }
 
     if (name === "email") {
-      return value.replace(/\s+/g, "");
+      return value;
     }
 
     if (name === "emailOtp") {
@@ -254,12 +279,37 @@ const Register = () => {
     }));
     setTouched((prev) => ({ ...prev, [name]: true }));
     setServerErrors((prev) => ({ ...prev, [name]: "" }));
+    setHighlightRequiredFields(false);
     setApiMessage("");
   };
 
   const handleBlur = (e) => {
     const { name } = e.target;
     setTouched((prev) => ({ ...prev, [name]: true }));
+  };
+
+  const showEmailSpaceError = () => {
+    setTouched((prev) => ({ ...prev, email: true }));
+    setServerErrors((prev) => ({
+      ...prev,
+      email: "Email cannot contain spaces",
+    }));
+    setHighlightRequiredFields(false);
+    setApiMessage("");
+  };
+
+  const handleEmailKeyDown = (event) => {
+    if (event.key === " ") {
+      event.preventDefault();
+      showEmailSpaceError();
+    }
+  };
+
+  const handleEmailPaste = (event) => {
+    if (/\s/.test(event.clipboardData.getData("text"))) {
+      event.preventDefault();
+      showEmailSpaceError();
+    }
   };
 
   const updateEmailOtp = (nextOtp) => {
@@ -269,6 +319,7 @@ const Register = () => {
     }));
     setTouched((prev) => ({ ...prev, emailOtp: true }));
     setServerErrors((prev) => ({ ...prev, emailOtp: "" }));
+    setHighlightRequiredFields(false);
     setApiMessage("");
   };
 
@@ -334,19 +385,32 @@ const Register = () => {
     });
   };
 
+  const showValidationErrors = (formToCheck, includeOtp = false) => {
+    if (!hasAnyEnteredRegisterDetail(formToCheck, { includeOtp })) {
+      setTouched({});
+      setServerErrors({});
+      setHighlightRequiredFields(true);
+      setApiMessage(REQUIRED_FIELDS_MESSAGE);
+      setIsSuccess(false);
+      return;
+    }
+
+    setHighlightRequiredFields(false);
+    markAllTouched(includeOtp);
+    setApiMessage("");
+    setIsSuccess(false);
+  };
+
   const sendRegistrationOtp = async () => {
     if (loading) return;
 
-    setSubmitAttempted(true);
     const cleanedForm = normalizeForm(form);
     setForm(cleanedForm);
 
     const nextErrors = validateRegisterForm(cleanedForm);
     const formIsValid = Object.keys(nextErrors).length === 0;
     if (!formIsValid) {
-      markAllTouched(false);
-      setApiMessage("");
-      setIsSuccess(false);
+      showValidationErrors(cleanedForm);
       return;
     }
 
@@ -375,7 +439,9 @@ const Register = () => {
         "/api/Auth/forgot-password",
         {
           method: "POST",
-          body: JSON.stringify({ email: cleanedForm.email })
+          body: JSON.stringify({
+            email: cleanedForm.email
+          })
         },
         "Failed to send OTP"
       );
@@ -383,7 +449,6 @@ const Register = () => {
       setEmailOtpSent(true);
       setOtpSecondsLeft(OTP_TIMER_SECONDS);
       setTouched((prev) => ({ ...prev, emailOtp: false }));
-      setSubmitAttempted(false);
       setIsSuccess(true);
       setApiMessage(
         "OTP sent to your email. Enter it below and click Sign Up."
@@ -401,7 +466,7 @@ const Register = () => {
           email: "Email already registered"
         });
         setTouched((prev) => ({ ...prev, email: true }));
-        setApiMessage("");
+        setApiMessage("Email already registered");
       } else {
         setApiMessage(message);
       }
@@ -425,7 +490,9 @@ const Register = () => {
         "/api/Auth/forgot-password",
         {
           method: "POST",
-          body: JSON.stringify({ email: cleanedForm.email })
+          body: JSON.stringify({
+            email: cleanedForm.email
+          })
         },
         "Failed to resend OTP"
       );
@@ -457,7 +524,6 @@ const Register = () => {
       return;
     }
 
-    setSubmitAttempted(true);
     const cleanedForm = normalizeForm(form);
     setForm(cleanedForm);
 
@@ -466,7 +532,7 @@ const Register = () => {
         emailOtp: "OTP expired. Please resend OTP"
       });
       setTouched((prev) => ({ ...prev, emailOtp: true }));
-      setApiMessage("");
+      setApiMessage("OTP expired. Please resend OTP");
       setIsSuccess(false);
       return;
     }
@@ -476,9 +542,7 @@ const Register = () => {
     });
     const formIsValid = Object.keys(nextErrors).length === 0;
     if (!formIsValid) {
-      markAllTouched(true);
-      setApiMessage("");
-      setIsSuccess(false);
+      showValidationErrors(cleanedForm, true);
       return;
     }
 
@@ -519,7 +583,7 @@ const Register = () => {
           emailOtp: otpMessage
         });
         setTouched((prev) => ({ ...prev, emailOtp: true }));
-        setApiMessage("");
+        setApiMessage(otpMessage);
       } else {
         setApiMessage(message);
       }
@@ -536,7 +600,7 @@ const Register = () => {
         <section className="travel-auth-form-panel">
           <h2 className="travel-auth-heading">Create Account</h2>
           <p className="travel-auth-subheading">
-            Sign up to book bus seats and manage trips
+            Sign up to book bus seats, flights and more
           </p>
 
           {statusMessage && isSuccess && (
@@ -702,7 +766,11 @@ const Register = () => {
                     value={form.email}
                     onChange={handleChange}
                     onBlur={handleBlur}
+                    onKeyDown={handleEmailKeyDown}
+                    onPaste={handleEmailPaste}
                     autoComplete="new-email"
+                    autoCapitalize="none"
+                    spellCheck={false}
                     disabled={accountFieldsLocked}
                   />
                   {!emailOtpSent ? (

@@ -770,8 +770,13 @@
 
 .bus-price-inputs input:focus {
   border-color: var(--bus-primary);
-  color: #172b49;
+  color: var(--bus-primary, #f04423);
   box-shadow: 0 0 0 3px rgba(240, 90, 40, 0.12);
+}
+
+.bus-price-inputs input:not(:disabled) {
+  border-color: var(--bus-primary, #f04423);
+  color: var(--bus-primary, #f04423);
 }
 
 .bus-price-inputs input:disabled {
@@ -799,14 +804,10 @@
 }
  
 .bus-type-chip.active {
-  border-color: transparent;
+  border-color: var(--bus-primary, #f04423);
   color: #ffffff;
-  background: linear-gradient(
-    135deg,
-    var(--bus-primary),
-    var(--bus-primary-strong)
-  );
-  box-shadow: 0 8px 14px rgba(26, 67, 121, 0.28);
+  background: var(--bus-primary, #f04423);
+  box-shadow: 0 8px 14px rgba(240, 68, 35, 0.24);
 }
  
 .time-chip-grid {
@@ -838,14 +839,10 @@
 }
  
 .time-chip.active {
-  border-color: transparent;
+  border-color: var(--bus-primary, #f04423);
   color: #ffffff;
-  background: linear-gradient(
-    135deg,
-    var(--bus-primary),
-    var(--bus-primary-strong)
-  );
-  box-shadow: 0 8px 14px rgba(26, 67, 121, 0.28);
+  background: var(--bus-primary, #f04423);
+  box-shadow: 0 8px 14px rgba(240, 68, 35, 0.24);
 }
  
 .time-chip.active svg {
@@ -881,11 +878,14 @@
  
 .point-list {
   margin-top: 10px;
-  max-height: 144px;
+  max-height: 210px;
+  min-height: 44px;
   overflow-y: auto;
   display: grid;
   gap: 8px;
-  padding-right: 2px;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
 }
  
 .point-list::-webkit-scrollbar {
@@ -896,12 +896,23 @@
   border-radius: 999px;
   background: var(--bus-primary);
 }
+
+.point-list::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: #fff1ea;
+}
  
 .point-row {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-height: 34px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 4px 6px;
   cursor: pointer;
+  background: #ffffff;
+  transition: border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease;
 }
  
 .point-row input {
@@ -914,6 +925,16 @@
   color: var(--theme-navy, #1f2a44);
   font-size: 0.855rem;
   font-weight: 600;
+}
+
+.point-row.active {
+  border-color: var(--bus-primary, #f04423);
+  background: #fff0e9;
+}
+
+.point-row.active span {
+  color: var(--bus-primary, #f04423);
+  font-weight: 800;
 }
  
 .bus-results-column {
@@ -977,13 +998,10 @@
 }
  
 .sort-control-list button.active {
-  border-color: transparent;
+  border-color: #f04423;
   color: #ffffff;
-  background: linear-gradient(
-    135deg,
-    var(--bus-primary),
-    var(--bus-primary-strong)
-  );
+  background: #f04423;
+  box-shadow: 0 10px 20px rgba(240, 68, 35, 0.24);
 }
 .bus-card-list {
   margin-top: 10px;
@@ -1674,7 +1692,6 @@
 .bus-modify-actions .primary,
 .bus-type-chip.active,
 .time-chip.active,
-.sort-control-list button.active,
 .bus-action-cell .primary,
 .bus-booking-actions .primary {
   background: linear-gradient(135deg, var(--bus-primary), var(--bus-primary-strong));

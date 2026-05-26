@@ -1,0 +1,149 @@
+.admin-flight-remark-edit-page {
+  gap: 12px;
+}
+
+.admin-flight-remark-edit-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-flight-remark-edit-header h1 {
+  font-size: 1.86rem;
+}
+
+.admin-flight-remark-edit-list-btn {
+  min-height: 34px;
+  border: 0;
+  border-radius: 10px;
+  padding: 0 12px;
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-strong));
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.admin-flight-remark-edit-shell {
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: var(--admin-surface);
+  overflow: hidden;
+}
+
+.admin-flight-remark-edit-grid {
+  display: grid;
+  grid-template-columns: 0.8fr 1.6fr 0.7fr 1.1fr 0.7fr 2.4fr;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-flight-remark-edit-label {
+  min-height: 48px;
+  border-right: 1px dashed var(--admin-border);
+  background: var(--admin-soft);
+  color: var(--admin-text);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 1.02rem;
+  font-weight: 800;
+}
+
+.admin-flight-remark-edit-field {
+  min-height: 48px;
+  border-right: 1px solid var(--admin-border);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.admin-flight-remark-edit-field:last-child {
+  border-right: 0;
+}
+
+.admin-flight-remark-edit-field input,
+.admin-flight-remark-edit-field select {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  font-size: 1.02rem;
+  padding: 0 10px;
+}
+
+.admin-flight-remark-edit-field input:focus,
+.admin-flight-remark-edit-field select:focus {
+  outline: none;
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px rgba(74, 15, 26, 0.14);
+}
+
+.admin-flight-remark-edit-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  padding: 12px 0 14px;
+  flex-wrap: wrap;
+}
+
+.admin-flight-remark-submit-btn,
+.admin-flight-remark-reset-btn {
+  min-height: 40px;
+  border-radius: 12px;
+  padding: 0 34px;
+  font-size: 1.02rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.admin-flight-remark-submit-btn {
+  border: 0;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-strong));
+  box-shadow: 0 12px 20px rgba(47, 47, 47, 0.18);
+}
+
+.admin-flight-remark-reset-btn {
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  color: var(--admin-text);
+}
+
+@media (max-width: 1100px) {
+  .admin-flight-remark-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-flight-remark-edit-label,
+  .admin-flight-remark-edit-field {
+    border-right: 0;
+    border-bottom: 1px solid var(--admin-border);
+  }
+
+  .admin-flight-remark-edit-field:last-child {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-flight-remark-edit-list-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .admin-flight-remark-submit-btn,
+  .admin-flight-remark-reset-btn {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+

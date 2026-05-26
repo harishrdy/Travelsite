@@ -1,91 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { getNextNumericId, useAdminList } from "../../../utils/adminPortalStorage";
-
-const RichEditor = ({ label, value, onChange, placeholder, showToast }) => {
-    const [ready, setReady] = useState(false);
-
-    const config = {
-        placeholder: placeholder || '',
-        toolbar: {
-            items: [
-                'heading',
-                '|',
-                'bold',
-                'italic',
-                'link',
-                'bulletedList',
-                'numberedList',
-                '|',
-                'outdent',
-                'indent',
-                '|',
-                'blockQuote',
-                'insertTable',
-                'mediaEmbed',
-                '|',
-                'undo',
-                'redo',
-            ],
-            shouldNotGroupWhenFull: true,
-        },
-        heading: {
-            options: [
-                { model: 'paragraph', title: 'Paragraph' },
-                { model: 'heading1', view: 'h1', title: 'Heading 1' },
-                { model: 'heading2', view: 'h2', title: 'Heading 2' },
-                { model: 'heading3', view: 'h3', title: 'Heading 3' },
-            ],
-        },
-        table: {
-            contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells'],
-        },
-    };
-
-    const styles = {
-        label: {
-            fontWeight: 700,
-            color: 'var(--text-primary)',
-            marginBottom: '8px',
-            display: 'block',
-        },
-        wrapper: {
-            border: '1px solid var(--border)',
-            borderRadius: '12px',
-            overflow: 'hidden',
-            background: 'var(--panel)',
-            boxShadow: 'var(--shadow-sm)',
-        },
-        loading: {
-            padding: '10px 12px',
-            fontSize: '0.85rem',
-            color: 'var(--text-secondary)',
-        },
-    };
-
-    return (
-        <div>
-            <label style={styles.label}>{label}</label>
-            <div style={styles.wrapper}>
-                <CKEditor
-                    editor={ClassicEditor}
-                    data={value}
-                    config={config}
-                    onReady={() => setReady(true)}
-                    onChange={(event, editor) => onChange(editor.getData())}
-                    onError={() => {
-                        if (showToast) {
-                            showToast('Editor error. Please refresh.', 'error');
-                        }
-                    }}
-                />
-                {!ready && <div style={styles.loading}>Loading editor...</div>}
-            </div>
-        </div>
-    );
-};
 
 const DEFAULT_FORM_STATE = {
     title: '',
@@ -95,8 +10,6 @@ const DEFAULT_FORM_STATE = {
     category: '',
     subCategory: '',
     addedBy: '',
-    shortDescription: '',
-    longDescription: '',
     subTitle: '',
     featured: 'No',
     isPublished: 'Yes',
@@ -127,8 +40,6 @@ const createFormState = (blog) => ({
     category: blog?.category || '',
     subCategory: blog?.subCategory || '',
     addedBy: blog?.author || blog?.addedBy || '',
-    shortDescription: blog?.shortDescription || '',
-    longDescription: blog?.longDescription || '',
     subTitle: blog?.subTitle || '',
     featured: blog?.featured || 'No',
     isPublished:
@@ -205,13 +116,6 @@ const AddBlogForm = () => {
         showToast('Slug generated.', 'info');
     };
 
-    const handleEditorChange = (field) => (content) => {
-        setFormData((prev) => ({
-            ...prev,
-            [field]: content,
-        }));
-    };
-
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!formData.title.trim()) {
@@ -243,8 +147,6 @@ const AddBlogForm = () => {
             subCategory: formData.subCategory,
             status: formData.isPublished === 'Yes' ? 'Active' : 'Inactive',
             author: formData.addedBy || editingBlog?.author || 'Admin',
-            shortDescription: formData.shortDescription || '',
-            longDescription: formData.longDescription || '',
             subTitle: formData.subTitle || '',
             featured: formData.featured || 'No',
             isPublished: formData.isPublished || 'Yes',
@@ -643,24 +545,6 @@ const AddBlogForm = () => {
                                 />
                             </div>
                         </div>
-
-                        <div style={styles.sectionHeader}>Short Description</div>
-                        <RichEditor
-                            label="Short Description"
-                            value={formData.shortDescription}
-                            onChange={handleEditorChange('shortDescription')}
-                            placeholder="Write a short description..."
-                            showToast={showToast}
-                        />
-
-                        <div style={styles.sectionHeader}>Long Description</div>
-                        <RichEditor
-                            label="Long Description"
-                            value={formData.longDescription}
-                            onChange={handleEditorChange('longDescription')}
-                            placeholder="Write the full blog content..."
-                            showToast={showToast}
-                        />
 
                         <div style={styles.sectionHeader}>SEO And Metadata</div>
                         <div style={styles.formGrid}>

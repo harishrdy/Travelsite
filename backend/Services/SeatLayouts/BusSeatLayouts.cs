@@ -1,4 +1,4 @@
-﻿namespace PickNBook.Api.Services.SeatLayouts
+namespace PickNBook.Api.Services.SeatLayouts
 {
     public sealed class SeaterLayout : IBusSeatLayout
     {
@@ -222,8 +222,7 @@
         {
             var lower = busType.ToLowerInvariant();
 
-            return lower.Contains("2+1")
-                   && lower.Contains("sleeper");
+            return lower.Contains("2+1");
         }
 
         public List<string> BuildSeatCodes(

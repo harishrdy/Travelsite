@@ -131,7 +131,14 @@ namespace PickNBook.Api.Controllers
                 x.UpdateDateUtc,
                 x.UpdatedBy,
                 x.Remark,
-                x.Status
+                x.Status,
+               
+                x.Priority,
+                x.IsExclusive,
+                x.MinBookingAmount,
+               
+                x.StartDateUtc,
+                x.EndDateUtc
             });
 
             return Ok(response);
@@ -161,8 +168,17 @@ namespace PickNBook.Api.Controllers
             var now = DateTime.UtcNow;
             var row = new BusDiscount
             {
+                Code = request.Code?.Trim(),
+                Title = request.Title?.Trim(),
+                Description = request.Description?.Trim(),
                 Value = request.Value,
                 DiscountType = NormalizeDiscountType(request.DiscountType),
+                IsAutoApply = request.IsAutoApply,
+                IsExclusive = request.IsExclusive,
+                Priority = request.Priority,
+                MinBookingAmount = request.MinBookingAmount,
+                StartDateUtc = request.StartDateUtc,
+                EndDateUtc = request.EndDateUtc,
                 EntryDateUtc = now,
                 UpdateDateUtc = now,
                 UpdatedBy = NormalizeUpdatedBy(request.UpdatedBy),
@@ -194,8 +210,17 @@ namespace PickNBook.Api.Controllers
                 return BadRequest(error);
             }
 
+            row.Code = request.Code?.Trim();
+            row.Title = request.Title?.Trim();
+            row.Description = request.Description?.Trim();
             row.Value = request.Value;
             row.DiscountType = NormalizeDiscountType(request.DiscountType);
+            row.IsAutoApply = request.IsAutoApply;
+            row.IsExclusive = request.IsExclusive;
+            row.Priority = request.Priority;
+            row.MinBookingAmount = request.MinBookingAmount;
+            row.StartDateUtc = request.StartDateUtc;
+            row.EndDateUtc = request.EndDateUtc;
             row.UpdateDateUtc = DateTime.UtcNow;
             row.UpdatedBy = NormalizeUpdatedBy(request.UpdatedBy);
             row.Remark = string.IsNullOrWhiteSpace(request.Remark) ? null : request.Remark.Trim();
@@ -210,15 +235,32 @@ namespace PickNBook.Api.Controllers
         [HttpDelete("discounts/{id:int}")]
         public async Task<IActionResult> DeleteDiscount(int id)
         {
-            var row = await dbContext.BusDiscounts.FirstOrDefaultAsync(x => x.Id == id);
-            if (row is null)
+            var discount = await dbContext.BusDiscounts
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (discount is null)
             {
                 return NotFound("Discount not found.");
             }
 
-            dbContext.BusDiscounts.Remove(row);
+            var linkedPromotion = await dbContext.BusPromotions
+                .FirstOrDefaultAsync(x =>
+                    x.SourceType == "Discount" &&
+                    x.SourceId == discount.Id);
+
+            if (linkedPromotion != null)
+            {
+                linkedPromotion.IsActive = false;
+            }
+
+            dbContext.BusDiscounts.Remove(discount);
+
             await dbContext.SaveChangesAsync();
-            return Ok(new { message = "Discount deleted." });
+
+            return Ok(new
+            {
+                message = "Discount deleted."
+            });
         }
         // GET all markup settings
         [HttpGet("markup-settings")]
@@ -387,7 +429,11 @@ namespace PickNBook.Api.Controllers
                 x.EntryDateUtc,
                 x.MaxUsagePerUser,
                 x.MinBookingAmount,
-                x.Remark
+                x.Remark,
+                x.TriggerType,
+                x.PromotionCategory,
+                x.Priority,
+                x.IsExclusive
             });
 
             return Ok(response);
@@ -443,11 +489,14 @@ namespace PickNBook.Api.Controllers
                 StartDate = request.StartDate,
                 ExpiryDate = request.ExpiryDate,
                 UseLimit = request.UseLimit,
-
+                IsAutoApply = request.IsAutoApply,
+                IsExclusive = request.IsExclusive,
+                Priority = request.Priority,
                 // ✅ NEW FIELD (per-user limit)
                 MaxUsagePerUser = request.MaxUsagePerUser,
                 MinBookingAmount = request.MinBookingAmount,
-
+                PromotionCategory = request.PromotionCategory,
+                TriggerType = request.TriggerType,
                 UsedCount = 0,
                 Status = NormalizeStatus(request.Status),
                 EntryDateUtc = now,
@@ -516,6 +565,14 @@ namespace PickNBook.Api.Controllers
             coupon.UseLimit = request.UseLimit;
             coupon.MaxUsagePerUser = request.MaxUsagePerUser;
             coupon.MinBookingAmount = request.MinBookingAmount;
+            coupon.IsAutoApply = request.IsAutoApply;
+            coupon.IsExclusive = request.IsExclusive;
+            coupon.Priority = request.Priority;
+            coupon.PromotionCategory =
+    request.PromotionCategory;
+            coupon.TriggerType =
+    request.TriggerType;
+
             coupon.Status = NormalizeStatus(request.Status);
             coupon.Remark = string.IsNullOrWhiteSpace(request.Remark) ? null : request.Remark.Trim();
 
@@ -537,17 +594,42 @@ namespace PickNBook.Api.Controllers
         [HttpDelete("coupons/{id:int}")]
         public async Task<IActionResult> DeleteCoupon(int id)
         {
-            var coupon = await dbContext.BusCoupons.FirstOrDefaultAsync(x => x.Id == id);
+            var coupon = await dbContext.BusCoupons
+                .FirstOrDefaultAsync(x => x.Id == id);
+
             if (coupon is null)
             {
                 return NotFound("Coupon not found.");
             }
 
-            dbContext.BusCoupons.Remove(coupon);
-            await dbContext.SaveChangesAsync();
-            return Ok(new { message = "Coupon deleted." });
-        }
+            var linkedPromotion = await dbContext.BusPromotions
+                .FirstOrDefaultAsync(x =>
+                    x.SourceType == "Coupon" &&
+                    x.SourceId == coupon.Id);
 
+            if (linkedPromotion != null)
+            {
+                linkedPromotion.IsActive = false;
+            }
+            var linkedOffers = await dbContext.FeaturedOffers
+    .Where(x =>
+        x.CouponId == coupon.Id)
+    .ToListAsync();
+
+            foreach (var offer in linkedOffers)
+            {
+                offer.IsActive = false;
+            }
+
+            dbContext.BusCoupons.Remove(coupon);
+
+            await dbContext.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Coupon deleted."
+            });
+        }
         [HttpGet("coupons/used")]
         public async Task<IActionResult> GetUsedCoupons(
      [FromQuery] string? couponCode,
@@ -818,7 +900,7 @@ namespace PickNBook.Api.Controllers
                 await dbContext.BusPromotions
                     .FirstOrDefaultAsync(x =>
                         x.SourceType == "Coupon" &&
-                        x.SourceKey == coupon.CouponCode);
+                       x.SourceId == coupon.Id);
 
             if (promo == null)
             {
@@ -835,7 +917,8 @@ namespace PickNBook.Api.Controllers
 
             promo.PromotionType = "Coupon";
 
-            promo.TriggerType = "ManualCode";
+            promo.TriggerType =
+     coupon.TriggerType ?? "ManualCode";
 
             promo.DiscountType = coupon.CouponType;
 
@@ -874,6 +957,8 @@ namespace PickNBook.Api.Controllers
 
             promo.SourceKey =
                 coupon.CouponCode;
+            promo.SourceId =
+    coupon.Id;
         }
         private async Task SyncPromotionFromDiscountAsync( BusDiscount discount)
         {

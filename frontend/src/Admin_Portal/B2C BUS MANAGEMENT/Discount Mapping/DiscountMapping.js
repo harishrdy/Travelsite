@@ -45,9 +45,9 @@ function DiscountMapping() {
 
   // Form states for creating/editing condition
   const [newCondition, setNewCondition] = useState({
-    conditionType: 'Route',
+    conditionType: 'SeatType',
     conditionOperator: 'Equals',
-    value1: 'Hyderabad-Bangalore',
+    value1: 'Sleeper',
     value2: null
   });
   const [editingConditionId, setEditingConditionId] = useState(null);
@@ -88,7 +88,7 @@ function DiscountMapping() {
       const data = await getConditions(discountId);
       const normalized = (data || []).map((c) => ({
         id: c.conditionId || c.id || '',
-        conditionType: c.conditionType || c.parameter || 'Route',
+        conditionType: c.conditionType || c.parameter || 'SeatType',
         conditionOperator: c.conditionOperator || c.operator || 'Equals',
         value1: c.value1 || c.value || c.conditionValue || '',
         value2: c.value2 || null,
@@ -111,7 +111,7 @@ function DiscountMapping() {
       setSelectedDiscount(found || null);
       loadConditionsData(selectedDiscountId);
       // Reset form to default values for the current type
-      handleParameterChange('Route');
+      handleParameterChange('SeatType');
       setEditingConditionId(null);
     } else {
       setSelectedDiscount(null);
@@ -123,7 +123,7 @@ function DiscountMapping() {
     let defaultOp = 'Equals';
     let defaultVal = '';
 
-    if (param === 'MinFare') {
+    if (param === 'MinimumFare' || param === 'MinFare') {
       defaultOp = 'GreaterThan';
       defaultVal = '500';
     } else if (param === 'MinSeats') {
@@ -135,12 +135,18 @@ function DiscountMapping() {
     } else if (param === 'Route') {
       defaultOp = 'Equals';
       defaultVal = 'Hyderabad-Bangalore';
-    } else if (param === 'Operator') {
+    } else if (param === 'OperatorName' || param === 'Operator') {
       defaultOp = 'Equals';
-      defaultVal = 'APSRTC';
+      defaultVal = 'SURESH TRAVELS';
     } else if (param === 'SeatType') {
       defaultOp = 'Equals';
       defaultVal = 'Sleeper';
+    } else if (param === 'SourceCity') {
+      defaultOp = 'Equals';
+      defaultVal = 'Hyderabad';
+    } else if (param === 'DestinationCity') {
+      defaultOp = 'Equals';
+      defaultVal = 'Vijayawada';
     } else if (param === 'BoardingPoint') {
       defaultOp = 'Equals';
       defaultVal = 'Hyderabad';
@@ -223,7 +229,7 @@ function DiscountMapping() {
       setConditions(prev => prev.filter(c => c.id !== conditionId));
       if (editingConditionId === conditionId) {
         setEditingConditionId(null);
-        handleParameterChange('Route');
+        handleParameterChange('SeatType');
       }
     } catch (err) {
       setConditionError(err.message || 'Failed to delete condition.');
@@ -233,7 +239,7 @@ function DiscountMapping() {
   const renderCompareValueInput = () => {
     const { conditionType, value1 } = newCondition;
 
-    if (conditionType === 'MinFare' || conditionType === 'MinSeats') {
+    if (conditionType === 'MinimumFare' || conditionType === 'MinFare' || conditionType === 'MinSeats') {
       return (
         <input
           type="number"
@@ -264,19 +270,33 @@ function DiscountMapping() {
       );
     }
 
-    if (conditionType === 'Operator') {
+    if (conditionType === 'OperatorName' || conditionType === 'Operator') {
       return (
         <select
-          value={value1 || 'APSRTC'}
+          value={value1 || 'SURESH TRAVELS'}
           onChange={(e) => setNewCondition(prev => ({ ...prev, value1: e.target.value }))}
           style={{ width: '100%', padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--border)' }}
         >
+          <option value="SURESH TRAVELS">SURESH TRAVELS</option>
           <option value="APSRTC">APSRTC</option>
           <option value="TGSRTC">TGSRTC</option>
           <option value="KSRTC">KSRTC</option>
           <option value="Kerala RTC">Kerala RTC</option>
           <option value="GSRTC">GSRTC</option>
         </select>
+      );
+    }
+
+    if (conditionType === 'SourceCity' || conditionType === 'DestinationCity') {
+      return (
+        <input
+          type="text"
+          placeholder={conditionType === 'SourceCity' ? 'e.g. Hyderabad' : 'e.g. Vijayawada'}
+          value={value1}
+          onChange={(e) => setNewCondition(prev => ({ ...prev, value1: e.target.value }))}
+          style={{ width: '100%', padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--border)' }}
+          required
+        />
       );
     }
 
@@ -398,14 +418,11 @@ function DiscountMapping() {
                   onChange={(e) => handleParameterChange(e.target.value)}
                   disabled={savingCondition}
                 >
-                  <option value="Route">Route (from-to)</option>
-                  <option value="BusType">Bus Type</option>
-                  <option value="Operator">Operator (RTC)</option>
                   <option value="SeatType">Seat Type</option>
-                  <option value="BoardingPoint">Boarding Point</option>
-                  <option value="UserType">User Type</option>
-                  <option value="MinFare">Minimum Fare (INR)</option>
-                  <option value="MinSeats">Minimum Seats Count</option>
+                  <option value="SourceCity">Source City</option>
+                  <option value="DestinationCity">Destination City</option>
+                  <option value="OperatorName">Operator Name</option>
+                  <option value="MinimumFare">Minimum Fare (INR)</option>
                 </select>
               </label>
 
@@ -418,7 +435,7 @@ function DiscountMapping() {
                 >
                   <option value="Equals">Equals</option>
                   <option value="Contains">Contains</option>
-                  {['MinFare', 'MinSeats'].includes(newCondition.conditionType) && (
+                  {['MinimumFare', 'MinFare', 'MinSeats'].includes(newCondition.conditionType) && (
                     <>
                       <option value="GreaterThan">Greater Than</option>
                       <option value="LessThan">Less Than</option>

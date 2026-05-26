@@ -175,16 +175,15 @@ public static class DbSeeder
             return;
         }
 
-        var existing = await dbContext.BusSeats
-            .AsNoTracking()
-            .Select(x => new { x.BusBookingId, x.SeatCode })
+        // Fetch ALL existing seats to check for updates
+        var existingSeats = await dbContext.BusSeats
             .ToListAsync(cancellationToken);
 
-        var existingSet = existing
-            .Select(x => $"{x.BusBookingId}|{x.SeatCode}")
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var existingMap = existingSeats
+            .ToDictionary(x => $"{x.BusBookingId}|{x.SeatCode}", x => x, StringComparer.OrdinalIgnoreCase);
 
         var seatsToInsert = new List<BusSeat>();
+        var seatsToUpdate = new List<BusSeat>();
 
         foreach (var bus in buses)
         {
@@ -196,25 +195,36 @@ public static class DbSeeder
             {
                 var key = $"{bus.Id}|{seatCode}";
 
-                if (existingSet.Contains(key))
+                var generatedSeatType = BusSeatLayoutRegistry.GetSeatType(
+                    bus.BusType,
+                    seatCode,
+                    bus.TotalSeats);
+
+                if (existingMap.TryGetValue(key, out var existingSeat))
                 {
+                    // 🔥 SYNC: Update existing seat type if it differs from layout definition
+                    if (existingSeat.SeatType != generatedSeatType)
+                    {
+                        existingSeat.SeatType = generatedSeatType;
+                        seatsToUpdate.Add(existingSeat);
+                    }
                     continue;
                 }
 
                 seatsToInsert.Add(new BusSeat
                 {
                     BusBookingId = bus.Id,
-
                     SeatCode = seatCode,
-
-                    SeatType = BusSeatLayoutRegistry.GetSeatType(
-                        bus.BusType,
-                        seatCode,
-                        bus.TotalSeats),
-
+                    SeatType = generatedSeatType,
                     IsBooked = false
                 });
             }
+        }
+
+        if (seatsToUpdate.Count > 0)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+            Console.WriteLine($"Synchronized {seatsToUpdate.Count} existing bus seat types.");
         }
 
         if (seatsToInsert.Count > 0)
@@ -227,6 +237,7 @@ public static class DbSeeder
                 await dbContext.SaveChangesAsync(cancellationToken);
                 dbContext.ChangeTracker.Clear();
             }
+            Console.WriteLine($"Inserted {seatsToInsert.Count} new bus seats.");
         }
     }
 
@@ -438,6 +449,40 @@ public static class DbSeeder
             new BusTemplate("PNB-B1016", "Sangitam", "AC Sleeper", "Bhopal", "Indore", 5, 6, 45, 240, 620m, 21, 36, "Nadra Bus Stand", "Sarvate"),
             new BusTemplate("PNB-B1017", "Orange Travels", "AC Sleeper", "Visakhapatnam", "Hyderabad", 5, 19, 20, 760, 1850m, 10, 28, "Maddilapalem", "Miyapur"),
             new BusTemplate("PNB-B1018", "VRL Travels", "Volvo AC Seater", "Mumbai", "Goa", 5, 20, 10, 690, 1700m, 9, 40, "Sion", "Panaji")
+            ,
+new BusTemplate(
+    "PNB-B2001",
+    "SURESH TRAVELS",
+    "Non AC Seater/Sleeper 2+1",
+    "Hyderabad",
+    "Vijayawada",
+    5,
+    15,
+    30,
+    480,
+    750m,
+    45,
+    45,
+    "MGBS",
+    "Benz Circle"
+),
+
+new BusTemplate(
+    "TS-HYB-002",
+    "Royal Travels",
+    "SEATER/SLEEPER 2+1 HYBRID AC",
+    "Delhi",
+    "Jaipur",
+    5,
+    18,
+    0,
+    420,
+    1350m,
+    36,
+    36,
+    "Delhi ISBT",
+    "Jaipur Sindhi Camp"
+)
         };
         
         return templates.Select(t =>

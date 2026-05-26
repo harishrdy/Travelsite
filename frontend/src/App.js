@@ -21,18 +21,25 @@ import BankList from "./pages/account/BankList";
 import QRList from "./pages/account/QRList";
 import DepositRequest from "./pages/account/DepositRequest";
 import TravelerList from "./pages/account/TravelerList";
+import FlightBookings from "./pages/booking/FlightBookings";
+import FlightCancel from "./pages/booking/FlightCancel";
 import BusBookings from "./pages/booking/BusBookings";
 import BusCancel from "./pages/booking/BusCancel";
 import AccountStatement from "./pages/account/AccountStatement";
 import EditProfile from "./pages/account/EditProfile";
+import FlightSearchResults from "./pages/booking/FlightSearchResults";
 import BusSearchResults from "./pages/booking/BusSearchResults";
 import PopularBusRoutesPage from "./pages/booking/PopularBusRoutesPage";
 import BusSeatSelectionPage from "./pages/booking/BusSeatSelectionPage";
 import BusPassengerDetailsPage from "./pages/booking/BusPassengerDetailsPage";
 import BusPaymentPage from "./pages/booking/BusPaymentPage";
+import FlightSeatSelectionPage from "./pages/booking/FlightSeatSelectionPage";
+import FlightPassengerDetailsPage from "./pages/booking/FlightPassengerDetailsPage";
+import FlightPaymentPage from "./pages/booking/FlightPaymentPage";
 import TicketConfirmationPage from "./pages/public/TicketConfirmationPage";
 import MyAccount from "./pages/account/MyAccount";
 import OffersPage from "./pages/public/OffersPage";
+import WebCheckinPage from "./pages/public/WebCheckinPage";
 
 import AdminLogin from "./Admin_Portal/AUTHENTICATIONS/login admin/login admin";
 import AdminPin from "./Admin_Portal/AUTHENTICATIONS/verifing/adminpin";
@@ -53,6 +60,25 @@ import BusGstSettings from "./Admin_Portal/B2C BUS MANAGEMENT/GstSettings/BusGst
 import BusCouponList from "./Admin_Portal/B2C BUS MANAGEMENT/Coupon list/BusCouponList";
 import BusUsedCouponsList from "./Admin_Portal/B2C BUS MANAGEMENT/Used coupon list/BusUsedCouponsList";
 import BusPopularRoutes from "./Admin_Portal/B2C BUS MANAGEMENT/Popular Bus Routes/PopularBusRoutes";
+import FlightDiscountList from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Discount List/DiscountList";
+import FlightBookingList from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Booking List/FlightBookingList";
+import FlightCancelRequestList from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Cancellation Request List/FlightCancelRequestList";
+import FlightConvenienceFee from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Convenience fee/FlightConvenienceFee";
+import FlightEditConvenienceFee from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Convenience fee/FlightEditConvenienceFee";
+import FlightRemarkList from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Remark List/FlightRemarkList";
+import FlightRemarkEditList from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Remark List/FlightRemarkEditList";
+import FlightAmendmentsList from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Amendments List/FlightAmendmentsList";
+import FlightSearchHistory from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Flight Search History/FlightSearchHistory";
+import PendingAirlinesList from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Pending Airline List/PendingAirlinesList";
+import PendingAirlinesEditList from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Pending Airline List/PendingAirlinesEditList";
+import FlightAllowedFareType from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Allowed Fare type/FlightAllowedFareType";
+import AirlineWebCheckLink from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Airline Web Check Link/AirlineWebCheckLink";
+import AirlineBrandList from "./Admin_Portal/B2C FLIGHT MANAGEMENT/AIRLINE BRANDS/AirlineBrandList";
+import FlightMarkupList from "./Admin_Portal/B2C FLIGHT MANAGEMENT/B2C Flight Markup/FlightMarkupList";
+import FlightCouponList from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Coupon List/FlightCoupon";
+import FlightUsedCouponList from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Used Coupon List/FlightUsedCoupon";
+import FlightPopularRoutes from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Flight Popular Routes/FlightPopularRoutes";
+import FlightPopularDestination from "./Admin_Portal/B2C FLIGHT MANAGEMENT/Popular Destinantion/FlightPopularDestination";
 import TaxManagement from "./Admin_Portal/PAYMENT MANAGEMENT/Tax Management/TaxManagement";
 import AllPages from "./Admin_Portal/PAGE MANAGEMENT/ALL PAGE LIST/AllPages";
 import AddPage from "./Admin_Portal/PAGE MANAGEMENT/ADD NEW PAGE/AddPage";
@@ -226,12 +252,17 @@ function AppContent() {
         <Route path="/forgot-password" element={<Forgetpassword />} />
         <Route path="/offers" element={<OffersPage />} />
 
+        <Route path="/web-checkin" element={<WebCheckinPage />} />
         <Route path="/fetch-ticket" element={<FetchTicket />} />
         <Route path="/print-ticket" element={<PrintTicketPage />} />
+        <Route path="/search/flights" element={<FlightSearchResults />} />
         <Route path="/search/buses" element={<BusSearchResults />} />
         <Route path="/bus/seats" element={<BusSeatSelectionPage />} />
         <Route path="/bus/passenger-details" element={<BusPassengerDetailsPage />} />
         <Route path="/bus/payment" element={<BusPaymentPage />} />
+        <Route path="/flight/seats" element={<FlightSeatSelectionPage />} />
+        <Route path="/flight/passenger-details" element={<FlightPassengerDetailsPage />} />
+        <Route path="/flight/payment" element={<FlightPaymentPage />} />
         <Route path="/booking/confirmation" element={<BookingConfirmationPage />} />
         <Route path="/ticket/confirmation" element={<TicketConfirmationPage />} />
         <Route path="/popular-buses/:operatorId" element={<PopularBusRoutesPage />} />
@@ -266,6 +297,36 @@ function AppContent() {
           <Route path="b2c-bus/coupon-list" element={<BusCouponList />} />
           <Route path="b2c-bus/used-coupon-list" element={<BusUsedCouponsList />} />
           <Route path="b2c-bus/popular-routes" element={<BusPopularRoutes />} />
+          <Route path="b2c-flight/discounts" element={<FlightDiscountList />} />
+          <Route
+            path="b2c-flight/discounts/new"
+            element={adminPlaceholder("Add B2C Flight Discount")}
+          />
+          <Route path="b2c-flight/booking-list" element={<FlightBookingList />} />
+          <Route path="b2c-flight/cancellation-requests" element={<FlightCancelRequestList />} />
+          <Route path="b2c-flight/convenience-fee" element={<FlightConvenienceFee />} />
+          <Route path="b2c-flight/convenience-fee/add" element={<FlightEditConvenienceFee />} />
+          <Route path="b2c-flight/convenience-fee/edit" element={<FlightEditConvenienceFee />} />
+          <Route path="b2c-flight/remark-list" element={<FlightRemarkList />} />
+          <Route path="b2c-flight/remark-list/add" element={<FlightRemarkEditList />} />
+          <Route path="b2c-flight/remark-list/edit" element={<FlightRemarkEditList />} />
+          <Route path="b2c-flight/amendments" element={<FlightAmendmentsList />} />
+          <Route path="b2c-flight/allowed-fare-types" element={<FlightAllowedFareType />} />
+          <Route path="b2c-flight/search-history" element={<FlightSearchHistory />} />
+          <Route path="b2c-flight/pending-airlines" element={<PendingAirlinesList />} />
+          <Route path="b2c-flight/pending-airlines/add" element={<PendingAirlinesEditList />} />
+          <Route path="b2c-flight/pending-airlines/edit" element={<PendingAirlinesEditList />} />
+          <Route path="b2c-flight/airline-webcheck-links" element={<AirlineWebCheckLink />} />
+          <Route path="b2c-flight/airline-brands" element={<AirlineBrandList />} />
+          <Route path="b2c-flight/markup" element={<FlightMarkupList />} />
+          <Route path="b2c-flight/coupon-list" element={<FlightCouponList />} />
+          <Route path="b2c-flight/used-coupon-list" element={<FlightUsedCouponList />} />
+          <Route path="b2c-flight/popular-routes" element={<FlightPopularRoutes />} />
+          <Route path="b2c-flight/popular-destinations" element={<FlightPopularDestination />} />
+          <Route
+            path="b2c-flight/*"
+            element={adminPlaceholder("B2C Flight Management")}
+          />
           <Route path="page-management/pages" element={<AllPages />} />
           <Route path="page-management/pages/new" element={<AddPage />} />
           <Route path={ADMIN_MENU_ROUTES.list} element={<AdminMenuListRoute />} />
@@ -340,6 +401,8 @@ function AppContent() {
           <Route path="qr-list" element={<QRList />} />
           <Route path="deposit-request" element={<DepositRequest />} />
           <Route path="traveler-list" element={<TravelerList />} />
+          <Route path="flight-bookings" element={<FlightBookings />} />
+          <Route path="flight-cancel" element={<FlightCancel />} />
           <Route path="bus-bookings" element={<BusBookings />} />
           <Route path="bus-cancel" element={<BusCancel />} />
           <Route path="account-statement" element={<AccountStatement />} />

@@ -1,0 +1,233 @@
+.admin-flight-fare-type-page {
+  gap: 12px;
+}
+
+.admin-flight-fare-type-header h1 {
+  font-size: 1.86rem;
+}
+
+.admin-flight-fare-type-shell {
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  overflow: visible;
+  background: var(--admin-surface);
+  box-shadow: 0 10px 18px rgba(31, 31, 31, 0.08);
+}
+
+.admin-flight-fare-type-success {
+  min-height: 38px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: var(--admin-success-soft);
+  color: var(--admin-success);
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.admin-flight-fare-type-success-close {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--admin-success-soft);
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.admin-flight-fare-type-row {
+  display: grid;
+  grid-template-columns: 0.9fr 3.1fr;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-flight-fare-type-label {
+  min-height: 48px;
+  border-right: 1px dashed var(--admin-border);
+  background: linear-gradient(135deg, var(--admin-soft), var(--admin-surface));
+  color: var(--admin-text);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 1.02rem;
+  font-weight: 900;
+}
+
+.admin-flight-fare-type-field {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px;
+}
+
+.admin-flight-fare-type-multi {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: var(--admin-surface);
+  position: relative;
+  padding: 6px 10px;
+  cursor: text;
+}
+
+.admin-flight-fare-type-multi.open {
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px rgba(74, 15, 26, 0.14);
+}
+
+.admin-flight-fare-type-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.admin-flight-fare-type-chip {
+  border: 1px solid var(--admin-border);
+  border-radius: 999px;
+  background: var(--admin-soft);
+  color: var(--admin-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  min-height: 28px;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.admin-flight-fare-type-chip-remove {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--admin-soft);
+  color: var(--admin-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.admin-flight-fare-type-input {
+  flex: 1;
+  min-width: 160px;
+  min-height: 28px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--admin-text);
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.admin-flight-fare-type-input::placeholder {
+  color: var(--admin-muted);
+  font-weight: 700;
+}
+
+.admin-flight-fare-type-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: var(--admin-surface);
+  box-shadow: 0 16px 30px rgba(31, 31, 31, 0.16);
+  max-height: 260px;
+  overflow: auto;
+  z-index: 1200;
+  padding: 6px;
+}
+
+.admin-flight-fare-type-option {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  color: var(--admin-text);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.admin-flight-fare-type-option:hover {
+  background: var(--admin-soft);
+}
+
+.admin-flight-fare-type-option.selected {
+  background: var(--admin-soft);
+  color: var(--admin-text);
+}
+
+.admin-flight-fare-type-option-mark {
+  color: var(--admin-primary);
+  font-weight: 900;
+}
+
+.admin-flight-fare-type-empty {
+  min-height: 40px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  color: var(--admin-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.admin-flight-fare-type-actions {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 14px;
+}
+
+.admin-flight-fare-type-update-btn {
+  min-height: 40px;
+  border: 2px solid var(--admin-primary);
+  border-radius: 12px;
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  padding: 0 34px;
+  font-size: 1.06rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.admin-flight-fare-type-update-btn:hover {
+  background: var(--admin-soft);
+}
+
+@media (max-width: 920px) {
+  .admin-flight-fare-type-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-flight-fare-type-label {
+    border-right: 0;
+    border-bottom: 1px solid var(--admin-border);
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-flight-fare-type-update-btn {
+    width: 100%;
+    max-width: 280px;
+  }
+}

@@ -1,0 +1,142 @@
+.admin-flight-booking-title {
+  margin: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.admin-flight-booking-title strong {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.admin-flight-booking-title strong::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--admin-primary);
+  opacity: 0.9;
+}
+
+.admin-flight-metrics {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.admin-flight-metric-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-flight-metric-chip {
+  min-height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  font-weight: 800;
+}
+
+.admin-flight-metric-chip strong {
+  min-width: 38px;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 900;
+}
+
+.admin-flight-metric-chip span {
+  padding: 0 12px;
+  font-size: 0.9rem;
+  color: var(--admin-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.admin-flight-metric-chip.success strong {
+  background: var(--admin-success);
+}
+
+.admin-flight-metric-chip.failed strong {
+  background: var(--admin-danger);
+}
+
+.admin-flight-metric-chip.pending strong {
+  background: var(--admin-primary);
+}
+
+.admin-flight-metric-chip.profit {
+  border-color: var(--admin-border);
+  background: var(--admin-success-soft);
+}
+
+.admin-flight-metric-chip.profit strong {
+  background: var(--admin-success);
+}
+
+.admin-flight-actions .admin-flight-btn {
+  min-height: 34px;
+  border: 0;
+  border-radius: 10px;
+  padding: 0 12px;
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.admin-flight-actions .admin-flight-btn-filter {
+  background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-strong));
+}
+
+.admin-flight-actions .admin-flight-btn-clear {
+  background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-strong));
+}
+
+.admin-flight-actions .admin-flight-btn-export {
+  background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-strong));
+}
+
+.admin-flight-legend {
+  min-height: 34px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  border-top: 1px solid var(--admin-border);
+  background: var(--admin-success-soft);
+  color: var(--admin-success);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.admin-flight-booked-by {
+  margin-top: 4px;
+  color: var(--admin-muted);
+}
+
+.admin-flight-booking-page .admin-status-pill.failed {
+  background: var(--admin-soft);
+  color: var(--admin-primary-strong);
+}
+
+.admin-flight-booking-page .admin-view-meta-chip.failed {
+  border-color: var(--admin-border);
+  background: var(--admin-soft);
+  color: var(--admin-primary);
+}

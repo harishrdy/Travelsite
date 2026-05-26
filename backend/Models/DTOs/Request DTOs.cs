@@ -1,11 +1,24 @@
-﻿namespace PickNBook.Api.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PickNBook.Api.Models
 {
     public class RegisterRequest
     {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
+
+        [RegularExpression(@"^[6-9]\d{9}$")]
         public string PhoneNumber { get; set; } = string.Empty;
+
+        [Required]
+        [EmailAddress]
         public string Email { get; set; } = string.Empty;
+
+        [Required]
+        [RegularExpression(
+    @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[^\s]{8,64}$",
+    ErrorMessage = "Password must contain uppercase, lowercase, number, special character and be 8-64 characters long."
+)]
         public string Password { get; set; } = string.Empty;
     }
 

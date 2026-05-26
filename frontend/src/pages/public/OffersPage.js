@@ -4,14 +4,18 @@ import { Tag, Bus, ArrowLeft } from "lucide-react";
 import { getPublicFeaturedOffers } from "../../services/adminFeaturedOffersService";
 import { sanitizeApiUrlValue, toApiAssetUrl } from "../../services/apiClient";
 import SiteFooter from "../../components/layout/SiteFooter";
+import { usePromo } from "../../contexts/PromoContext";
 import "../../STYLES/OffersPage.css";
 
 function normalizeFeaturedOffer(offer, index) {
-  const id = offer?.id ?? offer?.offerId ?? offer?.offerCode ?? `offer-${index}`;
+  const featuredOfferId = offer?.id ?? offer?.Id ?? offer?.offerId ?? offer?.OfferId ?? null;
+  const id = featuredOfferId ?? offer?.offerCode ?? `offer-${index}`;
   const bookingType = String(offer?.bookingType || "").trim();
 
   return {
     id,
+    selectedFeaturedOfferId: featuredOfferId,
+    promotionId: offer?.promotionId ?? offer?.PromotionId ?? null,
     offerCode: String(offer?.offerCode || "").trim(),
     title: String(offer?.title || "Travel Offer").trim(),
     subtitle: String(offer?.subtitle || "").trim(),
@@ -64,6 +68,7 @@ function OfferImage({ offer }) {
 
 export default function OffersPage() {
   const navigate = useNavigate();
+  const { setSelectedOffer } = usePromo();
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -93,7 +98,8 @@ export default function OffersPage() {
     return (offer.bookingType || "").toLowerCase() === filter;
   });
 
-  const handleBookNow = () => {
+  const handleBookNow = (offer) => {
+    setSelectedOffer(offer);
     navigate("/?tab=buses");
   };
 
@@ -152,7 +158,7 @@ export default function OffersPage() {
                         <strong>{offer.couponCode}</strong>
                       </div>
                     )}
-                    <button onClick={handleBookNow}>Book Now</button>
+                    <button onClick={() => handleBookNow(offer)}>Book Now</button>
                   </div>
                 </div>
               </article>

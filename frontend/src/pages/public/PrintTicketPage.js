@@ -3,23 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { fetchTicketByContact } from "../../services/ticketService";
 import "../../STYLES/PrintTicket.css";
 
-const MOCK_BUS = {
-  type: 'bus',
-  pnr: 'GOB2024ABC',
-  operator: 'Go Travels',
-  busNo: 'GT-K22',
-  from: { city: 'Hyderabad', stop: 'MGBS Bus Stand' },
-  to: { city: 'Bangalore', stop: 'Majestic Bus Stand' },
-  date: 'Thu, 20 Feb 2026',
-  departure: '21:00',
-  arrival: '05:30',
-  duration: '8h 30m',
-  class: 'AC Sleeper',
-  passengers: [{ name: 'Dilshaad Nazneen', age: 32, seat: 'L3 Lower', meal: '--' }],
-  status: 'CONFIRMED',
-  fare: 'INR 1,200',
-};
-
 const TICKET_TYPES = { BUS: "bus" };
 const FALLBACK_STOP = "--";
 const INDIA_TIME_ZONE = "Asia/Kolkata";
@@ -125,6 +108,33 @@ function pickTicketField(ticket, keys, fallback = "") {
   return fallback;
 }
 
+function readPointName(value) {
+  if (!value) return FALLBACK_STOP;
+
+  if (typeof value === "object") {
+    return String(
+      pickTicketField(
+        value,
+        [
+          "name",
+          "Name",
+          "pointName",
+          "PointName",
+          "boardingPoint",
+          "BoardingPoint",
+          "droppingPoint",
+          "DroppingPoint",
+          "location",
+          "Location",
+        ],
+        FALLBACK_STOP
+      ) || FALLBACK_STOP
+    ).trim();
+  }
+
+  return String(value || FALLBACK_STOP).trim();
+}
+
 function getDepartureValue(ticket) {
   return pickTicketField(ticket, [
     "departureTimeIst",
@@ -133,6 +143,10 @@ function getDepartureValue(ticket) {
     "DepartureTime",
     "departureDateTime",
     "DepartureDateTime",
+    "journeyDateTime",
+    "JourneyDateTime",
+    "journeyDate",
+    "JourneyDate",
     "departureTimeUtc",
     "DepartureTimeUtc",
   ]);
@@ -146,6 +160,10 @@ function getArrivalValue(ticket) {
     "ArrivalTime",
     "arrivalDateTime",
     "ArrivalDateTime",
+    "dropTime",
+    "DropTime",
+    "droppingTime",
+    "DroppingTime",
     "arrivalTimeUtc",
     "ArrivalTimeUtc",
   ]);
@@ -167,16 +185,47 @@ function normalizePassengers(ticket) {
   }));
 }
 
+function parseDateTime(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+
+  const parsed = new Date(raw);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed;
+  }
+
+  const timeMatch = raw.match(/^(\d{1,2}):(\d{2})$/);
+  if (!timeMatch) return null;
+
+  const date = new Date();
+  date.setHours(Number(timeMatch[1]), Number(timeMatch[2]), 0, 0);
+  return date;
+}
+
 function computeDuration(departureTime, arrivalTime) {
   if (!departureTime || !arrivalTime) return "--";
-  const dep = new Date(departureTime);
-  const arr = new Date(arrivalTime);
-  if (Number.isNaN(dep.getTime()) || Number.isNaN(arr.getTime())) return "--";
-  const diffMs = arr - dep;
+  const dep = parseDateTime(departureTime);
+  const arr = parseDateTime(arrivalTime);
+  if (!dep || !arr || Number.isNaN(dep.getTime()) || Number.isNaN(arr.getTime())) return "--";
+  let diffMs = arr - dep;
+  if (diffMs < 0) {
+    diffMs += 24 * 60 * 60 * 1000;
+  }
   if (diffMs <= 0) return "--";
   const hours = Math.floor(diffMs / 3600000);
   const minutes = Math.floor((diffMs % 3600000) / 60000);
-  return `${hours}h ${String(minutes).padStart(2, "0")}m`;
+  return `${hours}h ${minutes}m`;
+}
+
+function isOvernightJourney(departureTime, arrivalTime) {
+  const dep = parseDateTime(departureTime);
+  const arr = parseDateTime(arrivalTime);
+
+  if (!dep || !arr || Number.isNaN(dep.getTime()) || Number.isNaN(arr.getTime())) {
+    return false;
+  }
+
+  return arr < dep || arr.toDateString() !== dep.toDateString();
 }
 
 function mapTicketToBus(ticket, fallbackPnr) {
@@ -189,21 +238,36 @@ function mapTicketToBus(ticket, fallbackPnr) {
   }));
 
   // ✅ FIX: boardingPoint and droppingPoint come as objects from backend
-  const boardingStop =
-    typeof ticket?.boardingPoint === "object"
-      ? String(ticket.boardingPoint?.name || FALLBACK_STOP).trim()
-      : String(ticket?.boardingPoint || FALLBACK_STOP).trim();
+  const boardingStop = readPointName(
+    pickTicketField(ticket, ["boardingPoint", "BoardingPoint", "boarding", "Boarding"], "")
+  );
 
-  const droppingStop =
-    typeof ticket?.droppingPoint === "object"
-      ? String(ticket.droppingPoint?.name || FALLBACK_STOP).trim()
-      : String(ticket?.droppingPoint || FALLBACK_STOP).trim();
+  const droppingStop = readPointName(
+    pickTicketField(ticket, ["droppingPoint", "DroppingPoint", "arrivalPlace", "ArrivalPlace", "dropping", "Dropping"], "")
+  );
+
+  const operator = String(
+    pickTicketField(
+      ticket,
+      ["providerName", "ProviderName", "operatorName", "OperatorName", "operator", "Operator"],
+      "Bus Service"
+    ) || "Bus Service"
+  ).trim();
+  const busNo = String(
+    pickTicketField(
+      ticket,
+      ["tripNumber", "TripNumber", "busNumber", "BusNumber", "busNo", "BusNo"],
+      "--"
+    ) || "--"
+  ).trim();
+  const pnr = String(ticket?.bookingReference || ticket?.pnr || fallbackPnr || "--").trim();
+  const totalFare = ticket?.totalPaid ?? ticket?.totalFare ?? ticket?.fare?.totalFare ?? 0;
 
   return {
-    ...MOCK_BUS,
-    pnr: String(ticket?.bookingReference || fallbackPnr || "--").trim(),
-    operator: String(ticket?.providerName || "Bus Service").trim(),
-    busNo: String(ticket?.tripNumber || "--").trim(),
+    type: "bus",
+    pnr,
+    operator,
+    busNo,
     from: {
       city: String(ticket?.fromCity || "--").trim() || "--",
       stop: boardingStop,
@@ -217,10 +281,11 @@ function mapTicketToBus(ticket, fallbackPnr) {
     departure: formatJourneyTime(departureValue),
     arrival: formatJourneyTime(arrivalValue),
     duration: String(ticket?.duration || computeDuration(departureValue, arrivalValue) || "--").trim(),
+    journeyLabel: isOvernightJourney(departureValue, arrivalValue) ? "Overnight" : "Same Day",
     class: String(ticket?.busType || ticket?.className || ticket?.class || "--").trim(),
     passengers,
     status: String(ticket?.status || "Booked").toUpperCase(),
-    fare: formatCurrency(ticket?.totalPaid ?? ticket?.totalFare ?? ticket?.fare?.totalFare ?? 0),
+    fare: formatCurrency(totalFare),
   };
 }
 
@@ -244,10 +309,14 @@ const ticketShell = {
   background: '#ffffff', borderRadius: 28, overflow: 'hidden',
   boxShadow: '0 28px 60px rgba(125, 59, 31, 0.13)', border: '1px solid rgba(241, 217, 206, 0.95)',
   display: 'flex', flexDirection: 'column',
+  width: '100%',
+  height: 'var(--pb-ticket-height)',
+  minHeight: 'var(--pb-ticket-min-height)',
 };
 
 const hdr = {
-  color: '#fff', padding: '22px 42px',
+  minHeight: 58,
+  color: '#fff', padding: '13px 24px',
   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
 };
 
@@ -259,8 +328,9 @@ const FlipCard = ({ frontElement, backElement }) => {
     <div style={{ perspective: '1200px', cursor: 'pointer', position: 'relative', width: '100%' }}
       onClick={() => setIsFlipped(!isFlipped)} title="Click to flip">
       <style>{`
-        .flip-container { position: relative; width: 100%; display: grid; transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); transform-style: preserve-3d; transform: ${isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'}; }
-        .flip-front, .flip-back { backface-visibility: hidden; -webkit-backface-visibility: hidden; width: 100%; grid-area: 1 / 1; }
+        .flip-container { position: relative; width: 100%; display: grid; align-items: stretch; transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); transform-style: preserve-3d; transform: ${isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'}; }
+        .flip-front, .flip-back { backface-visibility: hidden; -webkit-backface-visibility: hidden; width: 100%; height: var(--pb-ticket-height); min-height: var(--pb-ticket-min-height); display: grid; grid-area: 1 / 1; }
+        .flip-front > *, .flip-back > * { width: 100%; height: 100%; min-height: var(--pb-ticket-min-height); }
         .flip-back { transform: rotateY(180deg); }
       `}</style>
       <div className="flip-container">
@@ -277,8 +347,8 @@ const BusTicket = ({ data, id }) => (
   <article id={id} className="pb-ticket-card">
     <header className="pb-ticket-head">
       <div>
-        <span>GoTravels - Bus Ticket</span>
-        <h2>Bus {data.operator} - {data.busNo}</h2>
+        <span>GoTravels - Ticket</span>
+        <h2>{data.operator} - {data.busNo}</h2>
       </div>
       <strong>{data.status}</strong>
     </header>
@@ -293,7 +363,7 @@ const BusTicket = ({ data, id }) => (
           <div className="pb-route-line">
             <span>{data.duration}</span>
             <i />
-            <small>Overnight</small>
+            <small>{data.journeyLabel}</small>
           </div>
           <div>
             <h3>{data.to.city}</h3>
@@ -314,6 +384,10 @@ const BusTicket = ({ data, id }) => (
             <span>Arrival</span>
             <strong>{data.arrival}</strong>
           </div>
+          <div>
+            <span>Arrival Date</span>
+            <strong>{data.arrivalDate}</strong>
+          </div>
         </div>
 
         <div className="pb-detail-grid">
@@ -324,6 +398,10 @@ const BusTicket = ({ data, id }) => (
           <div>
             <span>Boarding</span>
             <strong>{data.from.stop}</strong>
+          </div>
+          <div>
+            <span>Arrival Place</span>
+            <strong>{data.to.stop}</strong>
           </div>
           <div>
             <span>Total Fare</span>
@@ -344,7 +422,7 @@ const BusTicket = ({ data, id }) => (
       </section>
 
       <aside className="pb-ticket-stub">
-        <div className="pb-stub-label">Bus Ticket</div>
+        <div className="pb-stub-label">Ticket</div>
         <span>PNR</span>
         <strong>{data.pnr}</strong>
         <span>Fare</span>
@@ -358,6 +436,7 @@ const BusTicket = ({ data, id }) => (
             `From: ${data.from.city} (${data.from.stop})`,
             `To: ${data.to.city} (${data.to.stop})`,
             `Date: ${data.date}`,
+            `Arrival Date: ${data.arrivalDate}`,
             `Departure: ${data.departure}`,
             `Arrival: ${data.arrival}`,
             `Passenger(s): ${data.passengers.map((p) => `${p.name} Seat ${p.seat}`).join(", ")}`,
@@ -381,15 +460,16 @@ const BusBackSide = ({ id, ticket }) => {
   const totalFare = Number(ticket?.totalPaid ?? ticket?.totalFare ?? fare.totalFare ?? 0);
   const baseFare = Number(fare.baseFare ?? ticket?.baseFare ?? (totalFare - convenienceFee - tax + discount));
   const gstPercent = Number(fare.gstPercent ?? ticket?.gstPercent ?? 0);
+  const orangeGradient = 'linear-gradient(135deg, #df3f1f 0%, #f04423 100%)';
 
   return (
-    <div id={id} style={ticketShell}>
-      <div style={{ ...hdr, background: '#071c3d' }}>
-        <div style={{ fontSize: 12.6, fontWeight: 900, letterSpacing: 0.5, color: '#ffffff' }}>Bus Terms & Conditions</div>
+    <div id={id} className="pb-ticket-card pb-ticket-back-card" style={ticketShell}>
+      <div style={{ ...hdr, background: orangeGradient }}>
+        <div style={{ fontSize: 14.5, fontWeight: 900, letterSpacing: 0, color: '#ffffff' }}>Bus Terms & Conditions</div>
       </div>
       <div style={{ display: 'flex', flex: 1, padding: 0 }}>
         {/* Left Column: Terms */}
-        <div style={{ flex: 1.1, padding: '20px 24px', borderRight: '1px dashed rgba(148,163,184,0.4)' }}>
+        <div style={{ flex: 1.1, padding: '22px 28px', borderRight: '1px dashed #d8dee8' }}>
           {[
             { title: '1. BOARDING & TIMING', items: ['Report 30 minutes before departure', 'Valid photo ID required', 'No entry after departure time'] },
             { title: '2. LUGGAGE POLICY', items: ['Complimentary: 20kg', 'Excess: INR 100 per kg', 'No bulky items allowed'] },
@@ -397,7 +477,7 @@ const BusBackSide = ({ id, ticket }) => {
           ].map(({ title, items }) => (
             <div key={title} style={{ marginBottom: 14 }}>
               <div style={{ fontSize: 9.9, fontWeight: 900, color: '#071b3d', marginBottom: 6, letterSpacing: 0.5 }}>{title}</div>
-              <ul style={{ margin: 0, paddingLeft: 14, fontSize: 9, color: '#5d6f91', lineHeight: 1.5 }}>
+              <ul style={{ margin: 0, paddingLeft: 14, fontSize: 9, color: '#66758d', lineHeight: 1.5 }}>
                 {items.map((item) => <li key={item} style={{ marginBottom: 2 }}>{item}</li>)}
               </ul>
             </div>
@@ -405,20 +485,20 @@ const BusBackSide = ({ id, ticket }) => {
         </div>
 
         {/* Right Column: Fare Breakdown */}
-        <div style={{ flex: 0.9, padding: '20px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <div style={{ fontSize: 9.5, fontWeight: 800, color: '#1a5fb4', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.8, textAlign: 'right' }}>
+        <div style={{ flex: 0.9, padding: '22px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ fontSize: 9.5, fontWeight: 900, color: '#df3f1f', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.8, textAlign: 'right' }}>
             DISCOUNTS APPLIED & FARE BREAKDOWN
           </div>
           
           <div style={{ 
             backgroundColor: '#ffffff', 
-            border: '1px solid #c2dbff', 
+            border: '1px solid rgba(240,68,35,0.34)', 
             borderRadius: 8, 
             padding: '16px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
+            boxShadow: '0 12px 28px rgba(125, 59, 31, 0.08)'
           }}>
             {/* Base Fare */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10.8, color: '#5d6f91', marginBottom: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10.8, color: '#66758d', marginBottom: 8 }}>
               <span>Base Fare</span>
               <span>₹ {baseFare.toFixed(2)}</span>
             </div>
@@ -447,24 +527,24 @@ const BusBackSide = ({ id, ticket }) => {
             )}
 
             {/* GST */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10.8, color: '#5d6f91', marginBottom: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10.8, color: '#66758d', marginBottom: 8 }}>
               <span>GST ({gstPercent}%)</span>
               <span>+ ₹ {tax.toFixed(2)}</span>
             </div>
 
             {/* Convenience Fee */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10.8, color: '#5d6f91', marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10.8, color: '#66758d', marginBottom: 12 }}>
               <span>Convenience Fee</span>
               <span>+ ₹ {convenienceFee.toFixed(2)}</span>
             </div>
 
             {/* Separator */}
-            <div style={{ borderTop: '1px solid #e2e8f0', marginBottom: 12 }} />
+            <div style={{ borderTop: '1px dashed #d8dee8', marginBottom: 12 }} />
 
             {/* Total Fare */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, fontWeight: 800, color: '#071b3d' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, fontWeight: 900, color: '#071b3d' }}>
               <span>Total Fare</span>
-              <span>₹ {totalFare.toFixed(2)}</span>
+              <span style={{ color: '#df3f1f' }}>₹ {totalFare.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -484,7 +564,7 @@ const downloadTicketAsImage = async (frontId, backId, filename) => {
   script.onload = async () => {
     try {
       const tempContainer = document.createElement('div');
-      tempContainer.style.cssText = 'position:fixed;left:-99999px;top:0;width:900px;padding:12px;background:#ffffff;display:grid;gap:18px;';
+      tempContainer.style.cssText = 'position:fixed;left:-99999px;top:0;width:960px;padding:12px;background:#ffffff;display:grid;gap:18px;';
       tempContainer.appendChild(frontElement.cloneNode(true));
       tempContainer.appendChild(backElement.cloneNode(true));
       document.body.appendChild(tempContainer);
@@ -649,10 +729,14 @@ const TicketPreviewPage = () => {
     const frontEl = document.getElementById(frontId);
     const backEl = document.getElementById(backId);
     if (!frontEl || !backEl) return;
+    const pageStyles = Array.from(
+      document.querySelectorAll('style, link[rel="stylesheet"]')
+    ).map((node) => node.outerHTML).join("");
     const win = window.open('', '_blank', 'width=900,height=700');
     win.document.write(`<!DOCTYPE html><html><head><title>${title}</title>
-      <style>* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; } body { background: #fff; padding: 24px; } @media print { * { print-color-adjust: exact !important; -webkit-print-color-adjust: exact !important; } button { display: none !important; } }</style>
-      </head><body><div style="display:flex;flex-direction:column;gap:40px;">${frontEl.outerHTML}${backEl.outerHTML}</div></body></html>`);
+      ${pageStyles}
+      <style>* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; } body { background: #fff; padding: 0.2in; } .pb-print-sheet { width: 8in; margin: 0 auto; display:flex; flex-direction:column; gap:0.25in; } @media print { @page { size: 8.5in 11in; margin: 0.25in; } * { print-color-adjust: exact !important; -webkit-print-color-adjust: exact !important; } button { display: none !important; } body { padding: 0; } }</style>
+      </head><body><div class="pb-print-page"><div class="pb-print-sheet">${frontEl.outerHTML}${backEl.outerHTML}</div></div></body></html>`);
     win.document.close();
     setTimeout(() => { win.print(); win.close(); }, 400);
   };

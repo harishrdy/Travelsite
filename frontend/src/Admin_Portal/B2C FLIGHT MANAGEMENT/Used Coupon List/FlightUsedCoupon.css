@@ -1,0 +1,184 @@
+.flight-markup-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.flight-markup-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.flight-markup-title h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  color: var(--text-primary);
+}
+
+.flight-markup-title strong {
+  color: var(--primary);
+}
+
+.flight-markup-title-underline {
+  height: 2px;
+  width: 90px;
+  background: var(--primary);
+  border-radius: 999px;
+  margin-top: 8px;
+}
+
+.flight-markup-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.flight-markup-action-btn {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text-primary);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.flight-markup-action-btn.primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+.flight-markup-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--panel);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.flight-markup-table-scroll {
+  overflow-x: auto;
+}
+
+.flight-markup-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.flight-markup-table thead {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: #ffffff;
+}
+
+.flight-markup-table th,
+.flight-markup-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.flight-markup-th-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.flight-markup-empty-cell {
+  padding: 18px;
+  text-align: center;
+}
+
+.flight-markup-empty {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.flight-coupon-code {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  border: 1px dashed var(--border);
+  font-weight: 600;
+}
+
+.flight-booking-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.flight-markup-table .action-col {
+  text-align: center;
+}
+
+.flight-markup-table .markup-action-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.flight-markup-table .markup-action-group button {
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+  color: var(--text-primary);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.flight-markup-table .markup-action-group button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.flight-markup-table .markup-action-group button.danger {
+  border-color: rgba(217, 48, 37, 0.4);
+  color: var(--danger);
+  background: rgba(217, 48, 37, 0.12);
+}
+
+@media (max-width: 900px) {
+  .flight-markup-table thead {
+    display: none;
+  }
+
+  .flight-markup-table tr {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .flight-markup-table td {
+    border-bottom: 0;
+  }
+}

@@ -539,6 +539,53 @@
   color: #db2777 !important;
 }
 
+/* --- BOOKED MALE SEAT (Blue/M) --- */
+.hologram-bus-container .bus-flow-seat.status-booked-male .seat-frame {
+  stroke: #2563eb !important;
+  fill: #dbeafe !important;
+}
+.hologram-bus-container .bus-flow-seat.status-booked-male .seat-cushion,
+.hologram-bus-container .bus-flow-seat.status-booked-male .sleeper-pillow,
+.hologram-bus-container .bus-flow-seat.status-booked-male .seat-back {
+  stroke: #3b82f6 !important;
+  fill: #bfdbfe !important;
+}
+.hologram-bus-container .bus-flow-seat.status-booked-male .seat-arm {
+  stroke: #3b82f6 !important;
+  fill: #bfdbfe !important;
+}
+.hologram-bus-container .bus-flow-seat.status-booked-male .seat-shadow {
+  stroke: none !important;
+  fill: rgba(37, 99, 235, 0.1) !important;
+}
+.hologram-bus-container .bus-flow-seat.status-booked-male .seat-details {
+  color: #1d4ed8 !important;
+}
+
+/* --- MALE ADJACENT / MALE AVAILABLE SEAT (Dashed Blue) --- */
+.hologram-bus-container .bus-flow-seat.status-male-adjacent .seat-frame {
+  stroke: #1d4ed8 !important;
+  fill: #eff6ff !important;
+  stroke-dasharray: 2,2 !important;
+}
+.hologram-bus-container .bus-flow-seat.status-male-adjacent .seat-cushion,
+.hologram-bus-container .bus-flow-seat.status-male-adjacent .sleeper-pillow,
+.hologram-bus-container .bus-flow-seat.status-male-adjacent .seat-back {
+  stroke: #3b82f6 !important;
+  fill: #dbeafe !important;
+}
+.hologram-bus-container .bus-flow-seat.status-male-adjacent .seat-arm {
+  stroke: #3b82f6 !important;
+  fill: #dbeafe !important;
+}
+.hologram-bus-container .bus-flow-seat.status-male-adjacent .seat-shadow {
+  stroke: none !important;
+  fill: rgba(29, 78, 216, 0.1) !important;
+}
+.hologram-bus-container .bus-flow-seat.status-male-adjacent .seat-details {
+  color: #1d4ed8 !important;
+}
+
 /* ===== Expand Panel for summary actions (Boarding & Dropping / Cancellation Policies) ===== */
 .hologram-bus-container .bus-flow-expand-panel {
   border-top: 1px dashed #ffedd5 !important;
@@ -552,5 +599,16 @@
   color: #c2410c !important; /* Deep warm orange/brown text */
   font-size: 0.78rem !important;
   line-height: 1.4 !important;
+}
+
+/* ===== Legend overrides for Male Booked & Beside Male ===== */
+.bus-flow-page .legend.male-booked::before {
+  border-color: #2563eb !important;
+  background: linear-gradient(135deg, #e0f2fe, #bae6fd) !important;
+}
+.bus-flow-page .legend.male-adjacent::before {
+  border-color: #2563eb !important;
+  background: #ffffff !important;
+  box-shadow: inset 0 0 0 2px #93c5fd !important;
 }
 

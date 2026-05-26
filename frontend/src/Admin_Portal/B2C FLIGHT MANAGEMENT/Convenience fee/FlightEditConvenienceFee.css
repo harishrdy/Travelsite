@@ -1,0 +1,136 @@
+.admin-flight-fee-edit-page {
+  gap: 12px;
+}
+
+.admin-flight-fee-edit-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-flight-fee-edit-header h1 {
+  font-size: 1.86rem;
+}
+
+.admin-flight-fee-list-btn {
+  min-height: 34px;
+  border: 0;
+  border-radius: 10px;
+  padding: 0 12px;
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-strong));
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.admin-flight-fee-edit-shell {
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: var(--admin-surface);
+  overflow: hidden;
+}
+
+.admin-flight-fee-edit-row {
+  display: grid;
+  grid-template-columns: 0.85fr 2.2fr 0.6fr 1.9fr;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-flight-fee-edit-label {
+  min-height: 48px;
+  border-right: 1px dashed var(--admin-border);
+  background: var(--admin-soft);
+  color: var(--admin-text);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 1.02rem;
+  font-weight: 800;
+}
+
+.admin-flight-fee-edit-field {
+  min-height: 48px;
+  border-right: 1px solid var(--admin-border);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.admin-flight-fee-edit-field:last-child {
+  border-right: 0;
+}
+
+.admin-flight-fee-edit-field input,
+.admin-flight-fee-edit-field select {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  font-size: 1.02rem;
+  padding: 0 10px;
+}
+
+.admin-flight-fee-edit-field input:focus,
+.admin-flight-fee-edit-field select:focus {
+  outline: none;
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px rgba(74, 15, 26, 0.14);
+}
+
+.admin-flight-fee-edit-actions {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 14px;
+}
+
+.admin-flight-fee-update-btn {
+  min-height: 40px;
+  border: 0;
+  border-radius: 12px;
+  padding: 0 32px;
+  font-size: 1.04rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-strong));
+  box-shadow: 0 12px 20px rgba(47, 47, 47, 0.18);
+  cursor: pointer;
+}
+
+@media (max-width: 1100px) {
+  .admin-flight-fee-edit-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-flight-fee-edit-label,
+  .admin-flight-fee-edit-field {
+    border-right: 0;
+    border-bottom: 1px solid var(--admin-border);
+  }
+
+  .admin-flight-fee-edit-field:last-child {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-flight-fee-list-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .admin-flight-fee-update-btn {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+

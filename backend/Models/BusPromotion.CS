@@ -36,13 +36,13 @@ public class BusPromotion
 
     public int MaxUsagePerUser { get; set; }
 
-    public DateTime StartDateUtc { get; set; }
-
-    public DateTime EndDateUtc { get; set; }
+    public DateTime? StartDateUtc { get; set; }
+    public DateTime? EndDateUtc { get; set; }
 
     public string? SourceType { get; set; }
 
     public string? SourceKey { get; set; }
+    public int? SourceId { get; set; }
 
     public DateTime CreatedAtUtc { get; set; }
 

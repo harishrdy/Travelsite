@@ -200,7 +200,7 @@ public class TicketPdfService : ITicketPdfService
             XStringFormats.TopLeft);
 
         gfx.DrawString(
-            $"Bus {req.BusType} - {req.BookingReference}",
+            $"{req.BusType} - {req.BookingReference}",
             fTitle,
             XBrushes.White,
             new XRect(left, 23, mainW - left, 22),
@@ -231,12 +231,20 @@ public class TicketPdfService : ITicketPdfService
             new XRect(left, y, 165, 36),
             XStringFormats.TopLeft);
 
+        // Sub-text for Boarding Point (below Origin)
+        gfx.DrawString(
+            string.IsNullOrWhiteSpace(req.BoardingPoint) ? req.Origin : req.BoardingPoint,
+            fTiny,
+            grayBrush,
+            new XRect(left, y + 28, 165, 12),
+            XStringFormats.TopLeft);
+
         double centerX = left + 170;
 
         int hrs = req.DurationMinutes / 60;
         int mins = req.DurationMinutes % 60;
 
-        string dur = $"{hrs}h : {mins:00}m";
+        string dur = $"{hrs}h {mins:00}m";
 
         gfx.DrawString(
             dur,
@@ -254,15 +262,12 @@ public class TicketPdfService : ITicketPdfService
             new XRect(centerX + 68, y + 8, 14, 14),
             XStringFormats.TopLeft);
 
-        if (req.IsOvernightArrival)
-        {
-            gfx.DrawString(
-                "OVERNIGHT",
-                fTiny,
-                grayBrush,
-                new XRect(centerX, y + 22, 80, 11),
-                XStringFormats.TopCenter);
-        }
+        gfx.DrawString(
+            req.IsOvernightArrival ? "OVERNIGHT" : "SAME DAY",
+            fTiny,
+            grayBrush,
+            new XRect(centerX, y + 22, 80, 11),
+            XStringFormats.TopCenter);
 
         gfx.DrawString(
             req.Destination,
@@ -271,32 +276,37 @@ public class TicketPdfService : ITicketPdfService
             new XRect(centerX + 85, y, 165, 36),
             XStringFormats.TopLeft);
 
-        y += 45;
+        // Sub-text for Arrival Point (below Destination)
+        gfx.DrawString(
+            string.IsNullOrWhiteSpace(req.ArrivalPoint) ? req.Destination : req.ArrivalPoint,
+            fTiny,
+            grayBrush,
+            new XRect(centerX + 85, y + 28, 165, 12),
+            XStringFormats.TopLeft);
+
+        y += 52;
 
         gfx.DrawLine(lightGrayPen, left, y, mainW, y);
         y += 12;
 
+        // ─────────────────────────────────────────────────────────────
+        // 4-COLUMN ROW: DEPARTURE | DATE | ARRIVAL | ARRIVAL DATE
+        // ─────────────────────────────────────────────────────────────
         double col1 = left;
-        double col2 = left + 155;
-        double col3 = left + 310;
+        double col2 = left + 115;
+        double col3 = left + 250;
+        double col4 = left + 365;
 
         gfx.DrawString("DEPARTURE", fTiny, grayBrush, col1, y);
         gfx.DrawString("DATE", fTiny, grayBrush, col2, y);
-
-        gfx.DrawString(
-            req.IsOvernightArrival
-                ? "ARRIVAL (NEXT DAY)"
-                : "ARRIVAL",
-            fTiny,
-            grayBrush,
-            col3,
-            y);
+        gfx.DrawString("ARRIVAL", fTiny, grayBrush, col3, y);
+        gfx.DrawString("ARRIVAL DATE", fTiny, grayBrush, col4, y);
 
         y += 13;
 
         gfx.DrawString(
             ToIst(req.DepartureTime).ToString("HH:mm"),
-            fTitle,
+            fBold,
             navyBrush,
             col1,
             y);
@@ -310,45 +320,59 @@ public class TicketPdfService : ITicketPdfService
 
         gfx.DrawString(
             ToIst(req.ArrivalTime).ToString("HH:mm"),
-            fTitle,
+            fBold,
             navyBrush,
             col3,
             y);
 
-        y += 28;
+        gfx.DrawString(
+            ToIst(req.ArrivalTime).ToString("ddd, dd MMM, yyyy"),
+            fBold,
+            navyBrush,
+            col4,
+            y);
+
+        y += 32;
 
         DrawDashedLine(gfx, dashedPen, left, y, mainW);
         y += 12;
 
+        // ─────────────────────────────────────────────────────────────
+        // 4-COLUMN ROW: BUS TYPE | BOARDING | ARRIVAL PLACE | TOTAL FARE
+        // ─────────────────────────────────────────────────────────────
         gfx.DrawString("BUS TYPE", fTiny, grayBrush, col1, y);
         gfx.DrawString("BOARDING", fTiny, grayBrush, col2, y);
-        gfx.DrawString("TOTAL FARE", fTiny, grayBrush, col3, y);
+        gfx.DrawString("ARRIVAL PLACE", fTiny, grayBrush, col3, y);
+        gfx.DrawString("TOTAL FARE", fTiny, grayBrush, col4, y);
 
         y += 13;
 
         gfx.DrawString(
-            string.IsNullOrWhiteSpace(req.BusType)
-                ? "–"
-                : req.BusType,
+            string.IsNullOrWhiteSpace(req.BusType) ? "–" : req.BusType,
             fBold,
             navyBrush,
             col1,
             y);
 
         gfx.DrawString(
-            string.IsNullOrWhiteSpace(req.BoardingPoint)
-                ? req.Origin
-                : req.BoardingPoint,
+            string.IsNullOrWhiteSpace(req.BoardingPoint) ? req.Origin : req.BoardingPoint,
             fBold,
             navyBrush,
             col2,
             y);
 
         gfx.DrawString(
-            $"{req.Currency} {req.Price:0.00}",
+            string.IsNullOrWhiteSpace(req.ArrivalPoint) ? req.Destination : req.ArrivalPoint,
             fBold,
             navyBrush,
             col3,
+            y);
+
+        gfx.DrawString(
+            $"{req.Currency} {req.Price:0.##}",
+            fBold,
+            navyBrush,
+            col4,
             y);
 
         y += 28;

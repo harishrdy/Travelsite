@@ -1,4 +1,4 @@
-﻿namespace PickNBook.Api.Models.DTOs
+namespace PickNBook.Api.Models.DTOs
 {
     public class SendBusTicketEmailRequest
     {
@@ -19,6 +19,7 @@
         public bool IsOvernightArrival { get; set; }
         public int DurationMinutes { get; set; }
         public string BoardingPoint { get; set; } = string.Empty;
+        public string ArrivalPoint { get; set; } = string.Empty;
 
         // ── Fare breakdown ────────────────────────────────────
         public decimal Price { get; set; }                 // final customer fare (after coupon)

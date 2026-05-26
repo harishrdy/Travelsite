@@ -1,0 +1,326 @@
+.flight-markup-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.flight-markup-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.flight-markup-title h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  color: var(--text-primary);
+}
+
+.flight-markup-title strong {
+  color: var(--primary);
+}
+
+.flight-markup-title-underline {
+  height: 2px;
+  width: 90px;
+  background: var(--primary);
+  border-radius: 999px;
+  margin-top: 8px;
+}
+
+.flight-markup-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.flight-markup-action-btn {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text-primary);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.flight-markup-action-btn.primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+.flight-markup-action-btn.secondary {
+  background: var(--surface-soft);
+}
+
+.flight-markup-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--panel);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.flight-markup-table-scroll {
+  overflow-x: auto;
+}
+
+.flight-markup-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.flight-markup-table thead {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: #ffffff;
+}
+
+.flight-markup-table th,
+.flight-markup-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.flight-markup-th-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.flight-markup-empty-cell {
+  padding: 18px;
+  text-align: center;
+}
+
+.flight-markup-empty {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.markup-action-group {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.markup-action-group button {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text-primary);
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.markup-action-group button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--surface-soft);
+}
+
+.markup-action-group button.danger {
+  color: var(--danger);
+  border-color: rgba(180, 35, 24, 0.35);
+  background: var(--danger-soft);
+}
+
+.markup-status-toggle {
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+  color: var(--text-primary);
+  padding: 6px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.markup-status-toggle.active {
+  background: var(--success-soft);
+  color: var(--success);
+  border-color: rgba(30, 142, 62, 0.35);
+}
+
+.markup-status-toggle.inactive {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: rgba(180, 35, 24, 0.35);
+}
+
+.admin-markup-coupon-backdrop,
+.admin-markup-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 5, 5, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  padding: 16px;
+}
+
+.admin-markup-coupon-modal,
+.admin-markup-modal {
+  background: var(--panel);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 48px rgba(122, 31, 31, 0.25);
+  width: min(720px, 95vw);
+  padding: 16px;
+}
+
+.admin-markup-coupon-modal.generate {
+  width: min(820px, 95vw);
+}
+
+.admin-markup-modal.small {
+  width: min(480px, 95vw);
+}
+
+.admin-markup-coupon-modal header,
+.admin-markup-modal header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-markup-coupon-modal header h2,
+.admin-markup-modal header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.admin-markup-coupon-modal header button,
+.admin-markup-modal header button {
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+  color: var(--text-primary);
+  border-radius: 10px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.admin-markup-coupon-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.admin-markup-coupon-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.admin-markup-coupon-form input,
+.admin-markup-coupon-form select,
+.admin-markup-coupon-form textarea {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  background: var(--panel);
+  color: var(--text-primary);
+}
+
+.admin-markup-coupon-form .wide {
+  grid-column: 1 / -1;
+}
+
+.admin-markup-coupon-error {
+  margin: 12px 0 0;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.admin-markup-coupon-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.admin-markup-coupon-modal-actions button {
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-markup-coupon-modal-actions .primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+.admin-markup-coupon-modal-actions .secondary {
+  background: var(--surface-soft);
+  color: var(--text-primary);
+}
+
+.admin-markup-coupon-modal-actions .danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: rgba(180, 35, 24, 0.35);
+}
+
+.flight-route-image-body {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-soft);
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  color: var(--text-secondary);
+}
+
+.flight-route-image-body img {
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+@media (max-width: 900px) {
+  .flight-markup-table thead {
+    display: none;
+  }
+
+  .flight-markup-table tr {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .flight-markup-table td {
+    border-bottom: 0;
+  }
+}

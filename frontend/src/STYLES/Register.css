@@ -215,7 +215,7 @@ select:-webkit-autofill {
 }
 
 .travel-auth-register .travel-otp-timer {
-  color: var(--theme-navy, #1f2a44);
+  color: #0b3a78;
   font-size: 11.5px;
   font-weight: 800;
   line-height: 1.2;
@@ -343,7 +343,7 @@ select:-webkit-autofill {
 .travel-auth-register .travel-auth-footnote {
   margin: 6px 0 1px;
   padding-top: 0;
-  color: var(--theme-navy, #1f2a44);
+  color: #0b3a78;
   font-size: 13px;
   font-weight: 600;
   text-align: center;
@@ -353,14 +353,14 @@ select:-webkit-autofill {
 .travel-footnote-link {
   border: none;
   background: transparent;
-  color: var(--theme-primary, #f04423);
+  color: #3f7ed8;
   cursor: pointer;
   font-size: inherit;
-  font-weight: 700;
+  font-weight: 500;
   padding: 0;
   text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
 .travel-terms {
@@ -417,6 +417,15 @@ select:-webkit-autofill {
   border-color: #e53935;
   background: #fff5f5;
   box-shadow: 0 0 0 1px #e53935;
+}
+
+.travel-auth-register .travel-field-error {
+  min-height: 14px;
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--auth-error);
+  line-height: 1.15;
 }
 
 @media (max-width: 920px) {

@@ -65,6 +65,7 @@ public class CreateBusBookingRequestDto
     public int Seats { get; set; } = 1; // legacy fallback
     public List<CreateBusPassengerDto> Passengers { get; set; } = [];
     public int? PromotionId { get; set; }
+    public int? SelectedFeaturedOfferId { get; set; }
 }
 
 public class CreateBusPassengerDto

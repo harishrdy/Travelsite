@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PickNBook.Api.Data;
 using PickNBook.Api.Models;
 using PickNBook.Api.Models.DTOs;
@@ -18,13 +18,13 @@ public class BusPromotionEngineService
         _db = db;
     }
 
-    public async Task<BusPricingPreviewResponseDto>
-        CalculateAsync(
-            int busId,
-            List<string> seatCodes,
-            string? couponCode,
-            int? promotionId,
-            int? userId = null)
+    public async Task<BusPricingPreviewResponseDto> CalculateAsync(
+    int busId,
+    List<string> seatCodes,
+    string? couponCode,
+    int? promotionId,
+    int? userId = null,
+    int? selectedFeaturedOfferId = null)
     {
         var bus = await _db.BusBookings
             .AsNoTracking()
@@ -49,6 +49,7 @@ public class BusPromotionEngineService
             };
 
         decimal subtotal = 0m;
+       
 
         foreach (var seat in seats)
         {
@@ -91,7 +92,35 @@ public class BusPromotionEngineService
         }
 
         response.SubtotalBeforeCoupon =
-            decimal.Round(subtotal, 2);
+     decimal.Round(subtotal, 2);
+        FeaturedOffer? selectedOffer = null;
+
+        if (selectedFeaturedOfferId.HasValue)
+        {
+            selectedOffer = await _db.FeaturedOffers
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x =>
+                    x.Id == selectedFeaturedOfferId.Value &&
+                    x.IsActive);
+
+            if (selectedOffer == null)
+                throw new Exception(
+                    "Selected offer is invalid or inactive");
+
+            var offerNowUtc = DateTime.UtcNow;
+
+            if (selectedOffer.StartDateUtc.HasValue &&
+               selectedOffer.StartDateUtc > offerNowUtc)
+            {
+                throw new Exception("Offer not started yet");
+            }
+
+            if (selectedOffer.EndDateUtc.HasValue &&
+                selectedOffer.EndDateUtc < offerNowUtc)
+            {
+                throw new Exception("Offer expired");
+            }
+        }
         // ========================================
         // AUTO APPLY PROMOTIONS
         // ========================================
@@ -105,12 +134,14 @@ public class BusPromotionEngineService
         BusPromotion? bestAutoPromotion = null;
 
         decimal bestAutoDiscount = 0m;
-
+        var promoNowUtc = DateTime.UtcNow;
         var autoPromotions = await _db.BusPromotions
             .Include(x => x.Conditions)
-            .Where(x =>
-                x.IsActive &&
-                x.IsAutoApply)
+          .Where(x =>
+    x.IsActive &&
+    x.IsAutoApply &&
+    (!x.StartDateUtc.HasValue || x.StartDateUtc <= promoNowUtc) &&
+(!x.EndDateUtc.HasValue || x.EndDateUtc >= promoNowUtc))
             .OrderByDescending(x => x.Priority)
             .ToListAsync();
 
@@ -120,6 +151,12 @@ public class BusPromotionEngineService
                     promo,
                     bus,
                     seats))
+            {
+                continue;
+            }
+
+            if (promo.MinBookingAmount > 0m &&
+      subtotal < promo.MinBookingAmount)
             {
                 continue;
             }
@@ -146,73 +183,159 @@ public class BusPromotionEngineService
         }
 
         autoDiscount = bestAutoDiscount;
+
+        bool skipCouponValidation = false;
+
         if (bestAutoPromotion != null)
         {
             response.AutoPromotionCode =
                 bestAutoPromotion.Code;
+
+            // Exclusive auto discounts should block
+            // ONLY manual coupons,
+            // NOT featured-offer-linked coupons.
+
+            if (bestAutoPromotion.IsExclusive &&
+                selectedOffer == null)
+            {
+                skipCouponValidation = true;
+            }
         }
+
+        // ========================================
+        // BEST AUTO DISCOUNT (already calculated above)
+        // ========================================
 
         // ========================================
         // USER COUPON / MANUAL PROMOTION
         // ========================================
 
-        BusPromotion? userPromotion = null;
+        BusPromotion? manualPromotion = null;
+        decimal manualDiscount = 0m;
 
-        if (!string.IsNullOrWhiteSpace(couponCode))
+        // Load promotion by Id if provided and not auto apply
+        if (promotionId.HasValue &&
+      selectedOffer == null)
         {
-            userPromotion = await _db.BusPromotions
-                .Include(x => x.Conditions)
-                .FirstOrDefaultAsync(x =>
-                    x.Code == couponCode &&
-                    x.IsActive);
-        }
-        else if (promotionId.HasValue)
-        {
-            userPromotion = await _db.BusPromotions
+            var promoById = await _db.BusPromotions
                 .Include(x => x.Conditions)
                 .FirstOrDefaultAsync(x =>
                     x.Id == promotionId.Value &&
                     x.IsActive);
+
+            if (promoById != null &&
+                !promoById.IsAutoApply)
+            {
+                manualPromotion = promoById;
+            }
+        }
+        string? manualCouponCode = couponCode;
+
+        if (selectedOffer != null)
+        {
+            if (!string.IsNullOrWhiteSpace(manualCouponCode))
+            {
+                throw new Exception(
+                    "Featured offers cannot stack with manual coupons");
+            }
+
+            if (string.IsNullOrWhiteSpace(
+                    selectedOffer.CouponCode))
+            {
+                throw new Exception(
+                    "Selected offer has no linked coupon");
+            }
+
+            couponCode =
+                selectedOffer.CouponCode
+                    .Trim()
+                    .ToUpperInvariant();
+        }
+        // Load promotion by couponCode if provided and not auto apply
+        if (!skipCouponValidation &&
+      !string.IsNullOrWhiteSpace(couponCode))
+        {
+            var normalizedCoupon = couponCode.Trim().ToUpperInvariant();
+            var promoByCode = await _db.BusPromotions
+     .Include(x => x.Conditions)
+     .FirstOrDefaultAsync(x =>
+         x.Code == normalizedCoupon &&
+         x.IsActive);
+
+            if (promoByCode == null)
+            {
+                throw new Exception(
+                    "Invalid or inactive coupon");
+            }
+
+            if (selectedOffer != null &&
+                !promoByCode.Code.Equals(
+                    selectedOffer.CouponCode,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new Exception(
+                    "Offer coupon mismatch detected");
+            }
+            if (!promoByCode.IsAutoApply)
+            {
+                if (manualPromotion != null &&
+                    !manualPromotion.Id.Equals(promoByCode.Id))
+                {
+                    throw new InvalidOperationException(
+                        "Only one manual promotion can be used (coupon or offer).");
+                }
+
+                manualPromotion = promoByCode;
+            }
+
+            // If it's an auto apply promotion, ignore manual loading (will be considered in auto pool)
         }
 
         decimal couponDiscount = 0m;
+        decimal offerDiscount = 0m;
 
-        if (userPromotion != null)
+        if (manualPromotion != null)
         {
             bool valid =
                 ValidatePromotionConditions(
-                    userPromotion,
+                    manualPromotion,
                     bus,
                     seats);
 
             if (valid)
             {
-                couponDiscount =
-                    userPromotion.DiscountType.Equals(
+                manualDiscount =
+                    manualPromotion.DiscountType.Equals(
                         "Percentage",
                         StringComparison.OrdinalIgnoreCase)
                     ? subtotal *
-                        userPromotion.DiscountValue / 100m
-                    : userPromotion.DiscountValue;
+                        manualPromotion.DiscountValue / 100m
+                    : manualPromotion.DiscountValue;
 
-                if (userPromotion.MaxDiscountAmount.HasValue)
+                if (manualPromotion.MaxDiscountAmount.HasValue)
                 {
-                    couponDiscount = Math.Min(
-                        couponDiscount,
-                        userPromotion.MaxDiscountAmount.Value);
+                    manualDiscount = Math.Min(
+                        manualDiscount,
+                        manualPromotion.MaxDiscountAmount.Value);
                 }
+                // SET APPLIED PROMOTION DETAILS
+                response.AppliedPromotionCode = manualPromotion.Code;
+                response.AppliedPromotionTitle = manualPromotion.Title;
+                response.AppliedPromotionType = manualPromotion.PromotionType;
+                response.DiscountSource = manualPromotion.PromotionType;
+                response.DiscountLabel = manualPromotion.Title;
 
-                response.AppliedPromotionCode =
-                    userPromotion.Code;
-
-                response.AppliedPromotionTitle =
-                    userPromotion.Title;
-
-                response.AppliedPromotionType =
-                    userPromotion.PromotionType;
-
-                response.DiscountSource =
-                    userPromotion.PromotionType;
+                // SPLIT MANUAL DISCOUNT BY TYPE
+                if (manualPromotion.PromotionType.Equals(
+                        "Coupon",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    couponDiscount = manualDiscount;
+                }
+                else
+                {
+                    offerDiscount = manualDiscount;
+                }
             }
         }
 
@@ -232,6 +355,12 @@ public class BusPromotionEngineService
                 2,
                 MidpointRounding.AwayFromZero);
 
+        offerDiscount =
+            decimal.Round(
+                offerDiscount,
+                2,
+                MidpointRounding.AwayFromZero);
+
         // ========================================
         // RESPONSE DISCOUNT FIELDS
         // ========================================
@@ -242,14 +371,23 @@ public class BusPromotionEngineService
         response.CouponDiscountAmount =
             couponDiscount;
 
+        response.ManualDiscountAmount =
+            offerDiscount;
+
         var totalDiscount =
             Math.Min(
                 autoDiscount +
-                couponDiscount,
+                couponDiscount +
+                offerDiscount,
                 subtotal);
 
         response.CouponAmount =
             totalDiscount;
+
+        response.TotalDiscount =
+            totalDiscount;
+
+      
 
         // ========================================
         // TAXABLE FARE
@@ -308,6 +446,7 @@ public class BusPromotionEngineService
                 response.GstAmount +
                 convenienceFee,
                 2);
+        response.FinalAmount =response.GrandTotal;
 
         return response;
     }
@@ -396,6 +535,61 @@ public class BusPromotionEngineService
                         StringComparison.OrdinalIgnoreCase))
                     {
                         return false;
+                    }
+
+                    break;
+                case "MinimumFare":
+
+                    decimal currentFare =
+                        seats.Count * bus.PriceInr;
+
+                    decimal value1 =
+                        decimal.Parse(condition.Value1);
+
+                    decimal value2 =
+                        string.IsNullOrWhiteSpace(condition.Value2)
+                        ? 0
+                        : decimal.Parse(condition.Value2);
+
+                    switch (condition.ConditionOperator)
+                    {
+                        case ">":
+
+                            if (!(currentFare > value1))
+                                return false;
+
+                            break;
+
+                        case ">=":
+
+                            if (!(currentFare >= value1))
+                                return false;
+
+                            break;
+
+                        case "<":
+
+                            if (!(currentFare < value1))
+                                return false;
+
+                            break;
+
+                        case "<=":
+
+                            if (!(currentFare <= value1))
+                                return false;
+
+                            break;
+
+                        case "Between":
+
+                            if (!(currentFare >= value1 &&
+                                  currentFare <= value2))
+                            {
+                                return false;
+                            }
+
+                            break;
                     }
 
                     break;

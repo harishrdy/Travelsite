@@ -24,10 +24,15 @@ const DEFAULT_FILTERS = {
 const DEFAULT_EDIT_FORM = {
   title: "",
   offerCode: "",
+  couponId: "",
   couponCode: "",
+  promotionId: "",
+  displayOrder: "0",
   bookingType: "Bus",
   isActive: true,
   couponExpiresAtUtc: "",
+  startDateUtc: "",
+  endDateUtc: "",
   imageUrl: "",
   shortDescription: "",
   longDescription: "",
@@ -58,6 +63,16 @@ function formatBookingType(value) {
 
 function formatStatusLabel(isActive) {
   return isActive ? "Active" : "Inactive";
+}
+
+function toBoolean(value, fallback = false) {
+  if (value === undefined || value === null || value === "") {
+    return fallback;
+  }
+  if (typeof value === "boolean") {
+    return value;
+  }
+  return String(value).trim().toLowerCase() === "true";
 }
 
 function formatDateTime(value) {
@@ -110,15 +125,20 @@ function normalizeOffer(raw) {
     id: getField(raw, "id", "Id"),
     title: getField(raw, "title", "Title"),
     offerCode: getField(raw, "offerCode", "OfferCode"),
+    couponId: getField(raw, "couponId", "CouponId"),
     couponCode: getField(raw, "couponCode", "CouponCode"),
+    promotionId: getField(raw, "promotionId", "PromotionId"),
+    displayOrder: getField(raw, "displayOrder", "DisplayOrder", 0),
     bookingType: normalizeBookingType(getField(raw, "bookingType", "BookingType", "Bus")),
-    isActive: Boolean(getField(raw, "isActive", "IsActive", false)),
+    isActive: toBoolean(getField(raw, "isActive", "IsActive", false), false),
     couponExpiresAtUtc: getField(raw, "couponExpiresAtUtc", "CouponExpiresAtUtc", null),
+    startDateUtc: getField(raw, "startDateUtc", "StartDateUtc", null),
+    endDateUtc: getField(raw, "endDateUtc", "EndDateUtc", null),
     imageUrl: getField(raw, "imageUrl", "ImageUrl"),
     shortDescription: getField(raw, "subtitle", "Subtitle"),
     longDescription: getField(raw, "description", "Description"),
     basePrice: getField(raw, "basePrice", "BasePrice"),
-    isPercentageDiscount: Boolean(getField(raw, "isPercentageDiscount", "IsPercentageDiscount", false)),
+    isPercentageDiscount: toBoolean(getField(raw, "isPercentageDiscount", "IsPercentageDiscount", false), false),
     discountValue: getField(raw, "discountValue", "DiscountValue"),
     maxCouponUsage: getField(raw, "maxCouponUsage", "MaxCouponUsage"),
     couponUsedCount: getField(raw, "couponUsedCount", "CouponUsedCount", 0),
@@ -133,11 +153,17 @@ function buildOfferFormData(formValues, fileInputObject) {
   formData.append("BookingType", normalizeBookingType(formValues.bookingType));
   formData.append("IsActive", Boolean(formValues.isActive));
   
+  if (formValues.couponId !== undefined && formValues.couponId !== null && formValues.couponId !== "") {
+    formData.append("CouponId", Number(formValues.couponId));
+  }
   if (formValues.offerCode !== undefined && formValues.offerCode !== null) {
     formData.append("OfferCode", String(formValues.offerCode).trim());
   }
-  if (formValues.couponCode !== undefined && formValues.couponCode !== null) {
-    formData.append("CouponCode", String(formValues.couponCode).trim());
+  if (formValues.promotionId !== undefined && formValues.promotionId !== null && formValues.promotionId !== "") {
+    formData.append("PromotionId", Number(formValues.promotionId));
+  }
+  if (formValues.displayOrder !== undefined && formValues.displayOrder !== null && formValues.displayOrder !== "") {
+    formData.append("DisplayOrder", Number(formValues.displayOrder));
   }
   if (formValues.shortDescription !== undefined && formValues.shortDescription !== null) {
     formData.append("Subtitle", String(formValues.shortDescription).trim());
@@ -148,6 +174,12 @@ function buildOfferFormData(formValues, fileInputObject) {
   
   if (formValues.couponExpiresAtUtc) {
     formData.append("CouponExpiresAtUtc", toUtcIso(formValues.couponExpiresAtUtc));
+  }
+  if (formValues.startDateUtc) {
+    formData.append("StartDateUtc", toUtcIso(formValues.startDateUtc));
+  }
+  if (formValues.endDateUtc) {
+    formData.append("EndDateUtc", toUtcIso(formValues.endDateUtc));
   }
   
   if (formValues.basePrice !== undefined && formValues.basePrice !== null && formValues.basePrice !== "") {
@@ -217,7 +249,9 @@ export default function AdminOfferListPage({ onAddOffer }) {
       const matchesQuery =
         !query ||
         String(offer.title || "").toLowerCase().includes(query) ||
+        String(offer.couponId || "").toLowerCase().includes(query) ||
         String(offer.couponCode || "").toLowerCase().includes(query) ||
+        String(offer.promotionId || "").toLowerCase().includes(query) ||
         String(offer.bookingType || "").toLowerCase().includes(query) ||
         String(offer.couponExpiresAtUtc || "").toLowerCase().includes(query);
       const matchesBookingType =
@@ -278,10 +312,15 @@ export default function AdminOfferListPage({ onAddOffer }) {
       setEditForm({
         title: normalized.title || "",
         offerCode: normalized.offerCode || "",
+        couponId: normalized.couponId !== null && normalized.couponId !== undefined ? normalized.couponId : "",
         couponCode: normalized.couponCode || "",
+        promotionId: normalized.promotionId !== null && normalized.promotionId !== undefined ? normalized.promotionId : "",
+        displayOrder: normalized.displayOrder !== null && normalized.displayOrder !== undefined ? normalized.displayOrder : "0",
         bookingType: normalizeBookingType(normalized.bookingType),
         isActive: Boolean(normalized.isActive),
         couponExpiresAtUtc: toDatetimeLocal(normalized.couponExpiresAtUtc),
+        startDateUtc: toDatetimeLocal(normalized.startDateUtc),
+        endDateUtc: toDatetimeLocal(normalized.endDateUtc),
         imageUrl: normalized.imageUrl || "",
         shortDescription: normalized.shortDescription || "",
         longDescription: normalized.longDescription || "",
@@ -304,6 +343,20 @@ export default function AdminOfferListPage({ onAddOffer }) {
 
     if (!title || !bookingType) {
       setEditError("Offer name and booking type are required.");
+      return;
+    }
+
+    if (!editForm.couponId) {
+      setEditError("Linked coupon ID is required.");
+      return;
+    }
+
+    if (
+      editForm.startDateUtc &&
+      editForm.endDateUtc &&
+      new Date(editForm.startDateUtc).getTime() > new Date(editForm.endDateUtc).getTime()
+    ) {
+      setEditError("Offer end date should be after start date.");
       return;
     }
 
@@ -390,10 +443,25 @@ export default function AdminOfferListPage({ onAddOffer }) {
                 <div className="offer-details-label">Coupon Code</div>
                 <div className="offer-details-value">{detailsOffer.couponCode || "--"}</div>
 
+                <div className="offer-details-label">Coupon ID</div>
+                <div className="offer-details-value">{detailsOffer.couponId || "--"}</div>
+
+                <div className="offer-details-label">Promotion ID</div>
+                <div className="offer-details-value">{detailsOffer.promotionId || "--"}</div>
+
+                <div className="offer-details-label">Display Order</div>
+                <div className="offer-details-value">{detailsOffer.displayOrder ?? "--"}</div>
+
                 <div className="offer-details-label">Coupon Expires</div>
                 <div className="offer-details-value">
                   {formatDateTime(detailsOffer.couponExpiresAtUtc)}
                 </div>
+
+                <div className="offer-details-label">Offer Starts</div>
+                <div className="offer-details-value">{formatDateTime(detailsOffer.startDateUtc)}</div>
+
+                <div className="offer-details-label">Offer Ends</div>
+                <div className="offer-details-value">{formatDateTime(detailsOffer.endDateUtc)}</div>
 
                 <div className="offer-details-label">Base Price</div>
                 <div className="offer-details-value">
@@ -732,14 +800,52 @@ export default function AdminOfferListPage({ onAddOffer }) {
               </label>
 
               <label>
+                <span>Coupon ID *</span>
+                <input
+                  type="number"
+                  min="1"
+                  value={editForm.couponId}
+                  onChange={(event) =>
+                    setEditForm((previous) => ({ ...previous, couponId: event.target.value }))
+                  }
+                  placeholder="Linked coupon ID"
+                  required
+                />
+              </label>
+
+              <label>
                 <span>Coupon Code</span>
                 <input
                   type="text"
                   value={editForm.couponCode}
+                  disabled
+                  placeholder="Resolved by backend"
+                />
+              </label>
+
+              <label>
+                <span>Promotion ID</span>
+                <input
+                  type="number"
+                  min="1"
+                  value={editForm.promotionId}
                   onChange={(event) =>
-                    setEditForm((previous) => ({ ...previous, couponCode: event.target.value }))
+                    setEditForm((previous) => ({ ...previous, promotionId: event.target.value }))
                   }
-                  placeholder="e.g. WHEEL50"
+                  placeholder="e.g. 4"
+                />
+              </label>
+
+              <label>
+                <span>Display Order</span>
+                <input
+                  type="number"
+                  min="0"
+                  value={editForm.displayOrder}
+                  onChange={(event) =>
+                    setEditForm((previous) => ({ ...previous, displayOrder: event.target.value }))
+                  }
+                  placeholder="e.g. 1"
                 />
               </label>
 
@@ -752,6 +858,34 @@ export default function AdminOfferListPage({ onAddOffer }) {
                     setEditForm((previous) => ({
                       ...previous,
                       couponExpiresAtUtc: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+
+              <label>
+                <span>Offer Starts</span>
+                <input
+                  type="datetime-local"
+                  value={editForm.startDateUtc}
+                  onChange={(event) =>
+                    setEditForm((previous) => ({
+                      ...previous,
+                      startDateUtc: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+
+              <label>
+                <span>Offer Ends</span>
+                <input
+                  type="datetime-local"
+                  value={editForm.endDateUtc}
+                  onChange={(event) =>
+                    setEditForm((previous) => ({
+                      ...previous,
+                      endDateUtc: event.target.value,
                     }))
                   }
                 />

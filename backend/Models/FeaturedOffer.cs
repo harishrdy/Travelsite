@@ -8,6 +8,7 @@ public class FeaturedOffer
     public string Title { get; set; } = string.Empty;
     public string Subtitle { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public int? CouponId { get; set; }
     public string CouponCode { get; set; } = string.Empty;
     public decimal BasePrice { get; set; }
     public bool IsPercentageDiscount { get; set; }
@@ -31,6 +32,5 @@ public class FeaturedOffer
     public int DisplayOrder { get; set; }
 
     public DateTime? StartDateUtc { get; set; }
-
     public DateTime? EndDateUtc { get; set; }
 }

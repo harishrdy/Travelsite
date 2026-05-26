@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaEye, FaEyeSlash, FaBus } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaPlaneDeparture, FaBus } from "react-icons/fa";
 import "../../STYLES/ChangePassword.css";
 import { readApiMessage, requestAuth } from "../../services/authService";
-import authHeroImage from "../../assets/images/loginimage.png";
+import { validatePasswordNoSpaces } from "../../utils/authValidation";
+import flightCarImage from "../../assets/images/loginimage.png";
 
 function ChangePassword() {
   const navigate = useNavigate();
@@ -20,16 +21,12 @@ function ChangePassword() {
   const [loading, setLoading] = useState(false);
 
   const authPageStyle = {
-    backgroundImage: `url(${authHeroImage})`
+    backgroundImage: `url(${flightCarImage})`
   };
 
   useEffect(() => {
     oldPasswordInputRef.current?.focus();
   }, []);
-
-  const clearFieldError = (field) => {
-    setErrors((prev) => ({ ...prev, [field]: "" }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,14 +34,29 @@ function ChangePassword() {
 
     const newErrors = {};
 
-    if (!currentPassword.trim()) {
-      newErrors.currentPassword = "Old password is required";
+    const currentPasswordError = validatePasswordNoSpaces(
+      currentPassword,
+      "Old password"
+    );
+    const newPasswordError = validatePasswordNoSpaces(
+      newPassword,
+      "New password"
+    );
+    const confirmPasswordError = validatePasswordNoSpaces(
+      confirmPassword,
+      "Confirm password"
+    );
+
+    if (currentPasswordError) {
+      newErrors.currentPassword = currentPasswordError;
     }
-    if (!newPassword.trim()) {
-      newErrors.newPassword = "New password is required";
+
+    if (newPasswordError) {
+      newErrors.newPassword = newPasswordError;
     }
-    if (!confirmPassword.trim()) {
-      newErrors.confirmPassword = "Confirm password is required";
+
+    if (confirmPasswordError) {
+      newErrors.confirmPassword = confirmPasswordError;
     } else if (confirmPassword !== newPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
@@ -110,11 +122,12 @@ function ChangePassword() {
         <aside className="cp-auth-brand">
           <p className="cp-auth-kicker">Welcome to</p>
           <div className="cp-auth-logo">
+            <FaPlaneDeparture />
             <FaBus />
           </div>
           <h1 className="cp-auth-brand-name">Travling</h1>
           <p className="cp-auth-brand-copy">
-            Plan bus trips and holiday travel with one secure traveler account.
+            Plan flights, buses, hotels and holiday trips with one secure traveler account.
           </p>
           <p className="cp-auth-brand-meta">Travel smarter. Manage bookings faster.</p>
         </aside>
@@ -143,7 +156,12 @@ function ChangePassword() {
                   value={currentPassword}
                   onChange={(e) => {
                     setCurrentPassword(e.target.value);
-                    clearFieldError("currentPassword");
+                    setErrors((prev) => ({
+                      ...prev,
+                      currentPassword: /\s/.test(e.target.value)
+                        ? "Old password cannot contain spaces"
+                        : "",
+                    }));
                     setStatusMessage("");
                   }}
                 />
@@ -169,7 +187,12 @@ function ChangePassword() {
                   value={newPassword}
                   onChange={(e) => {
                     setNewPassword(e.target.value);
-                    clearFieldError("newPassword");
+                    setErrors((prev) => ({
+                      ...prev,
+                      newPassword: /\s/.test(e.target.value)
+                        ? "New password cannot contain spaces"
+                        : "",
+                    }));
                     setStatusMessage("");
                   }}
                 />
@@ -195,7 +218,12 @@ function ChangePassword() {
                   value={confirmPassword}
                   onChange={(e) => {
                     setConfirmPassword(e.target.value);
-                    clearFieldError("confirmPassword");
+                    setErrors((prev) => ({
+                      ...prev,
+                      confirmPassword: /\s/.test(e.target.value)
+                        ? "Confirm password cannot contain spaces"
+                        : "",
+                    }));
                     setStatusMessage("");
                   }}
                 />

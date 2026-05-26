@@ -80,11 +80,20 @@ const BUS_TYPE_FILTERS = [
   { key: "sleeper", label: "Sleeper" },
 ];
 
+const BUS_RESULTS_CACHE_VERSION = 2;
+
 const DEFAULT_BUS_TYPES = {
-  ac: true,
-  nonac: true,
-  seater: true,
-  sleeper: true,
+  ac: false,
+  nonac: false,
+  seater: false,
+  sleeper: false,
+};
+
+const DEFAULT_TIME_WINDOWS = {
+  morning: false,
+  afternoon: false,
+  evening: false,
+  night: false,
 };
 
 function readValue(params, state, key) {
@@ -302,10 +311,21 @@ function createToggleMap(items, previous = {}) {
   const next = {};
 
   items.forEach((item) => {
-    next[item] = previous[item] ?? true;
+    next[item] = previous[item] ?? false;
   });
 
   return next;
+}
+
+function uniqueSortedValues(values) {
+  return Array.from(
+    new Set(
+      values
+        .flat()
+        .map((item) => String(item || "").trim())
+        .filter(Boolean)
+    )
+  ).sort((first, second) => first.localeCompare(second));
 }
 
 function ModifyPlaceAutocomplete({
@@ -485,9 +505,9 @@ export default function BusSearchResults() {
   const params = new URLSearchParams(location.search);
   const state = location.state || {};
 
-  const initialSourceName = readValue(params, state, "source") || "Hyderabad";
+  const initialSourceName = readValue(params, state, "source") || "";
   const initialDestinationName =
-    readValue(params, state, "destination") || "Vijayawada";
+    readValue(params, state, "destination") || "";
   const initialDepartureDateInput =
     readValue(params, state, "departureDate") ||
     new Date().toISOString().slice(0, 10);
@@ -496,7 +516,9 @@ export default function BusSearchResults() {
   const [sourceName, setSourceName] = useState(initialSourceName);
   const [destinationName, setDestinationName] = useState(initialDestinationName);
   const [tripType, setTripType] = useState(initialTripType);
-  const [isModifySearchOpen, setIsModifySearchOpen] = useState(false);
+  const [isModifySearchOpen, setIsModifySearchOpen] = useState(
+    () => !initialSourceName.trim() || !initialDestinationName.trim()
+  );
   const [modifyForm, setModifyForm] = useState({
     source: initialSourceName,
     destination: initialDestinationName,
@@ -511,6 +533,7 @@ export default function BusSearchResults() {
         const parsed = JSON.parse(saved);
         if (
           parsed &&
+          parsed.version === 2 &&
           parsed.source === initialSourceName &&
           parsed.destination === initialDestinationName &&
           parsed.departureDate === initialDepartureDateInput
@@ -526,7 +549,7 @@ export default function BusSearchResults() {
 
   const cachedBuses = useMemo(() => {
     try {
-      const cacheKey = `bus_search_cache_${initialSourceName}_${initialDestinationName}_${initialDepartureDateInput}`;
+      const cacheKey = `bus_search_cache_v${BUS_RESULTS_CACHE_VERSION}_${initialSourceName}_${initialDestinationName}_${initialDepartureDateInput}`;
       const cached = sessionStorage.getItem(cacheKey);
       if (cached) {
         const parsed = JSON.parse(cached);
@@ -553,18 +576,8 @@ export default function BusSearchResults() {
   const [priceMin, setPriceMin] = useState(() => cachedFilters?.priceMin ?? 0);
   const [priceMax, setPriceMax] = useState(() => cachedFilters?.priceMax ?? 0);
   const [busTypeFilters, setBusTypeFilters] = useState(() => cachedFilters?.busTypeFilters ?? DEFAULT_BUS_TYPES);
-  const [departureWindows, setDepartureWindows] = useState(() => cachedFilters?.departureWindows ?? {
-    morning: true,
-    afternoon: true,
-    evening: true,
-    night: true,
-  });
-  const [arrivalWindows, setArrivalWindows] = useState(() => cachedFilters?.arrivalWindows ?? {
-    morning: true,
-    afternoon: true,
-    evening: true,
-    night: true,
-  });
+  const [departureWindows, setDepartureWindows] = useState(() => cachedFilters?.departureWindows ?? DEFAULT_TIME_WINDOWS);
+  const [arrivalWindows, setArrivalWindows] = useState(() => cachedFilters?.arrivalWindows ?? DEFAULT_TIME_WINDOWS);
   const [boardingFilters, setBoardingFilters] = useState(() => cachedFilters?.boardingFilters ?? {});
   const [droppingFilters, setDroppingFilters] = useState(() => cachedFilters?.droppingFilters ?? {});
   const [travelFilters, setTravelFilters] = useState(() => cachedFilters?.travelFilters ?? {});
@@ -587,6 +600,7 @@ export default function BusSearchResults() {
   // Save filter state to sessionStorage whenever it changes
   useEffect(() => {
     const filterState = {
+      version: 2,
       source: sourceName,
       destination: destinationName,
       departureDate: formatDateInput(selectedDate),
@@ -662,12 +676,18 @@ export default function BusSearchResults() {
     let isCurrent = true;
 
     async function runSearch() {
+      if (!sourceName.trim() || !destinationName.trim()) {
+        setApiBuses([]);
+        setIsLoadingBuses(false);
+        return;
+      }
+
       // ✅ Set loading IMMEDIATELY, before any cache checks
       // This ensures loading animation plays for all searches, including cached ones
       setIsLoadingBuses(true);
       setSearchError("");
 
-      const cacheKey = `bus_search_cache_${sourceName}_${destinationName}_${formatDateInput(selectedDate)}`;
+      const cacheKey = `bus_search_cache_v${BUS_RESULTS_CACHE_VERSION}_${sourceName}_${destinationName}_${formatDateInput(selectedDate)}`;
       const cached = sessionStorage.getItem(cacheKey);
       
       if (cached) {
@@ -755,6 +775,14 @@ export default function BusSearchResults() {
           toCity: bus.toCity || destinationName,
           boardingPoint: bus.boardingPoint || sourceName,
           droppingPoint: bus.droppingPoint || destinationName,
+          boardingPoints:
+            Array.isArray(bus.boardingPoints) && bus.boardingPoints.length > 0
+              ? bus.boardingPoints
+              : [bus.boardingPoint || sourceName],
+          droppingPoints:
+            Array.isArray(bus.droppingPoints) && bus.droppingPoints.length > 0
+              ? bus.droppingPoints
+              : [bus.droppingPoint || destinationName],
           departureDate: departureDate || selectedDate,
           arrivalDate: arrivalDate || selectedDate,
           departureHour: departureDate ? departureDate.getHours() : 0,
@@ -797,15 +825,15 @@ export default function BusSearchResults() {
   }, [maxFare]);
 
   const boardingList = useMemo(
-    () => Array.from(new Set(buses.map((bus) => bus.boardingPoint))).sort(),
+    () => uniqueSortedValues(buses.map((bus) => bus.boardingPoints || bus.boardingPoint)),
     [buses]
   );
   const droppingList = useMemo(
-    () => Array.from(new Set(buses.map((bus) => bus.droppingPoint))).sort(),
+    () => uniqueSortedValues(buses.map((bus) => bus.droppingPoints || bus.droppingPoint)),
     [buses]
   );
   const travelList = useMemo(
-    () => Array.from(new Set(buses.map((bus) => bus.operatorName))).sort(),
+    () => uniqueSortedValues(buses.map((bus) => bus.operatorName)),
     [buses]
   );
 
@@ -871,11 +899,20 @@ export default function BusSearchResults() {
         }
       }
 
-      if (activeBoarding.length > 0 && !activeBoarding.includes(bus.boardingPoint)) {
+      const busBoardingPoints = bus.boardingPoints?.length ? bus.boardingPoints : [bus.boardingPoint];
+      const busDroppingPoints = bus.droppingPoints?.length ? bus.droppingPoints : [bus.droppingPoint];
+
+      if (
+        activeBoarding.length > 0 &&
+        !activeBoarding.some((point) => busBoardingPoints.includes(point))
+      ) {
         return false;
       }
 
-      if (activeDropping.length > 0 && !activeDropping.includes(bus.droppingPoint)) {
+      if (
+        activeDropping.length > 0 &&
+        !activeDropping.some((point) => busDroppingPoints.includes(point))
+      ) {
         return false;
       }
 
@@ -940,15 +977,14 @@ export default function BusSearchResults() {
   }, [travelList, travelSearchText]);
 
   const resultItems = useMemo(() => {
-    const busItems = [];
+    const items = [];
     const groups = new Map();
-    const groupItems = [];
 
     filteredBuses.forEach((bus) => {
       const groupKey = getRtcOperatorGroupKey(bus.operatorName);
 
       if (!groupKey) {
-        busItems.push({ type: "bus", bus });
+        items.push({ type: "bus", bus });
         return;
       }
 
@@ -963,7 +999,7 @@ export default function BusSearchResults() {
         };
 
         groups.set(groupKey, group);
-        groupItems.push(group);
+        items.push(group);
       }
 
       const group = groups.get(groupKey);
@@ -972,7 +1008,7 @@ export default function BusSearchResults() {
       group.totalAvailableSeats += bus.availableSeats;
     });
 
-    return [...groupItems, ...busItems];
+    return items;
   }, [filteredBuses]);
 
   const tripLabel = tripType === "twoway" ? "Round Trip" : "One Way";
@@ -985,15 +1021,6 @@ export default function BusSearchResults() {
     { id: "seat-sync", label: "Seat Sync", value: "Syncing latest seat availability" },
   ];
 
-  const openDatePicker = (event) => {
-    try {
-      if (typeof event.currentTarget.showPicker === "function") {
-        event.currentTarget.showPicker();
-      }
-    } catch {
-      // Ignore browser picker access failures.
-    }
-  };
 
   const toggleModifySearch = () => {
     setModifyForm({
@@ -1062,8 +1089,8 @@ export default function BusSearchResults() {
     setPriceMin(priceFloor);
     setPriceMax(maxFare);
     setBusTypeFilters(DEFAULT_BUS_TYPES);
-    setDepartureWindows({ morning: true, afternoon: true, evening: true, night: true });
-    setArrivalWindows({ morning: true, afternoon: true, evening: true, night: true });
+    setDepartureWindows(DEFAULT_TIME_WINDOWS);
+    setArrivalWindows(DEFAULT_TIME_WINDOWS);
     setBoardingFilters(createToggleMap(boardingList));
     setDroppingFilters(createToggleMap(droppingList));
     setTravelFilters(createToggleMap(travelList));
@@ -1750,7 +1777,10 @@ export default function BusSearchResults() {
                 </div>
                 <div className="point-list">
                   {visibleBoarding.map((point) => (
-                    <label key={point} className="point-row">
+                    <label
+                      key={point}
+                      className={`point-row ${boardingFilters[point] ? "active" : ""}`}
+                    >
                       <input
                         type="checkbox"
                         checked={Boolean(boardingFilters[point])}
@@ -1775,7 +1805,10 @@ export default function BusSearchResults() {
                 </div>
                 <div className="point-list">
                   {visibleDropping.map((point) => (
-                    <label key={point} className="point-row">
+                    <label
+                      key={point}
+                      className={`point-row ${droppingFilters[point] ? "active" : ""}`}
+                    >
                       <input
                         type="checkbox"
                         checked={Boolean(droppingFilters[point])}
@@ -1800,7 +1833,10 @@ export default function BusSearchResults() {
                 </div>
                 <div className="point-list">
                   {visibleTravels.map((name) => (
-                    <label key={name} className="point-row">
+                    <label
+                      key={name}
+                      className={`point-row ${travelFilters[name] ? "active" : ""}`}
+                    >
                       <input
                         type="checkbox"
                         checked={Boolean(travelFilters[name])}
@@ -1836,7 +1872,12 @@ export default function BusSearchResults() {
               </header>
 
               <div className="bus-card-list">
-                {filteredBuses.length === 0 ? (
+                {!sourceName.trim() || !destinationName.trim() ? (
+                  <div className="bus-empty-state">
+                    <Search size={18} />
+                    <p>Please enter both source and destination cities to search for buses.</p>
+                  </div>
+                ) : filteredBuses.length === 0 ? (
                   <div className="bus-empty-state">
                     <ShieldAlert size={18} />
                     <p>No buses match the selected filters.</p>

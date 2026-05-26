@@ -1,0 +1,155 @@
+.admin-flight-fee-page {
+  gap: 12px;
+}
+
+.admin-flight-fee-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-flight-fee-header h1 {
+  font-size: 1.86rem;
+}
+
+.admin-flight-fee-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-flight-fee-table-shell {
+  border: 1px solid var(--admin-border);
+  border-radius: 13px;
+  overflow: hidden;
+  background: var(--admin-surface);
+  box-shadow: 0 10px 20px rgba(31, 31, 31, 0.08);
+}
+
+.admin-flight-fee-table-head,
+.admin-flight-fee-table-row {
+  display: grid;
+  grid-template-columns: 0.34fr 0.8fr 0.65fr 1fr 1fr 1fr 0.65fr 0.78fr;
+  gap: 8px;
+  padding: 8px;
+}
+
+.admin-flight-fee-table-head {
+  background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-strong));
+}
+
+.admin-flight-fee-table-head span {
+  min-height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.16);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.admin-flight-fee-table-body {
+  display: grid;
+}
+
+.admin-flight-fee-table-row {
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-flight-fee-cell {
+  min-height: 56px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: var(--admin-surface);
+  padding: 8px;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  color: var(--admin-text);
+  font-size: 0.81rem;
+}
+
+.admin-flight-fee-cell strong {
+  color: var(--admin-text);
+  font-size: 0.88rem;
+}
+
+.admin-flight-fee-cell-center {
+  justify-items: center;
+  text-align: center;
+}
+
+.admin-flight-fee-status {
+  min-height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--admin-success);
+  background: var(--admin-success-soft);
+  color: var(--admin-success);
+  padding: 0 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.admin-flight-fee-status.inactive {
+  border-color: var(--admin-danger);
+  background: var(--admin-danger-soft);
+  color: var(--admin-danger);
+}
+
+.admin-flight-fee-actions {
+  justify-items: center;
+  grid-auto-flow: column;
+  gap: 6px;
+}
+
+.admin-flight-fee-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.admin-flight-fee-icon-btn.view {
+  background: linear-gradient(135deg, var(--admin-primary-strong), var(--admin-primary));
+}
+
+.admin-flight-fee-icon-btn.edit {
+  background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-strong));
+}
+
+.admin-flight-fee-icon-btn.toggle.active {
+  background: linear-gradient(135deg, var(--admin-success), var(--admin-primary-strong));
+}
+
+.admin-flight-fee-icon-btn.toggle.inactive {
+  background: linear-gradient(135deg, var(--admin-danger), var(--admin-primary-strong));
+}
+
+@media (max-width: 920px) {
+  .admin-flight-fee-table-head,
+  .admin-flight-fee-table-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-flight-fee-table-head,
+  .admin-flight-fee-table-row {
+    grid-template-columns: 1fr;
+  }
+}
+

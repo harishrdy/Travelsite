@@ -4,13 +4,19 @@ import {
   FaEye,
   FaEyeSlash,
   FaSyncAlt,
+  FaPlaneDeparture,
   FaCheckCircle, FaBus,
 } from "react-icons/fa";
 import "../../STYLES/Login.css";
 import { requestAuth } from "../../services/authService";
-import authHeroImage from "../../assets/images/loginimage-hd.png";
+import {
+  validateLowercaseEmail,
+  validateStrongPassword,
+} from "../../utils/authValidation";
+import { generateMixedCaptcha, validateCaptcha } from "../../utils/captcha";
+// import flightCarImage from "../../assets/images/flightcar.png";
+import flightCarImage from "../../assets/images/loginimage.png";
 
-const EMAIL_REGEX = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
 
 function decodeJwtPayload(token) {
   
@@ -159,18 +165,12 @@ const Login = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const authPageStyle = {
-    backgroundImage: `url(${authHeroImage})`
+    backgroundImage: `url(${flightCarImage})`
   };
-  const normalizedEmail = email.trim();
-  const isEmailValid = EMAIL_REGEX.test(normalizedEmail);
 
   const generateCaptcha = () => {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let captchaValue = "";
-    for (let i = 0; i < 5; i += 1) {
-      captchaValue += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setGeneratedCaptcha(captchaValue);
+    setGeneratedCaptcha(generateMixedCaptcha());
+    setCaptcha("");
   };
 
   useEffect(() => {
@@ -185,24 +185,46 @@ const Login = () => {
     }));
   };
 
+  const showEmailSpaceError = () => {
+    setErrors((prev) => ({
+      ...prev,
+      email: "Email cannot contain spaces",
+    }));
+    setApiMessage("");
+    setIsSuccess(false);
+  };
+
+  const handleEmailKeyDown = (event) => {
+    if (event.key === " ") {
+      event.preventDefault();
+      showEmailSpaceError();
+    }
+  };
+
+  const handleEmailPaste = (event) => {
+    if (/\s/.test(event.clipboardData.getData("text"))) {
+      event.preventDefault();
+      showEmailSpaceError();
+    }
+  };
+
   const validate = () => {
     const newErrors = {};
-    if (!normalizedEmail) {
-      newErrors.email = "Email is required";
-    } else if (/\s/.test(email)) {
-      newErrors.email = "Email cannot contain spaces";
-    } else if (/[A-Z]/.test(normalizedEmail)) {
-      newErrors.email = "Only lowercase letters are allowed";
-    } else if (!EMAIL_REGEX.test(normalizedEmail)) {
-      newErrors.email = "Enter a valid email address";
+    const emailError = validateLowercaseEmail(email);
+    const passwordError = validateStrongPassword(password);
+
+    if (emailError) {
+      newErrors.email = emailError;
     }
 
-    if (!password.trim()) newErrors.password = "Password is required";
+    if (passwordError) {
+      newErrors.password = passwordError;
+    }
 
-    if (!captcha.trim()) {
-      newErrors.captcha = "Captcha is required";
-    }else if (captcha.trim().toUpperCase() !== generatedCaptcha) {
-      newErrors.captcha = "Captcha does not match";
+    const captchaError = validateCaptcha(captcha, generatedCaptcha);
+
+    if (captchaError) {
+      newErrors.captcha = captchaError;
     }
 
     setErrors(newErrors);
@@ -226,14 +248,14 @@ const Login = () => {
         {
           method: "POST",
           body: JSON.stringify({
-            email: normalizedEmail,
+            email: email.trim(),
             password,
           }),
         },
         "Invalid credentials"
       );
       const token = data?.token || data?.Token || "";
-      const userProfile = buildUserFromLoginResponse(data, normalizedEmail);
+      const userProfile = buildUserFromLoginResponse(data, email.trim());
       const resolvedUserId = pickFirst(
         [userProfile.userId, data?.userId, data?.UserId],
         ""
@@ -288,11 +310,11 @@ const Login = () => {
         <aside className="travel-auth-brand">
           <p className="travel-auth-kicker">Welcome to</p>
           <div className="travel-auth-logo">
-            <FaBus />
+            <FaPlaneDeparture />< FaBus/>
           </div>
           <h1 className="travel-auth-brand-name">Travling</h1>
           <p className="travel-auth-brand-copy">
-            Plan bus trips and holiday travel with one secure traveler
+            Plan flights,buses hotels and holiday trips with one secure traveler
             account.
           </p>
           <p className="travel-auth-brand-meta">
@@ -317,43 +339,51 @@ const Login = () => {
           <form className="travel-auth-form" onSubmit={handleSubmit} noValidate>
             <div className="travel-field">
               <label htmlFor="login-email">E-mail Address <span>*</span></label>
-              <div className={`travel-field-line ${errors.email ? "has-error" : ""}`}>
+              <div className="travel-field-line">
                 <input
                   id="login-email"
                   type="email"
                   placeholder="Enter your e-mail"
                   value={email}
                   autoComplete="off"
-                  aria-invalid={Boolean(errors.email)}
-                  aria-describedby="login-email-error"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  onKeyDown={handleEmailKeyDown}
+                  onPaste={handleEmailPaste}
                   onChange={(e) => {
                     setEmail(e.target.value);
-                    setErrors((prev) => ({ ...prev, email: "" }));
+                    setErrors((prev) => ({
+                      ...prev,
+                      email: validateLowercaseEmail(e.target.value) || "",
+                    }));
                     setApiMessage("");
                     setIsSuccess(false);
                   }}
                 />
-                {isEmailValid && (
+                {email.trim() && (
                   <FaCheckCircle className="travel-field-check" aria-hidden="true" />
                 )}
               </div>
-              <p id="login-email-error" className="travel-field-error">{errors.email || "\u00A0"}</p>
+              <p className="travel-field-error">{errors.email || "\u00A0"}</p>
             </div>
 
             <div className="travel-field">
               <label htmlFor="login-password">Password <span>*</span></label>
-              <div className={`travel-field-line ${errors.password ? "has-error" : ""}`}>
+              <div className="travel-field-line">
                 <input
                   id="login-password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   value={password}
                   autoComplete="new-password"
-                  aria-invalid={Boolean(errors.password)}
-                  aria-describedby="login-password-error"
                   onChange={(e) => {
                     setPassword(e.target.value);
-                    setErrors((prev) => ({ ...prev, password: "" }));
+                    setErrors((prev) => ({
+                      ...prev,
+                      password: e.target.value
+                        ? validateStrongPassword(e.target.value)
+                        : "",
+                    }));
                     setApiMessage("");
                     setIsSuccess(false);
                   }}
@@ -367,7 +397,7 @@ const Login = () => {
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
-              <p id="login-password-error" className="travel-field-error">{errors.password || "\u00A0"}</p>
+              <p className="travel-field-error">{errors.password || "\u00A0"}</p>
             </div>
 
             <div className="travel-field">
@@ -393,7 +423,7 @@ const Login = () => {
                   <span>Refresh</span>
                 </button>
               </div>
-              <div className={`travel-field-line ${errors.captcha ? "has-error" : ""}`}>
+              <div className="travel-field-line">
                 <input
                   id="login-captcha"
                   type="text"
@@ -403,21 +433,23 @@ const Login = () => {
                   autoCapitalize="none"
                   spellCheck={false}
                   maxLength={generatedCaptcha.length || 5}
-                  aria-invalid={Boolean(errors.captcha)}
-                  aria-describedby="login-captcha-error"
                   onPaste={handleCaptchaManualOnly}
                   onCopy={(e) => e.preventDefault()}
                   onCut={(e) => e.preventDefault()}
                   onDrop={handleCaptchaManualOnly}
                   onChange={(e) => {
-                    setCaptcha(e.target.value.replace(/\s+/g, ""));
-                    setErrors((prev) => ({ ...prev, captcha: "" }));
-                    setApiMessage("");
-                    setIsSuccess(false);
+                    const nextCaptcha = e.target.value;
+                    setCaptcha(nextCaptcha);
+                    setErrors((prev) => ({
+                      ...prev,
+                      captcha: /\s/.test(nextCaptcha)
+                        ? "Captcha cannot contain spaces"
+                        : "",
+                    }));
                   }}
                 />
               </div>
-              <p id="login-captcha-error" className="travel-field-error">{errors.captcha || "\u00A0"}</p>
+              <p className="travel-field-error">{errors.captcha || "\u00A0"}</p>
             </div>
 
             <div className="travel-auth-links">

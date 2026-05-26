@@ -4,12 +4,14 @@ import {
   BusFront,
   KeyRound,
   LayoutDashboard,
+  PlaneTakeoff,
   UserRound,
   Users,
 } from "lucide-react";
 
 const MAIN_LINKS = [
   { id: "nav-2", to: "/dashboard/traveler-list", label: "Traveler List", icon: Users },
+  { id: "nav-3", to: "/dashboard/flight-bookings", label: "Flight Bookings", icon: PlaneTakeoff },
   { id: "nav-4", to: "/dashboard/bus-bookings", label: "Bus Bookings", icon: BusFront },
 
 ];

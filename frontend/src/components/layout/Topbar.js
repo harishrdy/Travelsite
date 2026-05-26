@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   BusFront,
@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   LogIn,
   LogOut,
+  PlaneTakeoff,
   Ticket,
   User,
 } from "lucide-react";
@@ -98,6 +99,10 @@ export default function Topbar() {
   const location = useLocation();
 
   const isDashboard = location.pathname.startsWith("/dashboard");
+  const currentHomeTab =
+    new URLSearchParams(location.search).get("tab") === "buses"
+      ? "buses"
+      : "flights";
   const isHome = location.pathname === "/";
 
   const syncAuthState = () => {
@@ -145,7 +150,7 @@ export default function Topbar() {
 
   return (
     <header className="topbar">
-      <button type="button" className="brand" onClick={() => navigate("/?tab=buses")}>
+      <button type="button" className="brand" onClick={() => navigate("/?tab=flights")}>
         <span className="brand-icon">
           <Compass size={18} />
         </span>
@@ -153,19 +158,33 @@ export default function Topbar() {
           <span className="brand-title">
             Travel<span className="brand-title-accent">....</span>
           </span>
-          <span className="brand-subtitle">Bus booking</span>
+          <span className="brand-subtitle">Flights and Buses</span>
         </span>
       </button>
 
       <div className="right-section">
         <div className="menu">
           <Link
+            to="/?tab=flights"
+            className={`menu-item ${isHome && currentHomeTab === "flights" ? "active" : ""}`}
+          >
+            <PlaneTakeoff size={16} />
+            <span>Flights</span>
+          </Link>
+          <Link
             to="/?tab=buses"
-            className={`menu-item ${isHome ? "active" : ""}`}
+            className={`menu-item ${isHome && currentHomeTab === "buses" ? "active" : ""}`}
           >
             <BusFront size={16} />
             <span>Buses</span>
           </Link>
+          <NavLink
+            to="/web-checkin"
+            className={({ isActive }) => `menu-item ${isActive ? "active" : ""}`}
+          >
+            <Ticket size={16} />
+            <span>Web Check-in</span>
+          </NavLink>
           <NavLink
             to="/fetch-ticket"
             className={({ isActive }) => `menu-item ${isActive ? "active" : ""}`}

@@ -33,6 +33,12 @@ const formatDate = (dateString) => {
   }
 };
 
+const toBoolean = (value, fallback = false) => {
+  if (value === undefined || value === null || value === '') return fallback;
+  if (typeof value === 'boolean') return value;
+  return String(value).trim().toLowerCase() === 'true';
+};
+
 
 
 function DiscountList() {
@@ -51,8 +57,17 @@ function DiscountList() {
       const data = await listDiscounts();
       const normalized = (data || []).map((item) => ({
         id: item.id || item.discountId || '',
+        code: item.code || item.discountCode || '',
+        title: item.title || item.name || '',
+        description: item.description || '',
         value: Number(item.value) || 0,
         type: item.discountType || item.type || 'Percentage',
+        isAutoApply: toBoolean(item.isAutoApply, true),
+        isExclusive: toBoolean(item.isExclusive, false),
+        priority: Number(item.priority) || 0,
+        minBookingAmount: Number(item.minBookingAmount) || 0,
+        startDateUtc: item.startDateUtc || item.startDate || null,
+        endDateUtc: item.endDateUtc || item.endDate || null,
         entryDate: item.entryDate || item.createdDate || item.createdAt || 'N/A',
         updateDate: item.updateDate || item.updatedDate || item.updatedAt || 'N/A',
         updatedBy: item.updatedBy || 'Pick N Book',
@@ -76,6 +91,8 @@ function DiscountList() {
     return rows.filter((row) => {
       const matchesSearch =
         String(row.id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(row.code || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(row.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         String(row.type || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         String(row.remark || '').toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -92,11 +109,20 @@ function DiscountList() {
   const handleExport = () => {
     const headers = [
       'ID',
+      'Code',
+      'Title',
       'Value',
       'Discount Type',
+      'Auto Apply',
+      'Exclusive',
+      'Priority',
+      'Min Booking Amount',
+      'Start Date',
+      'End Date',
       'Entry Date',
       'Update Date',
       'Updated By',
+      'Description',
       'Remark',
       'Status',
     ];
@@ -105,11 +131,20 @@ function DiscountList() {
       headers,
       ...filteredDiscounts.map((row) => [
         row.id,
+        row.code,
+        row.title,
         row.value,
         row.type,
+        row.isAutoApply ? 'Yes' : 'No',
+        row.isExclusive ? 'Yes' : 'No',
+        row.priority,
+        row.minBookingAmount,
+        formatDate(row.startDateUtc),
+        formatDate(row.endDateUtc),
         formatDate(row.entryDate),
         formatDate(row.updateDate),
         row.updatedBy,
+        row.description,
         row.remark,
         row.status,
       ]),
@@ -183,7 +218,7 @@ function DiscountList() {
             <span>Search discounts</span>
             <input
               type="text"
-              placeholder="Search by ID, type, remark"
+              placeholder="Search by ID, code, title, type, remark"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
             />
@@ -216,11 +251,15 @@ function DiscountList() {
           <thead>
             <tr>
               <th>ID</th>
+              <th>Code</th>
+              <th>Title</th>
               <th>Discount Type</th>
               <th>Value</th>
+              <th>Auto</th>
+              <th>Priority</th>
+              <th>Min Booking</th>
+              <th>Validity</th>
               <th>Status</th>
-              <th>Entry Date</th>
-              <th>Update Date</th>
               <th>Updated By</th>
               <th>Remark</th>
               <th>Actions</th>
@@ -229,13 +268,13 @@ function DiscountList() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={9} className="empty-cell">
+                <td colSpan={13} className="empty-cell">
                   Loading discounts...
                 </td>
               </tr>
             ) : filteredDiscounts.length === 0 ? (
               <tr>
-                <td colSpan={9} className="empty-cell">
+                <td colSpan={13} className="empty-cell">
                   No discounts match your filters.
                 </td>
               </tr>
@@ -245,9 +284,19 @@ function DiscountList() {
                   <td>
                     <div className="id-chip">{row.id}</div>
                   </td>
+                  <td>{row.code || '--'}</td>
+                  <td>{row.title || '--'}</td>
                   <td>{row.type}</td>
                   <td className="amount-cell">
                     {row.type === 'Percentage' ? `${row.value}%` : `INR ${row.value}`}
+                  </td>
+                  <td>{row.isAutoApply ? 'Yes' : 'No'}{row.isExclusive ? ' / Exclusive' : ''}</td>
+                  <td>{row.priority}</td>
+                  <td>{row.minBookingAmount ? `INR ${row.minBookingAmount}` : '--'}</td>
+                  <td>
+                    {formatDate(row.startDateUtc)}
+                    <br />
+                    {formatDate(row.endDateUtc)}
                   </td>
                   <td>
                     <span className={`status-pill ${row.status.toLowerCase()}`}>
@@ -255,8 +304,6 @@ function DiscountList() {
                       {row.status}
                     </span>
                   </td>
-                  <td>{formatDate(row.entryDate)}</td>
-                  <td>{formatDate(row.updateDate)}</td>
                   <td>{row.updatedBy}</td>
                   <td className="remark-cell">{row.remark || '--'}</td>
                   <td>

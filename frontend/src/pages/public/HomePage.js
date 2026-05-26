@@ -1,16 +1,36 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeftRight,
   Bus,
+  CalendarDays,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   MessageSquareText,
+  Minus,
+  Plane,
+  Plus,
   Search,
+  Trash2,
+  Users,
   X,
 } from "lucide-react";
-import heroImage from "../../assets/images/hero-bus.png";
+import heroImage from "../../assets/images/hero.jpg";
+import flight1 from "../../assets/images/flight1.jpg";
+import flight2 from "../../assets/images/flight2.jpg";
+import flight3 from "../../assets/images/flight3.jpg";
+import flight4 from "../../assets/images/flight4.jpg";
+import airIndiaExpress from "../../assets/images/brands/air-india-express.png";
+import airIndia from "../../assets/images/brands/air-india.png";
+import akasaAir from "../../assets/images/brands/akasa-air.png";
+import airAsia from "../../assets/images/brands/airasia.png";
+import emirates from "../../assets/images/brands/emirates.png";
+import indigo from "../../assets/images/brands/indigo.png";
+import lufthansa from "../../assets/images/brands/lufthansa.png";
+import qatarAirways from "../../assets/images/brands/qatar-airways.png";
+import spiceJet from "../../assets/images/Spicejet.png";
 import { POPULAR_RTC_OPERATORS } from "../../data/popularBuses";
 import SiteFooter from "../../components/layout/SiteFooter";
 import "../../STYLES/HomePage.css";
@@ -19,6 +39,20 @@ import { getPublicFeaturedOffers, getActiveOffers } from "../../services/adminFe
 import { getPopularBusRoutesFromSearchHistory } from "../../services/busSearchHistoryService";
 import { toApiUrl } from "../../services/apiClient";
 import { usePromo } from "../../contexts/PromoContext";
+
+const CLASS_OPTIONS = [
+  "Economy",
+  "Premium Economy",
+  "Business",
+  "Premium Business",
+  "First Class",
+];
+
+const FLIGHT_TRIP_TYPES = [
+  { value: "oneway", label: "One Way" },
+  { value: "twoway", label: "Two Way" },
+  { value: "multicity", label: "Multi City" },
+];
 
 const USE_DIRECT_API_IN_DEV =
   String(process.env.REACT_APP_USE_DIRECT_API_IN_DEV || "").toLowerCase() ===
@@ -59,6 +93,89 @@ const FALLBACK_CITIES = [
   "Kolkata",
   "Ahmedabad",
   "Proddatur",  
+];
+
+const POPULAR_FLIGHTS = [
+  {
+    id: "flight-1",
+    image: flight1,
+    route: "Delhi to Mumbai",
+    summary: "Multiple daily departures and flexible timings.",
+    price: "INR 4,500",
+  },
+  {
+    id: "flight-2",
+    image: flight2,
+    route: "Delhi to New York",
+    summary: "Premium long-haul options with one-stop routes.",
+    price: "INR 35,000",
+  },
+  {
+    id: "flight-3",
+    image: flight3,
+    route: "Delhi to Dubai",
+    summary: "Fast visa-friendly routes with top carriers.",
+    price: "INR 15,000",
+  },
+  {
+    id: "flight-4",
+    image: flight4,
+    route: "Kolkata to Patna",
+    summary: "Affordable direct routes for frequent travelers.",
+    price: "INR 3,500",
+  },
+  {
+    id: "flight-5",
+    image: flight1,
+    route: "Pune to Chennai",
+    summary: "Quick connections with excellent morning slots.",
+    price: "INR 5,200",
+  },
+  {
+    id: "flight-6",
+    image: flight2,
+    route: "Bangalore to Jaipur",
+    summary: "Business and economy seats available every day.",
+    price: "INR 6,400",
+  },
+  {
+    id: "flight-7",
+    image: flight3,
+    route: "Hyderabad to Kolkata",
+    summary: "Convenient schedules for weekend travel plans.",
+    price: "INR 5,900",
+  },
+  {
+    id: "flight-8",
+    image: flight4,
+    route: "Mumbai to Doha",
+    summary: "Competitive fares on popular Gulf routes.",
+    price: "INR 18,300",
+  },
+   {
+    id: "flight-9",
+    image: flight3,
+    route: "Hyderabad to Proddatur",
+    summary: "Competitive fares on most Gulf routes.",
+    price: "INR 8,300",
+  },
+];
+
+const AIRLINE_BRANDS = [
+  { id: "brand-1", image: indigo, name: "IndiGo", scale: 1.2 },
+  { id: "brand-2", image: airIndia, name: "Air India", scale: 1.34 },
+  { id: "brand-3", image: airAsia, name: "AirAsia", scale: 1.08 },
+  { id: "brand-4", image: akasaAir, name: "Akasa Air", scale: 1.18 },
+  { id: "brand-5", image: emirates, name: "Emirates", scale: 1.08 },
+  { id: "brand-6", image: qatarAirways, name: "Qatar Airways", scale: 1.16 },
+  { id: "brand-7", image: lufthansa, name: "Lufthansa", scale: 1.1 },
+  { id: "brand-8", image: spiceJet, name: "SpiceJet", scale: 1.14 },
+  {
+    id: "brand-9",
+    image: airIndiaExpress,
+    name: "Air India Express",
+    scale: 1.08,
+  },
 ];
 
 const REVIEWS = [
@@ -146,6 +263,33 @@ function getDateInputValue(offsetDays = 0) {
   return new Date(date.getTime() - timezoneOffset).toISOString().slice(0, 10);
 }
 
+function createMultiCityLeg(from, to, offsetDays) {
+  return {
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    from,
+    to,
+    departureDate: getDateInputValue(offsetDays),
+  };
+}
+
+function formatTravellerSummary(adults, children, infants) {
+  if (adults <= 0 && children <= 0 && infants <= 0) {
+    return "";
+  }
+
+  const parts = [`${adults} Adult${adults > 1 ? "s" : ""}`];
+
+  if (children > 0) {
+    parts.push(`${children} Child${children > 1 ? "ren" : ""}`);
+  }
+
+  if (infants > 0) {
+    parts.push(`${infants} Infant${infants > 1 ? "s" : ""}`);
+  }
+
+  return parts.join(", ");
+}
+
 function getStaticAiReply(message) {
   const normalized = message.toLowerCase();
 
@@ -154,7 +298,15 @@ function getStaticAiReply(message) {
     normalized.includes("hello") ||
     normalized.includes("hey")
   ) {
-    return "Hello. I can help with bus routes, fares, seats, and booking flow questions.";
+    return "Hello. I can help with flights, buses, fares, and booking flow questions.";
+  }
+
+  if (
+    normalized.includes("flight") ||
+    normalized.includes("airline") ||
+    normalized.includes("plane")
+  ) {
+    return "For flights, share source, destination, and travel dates. I can suggest one-way, round-trip, or multi-city flow.";
   }
 
   if (
@@ -190,7 +342,7 @@ function getInitialAiChatMessages() {
     {
       id: `ai-welcome-${Date.now()}-${Math.random().toString(16).slice(2)}`,
       role: "assistant",
-      text: "Hi, I am Travel AI. Ask me anything about bus bookings.",
+      text: "Hi, I am Travel AI. Ask me anything about flights or bus bookings.",
     },
   ];
 }
@@ -640,10 +792,14 @@ function PlaceAutocomplete({
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") === "buses" ? "buses" : "flights";
+
   const { selectedOffer, setSelectedOffer } = usePromo();
   const aiChatMessagesRef = useRef(null);
   const aiReplyTimerRef = useRef(null);
 
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [isAiChatOpen, setIsAiChatOpen] = useState(false);
   const [aiChatInput, setAiChatInput] = useState("");
   const [isAiTyping, setIsAiTyping] = useState(false);
@@ -651,15 +807,42 @@ export default function HomePage() {
     getInitialAiChatMessages,
   );
 
+  const [flightTripType, setFlightTripType] = useState("oneway");
+  const [flightFrom, setFlightFrom] = useState("");
+  const [flightTo, setFlightTo] = useState("");
+  const [flightFromError, setFlightFromError] = useState("");
+  const [flightToError, setFlightToError] = useState("");
+  const [flightDepartureDate, setFlightDepartureDate] = useState(() =>
+    getDateInputValue(0),
+  );
+  const [flightReturnDate, setFlightReturnDate] = useState(() =>
+    getDateInputValue(3),
+  );
+
+  const [adults, setAdults] = useState(1);
+  const [children, setChildren] = useState(0);
+  const [infants, setInfants] = useState(0);
+  const [cabinClass, setCabinClass] = useState("Economy");
+  const [showTravellerDropdown, setShowTravellerDropdown] = useState(false);
+  const travellerFieldRef = useRef(null);
+
+  const [multiCityLegs, setMultiCityLegs] = useState(() => [
+    createMultiCityLeg("", "", 0),
+    createMultiCityLeg("", "", 2),
+  ]);
+
   const [busTripType, setBusTripType] = useState("oneway");
   const [busFrom, setBusFrom] = useState("");
   const [busTo, setBusTo] = useState("");
+  const [busFromError, setBusFromError] = useState("");
+  const [busToError, setBusToError] = useState("");
   const [busDepartureDate, setBusDepartureDate] = useState(() =>
     getDateInputValue(0),
   );
   const [busReturnDate, setBusReturnDate] = useState(() =>
     getDateInputValue(1),
   );
+
   const [featuredOffers, setFeaturedOffers] = useState([]);
   const [featuredOffersLoading, setFeaturedOffersLoading] = useState(false);
   const [featuredOffersError, setFeaturedOffersError] = useState("");
@@ -667,6 +850,29 @@ export default function HomePage() {
   const [popularRoutesLoading, setPopularRoutesLoading] = useState(false);
   const [popularRoutesError, setPopularRoutesError] = useState("");
   const [isDealsDialogOpen, setIsDealsDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab") === "buses" ? "buses" : "flights";
+    setActiveTab(tab);
+  }, [searchParams]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        travellerFieldRef.current &&
+        !travellerFieldRef.current.contains(event.target)
+      ) {
+        setShowTravellerDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    setShowTravellerDropdown(false);
+  }, [activeTab, flightTripType]);
 
   useEffect(() => {
     if (!isDealsDialogOpen || typeof document === "undefined") {
@@ -763,7 +969,8 @@ export default function HomePage() {
       setFeaturedOffersError("");
 
       try {
-        const response = await getActiveOffers("Bus");
+        const bookingType = activeTab === "buses" ? "Bus" : "Flight";
+        const response = await getActiveOffers(bookingType);
         const activeOffers = getFeaturedOffersPayload(response)
           .map(normalizeFeaturedOffer)
           .filter((offer) => offer.isActive);
@@ -786,7 +993,7 @@ export default function HomePage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [activeTab]);
 
   useEffect(() => {
     let isMounted = true;
@@ -818,6 +1025,19 @@ export default function HomePage() {
     };
   }, []);
 
+  const handleSwapFlights = () => {
+    setFlightFrom(flightTo);
+    setFlightTo(flightFrom);
+  };
+
+  const handleBookingTabChange = (nextTab) => {
+    const normalizedTab = nextTab === "buses" ? "buses" : "flights";
+    setActiveTab(normalizedTab);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("tab", normalizedTab);
+    setSearchParams(nextParams, { replace: true });
+  };
+
   const handleSwapBuses = () => {
     setBusFrom(busTo);
     setBusTo(busFrom);
@@ -827,7 +1047,81 @@ export default function HomePage() {
     navigate(`/popular-buses/${operatorId}`);
   };
 
+  const changeAdults = (delta) => {
+    setAdults((previous) => {
+      const next = Math.min(9, Math.max(0, previous + delta));
+
+      if (next === 0) {
+        setChildren(0);
+        setInfants(0);
+        return 0;
+      }
+
+      setInfants((previousInfants) => Math.min(previousInfants, next));
+      return next;
+    });
+  };
+
+  const changeChildren = (delta) => {
+    setChildren((previous) => Math.min(8, Math.max(0, previous + delta)));
+  };
+
+  const changeInfants = (delta) => {
+    setInfants((previous) => {
+      const candidate = previous + delta;
+      return Math.max(0, Math.min(adults, candidate));
+    });
+  };
+
+  const updateMultiCityLeg = (legId, field, value) => {
+    setMultiCityLegs((previousLegs) =>
+      previousLegs.map((leg) =>
+        leg.id === legId ? { ...leg, [field]: value } : leg,
+      ),
+    );
+  };
+
+  const addMultiCityLeg = () => {
+    setMultiCityLegs((previousLegs) => {
+      const lastLeg = previousLegs[previousLegs.length - 1];
+      const defaultFrom = lastLeg ? lastLeg.to : "";
+
+      return [
+        ...previousLegs,
+        createMultiCityLeg(defaultFrom, "Mumbai", previousLegs.length + 1),
+      ];
+    });
+  };
+
+  const removeMultiCityLeg = (legId) => {
+    setMultiCityLegs((previousLegs) =>
+      previousLegs.length === 1
+        ? previousLegs
+        : previousLegs.filter((leg) => leg.id !== legId),
+    );
+  };
+
+  const isFlightTwoWay = flightTripType === "twoway";
   const isBusTwoWay = busTripType === "twoway";
+  const travellerSummary = formatTravellerSummary(adults, children, infants);
+  const hasTravellerSelection = Boolean(travellerSummary);
+
+  const navigateToFlightSearch = (flightPayload) => {
+    const flightParams = new URLSearchParams();
+
+    Object.entries(flightPayload).forEach(([key, value]) => {
+      if (typeof value === "string" && value.trim()) {
+        flightParams.set(key, value.trim());
+      }
+    });
+
+    navigate(
+      `/search/flights${
+        flightParams.toString() ? `?${flightParams.toString()}` : ""
+      }`,
+      { state: flightPayload },
+    );
+  };
 
   const navigateToBusSearch = (busPayload) => {
     const busParams = new URLSearchParams();
@@ -847,13 +1141,24 @@ export default function HomePage() {
   const handleOfferBooking = (offer) => {
     setIsDealsDialogOpen(false);
     setSelectedOffer(offer);
-    const bookingType = normalizeBookingType(offer?.bookingType);
 
-    navigateToBusSearch({
-      source: bookingType === "bus" ? "Hyderabad" : "",
-      destination: bookingType === "bus" ? "Vijayawada" : "",
+    if (offer.bookingType === "bus" || offer.bookingType === "Bus") {
+      navigateToBusSearch({
+        source: "",
+        destination: "",
+        tripType: "oneway",
+        departureDate: getDateInputValue(0),
+      });
+      return;
+    }
+
+    navigateToFlightSearch({
+      source: "",
+      destination: "",
       tripType: "oneway",
       departureDate: getDateInputValue(0),
+      travellers: "1 Adult",
+      cabinClass: "Economy",
     });
   };
 
@@ -866,10 +1171,136 @@ export default function HomePage() {
     });
   };
 
+  const handlePopularFlightBooking = (popularFlight) => {
+    const [sourceRaw, destinationRaw] = String(popularFlight.route || "").split(
+      /\s+to\s+/i,
+    );
+    const source = sourceRaw?.trim() || "Delhi";
+    const destination = destinationRaw?.trim() || "Mumbai";
+
+    navigateToFlightSearch({
+      source,
+      destination,
+      tripType: "oneway",
+      departureDate: getDateInputValue(0),
+      travellers: "1 Adult",
+      cabinClass: "Economy",
+    });
+  };
+
+  const handleBusFromChange = (value) => {
+    setBusFrom(value);
+    if (value.trim()) {
+      setBusFromError("");
+    }
+  };
+
+  const handleBusToChange = (value) => {
+    setBusTo(value);
+    if (value.trim()) {
+      setBusToError("");
+    }
+  };
+
+  const handleFlightFromChange = (value) => {
+    setFlightFrom(value);
+    if (value.trim()) {
+      setFlightFromError("");
+    }
+  };
+
+  const handleFlightToChange = (value) => {
+    setFlightTo(value);
+    if (value.trim()) {
+      setFlightToError("");
+    }
+  };
+
   const handleSearch = () => {
+    if (activeTab === "flights") {
+      const isMultiCity = flightTripType === "multicity";
+      let hasError = false;
+
+      if (isMultiCity) {
+        const validatedLegs = multiCityLegs.map(leg => {
+          if (!leg.from.trim() || !leg.to.trim()) {
+            hasError = true;
+          }
+          return leg;
+        });
+        if (hasError) {
+          alert("Please fill all source and destination cities for multi-city legs.");
+          return;
+        }
+      } else {
+        const fromVal = flightFrom.trim();
+        const toVal = flightTo.trim();
+
+        if (!fromVal) {
+          setFlightFromError("Source city is required.");
+          hasError = true;
+        } else {
+          setFlightFromError("");
+        }
+
+        if (!toVal) {
+          setFlightToError("Destination city is required.");
+          hasError = true;
+        } else {
+          setFlightToError("");
+        }
+
+        if (hasError) {
+          return;
+        }
+      }
+
+      const source = isMultiCity ? multiCityLegs[0]?.from || "" : flightFrom;
+      const destination = isMultiCity
+        ? multiCityLegs[multiCityLegs.length - 1]?.to || ""
+        : flightTo;
+      const departureDate = isMultiCity
+        ? multiCityLegs[0]?.departureDate || ""
+        : flightDepartureDate;
+
+      const flightPayload = {
+        source: source.trim(),
+        destination: destination.trim(),
+        tripType: flightTripType,
+        departureDate: departureDate.trim(),
+        returnDate: flightTripType === "twoway" ? flightReturnDate.trim() : "",
+        travellers: travellerSummary,
+        cabinClass,
+      };
+      navigateToFlightSearch(flightPayload);
+      return;
+    }
+
+    const fromVal = busFrom.trim();
+    const toVal = busTo.trim();
+
+    let hasError = false;
+    if (!fromVal) {
+      setBusFromError("Source city is required.");
+      hasError = true;
+    } else {
+      setBusFromError("");
+    }
+
+    if (!toVal) {
+      setBusToError("Destination city is required.");
+      hasError = true;
+    } else {
+      setBusToError("");
+    }
+
+    if (hasError) {
+      return;
+    }
+
     const busPayload = {
-      source: busFrom.trim(),
-      destination: busTo.trim(),
+      source: fromVal,
+      destination: toVal,
       tripType: busTripType,
       departureDate: busDepartureDate.trim(),
       returnDate: busTripType === "twoway" ? busReturnDate.trim() : "",
@@ -925,6 +1356,129 @@ export default function HomePage() {
 
   const canResetAiChat =
     isAiTyping || aiChatInput.trim().length > 0 || aiChatMessages.length > 1;
+
+  const travellerField = (
+    <div className="field traveller-field" ref={travellerFieldRef}>
+      <label>Travellers</label>
+      <button
+        type="button"
+        className={`traveller-trigger ${showTravellerDropdown ? "open" : ""}`}
+        onClick={() => setShowTravellerDropdown((previous) => !previous)}
+      >
+        <span
+          className={`traveller-summary ${
+            hasTravellerSelection ? "" : "placeholder"
+          }`}
+        >
+          <Users size={16} />
+          <span>
+            {hasTravellerSelection ? travellerSummary : "Select travellers"}
+          </span>
+        </span>
+        <ChevronDown
+          size={16}
+          className={`traveller-caret ${showTravellerDropdown ? "open" : ""}`}
+        />
+      </button>
+
+      {showTravellerDropdown && (
+        <div className="traveller-dropdown">
+          <div className="counter-row">
+            <div className="counter-copy">
+              <strong>Adults</strong>
+              <span>12 years and above</span>
+            </div>
+            <div className="counter-box">
+              <button
+                type="button"
+                onClick={() => changeAdults(-1)}
+                disabled={adults <= 0}
+              >
+                <Minus size={14} />
+              </button>
+              <span>{adults}</span>
+              <button type="button" onClick={() => changeAdults(1)}>
+                <Plus size={14} />
+              </button>
+            </div>
+          </div>
+
+          <div className="counter-row">
+            <div className="counter-copy">
+              <strong>Child</strong>
+              <span>2 to 11 years</span>
+            </div>
+            <div className="counter-box">
+              <button
+                type="button"
+                onClick={() => changeChildren(-1)}
+                disabled={children <= 0}
+              >
+                <Minus size={14} />
+              </button>
+              <span>{children}</span>
+              <button
+                type="button"
+                onClick={() => changeChildren(1)}
+                disabled={adults <= 0}
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+          </div>
+
+          <div className="counter-row">
+            <div className="counter-copy">
+              <strong>Infant</strong>
+              <span>Under 2 years</span>
+            </div>
+            <div className="counter-box">
+              <button
+                type="button"
+                onClick={() => changeInfants(-1)}
+                disabled={infants <= 0}
+              >
+                <Minus size={14} />
+              </button>
+              <span>{infants}</span>
+              <button
+                type="button"
+                onClick={() => changeInfants(1)}
+                disabled={adults <= 0 || infants >= adults}
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="traveller-done"
+            onClick={() => setShowTravellerDropdown(false)}
+          >
+            Done
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
+  const classField = (
+    <div className="field class-field">
+      <label>Class</label>
+      <select
+        value={cabinClass}
+        onChange={(event) => setCabinClass(event.target.value)}
+        className="field-control"
+      >
+        {CLASS_OPTIONS.map((item) => (
+          <option key={item} value={item}>
+            {item}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
 
   return (
     <div className="homepage">
@@ -1190,7 +1744,7 @@ export default function HomePage() {
               <span className="hero-kicker">Smart Travel Studio</span>
               <h1>Book bolder journeys with one unified travel desk.</h1>
               <p>
-                Compare bus options, choose one-way or return routes, and
+                Compare flights and buses, mix one-way or multi-city routes, and
                 confirm tickets in seconds with transparent pricing.
               </p>
 
@@ -1215,14 +1769,221 @@ export default function HomePage() {
             <div className="search-panel">
               <div className="tabs-wrap">
                 <div className="tabs" role="tablist" aria-label="Booking type">
-                  <button type="button" className="tab active">
+                  <button
+                    type="button"
+                    className={`tab ${activeTab === "flights" ? "active" : ""}`}
+                    onClick={() => handleBookingTabChange("flights")}
+                  >
+                    <Plane size={17} />
+                    <span>Flights</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`tab ${activeTab === "buses" ? "active" : ""}`}
+                    onClick={() => handleBookingTabChange("buses")}
+                  >
                     <Bus size={17} />
                     <span>Buses</span>
                   </button>
                 </div>
               </div>
 
-              <div className="booking-content">
+              {activeTab === "flights" ? (
+                <div className="booking-content">
+                  <div
+                    className="trip-switch"
+                    role="tablist"
+                    aria-label="Flight trip type"
+                  >
+                    {FLIGHT_TRIP_TYPES.map((tripType) => (
+                      <button
+                        key={tripType.value}
+                        type="button"
+                        className={`trip-chip ${
+                          flightTripType === tripType.value ? "active" : ""
+                        }`}
+                        onClick={() => setFlightTripType(tripType.value)}
+                      >
+                        {tripType.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {flightTripType === "multicity" ? (
+                    <div className="multi-city-list">
+                      {multiCityLegs.map((leg) => (
+                        <div className="multi-city-row" key={leg.id}>
+                          <PlaceAutocomplete
+                            label="Source"
+                            value={leg.from}
+                            onChange={(nextValue) =>
+                              updateMultiCityLeg(leg.id, "from", nextValue)
+                            }
+                            tripType="flight"
+                            field="from"
+                            placeholder="Type source city"
+                          />
+
+                          <PlaceAutocomplete
+                            label="Destination"
+                            value={leg.to}
+                            onChange={(nextValue) =>
+                              updateMultiCityLeg(leg.id, "to", nextValue)
+                            }
+                            tripType="flight"
+                            field="to"
+                            placeholder="Type destination city"
+                          />
+
+                          <div className="field field-with-icon" style={{ position: "relative" }}>
+                            <label>Departure</label>
+                            <input
+                              type="text"
+                              readOnly
+                              value={toDisplayDate(leg.departureDate)}
+                              placeholder="DD-MM-YYYY"
+                              className="field-control"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => document.getElementById(`leg-dep-date-${leg.id}`).showPicker?.()}
+                            />
+                            <input
+                              id={`leg-dep-date-${leg.id}`}
+                              type="date"
+                              value={leg.departureDate}
+                              onChange={(event) =>
+                                updateMultiCityLeg(
+                                  leg.id,
+                                  "departureDate",
+                                  event.target.value
+                                )
+                              }
+                              style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
+                            />
+                          </div>
+
+                          <div
+                            className="multi-actions"
+                            aria-label="Multi-city row actions"
+                          >
+                            <button
+                              type="button"
+                              className="action-circle action-add"
+                              onClick={addMultiCityLeg}
+                              title="Add row"
+                            >
+                              <Plus size={16} />
+                            </button>
+
+                            <button
+                              type="button"
+                              className="action-circle action-delete"
+                              onClick={() => removeMultiCityLeg(leg.id)}
+                              title="Delete row"
+                              disabled={multiCityLegs.length === 1}
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      <div className="multi-footer-row">
+                        {travellerField}
+                        {classField}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="search-grid standard-grid">
+                      <PlaceAutocomplete
+                        label="Source"
+                        value={flightFrom}
+                        onChange={handleFlightFromChange}
+                        tripType="flight"
+                        field="from"
+                        placeholder="Type source city"
+                        error={flightFromError}
+                      />
+
+                      <div className="swap-field">
+                        <button
+                          type="button"
+                          className="swap-btn"
+                          onClick={handleSwapFlights}
+                          aria-label="Swap flight origin and destination"
+                        >
+                          <ArrowLeftRight size={16} />
+                        </button>
+                      </div>
+
+                      <PlaceAutocomplete
+                        label="Destination"
+                        value={flightTo}
+                        onChange={handleFlightToChange}
+                        tripType="flight"
+                        field="to"
+                        placeholder="Type destination city"
+                        error={flightToError}
+                      />
+
+                      <div className="field field-with-icon" style={{ position: "relative" }}>
+                        <label>Departure</label>
+                        <input
+                          type="text"
+                          readOnly
+                          value={toDisplayDate(flightDepartureDate)}
+                          placeholder="DD-MM-YYYY"
+                          className="field-control"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => document.getElementById("flight-dep-date").showPicker?.()}
+                        />
+                        <input
+                          id="flight-dep-date"
+                          type="date"
+                          value={flightDepartureDate}
+                          onChange={(event) => setFlightDepartureDate(event.target.value)}
+                          style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
+                        />
+                      </div>
+
+                      <div className="field field-with-icon" style={{ position: "relative" }}>
+                        <label>Return</label>
+                        {isFlightTwoWay ? (
+                          <>
+                            <input
+                              type="text"
+                              readOnly
+                              value={toDisplayDate(flightReturnDate)}
+                              placeholder="DD-MM-YYYY"
+                              className="field-control"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => document.getElementById("flight-ret-date").showPicker?.()}
+                            />
+                            <input
+                              id="flight-ret-date"
+                              type="date"
+                              value={flightReturnDate}
+                              onChange={(event) => setFlightReturnDate(event.target.value)}
+                              style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
+                            />
+                          </>
+                        ) : (
+                          <input
+                            type="text"
+                            className="field-control watermark-field"
+                            value="Available for two way"
+                            disabled
+                          />
+                        )}
+                      </div>
+
+                      {travellerField}
+                      {classField}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="booking-content">
                   <div
                     className="trip-switch"
                     role="tablist"
@@ -1246,10 +2007,11 @@ export default function HomePage() {
                     <PlaceAutocomplete
                       label="Source"
                       value={busFrom}
-                      onChange={setBusFrom}
+                      onChange={handleBusFromChange}
                       tripType="bus"
                       field="from"
                       placeholder="Type source city"
+                      error={busFromError}
                     />
 
                     <div className="swap-field">
@@ -1266,65 +2028,66 @@ export default function HomePage() {
                     <PlaceAutocomplete
                       label="Destination"
                       value={busTo}
-                      onChange={setBusTo}
+                      onChange={handleBusToChange}
                       tripType="bus"
                       field="to"
                       placeholder="Type destination city"
+                      error={busToError}
                     />
 
-                 <div className="field field-with-icon" style={{ position: "relative" }}>
-  <label>Departure</label>
-  <input
-    type="text"
-    readOnly
-    value={toDisplayDate(busDepartureDate)}
-    placeholder="DD-MM-YYYY"
-    className="field-control"
-    style={{ cursor: "pointer" }}
-    onClick={() => document.getElementById("bus-dep-date").showPicker?.()}
-  />
-  <input
-    id="bus-dep-date"
-    type="date"
-    value={busDepartureDate}
-    onChange={(event) => setBusDepartureDate(event.target.value)}
-    style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
-  />
-</div>
+                    <div className="field field-with-icon" style={{ position: "relative" }}>
+                      <label>Departure</label>
+                      <input
+                        type="text"
+                        readOnly
+                        value={toDisplayDate(busDepartureDate)}
+                        placeholder="DD-MM-YYYY"
+                        className="field-control"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => document.getElementById("bus-dep-date").showPicker?.()}
+                      />
+                      <input
+                        id="bus-dep-date"
+                        type="date"
+                        value={busDepartureDate}
+                        onChange={(event) => setBusDepartureDate(event.target.value)}
+                        style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
+                      />
+                    </div>
 
-                    <div className="field field-with-icon">
+                    <div className="field field-with-icon" style={{ position: "relative" }}>
                       <label>Return</label>
-                     {isBusTwoWay ? (
-  <div style={{ position: "relative" }}>
-    <input
-      type="text"
-      readOnly
-      value={toDisplayDate(busReturnDate)}
-      placeholder="DD-MM-YYYY"
-      className="field-control"
-      style={{ cursor: "pointer" }}
-      onClick={() => document.getElementById("bus-ret-date").showPicker?.()}
-    />
-    <input
-      id="bus-ret-date"
-      type="date"
-      value={busReturnDate}
-      onChange={(event) => setBusReturnDate(event.target.value)}
-      style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
-    />
-  </div>
+                      {isBusTwoWay ? (
+                        <>
+                          <input
+                            type="text"
+                            readOnly
+                            value={toDisplayDate(busReturnDate)}
+                            placeholder="DD-MM-YYYY"
+                            className="field-control"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => document.getElementById("bus-ret-date").showPicker?.()}
+                          />
+                          <input
+                            id="bus-ret-date"
+                            type="date"
+                            value={busReturnDate}
+                            onChange={(event) => setBusReturnDate(event.target.value)}
+                            style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
+                          />
+                        </>
                       ) : (
                         <input
                           type="text"
                           className="field-control watermark-field"
-                          value=""
-                          placeholder="Return date available for Two Way"
+                          value="Available for two way"
                           disabled
                         />
                       )}
                     </div>
                   </div>
                 </div>
+              )}
 
               <button
                 type="button"
@@ -1506,6 +2269,63 @@ export default function HomePage() {
             )}
           />
         </div>
+      </section>
+
+      <section className="popular-section section-shell">
+        <div className="section-header">
+          <div>
+            <span className="section-kicker">Popular Picks</span>
+            <h2>Trending Flight Routes</h2>
+          </div>
+        </div>
+
+        <AutoMarquee
+          items={POPULAR_FLIGHTS}
+          className="popular-marquee"
+          duration={44}
+          renderItem={(flight) => (
+            <article className="popular-card">
+              <img src={flight.image} alt={flight.route} />
+              <div className="popular-content">
+                <h3>{flight.route}</h3>
+                <p>{flight.summary}</p>
+                <span>{flight.price}</span>
+                <button
+                  type="button"
+                  onClick={() => handlePopularFlightBooking(flight)}
+                >
+                  Book flight
+                </button>
+              </div>
+            </article>
+          )}
+        />
+      </section>
+
+      <section className="brands-section section-shell">
+        <div className="section-header">
+          <div>
+            <span className="section-kicker">Trusted Partners</span>
+            <h2>Airline Brands</h2>
+          </div>
+        </div>
+
+        <AutoMarquee
+          items={AIRLINE_BRANDS}
+          className="brand-marquee"
+          duration={30}
+          renderItem={(brand) => (
+            <article className="brand-slide">
+              <img
+                src={brand.image}
+                alt={brand.name}
+                className="brand-logo"
+                style={{ "--brand-scale": brand.scale }}
+              />
+              <span>{brand.name}</span>
+            </article>
+          )}
+        />
       </section>
 
       <section className="reviews-section section-shell">

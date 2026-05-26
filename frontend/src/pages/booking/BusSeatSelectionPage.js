@@ -1115,6 +1115,7 @@ export default function BusSeatSelectionPage() {
     const isSelected = selectedSeatLabels.includes(seat.label);
     const isDimmed = activeFareFilter !== "all" && Number(activeFareFilter) !== seat.fare;
     const isBookedFemale = seat.status === "booked" && seat.bookedGender === "Female";
+    const isBookedMale = seat.status === "booked" && seat.bookedGender === "Male";
     const isNextToBookedFemale =
       seat.status !== "booked" &&
       (seat.bookedGender === "Female" ||
@@ -1122,12 +1123,21 @@ export default function BusSeatSelectionPage() {
           const adjacentSeat = seatsByLabel.get(adjacentLabel);
           return adjacentSeat?.status === "booked" && adjacentSeat?.bookedGender === "Female";
         }));
+    const isNextToBookedMale =
+      seat.status !== "booked" &&
+      (seat.bookedGender === "Male" ||
+        getAdjacentSeatLabelsFromRows(seat.label, allSeatRows).some((adjacentLabel) => {
+          const adjacentSeat = seatsByLabel.get(adjacentLabel);
+          return adjacentSeat?.status === "booked" && adjacentSeat?.bookedGender === "Male";
+        }));
     const className = [
       "bus-flow-seat",
       seat.kind === "sleeper" ? "bus-flow-seat--sleeper" : "bus-flow-seat--seater",
       `status-${seat.status}`,
       isBookedFemale ? "status-booked-female" : "",
+      isBookedMale ? "status-booked-male" : "",
       isNextToBookedFemale ? "status-female-adjacent" : "",
+      isNextToBookedMale ? "status-male-adjacent" : "",
       isSelected ? "status-selected" : "",
       isDimmed ? "is-dimmed" : "",
     ]
@@ -1148,6 +1158,7 @@ export default function BusSeatSelectionPage() {
             status: seat.status,
             bookedGender: seat.bookedGender,
             isNextToBookedFemale,
+            isNextToBookedMale,
             x: event.clientX,
             y: event.clientY,
           })
@@ -1170,6 +1181,8 @@ export default function BusSeatSelectionPage() {
         <div className="seat-details">
           {seat.status === "booked" && isBookedFemale ? (
             <span>F</span>
+          ) : seat.status === "booked" && isBookedMale ? (
+            <span>M</span>
           ) : seat.status === "booked" ? (
             <span>X</span>
           ) : (
@@ -1179,6 +1192,7 @@ export default function BusSeatSelectionPage() {
       </button>
     );
   };
+
 
   const renderHorizontalDeck = (deckName, rows, deckClassName, emptyMessage) => {
     const laneCount = Math.max(...rows.map((row) => row.length), 0);
@@ -1470,6 +1484,8 @@ export default function BusSeatSelectionPage() {
                   <span className="legend booked">Booked Seats</span>
                   <span className="legend female-booked">Female Booked</span>
                   <span className="legend female-adjacent">Beside Female</span>
+                  <span className="legend male-booked">Male Booked</span>
+                  <span className="legend male-adjacent">Beside Male</span>
                   <span className="legend selected">Selected Seats</span>
                 </div>
               </header>
@@ -1545,8 +1561,11 @@ export default function BusSeatSelectionPage() {
                 >
                   Seat No: {hoveredSeat.displayLabel || hoveredSeat.label} |{" "}
                   {hoveredSeat.status === "booked" && hoveredSeat.bookedGender === "Female" && "Female Booked | "}
+                  {hoveredSeat.status === "booked" && hoveredSeat.bookedGender === "Male" && "Male Booked | "}
                   {hoveredSeat.status !== "booked" && hoveredSeat.bookedGender === "Female" && "Female Available | "}
+                  {hoveredSeat.status !== "booked" && hoveredSeat.bookedGender === "Male" && "Male Available | "}
                   {hoveredSeat.status !== "booked" && hoveredSeat.bookedGender !== "Female" && hoveredSeat.isNextToBookedFemale && "Beside Female Seat | "}
+                  {hoveredSeat.status !== "booked" && hoveredSeat.bookedGender !== "Male" && hoveredSeat.isNextToBookedMale && "Beside Male Seat | "}
                   Fare: {formatCurrency(hoveredSeat.fare)}
                 </div>
               )}

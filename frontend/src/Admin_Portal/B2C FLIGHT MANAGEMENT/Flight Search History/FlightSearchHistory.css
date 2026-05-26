@@ -1,0 +1,30 @@
+.admin-flight-search-history-page .admin-search-history-table-head,
+.admin-flight-search-history-page .admin-search-history-row {
+  grid-template-columns: 0.92fr 2.5fr 0.82fr 1.15fr 0.45fr;
+}
+
+.admin-flight-search-history-page .admin-search-history-cell small {
+  font-size: 0.76rem;
+  color: var(--admin-muted);
+}
+
+.admin-flight-search-view-btn {
+  min-width: 36px;
+  padding: 0 !important;
+  display: grid;
+  place-items: center;
+}
+
+@media (max-width: 820px) {
+  .admin-flight-search-history-page .admin-search-history-table-head,
+  .admin-flight-search-history-page .admin-search-history-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-flight-search-history-page .admin-search-history-table-head,
+  .admin-flight-search-history-page .admin-search-history-row {
+    grid-template-columns: 1fr;
+  }
+}

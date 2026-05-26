@@ -9,14 +9,14 @@
   --auth-orange-border: #f7b39d;
   --auth-text: #18233a;
   --auth-muted: #315177;
-  --auth-blue: var(--theme-navy, #1f2a44);
-  --auth-link-blue: var(--theme-primary, #f04423);
+  --auth-blue: #0b3a78;
+  --auth-link-blue: #3f7ed8;
   --auth-label-size: 15px;
   --auth-input-size: 15.5px;
   --auth-helper-size: 14px;
   --auth-captcha-size: 17px;
   --auth-error: #dc2626;
-  --auth-success-blue: var(--theme-primary, #f04423);
+  --auth-success-blue: #185fbc;
 }
 
 input:-webkit-autofill,
@@ -340,11 +340,6 @@ input:-webkit-autofill:focus {
   box-shadow: none;  
 }
 
-.travel-field-line.has-error {
-  border-color: var(--auth-error);
-  background: #fff5f5;
-}
-
 .travel-captcha-refresh {
   background: linear-gradient(180deg, var(--auth-orange) 0%, var(--auth-orange-strong) 100%);
   color: #fff;
@@ -374,7 +369,8 @@ input:-webkit-autofill:focus {
 
 .travel-auth-links button:hover {
   text-decoration: underline;
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1px;
+  color: #2466c8;
 }
 
 .travel-auth-links {
@@ -388,9 +384,12 @@ input:-webkit-autofill:focus {
   border: none;
   background: transparent;
   font-size: var(--auth-helper-size);
+  font-weight: 500;
   cursor: pointer;
   color: var(--auth-link-blue);
   text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
   padding: 0;
   margin: 10px 0;
 }
@@ -549,7 +548,8 @@ input:-webkit-autofill:focus {
 
 .travel-auth-login .travel-auth-links button {
   font-size: var(--auth-helper-size);
-  font-weight: 700;
+  font-weight: 500;
+  color: var(--auth-link-blue);
 }
 
 .travel-auth-login .travel-auth-actions {

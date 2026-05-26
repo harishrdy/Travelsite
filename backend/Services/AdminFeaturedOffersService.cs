@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PickNBook.Api.Data;
 using PickNBook.Api.Models;
 using PickNBook.Api.Models.DTOs;
@@ -60,7 +60,9 @@ namespace PickNBook.Api.Services
                 Title = request.Title,
                 Subtitle = request.Subtitle,
                 Description = request.Description,
-                CouponCode = request.CouponCode,
+                CouponId = request.CouponId,
+                CouponCode = null,
+                //CouponCode = request.CouponCode,
                 BasePrice = request.BasePrice,
                 IsPercentageDiscount =
                     request.IsPercentageDiscount,
@@ -74,13 +76,34 @@ namespace PickNBook.Api.Services
                     request.CouponUsedCount,
                 IsActive =
                     request.IsActive,
+                PromotionId = request.PromotionId,
                 BookingType =
                     request.BookingType,
                 ImageUrl = imageUrl,
                 CreatedAtUtc = DateTime.UtcNow,
-                UpdatedAtUtc = DateTime.UtcNow
+                UpdatedAtUtc = DateTime.UtcNow,
+                DisplayOrder = request.DisplayOrder,
+                StartDateUtc = request.StartDateUtc,
+                EndDateUtc = request.EndDateUtc,
             };
+            if (!request.CouponId.HasValue)
+            {
+                throw new Exception(
+                    "Featured offer must be linked to a coupon");
+            }
 
+            var coupon = await _context.BusCoupons
+                .FirstOrDefaultAsync(x =>
+                    x.Id == request.CouponId.Value);
+
+            if (coupon == null)
+            {
+                throw new Exception(
+                    "Invalid coupon selected");
+            }
+
+            offer.CouponCode =
+                coupon.CouponCode;
             _context.FeaturedOffers.Add(offer);
 
             await _context.SaveChangesAsync();
@@ -104,7 +127,32 @@ namespace PickNBook.Api.Services
             offer.Title = request.Title;
             offer.Subtitle = request.Subtitle;
             offer.Description = request.Description;
-            offer.CouponCode = request.CouponCode;
+            offer.CouponId = request.CouponId;
+
+            offer.CouponCode = null;
+
+            if (!request.CouponId.HasValue)
+            {
+                throw new Exception(
+                    "Featured offer must be linked to a coupon");
+            }
+
+            offer.CouponId = request.CouponId;
+
+            offer.CouponCode = null;
+
+            var coupon = await _context.BusCoupons
+                .FirstOrDefaultAsync(x =>
+                    x.Id == request.CouponId.Value);
+
+            if (coupon == null)
+            {
+                throw new Exception(
+                    "Invalid coupon selected");
+            }
+
+            offer.CouponCode =
+                coupon.CouponCode;
             offer.BasePrice = request.BasePrice;
 
             offer.IsPercentageDiscount =
@@ -125,8 +173,13 @@ namespace PickNBook.Api.Services
             offer.IsActive =
                 request.IsActive;
 
+            offer.PromotionId = request.PromotionId;
+
             offer.BookingType =
                 request.BookingType;
+            offer.DisplayOrder = request.DisplayOrder;
+            offer.StartDateUtc = request.StartDateUtc;
+            offer.EndDateUtc = request.EndDateUtc;
 
             if (request.Image != null)
             {

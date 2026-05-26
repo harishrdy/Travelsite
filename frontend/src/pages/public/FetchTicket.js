@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/images/printticket.png";
 import "../../STYLES/FetchTicket.css";
@@ -11,6 +11,38 @@ const FetchTicket = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const handleScrollLock = () => {
+      const rootEl = document.getElementById("root");
+      if (window.innerWidth > 920) {
+        document.body.style.setProperty("overflow", "hidden", "important");
+        document.documentElement.style.setProperty("overflow", "hidden", "important");
+        if (rootEl) {
+          rootEl.style.setProperty("overflow", "hidden", "important");
+        }
+      } else {
+        document.body.style.removeProperty("overflow");
+        document.documentElement.style.removeProperty("overflow");
+        if (rootEl) {
+          rootEl.style.removeProperty("overflow");
+        }
+      }
+    };
+
+    handleScrollLock();
+    window.addEventListener("resize", handleScrollLock);
+
+    return () => {
+      window.removeEventListener("resize", handleScrollLock);
+      document.body.style.removeProperty("overflow");
+      document.documentElement.style.removeProperty("overflow");
+      const rootEl = document.getElementById("root");
+      if (rootEl) {
+        rootEl.style.removeProperty("overflow");
+      }
+    };
+  }, []);
 
   const validateForm = () => {
     let nextError = "";

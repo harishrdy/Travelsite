@@ -74,10 +74,18 @@ function normalizeFetchedTicket(ticket, request) {
       pickFirst(ticket, ["ticketType", "TicketType", "type", "Type"], bookingType) || bookingType
     ).trim().toLowerCase(),
     providerName: String(
-      pickFirst(ticket, ["providerName", "ProviderName", "operator", "Operator"], "Bus Service") || ""
+      pickFirst(
+        ticket,
+        ["providerName", "ProviderName", "operatorName", "OperatorName", "operator", "Operator"],
+        "Bus Service"
+      ) || ""
     ).trim(),
     tripNumber: String(
-      pickFirst(ticket, ["tripNumber", "TripNumber", "busNo", "BusNo"], "--") || "--"
+      pickFirst(
+        ticket,
+        ["tripNumber", "TripNumber", "busNumber", "BusNumber", "busNo", "BusNo"],
+        "--"
+      ) || "--"
     ).trim(),
     fromCity: String(
       pickFirst(ticket, ["fromCity", "FromCity", "source", "Source"], "--") || "--"
@@ -102,8 +110,16 @@ function normalizeFetchedTicket(ticket, request) {
     busType: String(
       pickFirst(ticket, ["busType", "BusType", "travelClass", "TravelClass", "className", "ClassName"], "") || ""
     ).trim(),
-    boardingPoint: pickFirst(ticket, ["boardingPoint", "BoardingPoint"], ticket?.boardingPoint),
-    droppingPoint: pickFirst(ticket, ["droppingPoint", "DroppingPoint"], ticket?.droppingPoint),
+    boardingPoint: pickFirst(
+      ticket,
+      ["boardingPoint", "BoardingPoint", "boarding", "Boarding"],
+      ticket?.boardingPoint
+    ),
+    droppingPoint: pickFirst(
+      ticket,
+      ["droppingPoint", "DroppingPoint", "arrivalPlace", "ArrivalPlace", "dropping", "Dropping"],
+      ticket?.droppingPoint
+    ),
     status: String(pickFirst(ticket, ["status", "Status"], "Booked") || "Booked"),
     passengers: passengers.map(normalizePassenger),
     contact: {

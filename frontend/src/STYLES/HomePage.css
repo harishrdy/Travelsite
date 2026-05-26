@@ -2,7 +2,7 @@
 
 .field,
 .place-autocomplete {
-  min-height: 68px;
+  min-height: 60px;
   height: auto;
   display: flex;
   flex-direction: column;
@@ -11,7 +11,7 @@
 }
 
 .swap-field {
-  min-height: 68px;
+  min-height: 60px;
   height: auto;
   display: flex;
   align-items: flex-end;
@@ -37,14 +37,39 @@
   --body-font: var(--app-font-family);
 
   min-height: 100vh;
+  position: relative;
   color: var(--text);
   font-family: var(--body-font);
   isolation: isolate;
+  overflow: hidden;
   background:
     radial-gradient(circle at 8% 10%, rgba(24, 72, 135, 0.16), transparent 28%),
     radial-gradient(circle at 92% 10%, rgba(56, 129, 224, 0.18), transparent 24%),
     radial-gradient(circle at 52% 92%, rgba(33, 72, 123, 0.14), transparent 34%),
     linear-gradient(180deg, #f6f9fe 0%, var(--page-bg) 46%, #f6f9fe 100%);
+}
+
+.homepage::before,
+.homepage::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.homepage::before {
+  z-index: -2;
+  background:
+    linear-gradient(120deg, rgba(8, 18, 32, 0.66), rgba(31, 42, 68, 0.34)),
+    url("../assets/images/hero-bus.png") center / cover no-repeat;
+}
+
+.homepage::after {
+  z-index: -1;
+  background:
+    radial-gradient(circle at 8% 10%, rgba(240, 68, 35, 0.14), transparent 28%),
+    radial-gradient(circle at 92% 12%, rgba(255, 137, 91, 0.15), transparent 26%),
+    linear-gradient(180deg, rgba(255, 250, 246, 0.7) 0%, rgba(255, 247, 242, 0.86) 42%, rgba(255, 250, 246, 0.76) 100%);
 }
 
 .homepage *,
@@ -66,8 +91,11 @@
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  background: #0b1f38;
-  padding: 86px 20px 110px;
+  min-height: calc(100svh - 70px);
+  display: flex;
+  align-items: center;
+  background: transparent;
+  padding: clamp(34px, 5vh, 58px) 20px clamp(38px, 6vh, 64px);
 }
 
 .hero-section::before {
@@ -89,6 +117,7 @@
   height: 100%;
   object-fit: cover;
   object-position: center center;
+  opacity: 0;
   pointer-events: none;
 }
 
@@ -104,8 +133,8 @@
 .hero-content {
   position: relative;
   z-index: 3;
-  width: 100%;
-  max-width: none;
+  width: min(100%, 1540px);
+  max-width: 1540px;
   margin: 0 auto;
 }
 
@@ -214,15 +243,15 @@
 .search-panel {
   position: relative;
   border: 1px solid rgba(205, 222, 244, 0.82);
-  border-radius: 22px;
-  padding: 20px;
+  border-radius: 20px;
+  padding: 16px 18px 18px;
   box-shadow: var(--shadow-xl);
   backdrop-filter: blur(8px);
   background: linear-gradient(
     156deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(246, 249, 254, 0.97) 52%,
-    rgba(245, 248, 254, 0.95) 100%
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(246, 249, 254, 0.78) 52%,
+    rgba(245, 248, 254, 0.74) 100%
   );
   animation: panel-in 0.8s ease 0.1s both;
 }
@@ -233,9 +262,9 @@
   inset: 0;
   border-radius: inherit;
   background:
-    radial-gradient(circle at 10% 8%, rgba(255, 255, 255, 0.88), transparent 42%),
-    radial-gradient(circle at 96% 8%, rgba(28, 86, 161, 0.09), transparent 36%),
-    radial-gradient(circle at 3% 92%, rgba(53, 123, 214, 0.08), transparent 34%);
+    radial-gradient(circle at 10% 8%, rgba(255, 255, 255, 0.34), transparent 42%),
+    radial-gradient(circle at 96% 8%, rgba(28, 86, 161, 0.06), transparent 36%),
+    radial-gradient(circle at 3% 92%, rgba(53, 123, 214, 0.05), transparent 34%);
   pointer-events: none;
 }
 
@@ -262,7 +291,7 @@
 
 .search-panel > .search-btn {
   z-index: 2;
-  margin: 18px auto 0;
+  margin: 14px auto 0;
 }
 
 /* ─── Tabs ────────────────────────────────────────────────────────────────── */
@@ -275,26 +304,26 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border-radius: 14px;
-  padding: 6px;
-  margin: 0 auto 16px;
+  border-radius: 13px;
+  padding: 5px;
+  margin: 0 auto 14px;
   background: rgba(233, 241, 252, 0.8);
   border: 1px solid #c7d9f1;
 }
 
 .tab {
   border: 0;
-  border-radius: 10px;
-  min-height: 42px;
-  min-width: 130px;
-  padding: 0 14px;
+  border-radius: 9px;
+  min-height: 36px;
+  min-width: 118px;
+  padding: 0 13px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   background: transparent;
   color: #2c486c;
-  font-size: 12.6px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.25s ease;
@@ -312,7 +341,7 @@
 
 /* ─── Trip type chips ─────────────────────────────────────────────────────── */
 .booking-content {
-  margin-top: 6px;
+  margin-top: 4px;
   position: relative;
   z-index: 3;
 }
@@ -320,9 +349,9 @@
 .trip-switch {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   flex-wrap: wrap;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 10;
 }
@@ -332,9 +361,9 @@
   border-radius: 999px;
   background: #f6f9fe;
   color: #31517b;
-  min-height: 34px;
-  padding: 0 14px;
-  font-size: 10.8px;
+  min-height: 30px;
+  padding: 0 13px;
+  font-size: 10.4px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -414,12 +443,12 @@
 .bus-standard-grid {
   display: grid;
   grid-template-columns:
-    minmax(150px, 1.12fr)
-    44px
-    minmax(150px, 1.12fr)
-    minmax(132px, 0.78fr)
-    minmax(132px, 0.78fr);
-  gap: 10px;
+    minmax(170px, 1.12fr)
+    40px
+    minmax(170px, 1.12fr)
+    minmax(150px, 0.86fr)
+    minmax(150px, 0.86fr);
+  gap: 10px 12px;
   align-items: end;
 }
 
@@ -503,11 +532,11 @@
 
 .field label {
   display: block;
-  margin: 0 0 6px;
+  margin: 0 0 5px;
   color: var(--text-soft);
-  font-size: 9.9px;
+  font-size: 9.4px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.095em;
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
@@ -517,15 +546,15 @@
 .field-control {
   width: 100%;
   max-width: 100%;
-  min-height: 48px;
-  height: 48px;
+  min-height: 44px;
+  height: 44px;
   border: 1px solid var(--surface-border);
   border-radius: 10px;
   background: linear-gradient(180deg, #ffffff 0%, #f6f9fe 100%);
   color: var(--text);
-  font-size: 12.6px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 10px 12px;
+  padding: 9px 12px;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   box-shadow:
@@ -640,6 +669,7 @@ select.field-control option {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 11px;
 }
 
 .field-control.watermark-field:disabled {
@@ -647,6 +677,7 @@ select.field-control option {
   background: transparent;
   box-shadow: none;
   color: #9eb2cb;
+  -webkit-text-fill-color: #9eb2cb;
   opacity: 1;
   cursor: default;
 }
@@ -670,10 +701,10 @@ select.field-control option {
 }
 
 .swap-btn {
-  width: 40px;
-  height: 48px;
-  min-height: 48px;
-  border-radius: 12px;
+  width: 38px;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 11px;
   border: 1px solid var(--surface-border);
   background: #ffffff;
   color: #2a61a8;
@@ -699,8 +730,8 @@ select.field-control option {
 .traveller-trigger {
   width: 100%;
   max-width: 100%;
-  min-height: 48px;
-  height: 48px;
+  min-height: 44px;
+  height: 44px;
   border: 1px solid var(--surface-border);
   border-radius: 12px;
   background: linear-gradient(180deg, #ffffff 0%, #f6f9fe 100%);
@@ -865,7 +896,7 @@ select.field-control option {
 .search-validation {
   width: fit-content;
   max-width: 100%;
-  margin: 14px auto 0;
+  margin: 11px auto 0;
   border: 1px solid rgba(220, 38, 38, 0.2);
   border-radius: 999px;
   background: #fff1f2;
@@ -880,20 +911,20 @@ select.field-control option {
   position: relative;
   z-index: 20;
   margin: 0;
-  margin-top: 18px;
+  margin-top: 14px;
   margin-left: auto;
   margin-right: auto;
   border: 0;
-  border-radius: 12px;
-  height: 48px;
-  min-height: 46px;
-  min-width: 140px;
-  padding: 0 20px;
+  border-radius: 11px;
+  height: 44px;
+  min-height: 44px;
+  min-width: 126px;
+  padding: 0 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 12.6px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -914,7 +945,7 @@ select.field-control option {
   width: min(100% - 40px, 1480px);
   max-width: none;
   margin: 0 auto;
-  padding: 70px 0;
+  padding: 34px 0;
   position: relative;
   z-index: 4;
 }
@@ -923,7 +954,7 @@ select.field-control option {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
   gap: 14px;
 }
 
@@ -1182,8 +1213,7 @@ select.field-control option {
 .reviews-section { background: transparent; }
 
 .signup-section {
-  padding-top: 24px;
-  background: linear-gradient(180deg, #f6f9fe 0%, #f6f9fe 100%);
+  background: transparent;
 }
 
 .payments-section {
@@ -1195,18 +1225,14 @@ select.field-control option {
 
 .popular-buses-section {
   background: transparent;
-  padding-top: 8px;
 }
 
 .popular-routes-section {
   background: transparent;
-  padding-top: 8px;
 }
 
 .insights-section {
-  background:
-    radial-gradient(circle at 6% 7%, rgba(53, 123, 214, 0.08), transparent 24%),
-    linear-gradient(180deg, #f6f9fe 0%, #f6f9fe 100%);
+  background: transparent;
 }
 
 /* ─── Marquee ─────────────────────────────────────────────────────────────── */
@@ -2397,8 +2423,8 @@ select.field-control option {
       minmax(132px, 1.1fr)
       40px
       minmax(132px, 1.1fr)
-      minmax(118px, 0.8fr)
-      minmax(118px, 0.8fr);
+      minmax(140px, 0.9fr)
+      minmax(140px, 0.9fr);
   }
 
   /* Re-map row/column positions for standard-grid at this breakpoint */
@@ -2428,7 +2454,10 @@ select.field-control option {
 }
 
 @media (max-width: 900px) {
-  .hero-section { padding: 68px 14px 82px; }
+  .hero-section {
+    min-height: auto;
+    padding: 34px 14px 30px;
+  }
   .search-panel { border-radius: 18px; padding: 15px; }
   .tabs { width: fit-content; margin: 0 auto 14px; }
   .tab { min-width: 122px; }
@@ -2463,7 +2492,7 @@ select.field-control option {
   .search-btn { width: 100%; }
   .section-shell {
     width: min(100% - 28px, 100%);
-    padding: 46px 0;
+    padding: 28px 0;
   }
   .hero-metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .section-header { align-items: flex-start; flex-direction: column; }
@@ -2500,6 +2529,15 @@ select.field-control option {
 }
 
 @media (max-width: 640px) {
+  .homepage::before {
+    background-position: 62% center;
+  }
+
+  .homepage::after {
+    background:
+      linear-gradient(180deg, rgba(255, 250, 246, 0.84) 0%, rgba(255, 247, 242, 0.9) 100%);
+  }
+
   .hero-kicker { min-height: 28px; padding: 0 11px; font-size: 9px; }
   .hero-copy-block h1 { font-size: clamp(27px, 8.1vw, 36px); }
   .hero-copy-block p { font-size: 12.6px; }
@@ -2577,10 +2615,7 @@ select.field-control option {
   --shadow-xl: 0 28px 60px rgba(125, 59, 31, 0.16);
   --shadow-lg: 0 18px 38px rgba(125, 59, 31, 0.12);
   --shadow-md: 0 12px 24px rgba(125, 59, 31, 0.08);
-  background:
-    radial-gradient(circle at 8% 10%, rgba(240, 68, 35, 0.11), transparent 28%),
-    radial-gradient(circle at 92% 10%, rgba(255, 137, 91, 0.14), transparent 24%),
-    linear-gradient(180deg, #fffaf6 0%, var(--page-bg) 48%, #fffaf6 100%);
+  background: transparent;
 }
 
 .hero-overlay {
@@ -2597,9 +2632,9 @@ select.field-control option {
 }
 
 .search-panel {
-  border-color: rgba(242, 203, 191, 0.95);
-  background: linear-gradient(156deg, rgba(255, 255, 255, 0.98), rgba(255, 250, 246, 0.97));
-  box-shadow: 0 30px 70px rgba(125, 59, 31, 0.18);
+  border-color: rgba(242, 203, 191, 0.72);
+  background: linear-gradient(156deg, rgba(255, 255, 255, 0.82), rgba(255, 250, 246, 0.74));
+  box-shadow: 0 22px 54px rgba(125, 59, 31, 0.16);
 }
 
 .tabs {
@@ -2643,9 +2678,9 @@ select.field-control option {
 
 .field-control,
 .traveller-trigger {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.92);
   color: var(--theme-navy, #1f2a44);
-  box-shadow: 0 10px 20px rgba(125, 59, 31, 0.06);
+  box-shadow: 0 7px 16px rgba(125, 59, 31, 0.055);
 }
 
 .field-control:focus,
@@ -2681,13 +2716,13 @@ select.field-control option {
 .search-panel .field-control,
 .search-panel .traveller-trigger {
   border: 1px solid #f0b9a8;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.94);
   box-shadow: none;
 }
 
 .search-panel .field-control.watermark-field:disabled {
   border: 1px solid #f0b9a8;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.34);
   box-shadow: none;
   opacity: 1;
 }

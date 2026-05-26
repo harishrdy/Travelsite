@@ -1,62 +1,9 @@
 
-import React, { useState } from "react";
-import {
-  AlignCenter,
-  AlignLeft,
-  AlignRight,
-  Baseline,
-  Bold,
-  CaseSensitive,
-  Clipboard,
-  Copy,
-  FileText,
-  Flag,
-  Globe,
-  Image as ImageIcon,
-  Italic,
-  Link2,
-  List,
-  ListIndentDecrease,
-  ListIndentIncrease,
-  ListOrdered,
-  Maximize2,
-  Omega,
-  Paintbrush,
-  Printer,
-  Quote,
-  Redo2,
-  Save,
-  Scissors,
-  Search,
-  SpellCheck,
-  Strikethrough,
-  Subscript,
-  Superscript,
-  Table2,
-  TextCursorInput,
-  Underline,
-  Unlink2,
-  Undo2,
-} from "lucide-react";
-import {
-  FaAlignJustify,
-  FaCheckSquare,
-  FaCode,
-  FaDotCircle,
-  FaEraser,
-  FaFile,
-  FaFont,
-  FaLanguage,
-  FaParagraph,
-  FaPaste,
-  FaQuestionCircle,
-  FaSmile,
-  FaSquare,
-  FaThLarge,
-  FaTint,
-} from "react-icons/fa";
+import React, { useEffect, useMemo, useState } from "react";
+import { List } from "lucide-react";
 import "./AddOffer.css";
 import { createAdminFeaturedOffer } from "../../../services/adminFeaturedOffersService";
+import { listBusCoupons } from "../../../services/busBookingService";
 
 const BOOKING_TYPE_OPTIONS = [
   { value: "Bus", label: "Bus" },
@@ -66,13 +13,17 @@ const BOOKING_TYPE_OPTIONS = [
 
 const DEFAULT_FORM = {
   title: "",
+  couponId: "",
   couponCode: "",
   bookingType: "Bus",
   isActive: true,
   couponExpiresAtUtc: "",
+  startDateUtc: "",
+  endDateUtc: "",
   shortDescription: "",
-  longDescription: "",
   offerCode: "",
+  promotionId: "",
+  displayOrder: "0",
   basePrice: "",
   isPercentageDiscount: false,
   discountValue: "",
@@ -80,109 +31,6 @@ const DEFAULT_FORM = {
 };
 
 
-
-const PRIMARY_EDITOR_TOOL_GROUPS = [
-  [
-    { label: "Source", kind: "text", icon: FaCode },
-    { label: "Save", icon: Save },
-    { label: "New Document", icon: FileText },
-    { label: "Preview", icon: Search },
-    { label: "Print", icon: Printer },
-    { label: "Templates", icon: FaFile },
-  ],
-  [
-    { label: "Cut", icon: Scissors },
-    { label: "Copy", icon: Copy },
-    { label: "Paste", icon: FaPaste },
-    { label: "Paste as text", icon: Clipboard },
-    { label: "Paste from Word", icon: Clipboard },
-  ],
-  [
-    { label: "Undo", icon: Undo2 },
-    { label: "Redo", icon: Redo2 },
-  ],
-  [
-    { label: "Find", icon: Search },
-    { label: "Replace", icon: SpellCheck },
-  ],
-  [
-    { label: "Forms", icon: FaThLarge },
-    { label: "Checkbox", icon: FaCheckSquare },
-    { label: "Radio button", icon: FaDotCircle },
-    { label: "Text field", icon: TextCursorInput },
-    { label: "Textarea", icon: FaParagraph },
-    { label: "Select field", icon: FaSquare },
-    { label: "Button", icon: Baseline },
-    { label: "Hidden field", icon: CaseSensitive },
-  ],
-];
-
-const SECONDARY_EDITOR_SELECTS = [
-  {
-    ariaLabel: "Styles",
-    options: ["Styles", "Paragraph", "Heading 1", "Heading 2"],
-  },
-  {
-    ariaLabel: "Format",
-    options: ["Format", "Normal", "Code", "Blockquote"],
-  },
-  {
-    ariaLabel: "Font",
-    options: ["Font", "Arial", "Georgia", "Verdana"],
-  },
-  {
-    ariaLabel: "Size",
-    options: ["Size", "12", "14", "16", "18"],
-  },
-];
-
-const SECONDARY_EDITOR_TOOL_GROUPS = [
-  [
-    { label: "Bold", icon: Bold },
-    { label: "Italic", icon: Italic },
-    { label: "Underline", icon: Underline },
-    { label: "Strikethrough", icon: Strikethrough },
-    { label: "Subscript", icon: Subscript },
-    { label: "Superscript", icon: Superscript },
-    { label: "Clear formatting", icon: FaEraser },
-    { label: "Special characters", icon: Omega },
-  ],
-  [
-    { label: "Text styles", icon: Paintbrush },
-    { label: "Text tools", icon: TextCursorInput },
-    { label: "Numbered list", icon: ListOrdered },
-    { label: "Bulleted list", icon: List },
-    { label: "Decrease indent", icon: ListIndentDecrease },
-    { label: "Increase indent", icon: ListIndentIncrease },
-    { label: "Quote", icon: Quote },
-  ],
-  [
-    { label: "Align left", icon: AlignLeft },
-    { label: "Align center", icon: AlignCenter },
-    { label: "Align right", icon: AlignRight },
-    { label: "Justify", icon: FaAlignJustify },
-  ],
-  [
-    { label: "Language", icon: FaLanguage },
-    { label: "Link", icon: Link2 },
-    { label: "Unlink", icon: Unlink2 },
-    { label: "Anchor", icon: Flag },
-    { label: "Image", icon: ImageIcon },
-    { label: "Globe", icon: Globe },
-    { label: "Table", icon: Table2 },
-    { label: "Emoji", icon: FaSmile },
-  ],
-];
-
-const TERTIARY_EDITOR_TOOL_GROUPS = [
-  [
-    { label: "Text color", icon: FaFont },
-    { label: "Background color", icon: FaTint },
-    { label: "Fullscreen", icon: Maximize2 },
-    { label: "Show blocks", icon: FaThLarge },
-    { label: "Help", icon: FaQuestionCircle },
-  ],
-];
 
 function toUtcIso(value) {
   if (!value) {
@@ -199,21 +47,31 @@ function buildOfferFormData(formValues, fileInputObject) {
   formData.append("BookingType", formValues.bookingType);
   formData.append("IsActive", Boolean(formValues.isActive));
   
+  if (formValues.couponId !== undefined && formValues.couponId !== null && formValues.couponId !== "") {
+    formData.append("CouponId", Number(formValues.couponId));
+  }
   if (formValues.offerCode !== undefined && formValues.offerCode !== null) {
     formData.append("OfferCode", String(formValues.offerCode).trim());
   }
-  if (formValues.couponCode !== undefined && formValues.couponCode !== null) {
-    formData.append("CouponCode", String(formValues.couponCode).trim());
+  if (formValues.promotionId !== undefined && formValues.promotionId !== null && formValues.promotionId !== "") {
+    formData.append("PromotionId", Number(formValues.promotionId));
+  }
+  if (formValues.displayOrder !== undefined && formValues.displayOrder !== null && formValues.displayOrder !== "") {
+    formData.append("DisplayOrder", Number(formValues.displayOrder));
   }
   if (formValues.shortDescription !== undefined && formValues.shortDescription !== null) {
     formData.append("Subtitle", String(formValues.shortDescription).trim());
-  }
-  if (formValues.longDescription !== undefined && formValues.longDescription !== null) {
-    formData.append("Description", String(formValues.longDescription).trim());
+    formData.append("Description", String(formValues.shortDescription).trim());
   }
   
   if (formValues.couponExpiresAtUtc) {
     formData.append("CouponExpiresAtUtc", toUtcIso(formValues.couponExpiresAtUtc));
+  }
+  if (formValues.startDateUtc) {
+    formData.append("StartDateUtc", toUtcIso(formValues.startDateUtc));
+  }
+  if (formValues.endDateUtc) {
+    formData.append("EndDateUtc", toUtcIso(formValues.endDateUtc));
   }
   
   if (formValues.basePrice !== undefined && formValues.basePrice !== null && formValues.basePrice !== "") {
@@ -241,9 +99,38 @@ function buildOfferFormData(formValues, fileInputObject) {
 export default function AdminAddOfferPage({ onBack }) {
   const [formValues, setFormValues] = useState(DEFAULT_FORM);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [couponOptions, setCouponOptions] = useState([]);
+  const [couponLoadError, setCouponLoadError] = useState("");
   const [formError, setFormError] = useState("");
   const [saved, setSaved] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    listBusCoupons()
+      .then((coupons) => {
+        if (isMounted) {
+          setCouponOptions(coupons);
+          setCouponLoadError("");
+        }
+      })
+      .catch((error) => {
+        if (isMounted) {
+          setCouponOptions([]);
+          setCouponLoadError(error.message || "Unable to load coupons.");
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const selectedCoupon = useMemo(
+    () => couponOptions.find((coupon) => String(coupon.id) === String(formValues.couponId)),
+    [couponOptions, formValues.couponId]
+  );
 
   const handleChange = (field) => (event) => {
     const value = field === "isActive" ? event.target.value === "active" : event.target.value;
@@ -258,6 +145,20 @@ export default function AdminAddOfferPage({ onBack }) {
     const title = String(formValues.title || "").trim();
     if (!title) {
       setFormError("Offer name is required.");
+      return;
+    }
+
+    if (!formValues.couponId) {
+      setFormError("Linked coupon is required.");
+      return;
+    }
+
+    if (
+      formValues.startDateUtc &&
+      formValues.endDateUtc &&
+      new Date(formValues.startDateUtc).getTime() > new Date(formValues.endDateUtc).getTime()
+    ) {
+      setFormError("Offer end date should be after start date.");
       return;
     }
 
@@ -366,15 +267,62 @@ export default function AdminAddOfferPage({ onBack }) {
             </div>
 
             <label className="offer-add-label" htmlFor="coupon-code">
-              Coupon Code
+              Linked Coupon <span aria-hidden="true">*</span>
+            </label>
+            <div className="offer-add-control">
+              <select
+                id="coupon-code"
+                value={formValues.couponId}
+                onChange={(event) => {
+                  const nextCouponId = event.target.value;
+                  const nextCoupon = couponOptions.find(
+                    (coupon) => String(coupon.id) === String(nextCouponId)
+                  );
+                  setFormValues((previous) => ({
+                    ...previous,
+                    couponId: nextCouponId,
+                    couponCode: nextCoupon?.couponCode || "",
+                  }));
+                }}
+                required
+              >
+                <option value="">Select linked coupon</option>
+                {couponOptions.map((coupon) => (
+                  <option key={coupon.id} value={coupon.id}>
+                    #{coupon.id} - {coupon.couponCode} ({coupon.cpnType})
+                  </option>
+                ))}
+              </select>
+              {selectedCoupon ? (
+                <small className="offer-add-help">Coupon code resolved as {selectedCoupon.couponCode}</small>
+              ) : null}
+            </div>
+
+            <label className="offer-add-label" htmlFor="promotion-id">
+              Promotion ID
             </label>
             <div className="offer-add-control">
               <input
-                id="coupon-code"
-                type="text"
-                placeholder="Enter coupon code"
-                value={formValues.couponCode}
-                onChange={handleChange("couponCode")}
+                id="promotion-id"
+                type="number"
+                min="1"
+                placeholder="e.g. 4"
+                value={formValues.promotionId}
+                onChange={handleChange("promotionId")}
+              />
+            </div>
+
+            <label className="offer-add-label" htmlFor="display-order">
+              Display Order
+            </label>
+            <div className="offer-add-control">
+              <input
+                id="display-order"
+                type="number"
+                min="0"
+                placeholder="e.g. 1"
+                value={formValues.displayOrder}
+                onChange={handleChange("displayOrder")}
               />
             </div>
 
@@ -387,6 +335,30 @@ export default function AdminAddOfferPage({ onBack }) {
                 type="datetime-local"
                 value={formValues.couponExpiresAtUtc}
                 onChange={handleChange("couponExpiresAtUtc")}
+              />
+            </div>
+
+            <label className="offer-add-label" htmlFor="offer-start">
+              Offer Starts
+            </label>
+            <div className="offer-add-control">
+              <input
+                id="offer-start"
+                type="datetime-local"
+                value={formValues.startDateUtc}
+                onChange={handleChange("startDateUtc")}
+              />
+            </div>
+
+            <label className="offer-add-label" htmlFor="offer-end">
+              Offer Ends
+            </label>
+            <div className="offer-add-control">
+              <input
+                id="offer-end"
+                type="datetime-local"
+                value={formValues.endDateUtc}
+                onChange={handleChange("endDateUtc")}
               />
             </div>
 
@@ -475,105 +447,7 @@ export default function AdminAddOfferPage({ onBack }) {
             onChange={handleChange("shortDescription")}
           />
 
-          <div className="offer-add-section-bar">
-            <span>Long Description</span>
-          </div>
-          <section className="offer-add-editor-shell" aria-label="Long description editor">
-            <div className="offer-add-editor-toolbar offer-add-editor-toolbar-primary">
-              {PRIMARY_EDITOR_TOOL_GROUPS.map((group, groupIndex) => (
-                <div key={`primary-group-${groupIndex}`} className="offer-add-editor-toolbar-group">
-                  {group.map((tool) => {
-                    const Icon = tool.icon;
-                    const isTextTool = tool.kind === "text";
-
-                    return (
-                      <button
-                        key={`${tool.label}-${groupIndex}`}
-                        type="button"
-                        className={`offer-add-editor-btn${isTextTool ? " text" : " icon-only"}`}
-                        aria-label={tool.label}
-                        title={tool.label}
-                      >
-                        {Icon ? <Icon size={15} /> : null}
-                        {isTextTool ? <span>{tool.label}</span> : null}
-                      </button>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-
-            <div className="offer-add-editor-toolbar offer-add-editor-toolbar-secondary">
-              {SECONDARY_EDITOR_TOOL_GROUPS.map((group, groupIndex) => (
-                <div key={`secondary-group-${groupIndex}`} className="offer-add-editor-toolbar-group">
-                  {group.map((tool) => {
-                    const Icon = tool.icon;
-
-                    return (
-                      <button
-                        key={`${tool.label}-${groupIndex}`}
-                        type="button"
-                        className="offer-add-editor-btn icon-only"
-                        aria-label={tool.label}
-                        title={tool.label}
-                      >
-                        <Icon size={15} />
-                      </button>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-
-            <div className="offer-add-editor-toolbar offer-add-editor-toolbar-tertiary">
-              <div className="offer-add-editor-selects">
-                {SECONDARY_EDITOR_SELECTS.map((selectConfig) => (
-                  <label
-                    key={selectConfig.ariaLabel}
-                    className="offer-add-editor-select-wrap"
-                    aria-label={selectConfig.ariaLabel}
-                  >
-                    <select defaultValue={selectConfig.options[0]} aria-label={selectConfig.ariaLabel}>
-                      {selectConfig.options.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                ))}
-              </div>
-
-              {TERTIARY_EDITOR_TOOL_GROUPS.map((group, groupIndex) => (
-                <div key={`tertiary-group-${groupIndex}`} className="offer-add-editor-toolbar-group">
-                  {group.map((tool) => {
-                    const Icon = tool.icon;
-
-                    return (
-                      <button
-                        key={`${tool.label}-${groupIndex}`}
-                        type="button"
-                        className="offer-add-editor-btn icon-only"
-                        aria-label={tool.label}
-                        title={tool.label}
-                      >
-                        <Icon size={15} />
-                      </button>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-
-            <div className="offer-add-editor-surface">
-              <textarea
-                placeholder="Write the long description..."
-                value={formValues.longDescription}
-                onChange={handleChange("longDescription")}
-              />
-            </div>
-          </section>
-
+          {couponLoadError && <p className="admin-markup-form-error">{couponLoadError}</p>}
           {formError && <p className="admin-markup-form-error">{formError}</p>}
           {saved && <p className="menu-form-success">Offer saved to backend.</p>}
 

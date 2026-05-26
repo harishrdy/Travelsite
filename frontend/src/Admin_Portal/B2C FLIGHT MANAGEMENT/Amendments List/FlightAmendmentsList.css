@@ -1,0 +1,56 @@
+.admin-flight-amend-page {
+  gap: 12px;
+}
+
+.admin-flight-amend-header h1 {
+  font-size: 1.85rem;
+}
+
+.admin-flight-amend-toolbar .admin-chip {
+  background: var(--admin-surface);
+  color: var(--admin-text);
+}
+
+.admin-flight-amend-filters {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-flight-amend-filter-actions {
+  justify-content: flex-start;
+}
+
+.admin-flight-amend-table-head,
+.admin-flight-amend-table-row {
+  grid-template-columns: 1.05fr 1.25fr 1.05fr 0.75fr 1.55fr 0.65fr;
+}
+
+.admin-flight-amend-footnote {
+  min-height: 34px;
+  border-top: 1px solid var(--admin-border);
+  background: var(--admin-soft);
+  color: var(--admin-text);
+  font-size: 0.86rem;
+  padding: 8px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-weight: 700;
+}
+
+.admin-flight-amend-footnote strong {
+  color: var(--admin-primary);
+}
+
+@media (max-width: 1100px) {
+  .admin-flight-amend-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-flight-amend-filters {
+    grid-template-columns: 1fr;
+  }
+}
+

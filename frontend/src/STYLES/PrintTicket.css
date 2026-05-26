@@ -1,4 +1,7 @@
 .pb-print-page {
+  --pb-ticket-width: min(960px, calc(100vw - 48px));
+  --pb-ticket-height: 390px;
+  --pb-ticket-min-height: var(--pb-ticket-height);
   min-height: calc(100vh - 76px);
   padding: 8px 24px 54px;
   background:
@@ -8,7 +11,7 @@
 }
 
 .pb-top-row {
-  width: min(900px, 100%);
+  width: var(--pb-ticket-width);
   margin: 0 auto 10px;
   display: flex;
   align-items: center;
@@ -35,7 +38,7 @@
 
 .pb-preview-title,
 .pb-select-shell {
-  width: min(900px, 100%);
+  width: var(--pb-ticket-width);
   margin: 0 auto 20px;
   text-align: center;
 }
@@ -90,7 +93,7 @@
 }
 
 .pb-preview-shell {
-  width: min(900px, 100%);
+  width: var(--pb-ticket-width);
   margin: 0 auto;
 }
 
@@ -215,6 +218,7 @@
 
 .pb-ticket-section {
   margin-bottom: 30px;
+  width: 100%;
 }
 
 .pb-ticket-toolbar {
@@ -269,18 +273,23 @@
 }
 
 .pb-ticket-card {
+  width: 100%;
+  height: var(--pb-ticket-height);
+  min-height: var(--pb-ticket-min-height);
   overflow: hidden;
   border: 1px solid rgba(241, 217, 206, 0.95);
   border-radius: 28px;
   background: #ffffff;
   box-shadow: 0 28px 60px rgba(125, 59, 31, 0.13);
+  display: flex;
+  flex-direction: column;
 }
 
 .pb-ticket-head {
-  min-height: 64px;
+  min-height: 58px;
   background: linear-gradient(135deg, var(--theme-primary-strong, #df3f1f) 0%, var(--theme-primary, #f04423) 100%);
   color: #ffffff;
-  padding: 16px 28px;
+  padding: 13px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -299,7 +308,7 @@
 .pb-ticket-head h2 {
   margin: 4px 0 0;
   color: #ffffff;
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   font-weight: 900;
   letter-spacing: 0;
 }
@@ -315,13 +324,19 @@
 }
 
 .pb-ticket-body {
+  flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 170px;
+  grid-template-columns: minmax(0, 1fr) 172px;
   background: #ffffff;
 }
 
+.pb-ticket-back-card {
+  margin: 0 auto;
+}
+
 .pb-ticket-main {
-  padding: 22px 28px;
+  padding: 18px 24px;
 }
 
 .pb-route-row {
@@ -338,7 +353,7 @@
 .pb-route-row h3 {
   margin: 0;
   color: #071b3d;
-  font-size: 1.18rem;
+  font-size: 1.05rem;
   line-height: 1.1;
   font-weight: 900;
 }
@@ -347,7 +362,7 @@
   display: block;
   margin-top: 6px;
   color: #66758d;
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   font-weight: 700;
 }
 
@@ -386,10 +401,10 @@
 .pb-time-row,
 .pb-detail-grid {
   border-top: 1px dashed #d8dee8;
-  margin-top: 22px;
-  padding-top: 20px;
+  margin-top: 16px;
+  padding-top: 15px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
 }
 
@@ -405,6 +420,11 @@
 
 .pb-time-row div:nth-child(3),
 .pb-detail-grid div:nth-child(3) {
+  text-align: center;
+}
+
+.pb-time-row div:nth-child(4),
+.pb-detail-grid div:nth-child(4) {
   text-align: right;
 }
 
@@ -423,7 +443,7 @@
   display: block;
   margin-top: 5px;
   color: #071b3d;
-  font-size: 0.92rem;
+  font-size: 0.82rem;
   font-weight: 900;
 }
 
@@ -431,20 +451,20 @@
   display: block;
   margin-top: 5px;
   color: #071b3d;
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   font-weight: 900;
 }
 
 .pb-pax-title {
   border-top: 1px dashed #d8dee8;
-  margin-top: 22px;
-  padding-top: 20px;
+  margin-top: 16px;
+  padding-top: 14px;
 }
 
 .pb-passengers {
   display: grid;
-  gap: 9px;
-  margin-top: 11px;
+  gap: 7px;
+  margin-top: 9px;
 }
 
 .pb-passenger-row {
@@ -484,11 +504,11 @@
 .pb-ticket-stub {
   border-left: 1px dashed #d8dee8;
   background: #eef2f7;
-  padding: 24px 18px;
+  padding: 20px 14px;
   display: grid;
   justify-items: center;
   align-content: center;
-  gap: 10px;
+  gap: 8px;
   position: relative;
 }
 
@@ -525,7 +545,7 @@
 
 .pb-ticket-stub strong {
   color: #f23d24;
-  font-size: 0.72rem;
+  font-size: 0.64rem;
   font-weight: 900;
   line-height: 1.2;
   text-align: center;
@@ -534,17 +554,36 @@
 
 .pb-ticket-stub b {
   color: #071b3d;
-  font-size: 0.76rem;
+  font-size: 0.7rem;
 }
 
 .pb-ticket-stub small {
   color: #6f7888;
-  font-size: 0.6rem;
+  font-size: 0.56rem;
   font-weight: 700;
+}
+
+@media print {
+  .pb-print-page {
+    --pb-ticket-width: 8in;
+    --pb-ticket-height: 3.25in;
+    min-height: auto;
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .pb-preview-shell,
+  .pb-ticket-section,
+  .pb-ticket-card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 }
 
 @media (max-width: 760px) {
   .pb-print-page {
+    --pb-ticket-width: calc(100vw - 24px);
+    --pb-ticket-height: auto;
     padding: 16px 12px 40px;
   }
 

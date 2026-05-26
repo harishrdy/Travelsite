@@ -291,13 +291,21 @@ namespace PickNBook.Api.Controllers
    layout.GetSeatDefinitions(
        seats.Count,
        bus.BusType);
+
+            var definitionMap = definitions.ToDictionary(x => x.SeatCode, x => x.SeatType, StringComparer.OrdinalIgnoreCase);
+
             var seatDtos = new List<SeatMapItemDto>();
 
             foreach (var seat in seats)
             {
+                // 🔥 Use layout definition for seat type to avoid stale DB values
+                var effectiveSeatType = definitionMap.TryGetValue(seat.SeatCode, out var type)
+                    ? type
+                    : seat.SeatType;
+
                 var markup =
                     await GetActiveSeatMarkupAsync(
-                        seat.SeatType);
+                        effectiveSeatType);
 
                 var markupAmount =
                     CalculateMarkupAmount(
@@ -326,7 +334,7 @@ namespace PickNBook.Api.Controllers
                         : null,
 
                     // NEW
-                    SeatType = seat.SeatType,
+                    SeatType = effectiveSeatType,
 
                     BaseFare = decimal.Round(
                         bus.PriceInr,
@@ -394,12 +402,12 @@ namespace PickNBook.Api.Controllers
                     "At least one seat must be selected.");
             }
 
-
             var result = await _promotionEngine.CalculateAsync(
      request.BusId,
      request.SeatCodes,
      request.CouponCode,
-     request.PromotionId);
+     request.PromotionId,
+         selectedFeaturedOfferId: request.SelectedFeaturedOfferId);
 
             result.DiscountLabel =
                 result.DiscountSource switch
@@ -486,12 +494,6 @@ namespace PickNBook.Api.Controllers
                 return BadRequest("PassengerName is required for contact.");
 
             var seatsRequired = normalizedPassengers!.Count;
-            if (request.PromotionId.HasValue &&
-    !string.IsNullOrWhiteSpace(request.CouponCode))
-            {
-                return BadRequest(
-                    "Offer and coupon cannot be used together.");
-            }
             var strategy = dbContext.Database.CreateExecutionStrategy();
 
             try
@@ -673,11 +675,7 @@ namespace PickNBook.Api.Controllers
                                     "User coupon usage limit reached.");
                             }
                         }
-                        //if (request.PromotionId.HasValue &&!string.IsNullOrWhiteSpace(request.CouponCode))
-                        //{
-                        //    return BadRequest(
-                        //        "Offer and coupon cannot be used together.");
-                        //}
+                       
                         // ========================================
                         // CENTRALIZED PRICING ENGINE
                         // ========================================
@@ -687,7 +685,8 @@ namespace PickNBook.Api.Controllers
                                 seatAssignedPassengers,
                                 request.CouponCode,
                                 request.PromotionId,
-                                int.Parse(userId!));
+                                int.Parse(userId!),
+                                 request.SelectedFeaturedOfferId);
 
                         // 🔥 MIN BOOKING AMOUNT CHECK
                         if (appliedCoupon is not null &&
@@ -735,6 +734,7 @@ namespace PickNBook.Api.Controllers
 
                             ConvenienceFeeInr = pricing.ConvenienceFee,
                             CouponCode = string.IsNullOrWhiteSpace(couponCode) ? null : couponCode.Trim().ToUpperInvariant(),
+                            AppliedPromotionId = request.PromotionId,
                             AppliedPromotionCode =
 pricing.AppliedPromotionCode,
 
@@ -1192,6 +1192,9 @@ pricing.DiscountSource,
                 reservation.GstPercent,
 
                 reservation.GstAmountInr,
+                reservation.AppliedPromotionId,
+                reservation.AppliedPromotionCode,
+                reservation.AppliedPromotionType,
                 reservation.CouponCode,
                 reservation.AutoPromotionCode,
                 baseDto.BookedAtUtc,
@@ -1661,6 +1664,34 @@ pricing.DiscountSource,
                 if (finalInsertList.Count > 0)
                 {
                     await dbContext.BusBookings.AddRangeAsync(finalInsertList);
+
+                    // SAVE FIRST TO GET GENERATED IDS
+                    await dbContext.SaveChangesAsync();
+
+                    // CREATE SEATS FOR EACH GENERATED BUS
+                    foreach (var bus in finalInsertList)
+                    {
+                        var seatCodes = BusSeatLayoutRegistry.BuildSeatCodes(
+                            Math.Max(1, bus.TotalSeats),
+                            bus.BusType);
+
+                        foreach (var seatCode in seatCodes)
+                        {
+                            dbContext.BusSeats.Add(new BusSeat
+                            {
+                                BusBookingId = bus.Id,
+                                SeatCode = seatCode,
+
+                                SeatType = BusSeatLayoutRegistry.GetSeatType(
+                                    bus.BusType,
+                                    seatCode,
+                                    bus.TotalSeats),
+
+                                IsBooked = false
+                            });
+                        }
+                    }
+
                     await dbContext.SaveChangesAsync();
                 }
             }
@@ -1786,6 +1817,7 @@ pricing.DiscountSource,
         IsOvernightArrival = booking.BusBooking.ArrivalTime.Date > booking.BusBooking.DepartureTime.Date,
         DurationMinutes = (int)(booking.BusBooking.ArrivalTime - booking.BusBooking.DepartureTime).TotalMinutes,
         BoardingPoint = booking.BusBooking.BoardingPoint,
+        ArrivalPoint = booking.BusBooking.ToCity,
 
         // Fare breakdown
         Price = booking.TotalPriceInr,
@@ -1905,6 +1937,7 @@ pricing.DiscountSource,
                         IsOvernightArrival = bus.ArrivalTime.Date > bus.DepartureTime.Date,
                         DurationMinutes = (int)(bus.ArrivalTime - bus.DepartureTime).TotalMinutes,
                         BoardingPoint = bus.BoardingPoint,
+                        ArrivalPoint = bus.ToCity,
 
                         // Fare breakdown
                         Price = reservation.TotalPriceInr,

@@ -182,6 +182,15 @@ namespace PickNBook.Api.Data
             modelBuilder.Entity<FeaturedOffer>()
                 .HasIndex(x => new { x.IsActive, x.CouponExpiresAtUtc });
 
+            modelBuilder.Entity<FeaturedOffer>()
+                .HasIndex(x => x.PromotionId);
+
+            modelBuilder.Entity<FeaturedOffer>()
+                .HasOne(x => x.Promotion)
+                .WithMany()
+                .HasForeignKey(x => x.PromotionId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // =============================
             // CouponRedemption Configuration
             // =============================

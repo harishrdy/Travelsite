@@ -19,5 +19,8 @@
         public int FailedAttempts { get; set; } = 0;
 
         public User? User { get; set; }
+        public string Email { get; set; } = string.Empty;
+
+        public bool IsVerified { get; set; } = false;
     }
 }

@@ -70,7 +70,13 @@ function createDefaultCouponForm() {
     couponCode: generateCouponCode(),
     useLimit: "",
     maxUsagePerUser: "1",
+    isAutoApply: false,
+    isExclusive: true,
+    priority: "0",
+    triggerType: "ManualCode",
+    promotionCategory: "Coupon",
     minBookingAmount: "0",
+    status: "Active",
     remark: "",
   };
 }
@@ -193,6 +199,13 @@ export default function AdminBusCouponListPage() {
       "Start Date",
       "Expiry Date",
       "Use Limit",
+      "Max Usage Per User",
+      "Auto Apply",
+      "Exclusive",
+      "Priority",
+      "Trigger Type",
+      "Promotion Category",
+      "Min Booking Amount",
       "Status",
       "Entry Date",
       "Remark",
@@ -206,6 +219,13 @@ export default function AdminBusCouponListPage() {
       formatCouponDate(coupon.startDate),
       formatCouponDate(coupon.expiryDate),
       coupon.useLimit,
+      coupon.maxUsagePerUser,
+      coupon.isAutoApply ? "Yes" : "No",
+      coupon.isExclusive ? "Yes" : "No",
+      coupon.priority,
+      coupon.triggerType,
+      coupon.promotionCategory,
+      coupon.minBookingAmount,
       coupon.status,
       formatCouponDateTime(coupon.entryDate),
       coupon.remark,
@@ -283,8 +303,13 @@ export default function AdminBusCouponListPage() {
       expiryDate: generateForm.expiryDate,
       useLimit,
       maxUsagePerUser: Number(generateForm.maxUsagePerUser) || 1,
+      isAutoApply: Boolean(generateForm.isAutoApply),
+      isExclusive: Boolean(generateForm.isExclusive),
+      priority: Number(generateForm.priority) || 0,
+      triggerType: generateForm.triggerType,
+      promotionCategory: generateForm.promotionCategory,
       minBookingAmount: Number(generateForm.minBookingAmount) || 0,
-      status: "Active",
+      status: generateForm.status,
       remark: generateForm.remark.trim(),
     };
 
@@ -305,6 +330,11 @@ export default function AdminBusCouponListPage() {
       value: String(coupon.value),
       useLimit: String(coupon.useLimit),
       maxUsagePerUser: String(coupon.maxUsagePerUser || 1),
+      isAutoApply: Boolean(coupon.isAutoApply),
+      isExclusive: Boolean(coupon.isExclusive),
+      priority: String(coupon.priority || 0),
+      triggerType: coupon.triggerType || "ManualCode",
+      promotionCategory: coupon.promotionCategory || "Coupon",
       minBookingAmount: String(coupon.minBookingAmount || 0),
       startDate: toInputDate(coupon.startDate),
       expiryDate: toInputDate(coupon.expiryDate),
@@ -351,6 +381,11 @@ export default function AdminBusCouponListPage() {
       expiryDate: editCoupon.expiryDate,
       useLimit,
       maxUsagePerUser: Number(editCoupon.maxUsagePerUser) || 1,
+      isAutoApply: Boolean(editCoupon.isAutoApply),
+      isExclusive: Boolean(editCoupon.isExclusive),
+      priority: Number(editCoupon.priority) || 0,
+      triggerType: editCoupon.triggerType || "ManualCode",
+      promotionCategory: editCoupon.promotionCategory || "Coupon",
       minBookingAmount: Number(editCoupon.minBookingAmount) || 0,
       status: editCoupon.status,
       remark: editCoupon.remark.trim(),
@@ -724,6 +759,73 @@ export default function AdminBusCouponListPage() {
                 />
               </label>
               <label>
+                <span>Trigger Type:</span>
+                <select
+                  value={generateForm.triggerType}
+                  onChange={(event) =>
+                    setGenerateForm((previous) => ({ ...previous, triggerType: event.target.value }))
+                  }
+                >
+                  <option value="ManualCode">Manual Code</option>
+                  <option value="AutoApply">Auto Apply</option>
+                </select>
+              </label>
+              <label>
+                <span>Promotion Category:</span>
+                <select
+                  value={generateForm.promotionCategory}
+                  onChange={(event) =>
+                    setGenerateForm((previous) => ({ ...previous, promotionCategory: event.target.value }))
+                  }
+                >
+                  <option value="Coupon">Coupon</option>
+                  <option value="Discount">Discount</option>
+                </select>
+              </label>
+              <label>
+                <span>Auto Apply:</span>
+                <select
+                  value={String(generateForm.isAutoApply)}
+                  onChange={(event) =>
+                    setGenerateForm((previous) => ({
+                      ...previous,
+                      isAutoApply: event.target.value === "true",
+                    }))
+                  }
+                >
+                  <option value="false">No</option>
+                  <option value="true">Yes</option>
+                </select>
+              </label>
+              <label>
+                <span>Exclusive:</span>
+                <select
+                  value={String(generateForm.isExclusive)}
+                  onChange={(event) =>
+                    setGenerateForm((previous) => ({
+                      ...previous,
+                      isExclusive: event.target.value === "true",
+                    }))
+                  }
+                >
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </label>
+              <label>
+                <span>Priority:</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  placeholder="e.g. 0"
+                  value={generateForm.priority}
+                  onChange={(event) =>
+                    setGenerateForm((previous) => ({ ...previous, priority: event.target.value }))
+                  }
+                />
+              </label>
+              <label>
                 <span>Min Booking Amount (INR):</span>
                 <input
                   type="number"
@@ -735,6 +837,18 @@ export default function AdminBusCouponListPage() {
                     setGenerateForm((previous) => ({ ...previous, minBookingAmount: event.target.value }))
                   }
                 />
+              </label>
+              <label>
+                <span>Status:</span>
+                <select
+                  value={generateForm.status}
+                  onChange={(event) =>
+                    setGenerateForm((previous) => ({ ...previous, status: event.target.value }))
+                  }
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
               </label>
               <label className="remark-field">
                 <span>Coupon Remark:</span>
@@ -863,6 +977,72 @@ export default function AdminBusCouponListPage() {
                   value={editCoupon.maxUsagePerUser}
                   onChange={(event) =>
                     setEditCoupon((previous) => ({ ...previous, maxUsagePerUser: event.target.value }))
+                  }
+                />
+              </label>
+              <label>
+                <span>Trigger Type</span>
+                <select
+                  value={editCoupon.triggerType}
+                  onChange={(event) =>
+                    setEditCoupon((previous) => ({ ...previous, triggerType: event.target.value }))
+                  }
+                >
+                  <option value="ManualCode">Manual Code</option>
+                  <option value="AutoApply">Auto Apply</option>
+                </select>
+              </label>
+              <label>
+                <span>Promotion Category</span>
+                <select
+                  value={editCoupon.promotionCategory}
+                  onChange={(event) =>
+                    setEditCoupon((previous) => ({ ...previous, promotionCategory: event.target.value }))
+                  }
+                >
+                  <option value="Coupon">Coupon</option>
+                  <option value="Discount">Discount</option>
+                </select>
+              </label>
+              <label>
+                <span>Auto Apply</span>
+                <select
+                  value={String(editCoupon.isAutoApply)}
+                  onChange={(event) =>
+                    setEditCoupon((previous) => ({
+                      ...previous,
+                      isAutoApply: event.target.value === "true",
+                    }))
+                  }
+                >
+                  <option value="false">No</option>
+                  <option value="true">Yes</option>
+                </select>
+              </label>
+              <label>
+                <span>Exclusive</span>
+                <select
+                  value={String(editCoupon.isExclusive)}
+                  onChange={(event) =>
+                    setEditCoupon((previous) => ({
+                      ...previous,
+                      isExclusive: event.target.value === "true",
+                    }))
+                  }
+                >
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </label>
+              <label>
+                <span>Priority</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={editCoupon.priority}
+                  onChange={(event) =>
+                    setEditCoupon((previous) => ({ ...previous, priority: event.target.value }))
                   }
                 />
               </label>

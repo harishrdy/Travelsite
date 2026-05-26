@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaSyncAlt, FaBus } from "react-icons/fa";
+import { FaPlaneDeparture, FaSyncAlt,FaBus } from "react-icons/fa";
 import "../../STYLES/Login.css";
 import "../../STYLES/RESETPASSWORD.css";
 import { readApiMessage, requestAuth } from "../../services/authService";
-import authHeroImage from "../../assets/images/loginimage.png";
-
-const EMAIL_REGEX = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+import { validateLowercaseEmail } from "../../utils/authValidation";
+import { generateMixedCaptcha, validateCaptcha } from "../../utils/captcha";
+// import flightCarImage from "../../assets/images/flightcar.png";
+import flightCarImage from "../../assets/images/loginimage.png";
 
 const ResetPassword = () => {
   const [email, setEmail] = useState("");
@@ -18,40 +19,53 @@ const ResetPassword = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const navigate = useNavigate();
   const authPageStyle = {
-    backgroundImage: `url(${authHeroImage})`
+    backgroundImage: `url(${flightCarImage})`
   };
 
   const generateCaptcha = () => {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let value = "";
-    for (let i = 0; i < 5; i += 1) {
-      value += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setGeneratedCaptcha(value);
+    setGeneratedCaptcha(generateMixedCaptcha());
+    setCaptchaInput("");
   };
 
   useEffect(() => {
     generateCaptcha();
   }, []);
 
+  const showEmailSpaceError = () => {
+    setErrors((prev) => ({
+      ...prev,
+      email: "Email cannot contain spaces",
+    }));
+    setApiMessage("");
+    setIsSuccess(false);
+  };
+
+  const handleEmailKeyDown = (event) => {
+    if (event.key === " ") {
+      event.preventDefault();
+      showEmailSpaceError();
+    }
+  };
+
+  const handleEmailPaste = (event) => {
+    if (/\s/.test(event.clipboardData.getData("text"))) {
+      event.preventDefault();
+      showEmailSpaceError();
+    }
+  };
+
   const validate = () => {
     const newErrors = {};
-    const normalizedEmail = email.trim();
+    const emailError = validateLowercaseEmail(email);
 
-    if (!normalizedEmail) {
-      newErrors.email = "Email is required.";
-    } else if (/\s/.test(email)) {
-      newErrors.email = "Email cannot contain spaces.";
-    } else if (/[A-Z]/.test(normalizedEmail)) {
-      newErrors.email = "Only lowercase letters are allowed.";
-    } else if (!EMAIL_REGEX.test(normalizedEmail)) {
-      newErrors.email = "Enter a valid email address.";
+    if (emailError) {
+      newErrors.email = emailError;
     }
 
-    if (!captchaInput.trim()) {
-      newErrors.captcha = "Captcha is required.";
-    } else if (captchaInput.trim().toUpperCase() !== generatedCaptcha) {
-      newErrors.captcha = "Invalid captcha.";
+    const captchaError = validateCaptcha(captchaInput, generatedCaptcha);
+
+    if (captchaError) {
+      newErrors.captcha = captchaError;
     }
 
     setErrors(newErrors);
@@ -67,20 +81,24 @@ const ResetPassword = () => {
     setIsSuccess(false);
 
     try {
+      const resetEmail = email.trim();
       const payload = await requestAuth(
         "/api/Auth/forgot-password",
         {
           method: "POST",
-          body: JSON.stringify({ email: email.trim() })
+          body: JSON.stringify({ email: resetEmail })
         },
         "Failed to send OTP."
       );
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem("passwordResetEmail", resetEmail);
+      }
       setIsSuccess(true);
       setApiMessage(
         readApiMessage(payload, "If the email is registered, an OTP has been sent.")
       );
       setTimeout(() => {
-        navigate("/verify");
+        navigate("/verify", { state: { email: resetEmail } });
       }, 1200);
     } catch (error) {
       setIsSuccess(false);
@@ -99,7 +117,7 @@ const ResetPassword = () => {
         <aside className="travel-auth-brand">
           <p className="travel-auth-kicker">Welcome to</p>
           <div className="travel-auth-logo">
-            <FaBus />
+            <FaPlaneDeparture />< FaBus/>
           </div>
           <h1 className="travel-auth-brand-name">Travling</h1>
           <p className="travel-auth-brand-copy">
@@ -124,29 +142,33 @@ const ResetPassword = () => {
 
           <form className="travel-auth-form" onSubmit={handleSubmit} noValidate>
             <div className="travel-field">
-              <label htmlFor="forgot-email">E-mail Address <span>*</span></label>
-              <div className={`travel-field-line ${errors.email ? "has-error" : ""}`}>
+              <label htmlFor="forgot-email">E-mail Address</label>
+              <div className="travel-field-line">
                 <input
                   id="forgot-email"
                   type="email"
                   placeholder="Enter your registered e-mail"
                   value={email}
-                  autoComplete="email"
-                  aria-invalid={Boolean(errors.email)}
-                  aria-describedby="forgot-email-error"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  onKeyDown={handleEmailKeyDown}
+                  onPaste={handleEmailPaste}
                   onChange={(e) => {
                     setEmail(e.target.value);
-                    setErrors((prev) => ({ ...prev, email: "" }));
+                    setErrors((prev) => ({
+                      ...prev,
+                      email: validateLowercaseEmail(e.target.value) || "",
+                    }));
                     setApiMessage("");
                     setIsSuccess(false);
                   }}
                 />
               </div>
-              <p id="forgot-email-error" className="travel-field-error">{errors.email || "\u00A0"}</p>
+              <p className="travel-field-error">{errors.email || "\u00A0"}</p>
             </div>
 
             <div className="travel-field">
-              <label htmlFor="forgot-captcha">Captcha <span>*</span></label>
+              <label htmlFor="forgot-captcha">Captcha</label>
               <div className="travel-captcha-row">
                 <div className="travel-captcha-display" aria-label="Captcha code">
                   {generatedCaptcha.split("").map((char, index) => (
@@ -162,7 +184,7 @@ const ResetPassword = () => {
                   <span>Refresh</span>
                 </button>
               </div>
-              <div className={`travel-field-line ${errors.captcha ? "has-error" : ""}`}>
+              <div className="travel-field-line">
                 <input
                   id="forgot-captcha"
                   type="text"
@@ -172,17 +194,21 @@ const ResetPassword = () => {
                   autoCapitalize="none"
                   spellCheck={false}
                   maxLength={generatedCaptcha.length || 5}
-                  aria-invalid={Boolean(errors.captcha)}
-                  aria-describedby="forgot-captcha-error"
                   onChange={(e) => {
-                    setCaptchaInput(e.target.value.replace(/\s+/g, ""));
-                    setErrors((prev) => ({ ...prev, captcha: "" }));
+                    const nextCaptcha = e.target.value;
+                    setCaptchaInput(nextCaptcha);
+                    setErrors((prev) => ({
+                      ...prev,
+                      captcha: /\s/.test(nextCaptcha)
+                        ? "Captcha cannot contain spaces"
+                        : "",
+                    }));
                     setApiMessage("");
                     setIsSuccess(false);
                   }}
                 />
               </div>
-              <p id="forgot-captcha-error" className="travel-field-error">{errors.captcha || "\u00A0"}</p>
+              <p className="travel-field-error">{errors.captcha || "\u00A0"}</p>
             </div>
 
             <div className="travel-auth-links">

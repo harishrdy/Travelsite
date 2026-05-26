@@ -29,7 +29,7 @@ public class FeaturedOffersService : IFeaturedOffersService
 
     public async Task<IReadOnlyList<FeaturedOfferDto>> GetFeaturedOffersAsync()
     {
-        await EnsureSeededAsync();
+        
 
         var now = DateTime.UtcNow;
 
@@ -46,7 +46,7 @@ public class FeaturedOffersService : IFeaturedOffersService
 
     public async Task<ApplyOfferCouponResponse> ApplyCouponAsync(ApplyOfferCouponRequest request)
     {
-        await EnsureSeededAsync();
+       
 
         if (string.IsNullOrWhiteSpace(request.OfferId) || string.IsNullOrWhiteSpace(request.CouponCode))
         {
@@ -201,6 +201,7 @@ public class FeaturedOffersService : IFeaturedOffersService
             CouponUsedCount = offer.CouponUsedCount,
             RemainingCouponUsage = remaining,
             IsCouponActive = isActive,
+            PromotionId = offer.PromotionId,
             ImageUrl = ResolveImageUrl(offer.ImageUrl),
             BookingType = offer.BookingType,
             PreviewFinalPrice = Math.Round(
@@ -262,42 +263,5 @@ public class FeaturedOffersService : IFeaturedOffersService
         return Math.Round(Math.Min(discount, originalPrice), 2, MidpointRounding.AwayFromZero);
     }
 
-    private async Task EnsureSeededAsync()
-    {
-        if (await _context.FeaturedOffers.AnyAsync())
-            return;
-
-        var now = DateTime.UtcNow;
-        var expiry = now.AddMonths(6);
-
-        var offers = new List<FeaturedOffer>
-        {
-            new() { OfferCode = "OFR001", Title = "Flight Special Deal", Subtitle = "Save Big", Description = "Save up to 20% on selected domestic routes.", CouponCode = "FLY20", BasePrice = 5200m, IsPercentageDiscount = true, DiscountValue = 20m, CouponExpiresAtUtc = expiry, MaxCouponUsage = 500, CouponUsedCount = 0, IsActive = true, ImageUrl = "/offers/flight-special-deal.png", CreatedAtUtc = now, UpdatedAtUtc = now },
-            new() { OfferCode = "OFR002", Title = "Monsoon Express", Subtitle = "Rainy Sale", Description = "Monsoon season discount for weekend travelers.", CouponCode = "RAIN15", BasePrice = 4600m, IsPercentageDiscount = true, DiscountValue = 15m, CouponExpiresAtUtc = expiry, MaxCouponUsage = 450, CouponUsedCount = 0, IsActive = true, ImageUrl = "/offers/monsoon-express.png", CreatedAtUtc = now, UpdatedAtUtc = now },
-            new() { OfferCode = "OFR003", Title = "Bus Buddy Flat Fare", Subtitle = "Quick Save", Description = "Flat INR 300 off for short-haul bookings.", CouponCode = "BUSBUDDY", BasePrice = 2200m, IsPercentageDiscount = false, DiscountValue = 300m, CouponExpiresAtUtc = expiry, MaxCouponUsage = 350, CouponUsedCount = 0, IsActive = true, ImageUrl = "/offers/bus-buddy.png", CreatedAtUtc = now, UpdatedAtUtc = now },
-            new() { OfferCode = "OFR004", Title = "City Hopper", Subtitle = "Metro Saver", Description = "Perfect for frequent city-to-city flyers.", CouponCode = "HOPPER12", BasePrice = 4100m, IsPercentageDiscount = true, DiscountValue = 12m, CouponExpiresAtUtc = expiry, MaxCouponUsage = 300, CouponUsedCount = 0, IsActive = true, ImageUrl = "/offers/city-hopper.png", CreatedAtUtc = now, UpdatedAtUtc = now },
-            new() { OfferCode = "OFR005", Title = "Weekend Blast", Subtitle = "Fri-Sun Offer", Description = "Discount valid for weekend departures only.", CouponCode = "WEEKEND10", BasePrice = 5900m, IsPercentageDiscount = true, DiscountValue = 10m, CouponExpiresAtUtc = expiry, MaxCouponUsage = 325, CouponUsedCount = 0, IsActive = true, ImageUrl = "/offers/weekend-blast.png", CreatedAtUtc = now, UpdatedAtUtc = now },
-            new() { OfferCode = "OFR006", Title = "Early Bird", Subtitle = "Plan Ahead", Description = "Book early and unlock a flat discount.", CouponCode = "EARLY500", BasePrice = 6800m, IsPercentageDiscount = false, DiscountValue = 500m, CouponExpiresAtUtc = expiry, MaxCouponUsage = 280, CouponUsedCount = 0, IsActive = true, ImageUrl = "/offers/early-bird.png", CreatedAtUtc = now, UpdatedAtUtc = now },
-            new() { OfferCode = "OFR007", Title = "Family Pack", Subtitle = "Group Friendly", Description = "Family travelers can save with this coupon.", CouponCode = "FAM18", BasePrice = 8400m, IsPercentageDiscount = true, DiscountValue = 18m, CouponExpiresAtUtc = expiry, MaxCouponUsage = 250, CouponUsedCount = 0, IsActive = true, ImageUrl = "/offers/family-pack.png", CreatedAtUtc = now, UpdatedAtUtc = now },
-            new() { OfferCode = "OFR008", Title = "Night Owl", Subtitle = "Late Flights", Description = "Special discount for red-eye and late departures.", CouponCode = "OWL350", BasePrice = 3700m, IsPercentageDiscount = false, DiscountValue = 350m, CouponExpiresAtUtc = expiry, MaxCouponUsage = 300, CouponUsedCount = 0, IsActive = true, ImageUrl = "/offers/night-owl.png", CreatedAtUtc = now, UpdatedAtUtc = now },
-            new() { OfferCode = "OFR009", Title = "Student Saver", Subtitle = "Campus Route", Description = "Student-focused fare cuts for selected sectors.", CouponCode = "STUDY14", BasePrice = 4300m, IsPercentageDiscount = true, DiscountValue = 14m, CouponExpiresAtUtc = expiry, MaxCouponUsage = 400, CouponUsedCount = 0, IsActive = true, ImageUrl = "/offers/student-saver.png", CreatedAtUtc = now, UpdatedAtUtc = now },
-            new() { OfferCode = "OFR010", Title = "Corporate Connect", Subtitle = "Business Travel", Description = "Business route offer with instant savings.", CouponCode = "CORP600", BasePrice = 9200m, IsPercentageDiscount = false, DiscountValue = 600m, CouponExpiresAtUtc = expiry, MaxCouponUsage = 220, CouponUsedCount = 0, IsActive = true, ImageUrl = "/offers/corporate-connect.png", CreatedAtUtc = now, UpdatedAtUtc = now },
-            new() { OfferCode = "OFR011", Title = "Festive Joy", Subtitle = "Holiday Rush", Description = "Festive travel season discount.", CouponCode = "FEST16", BasePrice = 7600m, IsPercentageDiscount = true, DiscountValue = 16m, CouponExpiresAtUtc = expiry, MaxCouponUsage = 260, CouponUsedCount = 0, IsActive = true, ImageUrl = "/offers/festive-joy.png", CreatedAtUtc = now, UpdatedAtUtc = now },
-            new() { OfferCode = "OFR012", Title = "Round Trip Booster", Subtitle = "Return Saver", Description = "Extra value for round-trip bookings.", CouponCode = "ROUND450", BasePrice = 7000m, IsPercentageDiscount = false, DiscountValue = 450m, CouponExpiresAtUtc = expiry, MaxCouponUsage = 240, CouponUsedCount = 0, IsActive = true, ImageUrl = "/offers/round-trip.png", CreatedAtUtc = now, UpdatedAtUtc = now },
-            new() { OfferCode = "OFR013", Title = "Premium Escape", Subtitle = "Luxury Promo", Description = "Premium flight deal with high-value discount.", CouponCode = "PREM22", BasePrice = 12500m, IsPercentageDiscount = true, DiscountValue = 22m, CouponExpiresAtUtc = expiry, MaxCouponUsage = 180, CouponUsedCount = 0, IsActive = true, ImageUrl = "/offers/premium-escape.png", CreatedAtUtc = now, UpdatedAtUtc = now },
-            new() { OfferCode = "OFR014", Title = "Quick Fly", Subtitle = "Flash Sale", Description = "Flash sale with limited-time reduction.", CouponCode = "QUICK250", BasePrice = 3100m, IsPercentageDiscount = false, DiscountValue = 250m, CouponExpiresAtUtc = expiry, MaxCouponUsage = 360, CouponUsedCount = 0, IsActive = true, ImageUrl = "/offers/quick-fly.png", CreatedAtUtc = now, UpdatedAtUtc = now },
-            new() { OfferCode = "OFR015", Title = "Mega Miles", Subtitle = "Big Savings", Description = "Heavy discount for long-distance routes.", CouponCode = "MEGA25", BasePrice = 9800m, IsPercentageDiscount = true, DiscountValue = 25m, CouponExpiresAtUtc = expiry, MaxCouponUsage = 200, CouponUsedCount = 0, IsActive = true, ImageUrl = "/offers/mega-miles.png", CreatedAtUtc = now, UpdatedAtUtc = now }
-        };
-
-        _context.FeaturedOffers.AddRange(offers);
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateException)
-        {
-            // Ignore if another request seeded concurrently.
-        }
-    }
+   
 }
