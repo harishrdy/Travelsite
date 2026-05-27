@@ -16,7 +16,7 @@ services:
       Jwt__Audience: ${JWT_AUDIENCE:-PickNBookUsers}
       Jwt__ExpiryMinutes: ${JWT_EXPIRY_MINUTES:-60}
       Cors__AllowedOrigins__0: ${FRONTEND_PUBLIC_URL:-http://3.111.182.53:3000}
-      Cors__AllowedOrigins__1: ${FRONTEND_PUBLIC_URL_ALT:-http://127.0.0.1:3000}
+      Cors__AllowedOrigins__1: ${FRONTEND_PUBLIC_URL_ALT:-http://3.111.182.53:3000}
       Amadeus__BaseUrl: ${AMADEUS_BASE_URL:-https://test.api.amadeus.com}
       Amadeus__ClientId: ${AMADEUS_CLIENT_ID:-}
       Amadeus__ClientSecret: ${AMADEUS_CLIENT_SECRET:-}
