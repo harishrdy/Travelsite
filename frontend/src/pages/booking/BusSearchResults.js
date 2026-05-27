@@ -1292,7 +1292,7 @@ export default function BusSearchResults() {
                 }
                 tripType="bus"
                 field="from"
-                placeholder="Type source city"
+                placeholder="Source"
               />
 
               <button
@@ -1315,7 +1315,7 @@ export default function BusSearchResults() {
                 }
                 tripType="bus"
                 field="to"
-                placeholder="Type destination city"
+                placeholder="Destination"
               />
 
              <label className="bus-modify-field" style={{ position: "relative" }}>

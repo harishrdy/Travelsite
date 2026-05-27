@@ -29,7 +29,6 @@ import AccountStatement from "./pages/account/AccountStatement";
 import EditProfile from "./pages/account/EditProfile";
 import FlightSearchResults from "./pages/booking/FlightSearchResults";
 import BusSearchResults from "./pages/booking/BusSearchResults";
-import PopularBusRoutesPage from "./pages/booking/PopularBusRoutesPage";
 import BusSeatSelectionPage from "./pages/booking/BusSeatSelectionPage";
 import BusPassengerDetailsPage from "./pages/booking/BusPassengerDetailsPage";
 import BusPaymentPage from "./pages/booking/BusPaymentPage";
@@ -265,7 +264,6 @@ function AppContent() {
         <Route path="/flight/payment" element={<FlightPaymentPage />} />
         <Route path="/booking/confirmation" element={<BookingConfirmationPage />} />
         <Route path="/ticket/confirmation" element={<TicketConfirmationPage />} />
-        <Route path="/popular-buses/:operatorId" element={<PopularBusRoutesPage />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/change-password" element={<ChangePassword />} />
 

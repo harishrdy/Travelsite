@@ -185,7 +185,8 @@ namespace PickNBook.Api.Controllers
                     x.FromCity,
                     x.ToCity,
                     x.BoardingPoint,
-                    x.DroppingPoint,
+                    DroppingPoint = x.DroppingPoint.Split(',').Last().Trim(),
+                   
 
                     DepartureTimeUtc = x.DepartureTime,
                     ArrivalTimeUtc = x.ArrivalTime,

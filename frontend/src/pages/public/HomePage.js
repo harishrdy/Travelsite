@@ -8,20 +8,21 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Clock3,
   MessageSquareText,
   Minus,
   Plane,
   Plus,
+  RefreshCw,
   Search,
+  ShieldCheck,
   Trash2,
   Users,
   X,
 } from "lucide-react";
-import heroImage from "../../assets/images/hero.jpg";
-import flight1 from "../../assets/images/flight1.jpg";
-import flight2 from "../../assets/images/flight2.jpg";
-import flight3 from "../../assets/images/flight3.jpg";
-import flight4 from "../../assets/images/flight4.jpg";
+import travelServiceRoute from "../../assets/images/travel-service-route.png";
+import travelServiceFares from "../../assets/images/travel-service-fares.png";
+import travelServiceTraveller from "../../assets/images/travel-service-traveller.png";
 import airIndiaExpress from "../../assets/images/brands/air-india-express.png";
 import airIndia from "../../assets/images/brands/air-india.png";
 import akasaAir from "../../assets/images/brands/akasa-air.png";
@@ -99,66 +100,75 @@ const FALLBACK_CITIES = [
 const POPULAR_FLIGHTS = [
   {
     id: "flight-1",
-    image: flight1,
     route: "Delhi to Mumbai",
+    fromCity: "Delhi",
+    toCity: "Mumbai",
     summary: "Multiple daily departures and flexible timings.",
-    price: "INR 4,500",
+    searches: 1520,
   },
   {
     id: "flight-2",
-    image: flight2,
     route: "Delhi to New York",
+    fromCity: "Delhi",
+    toCity: "New York",
     summary: "Premium long-haul options with one-stop routes.",
-    price: "INR 35,000",
+    searches: 1480,
   },
   {
     id: "flight-3",
-    image: flight3,
     route: "Delhi to Dubai",
+    fromCity: "Delhi",
+    toCity: "Dubai",
     summary: "Fast visa-friendly routes with top carriers.",
-    price: "INR 15,000",
+    searches: 1390,
   },
   {
     id: "flight-4",
-    image: flight4,
     route: "Kolkata to Patna",
+    fromCity: "Kolkata",
+    toCity: "Patna",
     summary: "Affordable direct routes for frequent travelers.",
-    price: "INR 3,500",
+    searches: 1210,
   },
   {
     id: "flight-5",
-    image: flight1,
     route: "Pune to Chennai",
+    fromCity: "Pune",
+    toCity: "Chennai",
     summary: "Quick connections with excellent morning slots.",
-    price: "INR 5,200",
+    searches: 980,
   },
   {
     id: "flight-6",
-    image: flight2,
     route: "Bangalore to Jaipur",
+    fromCity: "Bangalore",
+    toCity: "Jaipur",
     summary: "Business and economy seats available every day.",
-    price: "INR 6,400",
+    searches: 940,
   },
   {
     id: "flight-7",
-    image: flight3,
     route: "Hyderabad to Kolkata",
+    fromCity: "Hyderabad",
+    toCity: "Kolkata",
     summary: "Convenient schedules for weekend travel plans.",
-    price: "INR 5,900",
+    searches: 870,
   },
   {
     id: "flight-8",
-    image: flight4,
     route: "Mumbai to Doha",
+    fromCity: "Mumbai",
+    toCity: "Doha",
     summary: "Competitive fares on popular Gulf routes.",
-    price: "INR 18,300",
+    searches: 820,
   },
   {
     id: "flight-9",
-    image: flight3,
     route: "Hyderabad to Proddatur",
+    fromCity: "Hyderabad",
+    toCity: "Proddatur",
     summary: "Competitive fares on most Gulf routes.",
-    price: "INR 8,300",
+    searches: 760,
   },
 ];
 
@@ -279,18 +289,31 @@ const REVIEWS = [
 const HIGHLIGHTS = [
   {
     id: "highlight-1",
-    title: "Why Choose Us?",
-    text: "From search to seat selection, we keep bus bookings simple, pricing transparent, and support available whenever you need help.",
+    icon: Search,
+    value: "Fast",
+    title: "Search Without Guesswork",
+    text: "Compare routes, timings, fares, pickup points, and seat choices in one clean flow.",
   },
   {
     id: "highlight-2",
-    title: "We Believe in the Magic of Travel",
-    text: "Every journey should feel smooth and personal. Our platform focuses on fast search, trusted inventory, and confirmation workflows that reduce stress.",
+    icon: ShieldCheck,
+    value: "Clear",
+    title: "Book With Confidence",
+    text: "Check cancellation rules, fare details, and trip information before you confirm.",
   },
   {
     id: "highlight-3",
-    title: "Your Perfect Travel Experience Starts Here",
-    text: "Compare options, book quickly, and manage plans in one place. We are built for quick intercity bus bookings.",
+    icon: Clock3,
+    value: "Ready",
+    title: "Better For Urgent Plans",
+    text: "Find close-to-departure options quickly when your journey changes at the last minute.",
+  },
+  {
+    id: "highlight-4",
+    icon: RefreshCw,
+    value: "Easy",
+    title: "Everything In One Place",
+    text: "Keep search, offers, booking, and ticket actions simple from start to finish.",
   },
 ];
 
@@ -308,6 +331,143 @@ const HERO_TAGS = [
   { id: "tag-3", label: "Flexible trip combinations" },
 ];
 
+const HOME_BOOKING_STEPS = [
+  {
+    id: "step-1",
+    title: "Search Your Route",
+    text: "Enter source, destination, and journey date to compare available buses in one place.",
+  },
+  {
+    id: "step-2",
+    title: "Pick The Right Bus",
+    text: "Check timings, boarding points, bus type, fare, and cancellation rules before selecting seats.",
+  },
+  {
+    id: "step-3",
+    title: "Confirm Securely",
+    text: "Add passenger details, complete payment, and keep your ticket reference ready for the journey.",
+  },
+];
+
+const HOME_GUIDE_NOTES = [
+  {
+    id: "note-1",
+    title: "Close-To-Departure Booking",
+    text: "When plans change at the last minute, filter by departure time, pickup point, seat type, and cancellation flexibility. A slightly later boarding time can sometimes give better seat choice and fare clarity.",
+  },
+  {
+    id: "note-2",
+    title: "A Cleaner Way To Choose",
+    text: "Instead of picking only the cheapest option, compare the whole trip: operator reliability, boarding location, arrival time, amenities, and refund rules. A calmer booking decision usually starts with fewer surprises.",
+  },
+];
+
+const HOME_SERVICE_BLOCKS = [
+  {
+    id: "services",
+    kicker: "Travel Desk Services",
+    title: "Online Bus Booking Made Simple",
+    text:
+      "Search routes, compare departures, check fares, and keep booking details in one clear flow. Travel Desk is built for quick city-to-city planning without jumping between different tools.",
+    points: [
+      "Live route search with practical filters",
+      "Boarding, dropping, and timing details in one place",
+      "Ticket confirmation ready after payment",
+    ],
+    visual: "route",
+    image: travelServiceRoute,
+    imageAlt: "Bus route search shown on a mobile booking screen",
+  },
+  {
+    id: "fares",
+    kicker: "Fare Clarity",
+    title: "Choose The Right Bus At The Right Price",
+    text:
+      "Compare AC, non-AC, sleeper, seater, private, and RTC-style options by comfort, timing, and cancellation rules before you confirm.",
+    points: [
+      "AC Sleeper",
+      "Non-AC Seater",
+      "Semi Sleeper",
+      "Volvo / Premium",
+      "Express Routes",
+      "Night Services",
+    ],
+    visual: "fare",
+    image: travelServiceFares,
+    imageAlt: "Bus fare comparison cards with seat and route options",
+  },
+  {
+    id: "benefits",
+    kicker: "Better Booking Habits",
+    title: "Everything You Need Before You Travel",
+    text:
+      "A good booking experience should reduce uncertainty. Review route details, passenger information, fare rules, and ticket status before the journey starts.",
+    points: [
+      "Avoid standing in queues at counters",
+      "Review pickup and drop points before payment",
+      "Keep booking reference and passenger details handy",
+      "Use saved routes for repeat journeys",
+    ],
+    visual: "traveller",
+    image: travelServiceTraveller,
+    imageAlt: "Traveller checking ticket details beside a bus stop",
+  },
+];
+
+const HOME_ASSURANCE_POINTS = [
+  {
+    id: "assurance-1",
+    icon: ShieldCheck,
+    title: "Trip Protection",
+    text: "Clear cancellation and support paths when plans change.",
+  },
+  {
+    id: "assurance-2",
+    icon: Clock3,
+    title: "Delay Ready",
+    text: "Keep route timing, boarding details, and ticket status easy to check.",
+  },
+  {
+    id: "assurance-3",
+    icon: RefreshCw,
+    title: "Flexible Changes",
+    text: "Compare options with refund rules before you confirm your seat.",
+  },
+];
+
+const HOME_BUS_FAQS = [
+  {
+    id: "faq-1",
+    question: "How do I book bus tickets online?",
+    answer:
+      "Choose your source, destination, journey date, and preferred bus. Then select seats, add passenger details, and complete payment to receive your ticket confirmation.",
+  },
+  {
+    id: "faq-2",
+    question: "Can I book RTC and private bus operators?",
+    answer:
+      "Yes. The platform is designed for common routes across RTC operators and private buses, including seater, sleeper, AC, non-AC, and overnight journeys.",
+  },
+  {
+    id: "faq-3",
+    question: "What should I check before payment?",
+    answer:
+      "Always check the final fare, boarding point, cancellation rules, passenger details, and operator policy before payment.",
+  },
+  {
+    id: "faq-4",
+    question: "Where can I check boarding point and ticket details?",
+    answer:
+      "After booking, your ticket page shows route, date, boarding point, passenger details, fare summary, and confirmation reference for quick access.",
+  },
+];
+
+const HOME_APP_BENEFITS = [
+  "Route alerts for frequently searched corridors",
+  "Quick access to PNR and ticket history",
+  "Offers for repeat travellers and families",
+];
+
 function getDateInputValue(offsetDays = 0) {
   const date = new Date();
   date.setDate(date.getDate() + offsetDays);
@@ -321,7 +481,7 @@ function createMultiCityLeg(from, to, offsetDays) {
     id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
     from,
     to,
-    departureDate: getDateInputValue(offsetDays),
+    departureDate: "",
   };
 }
 
@@ -628,10 +788,186 @@ function normalizeFeaturedOffer(offer, index) {
 }
 
 function AutoMarquee({ items, className, duration, renderItem }) {
-  const loopItems = [...items, ...items];
+  const marqueeRef = useRef(null);
+  const animationFrameRef = useRef(null);
+  const draggedClickRef = useRef(false);
+  const hoveredRef = useRef(false);
+  const momentumRef = useRef(0);
+  const dragStateRef = useRef({
+    active: false,
+    dragged: false,
+    pointerId: null,
+    startX: 0,
+    lastX: 0,
+    lastTime: 0,
+    scrollLeft: 0,
+  });
+  const [isDragging, setIsDragging] = useState(false);
+  const loopItems = [...items, ...items, ...items];
+
+  const normalizeMarqueeScroll = (node) => {
+    if (!node || node.scrollWidth <= node.clientWidth) {
+      return;
+    }
+
+    const segmentWidth = node.scrollWidth / 3;
+
+    if (segmentWidth <= 0) {
+      return;
+    }
+
+    if (node.scrollLeft < segmentWidth * 0.5) {
+      node.scrollLeft += segmentWidth;
+    } else if (node.scrollLeft > segmentWidth * 1.5) {
+      node.scrollLeft -= segmentWidth;
+    }
+  };
+
+  useEffect(() => {
+    const node = marqueeRef.current;
+
+    if (!node || items.length === 0) {
+      return undefined;
+    }
+
+    const segmentWidth = node.scrollWidth / 3;
+    if (segmentWidth > 0) {
+      node.scrollLeft = segmentWidth;
+    }
+
+    let previousTime = performance.now();
+
+    const animate = (time) => {
+      const currentNode = marqueeRef.current;
+      const elapsed = Math.min(time - previousTime, 32);
+      previousTime = time;
+
+      if (currentNode && currentNode.scrollWidth > currentNode.clientWidth) {
+        const state = dragStateRef.current;
+
+        if (!state.active) {
+          if (Math.abs(momentumRef.current) > 0.02) {
+            currentNode.scrollLeft += momentumRef.current * elapsed;
+            momentumRef.current *= Math.pow(0.92, elapsed / 16.67);
+          } else if (!hoveredRef.current) {
+            const loopWidth = currentNode.scrollWidth / 3;
+            const pixelsPerMs = loopWidth / Math.max(duration * 1000, 1);
+            currentNode.scrollLeft += pixelsPerMs * elapsed;
+          }
+
+          normalizeMarqueeScroll(currentNode);
+        }
+      }
+
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [items, duration]);
+
+  const handlePointerDown = (event) => {
+    if (event.button !== undefined && event.button !== 0) {
+      return;
+    }
+
+    const node = marqueeRef.current;
+    if (!node) {
+      return;
+    }
+
+    momentumRef.current = 0;
+    dragStateRef.current = {
+      active: true,
+      dragged: false,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      lastX: event.clientX,
+      lastTime: performance.now(),
+      scrollLeft: node.scrollLeft,
+    };
+    draggedClickRef.current = false;
+    setIsDragging(true);
+    node.setPointerCapture?.(event.pointerId);
+  };
+
+  const handlePointerMove = (event) => {
+    const state = dragStateRef.current;
+    const node = marqueeRef.current;
+
+    if (!state.active || !node) {
+      return;
+    }
+
+    const deltaX = event.clientX - state.startX;
+    const now = performance.now();
+    const frameElapsed = Math.max(now - state.lastTime, 1);
+
+    if (Math.abs(deltaX) > 4) {
+      state.dragged = true;
+      draggedClickRef.current = true;
+      event.preventDefault();
+    }
+
+    node.scrollLeft = state.scrollLeft - deltaX;
+    momentumRef.current = -((event.clientX - state.lastX) / frameElapsed);
+    state.lastX = event.clientX;
+    state.lastTime = now;
+    normalizeMarqueeScroll(node);
+  };
+
+  const endDrag = (event) => {
+    const state = dragStateRef.current;
+    const node = marqueeRef.current;
+
+    if (node && state.pointerId !== null) {
+      node.releasePointerCapture?.(state.pointerId);
+    }
+
+    dragStateRef.current = {
+      active: false,
+      dragged: false,
+      pointerId: null,
+      startX: 0,
+      lastX: 0,
+      lastTime: 0,
+      scrollLeft: 0,
+    };
+    setIsDragging(false);
+  };
+
+  const handleClickCapture = (event) => {
+    if (draggedClickRef.current) {
+      event.preventDefault();
+      event.stopPropagation();
+      draggedClickRef.current = false;
+    }
+  };
 
   return (
-    <div className={`marquee ${className}`}>
+    <div
+      ref={marqueeRef}
+      className={`marquee ${className} ${isDragging ? "is-dragging" : ""}`}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onPointerLeave={endDrag}
+      onMouseEnter={() => {
+        hoveredRef.current = true;
+      }}
+      onMouseLeave={() => {
+        hoveredRef.current = false;
+      }}
+      onClickCapture={handleClickCapture}
+      role="region"
+      aria-label="Draggable carousel"
+    >
       <div
         className="marquee-track"
         style={{ "--marquee-duration": `${duration}s` }}
@@ -678,6 +1014,8 @@ function PlaceAutocomplete({
   tripType,
   field,
   placeholder,
+  className,
+  error,
 }) {
   const [inputValue, setInputValue] = useState(value || "");
   const [results, setResults] = useState([]);
@@ -806,17 +1144,24 @@ function PlaceAutocomplete({
   };
 
   return (
-    <div className="field place-autocomplete" ref={wrapperRef}>
+    <div className={`field place-autocomplete ${className || ""}`} ref={wrapperRef}>
       <label>{label}</label>
-      <input
-        type="text"
-        value={inputValue}
-        onChange={handleInputChange}
-        onFocus={() => setOpen(inputValue.trim().length > 0)}
-        className="field-control place-input"
-        placeholder={placeholder}
-        autoComplete="off"
-      />
+      <div className="control-wrap">
+        {tripType === "flight" ? (
+          <Plane size={18} />
+        ) : (
+          <Bus size={18} />
+        )}
+        <input
+          type="text"
+          value={inputValue}
+          onChange={handleInputChange}
+          onFocus={() => setOpen(inputValue.trim().length > 0)}
+          className="field-control place-input with-leading-icon"
+          placeholder={placeholder}
+          autoComplete="off"
+        />
+      </div>
 
       {open && (
         <div className="place-dropdown">
@@ -865,12 +1210,8 @@ export default function HomePage() {
   const [flightTo, setFlightTo] = useState("");
   const [flightFromError, setFlightFromError] = useState("");
   const [flightToError, setFlightToError] = useState("");
-  const [flightDepartureDate, setFlightDepartureDate] = useState(() =>
-    getDateInputValue(0),
-  );
-  const [flightReturnDate, setFlightReturnDate] = useState(() =>
-    getDateInputValue(3),
-  );
+  const [flightDepartureDate, setFlightDepartureDate] = useState("");
+  const [flightReturnDate, setFlightReturnDate] = useState("");
 
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
@@ -889,12 +1230,8 @@ export default function HomePage() {
   const [busTo, setBusTo] = useState("");
   const [busFromError, setBusFromError] = useState("");
   const [busToError, setBusToError] = useState("");
-  const [busDepartureDate, setBusDepartureDate] = useState(() =>
-    getDateInputValue(0),
-  );
-  const [busReturnDate, setBusReturnDate] = useState(() =>
-    getDateInputValue(1),
-  );
+  const [busDepartureDate, setBusDepartureDate] = useState("");
+  const [busReturnDate, setBusReturnDate] = useState("");
 
   const [featuredOffers, setFeaturedOffers] = useState([]);
   const [featuredOffersLoading, setFeaturedOffersLoading] = useState(false);
@@ -1097,18 +1434,18 @@ export default function HomePage() {
         if (isMounted) {
           if (routes && routes.length > 0) {
             const mapped = routes.map((route, index) => {
-              const images = [flight1, flight2, flight3, flight4];
-              const image = images[index % images.length];
               const from = route.fromCity || "Hyderabad";
               const to = route.toCity || "Bengaluru";
+              const searches =
+                Number(route.searchCount || route.bookingCount || route.score) ||
+                620 + index * 115;
               return {
                 id: route.routeId || `flight-hot-${index}`,
-                image,
                 route: `${from} to ${to}`,
                 fromCity: from,
                 toCity: to,
-                summary: `Trending flight from search history. Score: ${route.score || 0}`,
-                price: `INR ${(3500 + (index * 450) % 6000).toLocaleString()}`,
+                summary: "Trending from flight search history",
+                searches,
               };
             });
             setPopularFlights(mapped);
@@ -1151,8 +1488,17 @@ export default function HomePage() {
     setBusTo(busFrom);
   };
 
-  const openPopularBusRoutes = (operatorId) => {
-    navigate(`/popular-buses/${operatorId}`);
+  const openPopularBusRoutes = () => {
+    setActiveTab("buses");
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("tab", "buses");
+    setSearchParams(nextParams, { replace: true });
+
+    window.setTimeout(() => {
+      document
+        .querySelector(".hero-section")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 0);
   };
 
   const changeAdults = (delta) => {
@@ -1280,11 +1626,9 @@ export default function HomePage() {
   };
 
   const handlePopularFlightBooking = (popularFlight) => {
-    const [sourceRaw, destinationRaw] = String(popularFlight.route || "").split(
-      /\s+to\s+/i,
-    );
-    const source = sourceRaw?.trim() || "Delhi";
-    const destination = destinationRaw?.trim() || "Mumbai";
+    const [sourceRaw, destinationRaw] = String(popularFlight.route || "").split(/\s+to\s+/i);
+    const source = popularFlight.fromCity || sourceRaw?.trim() || "Delhi";
+    const destination = popularFlight.toCity || destinationRaw?.trim() || "Mumbai";
 
     navigateToFlightSearch({
       source,
@@ -1706,13 +2050,6 @@ export default function HomePage() {
            letter-spacing: 0.02em;
         }
 
-        .pop-route-meta-right {
-           color: #24506f;
-           font-size: 0.68rem;
-           font-weight: 700;
-           letter-spacing: 0.02em;
-        }
-
         .pop-route-book-btn {
            background: #e14e2a;
            color: #ffffff;
@@ -1738,7 +2075,8 @@ export default function HomePage() {
         }
 
          .popular-routes-marquee .marquee-slide {
-            padding: 12px 10px;
+            width: 300px;
+            padding: 12px 20px 12px 0;
          }
 
          /* Custom Offers Scrollable Row and Selected Highlighting */
@@ -1843,37 +2181,18 @@ export default function HomePage() {
          }
       `}</style>
       <section className="hero-section">
-        <img src={heroImage} alt="" className="hero-bg-image" aria-hidden="true" />
-        <div className="hero-overlay" />
-
         <div className="hero-content">
-          <div className="hero-grid">
-            <div className="hero-copy-block">
-              <span className="hero-kicker">Smart Travel Studio</span>
-              <h1>Book bolder journeys with one unified travel desk.</h1>
-              <p>
-                Compare flights and buses, mix one-way or multi-city routes, and
-                confirm tickets in seconds with transparent pricing.
-              </p>
-
-              <div className="hero-metric-grid">
-                {HERO_METRICS.map((metric) => (
-                  <article key={metric.id} className="hero-metric-card">
-                    <strong>{metric.value}</strong>
-                    <span>{metric.label}</span>
-                  </article>
-                ))}
-              </div>
-
-              <div className="hero-tag-row">
-                {HERO_TAGS.map((tag) => (
-                  <span key={tag.id} className="hero-tag">
-                    {tag.label}
-                  </span>
-                ))}
-              </div>
+          {/* Left-aligned Heading and Point Tags */}
+          <div className="hero-header-left">
+            <h1 className="hero-title-left">One app for every step of your journey</h1>
+            <div className="hero-tag-row-left">
+              <span className="hero-tag-left">Live fares</span>
+              <span className="hero-tag-left">Instant booking confirmation</span>
+              <span className="hero-tag-left">Flexible trip combinations</span>
             </div>
+          </div>
 
+          <div className="hero-grid">
             <div className="search-panel">
               <div className="tabs-wrap">
                 <div className="tabs" role="tablist" aria-label="Booking type">
@@ -1930,7 +2249,7 @@ export default function HomePage() {
                             }
                             tripType="flight"
                             field="from"
-                            placeholder="Type source city"
+                            placeholder="Source"
                           />
 
                           <PlaceAutocomplete
@@ -1941,20 +2260,23 @@ export default function HomePage() {
                             }
                             tripType="flight"
                             field="to"
-                            placeholder="Type destination city"
+                            placeholder="Destination"
                           />
 
                           <div className="field field-with-icon" style={{ position: "relative" }}>
                             <label>Departure</label>
-                            <input
-                              type="text"
-                              readOnly
-                              value={toDisplayDate(leg.departureDate)}
-                              placeholder="DD-MM-YYYY"
-                              className="field-control"
-                              style={{ cursor: "pointer" }}
-                              onClick={() => document.getElementById(`leg-dep-date-${leg.id}`).showPicker?.()}
-                            />
+                            <div className="control-wrap">
+                              <CalendarDays size={18} />
+                              <input
+                                type="text"
+                                readOnly
+                                value={toDisplayDate(leg.departureDate)}
+                                placeholder="DD-MM-YYYY"
+                                className="field-control with-leading-icon"
+                                style={{ cursor: "pointer" }}
+                                onClick={() => document.getElementById(`leg-dep-date-${leg.id}`).showPicker?.()}
+                              />
+                            </div>
                             <input
                               id={`leg-dep-date-${leg.id}`}
                               type="date"
@@ -2002,15 +2324,16 @@ export default function HomePage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="search-grid standard-grid">
+                    <div className={`search-grid standard-grid ${isFlightTwoWay ? "two-way" : "one-way"}`}>
                       <PlaceAutocomplete
                         label="Source"
                         value={flightFrom}
                         onChange={handleFlightFromChange}
                         tripType="flight"
                         field="from"
-                        placeholder="Type source city"
+                        placeholder="Source"
                         error={flightFromError}
+                        className="source-field"
                       />
 
                       <div className="swap-field">
@@ -2030,21 +2353,25 @@ export default function HomePage() {
                         onChange={handleFlightToChange}
                         tripType="flight"
                         field="to"
-                        placeholder="Type destination city"
+                        placeholder="Destination"
                         error={flightToError}
+                        className="destination-field"
                       />
 
-                      <div className="field field-with-icon" style={{ position: "relative" }}>
+                      <div className="field field-with-icon departure-field" style={{ position: "relative" }}>
                         <label>Departure</label>
-                        <input
-                          type="text"
-                          readOnly
-                          value={toDisplayDate(flightDepartureDate)}
-                          placeholder="DD-MM-YYYY"
-                          className="field-control"
-                          style={{ cursor: "pointer" }}
-                          onClick={() => document.getElementById("flight-dep-date").showPicker?.()}
-                        />
+                        <div className="control-wrap">
+                          <CalendarDays size={18} />
+                          <input
+                            type="text"
+                            readOnly
+                            value={toDisplayDate(flightDepartureDate)}
+                            placeholder="DD-MM-YYYY"
+                            className="field-control with-leading-icon"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => document.getElementById("flight-dep-date").showPicker?.()}
+                          />
+                        </div>
                         <input
                           id="flight-dep-date"
                           type="date"
@@ -2054,16 +2381,17 @@ export default function HomePage() {
                         />
                       </div>
 
-                      <div className="field field-with-icon" style={{ position: "relative" }}>
-                        <label>Return</label>
-                        {isFlightTwoWay ? (
-                          <>
+                      {isFlightTwoWay && (
+                        <div className="field field-with-icon return-field" style={{ position: "relative" }}>
+                          <label>Return</label>
+                          <div className="control-wrap">
+                            <CalendarDays size={18} />
                             <input
                               type="text"
                               readOnly
                               value={toDisplayDate(flightReturnDate)}
                               placeholder="DD-MM-YYYY"
-                              className="field-control"
+                              className="field-control with-leading-icon"
                               style={{ cursor: "pointer" }}
                               onClick={() => document.getElementById("flight-ret-date").showPicker?.()}
                             />
@@ -2074,16 +2402,9 @@ export default function HomePage() {
                               onChange={(event) => setFlightReturnDate(event.target.value)}
                               style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
                             />
-                          </>
-                        ) : (
-                          <input
-                            type="text"
-                            className="field-control watermark-field"
-                            value="Available for two way"
-                            disabled
-                          />
-                        )}
-                      </div>
+                          </div>
+                        </div>
+                      )}
 
                       {travellerField}
                       {classField}
@@ -2111,15 +2432,16 @@ export default function HomePage() {
                     ))}
                   </div>
 
-                  <div className="search-grid bus-standard-grid">
+                  <div className={`search-grid bus-standard-grid ${isBusTwoWay ? "two-way" : "one-way"}`}>
                     <PlaceAutocomplete
                       label="Source"
                       value={busFrom}
                       onChange={handleBusFromChange}
                       tripType="bus"
                       field="from"
-                      placeholder="Type source city"
+                      placeholder="Source"
                       error={busFromError}
+                      className="source-field"
                     />
 
                     <div className="swap-field">
@@ -2139,21 +2461,25 @@ export default function HomePage() {
                       onChange={handleBusToChange}
                       tripType="bus"
                       field="to"
-                      placeholder="Type destination city"
+                      placeholder="Destination"
                       error={busToError}
+                      className="destination-field"
                     />
 
-                    <div className="field field-with-icon" style={{ position: "relative" }}>
+                    <div className="field field-with-icon departure-field" style={{ position: "relative" }}>
                       <label>Departure</label>
-                      <input
-                        type="text"
-                        readOnly
-                        value={toDisplayDate(busDepartureDate)}
-                        placeholder="DD-MM-YYYY"
-                        className="field-control"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => document.getElementById("bus-dep-date").showPicker?.()}
-                      />
+                      <div className="control-wrap">
+                        <CalendarDays size={18} />
+                        <input
+                          type="text"
+                          readOnly
+                          value={toDisplayDate(busDepartureDate)}
+                          placeholder="DD-MM-YYYY"
+                          className="field-control with-leading-icon"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => document.getElementById("bus-dep-date").showPicker?.()}
+                        />
+                      </div>
                       <input
                         id="bus-dep-date"
                         type="date"
@@ -2163,16 +2489,17 @@ export default function HomePage() {
                       />
                     </div>
 
-                    <div className="field field-with-icon" style={{ position: "relative" }}>
-                      <label>Return</label>
-                      {isBusTwoWay ? (
-                        <>
+                    {isBusTwoWay && (
+                      <div className="field field-with-icon return-field" style={{ position: "relative" }}>
+                        <label>Return</label>
+                        <div className="control-wrap">
+                          <CalendarDays size={18} />
                           <input
                             type="text"
                             readOnly
                             value={toDisplayDate(busReturnDate)}
                             placeholder="DD-MM-YYYY"
-                            className="field-control"
+                            className="field-control with-leading-icon"
                             style={{ cursor: "pointer" }}
                             onClick={() => document.getElementById("bus-ret-date").showPicker?.()}
                           />
@@ -2183,16 +2510,9 @@ export default function HomePage() {
                             onChange={(event) => setBusReturnDate(event.target.value)}
                             style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
                           />
-                        </>
-                      ) : (
-                        <input
-                          type="text"
-                          className="field-control watermark-field"
-                          value="Available for two way"
-                          disabled
-                        />
-                      )}
-                    </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -2275,6 +2595,37 @@ export default function HomePage() {
         )}
       </section>
 
+      <section className="insights-section section-shell">
+        <div className="insights-banner">
+          <div className="insights-copy">
+            <h2>Make every booking feel clear before you pay.</h2>
+            <p>
+              Travel Desk helps users compare the full journey, not just the
+              price, so the final booking feels easier to trust.
+            </p>
+          </div>
+
+          <div className="insights-grid">
+            {HIGHLIGHTS.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <article key={item.id} className="insight-card">
+                  <span className="insight-icon">
+                    <Icon size={22} />
+                  </span>
+                  <div>
+                    <strong>{item.value}</strong>
+                    <p>{item.title}</p>
+                    <span>{item.text}</span>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       <section className="popular-routes-section section-shell">
         <div className="section-header">
           <div>
@@ -2319,7 +2670,6 @@ export default function HomePage() {
 
                 <div className="pop-route-meta-row">
                   <span className="pop-route-meta-left">Recently searched</span>
-                  <span className="pop-route-meta-right">Backend data</span>
                 </div>
 
                 <button
@@ -2396,22 +2746,44 @@ export default function HomePage() {
         ) : (
           <AutoMarquee
             items={popularFlights}
-            className="popular-marquee"
-            duration={44}
+            className="popular-routes-marquee flight-routes-marquee"
+            duration={38}
             renderItem={(flight) => (
-              <article className="popular-card">
-                <img src={flight.image} alt={flight.route} />
-                <div className="popular-content">
-                  <h3>{flight.route}</h3>
-                  <p>{flight.summary}</p>
-                  <span>{flight.price}</span>
-                  <button
-                    type="button"
-                    onClick={() => handlePopularFlightBooking(flight)}
-                  >
-                    Book flight
-                  </button>
+              <article className="pop-route-card pop-flight-card" key={flight.id}>
+                <div className="pop-route-top-row">
+                  <span className="pop-route-tag-search">SEARCH</span>
+                  <span className="pop-route-tag-searches">
+                    {(flight.searches || 0).toLocaleString()} SEARCHES
+                  </span>
                 </div>
+
+                <div className="pop-route-cities-row">
+                  <span className="pop-route-city from" title={flight.fromCity}>
+                    {flight.fromCity}
+                  </span>
+                  <div className="pop-route-icon-circle">
+                    <Plane size={13} />
+                  </div>
+                  <span className="pop-route-city to" title={flight.toCity}>
+                    {flight.toCity}
+                  </span>
+                </div>
+
+                <div className="pop-route-trending">
+                  Trending from flight search history
+                </div>
+
+                <div className="pop-route-meta-row">
+                  <span className="pop-route-meta-left">Recently searched</span>
+                </div>
+
+                <button
+                  type="button"
+                  className="pop-route-book-btn"
+                  onClick={() => handlePopularFlightBooking(flight)}
+                >
+                  BOOK FLIGHT
+                </button>
               </article>
             )}
           />
@@ -2442,6 +2814,209 @@ export default function HomePage() {
             </article>
           )}
         />
+      </section>
+
+      <section className="travel-services-section section-shell">
+        <div className="section-header">
+          <div>
+            <span className="section-kicker">Booking Services</span>
+            <h2>Plan, compare, and book with clearer choices</h2>
+          </div>
+        </div>
+
+        <div className="travel-services-grid">
+          {HOME_SERVICE_BLOCKS.map((block) => (
+            <article
+              className={`travel-service-card ${block.visual}`}
+              key={block.id}
+            >
+              <div className="travel-service-copy">
+                <span className="service-kicker">{block.kicker}</span>
+                <h3>{block.title}</h3>
+                <p>{block.text}</p>
+                <ul
+                  className={
+                    block.id === "fares"
+                      ? "service-pill-list"
+                      : "service-check-list"
+                  }
+                >
+                  {block.points.map((point) => (
+                    <li key={point}>{point}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="travel-service-visual">
+                <span className="service-spark one" aria-hidden="true" />
+                <span className="service-spark two" aria-hidden="true" />
+                <span className="service-spark three" aria-hidden="true" />
+                <img
+                  className="travel-service-image"
+                  src={block.image}
+                  alt={block.imageAlt}
+                  loading="lazy"
+                />
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="booking-guide-section section-shell">
+        <div className="section-header">
+          <div>
+            <span className="section-kicker">Booking Guide</span>
+            <h2>Book Bus Tickets With Less Guesswork</h2>
+          </div>
+        </div>
+
+        <div className="booking-guide-hero">
+          <div className="booking-guide-visual" aria-hidden="true">
+            <div className="booking-route-map">
+              <span className="route-node start">From</span>
+              <span className="route-line" />
+              <span className="route-bus">
+                <Bus size={18} />
+              </span>
+              <span className="route-node end">To</span>
+            </div>
+            <div className="booking-visual-steps">
+              {HOME_BOOKING_STEPS.map((step, index) => (
+                <span key={step.id} style={{ "--step-index": index }}>
+                  {step.title}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="booking-guide-copy">
+            <p>
+              A good bus booking flow should help you compare routes quickly,
+              understand the fare clearly, and confirm the ticket without
+              hunting for details later.
+            </p>
+            <div className="booking-step-grid">
+              {HOME_BOOKING_STEPS.map((step, index) => (
+                <article className="booking-step-card" key={step.id}>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <h3>{step.title}</h3>
+                  <p>{step.text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="booking-note-grid">
+          {HOME_GUIDE_NOTES.map((item) => (
+            <article className="booking-note-card" key={item.id}>
+              <h3>{item.title}</h3>
+              <p>{item.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="assurance-section section-shell">
+        <div className="assurance-banner">
+          <div className="assurance-panel">
+            <span className="assurance-badge">
+              <ShieldCheck size={17} />
+              Travel Assured
+            </span>
+
+            <div className="assurance-list">
+              {HOME_ASSURANCE_POINTS.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <article className="assurance-item" key={item.id}>
+                    <span className="assurance-icon">
+                      <Icon size={18} />
+                    </span>
+                    <div>
+                      <h3>{item.title}</h3>
+                      <p>{item.text}</p>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            <p className="assurance-ending">
+              Book with confidence
+            </p>
+          </div>
+
+          <div className="assurance-visual" aria-hidden="true">
+            <span className="assurance-glow" />
+
+            <div className="assurance-story-board">
+              <div className="assurance-map-card">
+                <div className="assurance-map-header">
+                  <span>Live journey view</span>
+                  <strong>3 checks passed</strong>
+                </div>
+                <div className="assurance-map-path">
+                  <span className="map-pin source">Start</span>
+                  <span className="map-line" />
+                  <span className="map-bus">
+                    <Bus size={24} />
+                  </span>
+                  <span className="map-pin destination">Arrive</span>
+                </div>
+                <div className="assurance-map-grid">
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              </div>
+
+              <div className="assurance-proof-grid">
+                <div className="assurance-proof-card verified">
+                  <span className="assurance-proof-icon">
+                    <ShieldCheck size={20} />
+                  </span>
+                  <div>
+                    <strong>Details verified</strong>
+                    <span>Fare, pickup point, and rules are easy to review.</span>
+                  </div>
+                </div>
+
+                <div className="assurance-proof-card timing">
+                  <span className="assurance-proof-icon">
+                    <Clock3 size={18} />
+                  </span>
+                  <div>
+                    <strong>Timing matched</strong>
+                    <span>Departure and arrival stay easy to scan.</span>
+                  </div>
+                </div>
+
+                <div className="assurance-proof-card support">
+                  <span className="assurance-proof-icon">
+                    <RefreshCw size={18} />
+                  </span>
+                  <div>
+                    <strong>Change-ready plan</strong>
+                    <span>Review flexibility before confirming.</span>
+                  </div>
+                </div>
+
+                <div className="assurance-proof-card ticket">
+                  <span className="assurance-proof-icon">
+                    <Search size={18} />
+                  </span>
+                  <div>
+                    <strong>Ticket ready</strong>
+                    <span>Saved in one place after booking.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section className="reviews-section section-shell">
@@ -2490,20 +3065,87 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="insights-section section-shell">
-        <div className="section-header">
-          <div>
-            <span className="section-kicker">Travel Insights</span>
-            <h2>Plan Better Every Time</h2>
+      <section className="india-booking-section section-shell">
+        <div className="india-faq-block">
+          <div className="section-header india-static-header">
+            <div>
+              <span className="section-kicker">Help Center</span>
+              <h2>Online Bus Booking FAQs</h2>
+            </div>
+            <button type="button" className="india-faq-link">
+              View all FAQs
+            </button>
+          </div>
+
+          <div className="india-faq-list">
+            {HOME_BUS_FAQS.map((item) => (
+              <details className="india-faq-item" key={item.id}>
+                <summary>{item.question}</summary>
+                <p>{item.answer}</p>
+              </details>
+            ))}
           </div>
         </div>
-        <div className="insights-grid">
-          {HIGHLIGHTS.map((item) => (
-            <article key={item.id} className="insight-card">
-              <h3>{item.title}</h3>
-              <p>{item.text}</p>
-            </article>
-          ))}
+
+        <div className="india-app-card">
+          <div className="india-app-mark" aria-hidden="true">
+            <Bus size={42} />
+            <span>TD</span>
+          </div>
+
+          <div className="india-app-copy">
+            <span className="section-kicker">Quick Booking</span>
+            <h2>Book buses faster on your next trip</h2>
+            <p>
+              Save common routes, compare buses quickly, and keep ticket
+              details ready for city-to-city journeys.
+            </p>
+            <div className="india-offer-chip">Use code TRAVELFIRST</div>
+          </div>
+
+          <div className="india-app-side">
+            <ul className="india-app-benefits">
+              {HOME_APP_BENEFITS.map((benefit) => (
+                <li key={benefit}>{benefit}</li>
+              ))}
+            </ul>
+
+            <div className="india-app-qr" aria-label="Mobile app QR code placeholder">
+              <div className="india-app-qr-code" aria-hidden="true">
+                {[
+                  1, 0, 1, 1, 0, 1, 0,
+                  0, 1, 0, 1, 1, 0, 1,
+                  1, 1, 0, 0, 1, 1, 0,
+                  0, 1, 1, 1, 0, 0, 1,
+                  1, 0, 1, 0, 1, 1, 1,
+                  0, 1, 0, 1, 0, 1, 0,
+                  1, 1, 1, 0, 1, 0, 1,
+                ].map((cell, index) => (
+                  <span key={index} className={cell ? "filled" : ""} />
+                ))}
+              </div>
+              <div>
+                <strong>App QR</strong>
+                <span>Mobile app link ready</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="india-about-block">
+          <h2>About Travel Desk</h2>
+          <p>
+            Travel Desk brings buses and flights into one simple booking
+            experience. The platform focuses on clear route search, practical
+            filters, transparent fare checks, and confirmation workflows that
+            work for everyday intercity travel.
+          </p>
+          <p>
+            Whether it is a weekend visit home, a business trip, a pilgrimage
+            route, or a family holiday, the goal is to make booking feel calm:
+            compare options, choose confidently, and keep every journey detail
+            available in one place.
+          </p>
         </div>
       </section>
 
