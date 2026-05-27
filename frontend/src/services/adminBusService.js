@@ -17,7 +17,7 @@ function getAdminAuthHeaders(hasBody = false) {
 
   const headers = {
     Accept: "application/json",
-    "ngrok-skip-browser-warning": "true",
+    "x-skip-browser-warning": "true",
   };
 
   if (hasBody) {
@@ -276,4 +276,6 @@ export async function listAdminBusBookings({ passengerPhone, status } = {}) {
   });
   return handleResponse(response);
 }
+
+
 

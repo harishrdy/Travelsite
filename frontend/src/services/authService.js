@@ -1,5 +1,5 @@
 const FALLBACK_API_BASE_URL =
-  "https://undogmatically-knotlike-evita.ngrok-free.dev";
+  "http://3.111.182.53:8080";
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "0.0.0.0"]);
 
 function isLocalDevelopment() {
@@ -65,8 +65,7 @@ function shouldUseNgrokBypass(urlOrPath) {
       typeof window !== "undefined" ? window.location.origin : undefined
     );
     return (
-      parsed.hostname.includes("ngrok-free.dev") ||
-      parsed.hostname.includes("ngrok.io")
+      false
     );
   } catch {
     return false;
@@ -136,7 +135,7 @@ export async function requestAuth(
   }
 
   if (shouldUseNgrokBypass(urlOrPath)) {
-    headers["ngrok-skip-browser-warning"] = "true";
+    headers["x-skip-browser-warning"] = "true";
   }
 
   const response = await fetch(toAuthUrl(urlOrPath), {
@@ -152,3 +151,5 @@ export async function requestAuth(
 
   return payload;
 }
+
+

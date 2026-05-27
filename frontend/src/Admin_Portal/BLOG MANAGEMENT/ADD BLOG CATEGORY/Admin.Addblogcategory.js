@@ -505,3 +505,4 @@ function AddBlogCategory() {
 }
 
 export default AddBlogCategory;
+

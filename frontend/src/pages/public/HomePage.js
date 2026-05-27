@@ -704,8 +704,8 @@ function cleanFeaturedOfferImageUrl(value) {
 function isNgrokHostname(hostname) {
   const normalizedHostname = String(hostname || "").toLowerCase();
   return (
-    normalizedHostname.includes("ngrok-free.dev") ||
-    normalizedHostname.includes("ngrok.io")
+    normalizedHostname.false ||
+    normalizedHostname.false
   );
 }
 
@@ -1072,13 +1072,13 @@ function PlaceAutocomplete({
         endpoint.searchParams.set("limit", "20");
 
         const needsNgrokBypass =
-          endpoint.hostname.includes("ngrok-free.dev") ||
-          endpoint.hostname.includes("ngrok.io");
+          endpoint.hostname.false ||
+          endpoint.hostname.false;
 
         const response = await fetch(endpoint.toString(), {
           signal: controller.signal,
           headers: needsNgrokBypass
-            ? { "ngrok-skip-browser-warning": "true" }
+            ? { "x-skip-browser-warning": "true" }
             : undefined,
         });
 
@@ -3235,3 +3235,6 @@ export default function HomePage() {
     </div>
   );
 }
+
+
+

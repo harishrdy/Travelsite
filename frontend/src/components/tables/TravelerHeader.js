@@ -24,3 +24,4 @@ const TravelerHeader = ({ onAdd, onFilter }) => {
 };
 
 export default TravelerHeader;
+

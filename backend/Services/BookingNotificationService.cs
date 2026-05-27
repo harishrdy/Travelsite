@@ -8,7 +8,7 @@ public class BookingNotificationService(
     IConfiguration configuration,
     ILogger<BookingNotificationService> logger) : IBookingNotificationService
 {
-    private const string DefaultTicketEmailUrl = "https://duncan-exclamatory-synaptically.ngrok-free.dev/api/Tickets/send-email";
+    private const string DefaultTicketEmailUrl = "";
 
     public async Task<bool> TrySendTicketEmailAsync(TicketEmailRequestDto request, CancellationToken cancellationToken = default)
     {
@@ -20,7 +20,8 @@ public class BookingNotificationService(
         var endpointUrl = configuration["Notifications:TicketEmailUrl"];
         if (string.IsNullOrWhiteSpace(endpointUrl))
         {
-            endpointUrl = DefaultTicketEmailUrl;
+            logger.LogWarning("Ticket notifications are disabled because Notifications:TicketEmailUrl is not configured.");
+            return false;
         }
 
         try

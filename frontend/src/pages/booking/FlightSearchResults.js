@@ -1567,3 +1567,4 @@ export default function FlightSearchResults() {
     </main>
   );
 }
+

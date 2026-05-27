@@ -157,3 +157,4 @@ export default function AddQR({ onAdd, onBack, isBusy = false }) {
     </div>
   );
 }
+

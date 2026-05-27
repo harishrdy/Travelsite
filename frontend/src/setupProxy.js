@@ -1,7 +1,7 @@
 const { createProxyMiddleware } = require("http-proxy-middleware");
 
 const FALLBACK_PROXY_TARGET =
-  "https://undogmatically-knotlike-evita.ngrok-free.dev";
+  "http://3.111.182.53:8080";
 
 function normalizeHttpUrl(value) {
   if (typeof value !== "string") {
@@ -61,9 +61,7 @@ module.exports = function setupProxy(app) {
       changeOrigin: true,
       secure: false,
       logLevel: "warn",
-      onProxyReq(proxyReq) {
-        proxyReq.setHeader("ngrok-skip-browser-warning", "true");
-      },
     })
   );
 };
+

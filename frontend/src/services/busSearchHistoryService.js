@@ -438,3 +438,4 @@ export async function getPopularBusRoutesFromSearchHistory({ limit = 12 } = {}) 
 
   return routes;
 }
+

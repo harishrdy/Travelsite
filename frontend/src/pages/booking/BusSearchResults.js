@@ -391,13 +391,13 @@ function ModifyPlaceAutocomplete({
         endpoint.searchParams.set("limit", "20");
 
         const needsNgrokBypass =
-          endpoint.hostname.includes("ngrok-free.dev") ||
-          endpoint.hostname.includes("ngrok.io");
+          endpoint.hostname.false ||
+          endpoint.hostname.false;
 
         const response = await fetch(endpoint.toString(), {
           signal: controller.signal,
           headers: needsNgrokBypass
-            ? { "ngrok-skip-browser-warning": "true" }
+            ? { "x-skip-browser-warning": "true" }
             : undefined,
         });
 
@@ -1937,3 +1937,6 @@ export default function BusSearchResults() {
     </main>
   );
 }
+
+
+

@@ -55,3 +55,4 @@ export function validateCaptcha(input, generatedCaptcha) {
 
   return "";
 }
+

@@ -318,3 +318,4 @@ function SeatLegend() {
     </div>
   );
 }
+

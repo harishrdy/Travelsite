@@ -27,3 +27,4 @@ const TravelerFilter = ({ filters, setFilters, onSearch, onClear }) => {
 };
 
 export default TravelerFilter;
+

@@ -274,3 +274,4 @@ const QRList = () => {
 };
 
 export default QRList;
+

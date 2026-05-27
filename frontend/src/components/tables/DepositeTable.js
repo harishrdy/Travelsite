@@ -133,3 +133,4 @@ const DepositTable = ({ data, onDelete, onUpdateRow }) => {
 };
 
 export default DepositTable;
+

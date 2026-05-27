@@ -662,3 +662,4 @@ export default function BusPaymentPage() {
     </main>
   );
 }
+

@@ -1036,3 +1036,4 @@ export default function AdminOfferListPage({ onAddOffer }) {
     </>
   );
 }
+

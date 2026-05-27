@@ -1,5 +1,5 @@
 const FALLBACK_API_BASE_URL =
-  "https://undogmatically-knotlike-evita.ngrok-free.dev";
+  "http://3.111.182.53:8080";
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "0.0.0.0"]);
 
 const NOTIFICATIONS_ROOT = "/api/Notifications";
@@ -68,8 +68,7 @@ function shouldUseNgrokBypass(urlOrPath) {
   try {
     const parsed = new URL(toAbsoluteUrl(urlOrPath), window.location.origin);
     return (
-      parsed.hostname.includes("ngrok-free.dev") ||
-      parsed.hostname.includes("ngrok.io")
+      false
     );
   } catch {
     return false;
@@ -97,7 +96,7 @@ async function requestJson(urlOrPath, options = {}) {
   }
 
   if (shouldUseNgrokBypass(urlOrPath)) {
-    headers["ngrok-skip-browser-warning"] = "true";
+    headers["x-skip-browser-warning"] = "true";
   }
 
   const response = await fetch(toAbsoluteUrl(urlOrPath), {
@@ -352,3 +351,5 @@ export async function sendBookingNotifications({
     source: clientDispatch.source,
   };
 }
+
+

@@ -166,3 +166,4 @@ export async function getAccountProfile() {
 
   return mergeProfiles(storedProfile, sessionProfile);
 }
+

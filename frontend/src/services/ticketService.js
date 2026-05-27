@@ -186,3 +186,4 @@ export async function fetchTicketByContact({ mobile, email, bookingType, activeO
 
   throw new Error("No active booking found");
 }
+

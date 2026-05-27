@@ -490,3 +490,4 @@ export default function AdminMenuListPage({ onAddMenu }) {
     </>
   );
 }
+
