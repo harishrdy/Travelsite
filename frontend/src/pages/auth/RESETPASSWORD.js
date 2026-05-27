@@ -83,7 +83,7 @@ const ResetPassword = () => {
     try {
       const resetEmail = email.trim();
       const payload = await requestAuth(
-        "/api/Auth/forgot-password",
+        "/api/Auth/forgot-password/send-otp",
         {
           method: "POST",
           body: JSON.stringify({ email: resetEmail })
