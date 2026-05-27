@@ -25,6 +25,7 @@ const VerifyOtp = () => {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
   const [apiMessage, setApiMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const authPageStyle = {
@@ -50,6 +51,10 @@ const VerifyOtp = () => {
       [name]: nextValue
     }));
 
+    if (name === "otp") {
+      setOtpVerified(false);
+    }
+
     setErrors((prev) => ({
       ...prev,
       [name]:
@@ -66,7 +71,7 @@ const VerifyOtp = () => {
     setIsSuccess(false);
   };
 
-  const validate = () => {
+  const validateOtp = () => {
     const newErrors = {};
     const otpValue = form.otp.trim();
 
@@ -74,6 +79,17 @@ const VerifyOtp = () => {
       newErrors.otp = "OTP is required.";
     } else if (!/^\d{6}$/.test(otpValue)) {
       newErrors.otp = "OTP must be 6 numbers";
+    }
+
+    setErrors((prev) => ({ ...prev, otp: newErrors.otp || "" }));
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validatePasswordReset = () => {
+    const newErrors = {};
+
+    if (!otpVerified) {
+      newErrors.otp = "Please verify OTP first.";
     }
 
     const passwordError = validateStrongPassword(form.password, "New password");
@@ -110,11 +126,12 @@ const VerifyOtp = () => {
     setLoading(true);
     setApiMessage("");
     setIsSuccess(false);
+    setOtpVerified(false);
     setErrors((prev) => ({ ...prev, otp: "" }));
 
     try {
       const payload = await requestAuth(
-        "/api/Auth/forgot-password",
+        "/api/Auth/forgot-password/send-otp",
         {
           method: "POST",
           body: JSON.stringify({ email: resetEmail })
@@ -123,6 +140,7 @@ const VerifyOtp = () => {
       );
       setIsSuccess(true);
       setApiMessage(readApiMessage(payload, "OTP resent successfully."));
+      setForm((prev) => ({ ...prev, otp: "" }));
     } catch (error) {
       setIsSuccess(false);
       setApiMessage(error?.message || "Failed to resend OTP.");
@@ -131,10 +149,55 @@ const VerifyOtp = () => {
     setLoading(false);
   };
 
+  const handleVerifyOtp = async () => {
+    if (!validateOtp()) return;
+
+    if (!resetEmail) {
+      setIsSuccess(false);
+      setApiMessage("Please go back to Forgot Page and enter your email first.");
+      return;
+    }
+
+    if (resetEmailError) {
+      setIsSuccess(false);
+      setApiMessage(resetEmailError);
+      return;
+    }
+
+    setLoading(true);
+    setApiMessage("");
+    setIsSuccess(false);
+
+    try {
+      const payload = await requestAuth(
+        "/api/Auth/forgot-password/verify-otp",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            email: resetEmail,
+            otp: form.otp
+          })
+        },
+        "Invalid or expired OTP."
+      );
+
+      setOtpVerified(true);
+      setIsSuccess(true);
+      setApiMessage(readApiMessage(payload, "OTP verified successfully."));
+      setErrors((prev) => ({ ...prev, otp: "" }));
+    } catch (error) {
+      setOtpVerified(false);
+      setIsSuccess(false);
+      setApiMessage(error?.message || "Invalid or expired OTP.");
+    }
+
+    setLoading(false);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validate()) return;
+    if (!validatePasswordReset()) return;
 
     setLoading(true);
     setApiMessage("");
@@ -146,7 +209,7 @@ const VerifyOtp = () => {
         {
           method: "POST",
           body: JSON.stringify({
-            otp: form.otp,
+            email: resetEmail,
             newPassword: form.password
           })
         },
@@ -215,16 +278,24 @@ const VerifyOtp = () => {
                   onChange={handleChange}
                 />
                 <button
-                  type={hasOtp ? "submit" : "button"}
+                  type="button"
                   className="travel-inline-otp-btn"
-                  onClick={hasOtp ? undefined : handleResendOtp}
-                  disabled={loading}
+                  onClick={
+                    otpVerified
+                      ? undefined
+                      : hasOtp
+                        ? handleVerifyOtp
+                        : handleResendOtp
+                  }
+                  disabled={loading || otpVerified}
                 >
-                  {loading
+                  {loading && !otpVerified
                     ? hasOtp
                       ? "Verifying..."
                       : "Resending..."
-                    : hasOtp
+                    : otpVerified
+                      ? "Verified"
+                      : hasOtp
                       ? "Verify OTP"
                       : "Resend OTP"}
                 </button>
@@ -242,12 +313,14 @@ const VerifyOtp = () => {
                   placeholder="Enter new password"
                   value={form.password}
                   onChange={handleChange}
+                  disabled={!otpVerified || loading}
                 />
                 <button
                   type="button"
                   className="travel-eye-btn"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
+                  disabled={!otpVerified || loading}
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -265,6 +338,7 @@ const VerifyOtp = () => {
                   placeholder="Confirm new password"
                   value={form.confirmPassword}
                   onChange={handleChange}
+                  disabled={!otpVerified || loading}
                 />
                 <button
                   type="button"
@@ -275,6 +349,7 @@ const VerifyOtp = () => {
                   aria-label={
                     showConfirmPassword ? "Hide password" : "Show password"
                   }
+                  disabled={!otpVerified || loading}
                 >
                   {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -297,7 +372,7 @@ const VerifyOtp = () => {
               <button
                 type="submit"
                 className="travel-btn travel-btn-primary"
-                disabled={loading}
+                disabled={loading || !otpVerified}
               >
                 {loading ? "Submitting..." : "Submit"}
               </button>

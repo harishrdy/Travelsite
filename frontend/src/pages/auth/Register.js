@@ -421,22 +421,7 @@ const Register = () => {
 
     try {
       await requestAuth(
-        "/api/Auth/register",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            firstName: cleanedForm.firstName,
-            lastName: cleanedForm.lastName,
-            phoneNumber: cleanedForm.countryCode + cleanedForm.mobile,
-            email: cleanedForm.email,
-            password: cleanedForm.password
-          })
-        },
-        "Registration failed"
-      );
-
-      await requestAuth(
-        "/api/Auth/forgot-password",
+        "/api/Auth/send-registration-otp",
         {
           method: "POST",
           body: JSON.stringify({
@@ -487,7 +472,7 @@ const Register = () => {
 
     try {
       await requestAuth(
-        "/api/Auth/forgot-password",
+        "/api/Auth/send-registration-otp",
         {
           method: "POST",
           body: JSON.stringify({
@@ -553,12 +538,27 @@ const Register = () => {
 
     try {
       await requestAuth(
-        "/api/Auth/reset-password",
+        "/api/Auth/verify-registration-otp",
         {
           method: "POST",
           body: JSON.stringify({
-            otp: cleanedForm.emailOtp,
-            newPassword: cleanedForm.password
+            email: cleanedForm.email,
+            otp: cleanedForm.emailOtp
+          })
+        },
+        "Invalid or expired OTP"
+      );
+
+      await requestAuth(
+        "/api/Auth/register",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            firstName: cleanedForm.firstName,
+            lastName: cleanedForm.lastName,
+            phoneNumber: cleanedForm.mobile,
+            email: cleanedForm.email,
+            password: cleanedForm.password
           })
         },
         "Invalid or expired OTP"
