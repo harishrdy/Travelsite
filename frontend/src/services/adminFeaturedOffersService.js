@@ -130,5 +130,29 @@ export async function deleteAdminFeaturedOffer(id) {
   return response.data;
 }
 
-export default offersApi;
+export async function getOfferConditions(offerId) {
+  const response = await offersApi.get(`/api/AdminFeaturedOffers/${offerId}/conditions`);
+  return response.data;
+}
 
+export async function addOfferCondition(offerId, data) {
+  const response = await offersApi.post(`/api/AdminFeaturedOffers/${offerId}/conditions`, data);
+  return response.data;
+}
+
+export async function updateOfferCondition(offerId, conditionId, data) {
+  const response = await offersApi.put(
+    `/api/AdminFeaturedOffers/${offerId}/conditions/${conditionId}`,
+    data
+  );
+  return response.data;
+}
+
+export async function deleteOfferCondition(offerId, conditionId) {
+  const response = await offersApi.delete(
+    `/api/AdminFeaturedOffers/${offerId}/conditions/${conditionId}`
+  );
+  return response.data;
+}
+
+export default offersApi;
