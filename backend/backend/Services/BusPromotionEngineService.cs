@@ -49,7 +49,7 @@ public class BusPromotionEngineService
             };
 
         decimal subtotal = 0m;
-       
+
 
         foreach (var seat in seats)
         {
@@ -98,28 +98,17 @@ public class BusPromotionEngineService
         if (selectedFeaturedOfferId.HasValue)
         {
             selectedOffer = await _db.FeaturedOffers
-                .AsNoTracking()
+                .Include(x => x.Promotion)
+                .ThenInclude(p => p!.Conditions)
                 .FirstOrDefaultAsync(x =>
                     x.Id == selectedFeaturedOfferId.Value &&
                     x.IsActive);
 
             if (selectedOffer == null)
-                throw new Exception(
-                    "Selected offer is invalid or inactive");
+                throw new Exception("Selected offer is invalid or inactive");
 
-            var offerNowUtc = DateTime.UtcNow;
-
-            if (selectedOffer.StartDateUtc.HasValue &&
-               selectedOffer.StartDateUtc > offerNowUtc)
-            {
-                throw new Exception("Offer not started yet");
-            }
-
-            if (selectedOffer.EndDateUtc.HasValue &&
-                selectedOffer.EndDateUtc < offerNowUtc)
-            {
-                throw new Exception("Offer expired");
-            }
+            if (selectedOffer.Promotion == null || !selectedOffer.Promotion.IsActive)
+                throw new Exception("The promotion associated with this offer is invalid or inactive");
         }
         // ========================================
         // AUTO APPLY PROMOTIONS
@@ -141,7 +130,7 @@ public class BusPromotionEngineService
     x.IsActive &&
     x.IsAutoApply &&
     (!x.StartDateUtc.HasValue || x.StartDateUtc <= promoNowUtc) &&
-(!x.EndDateUtc.HasValue || x.EndDateUtc >= promoNowUtc))
+    (!x.EndDateUtc.HasValue || x.EndDateUtc >= promoNowUtc))
             .OrderByDescending(x => x.Priority)
             .ToListAsync();
 
@@ -213,82 +202,57 @@ public class BusPromotionEngineService
         BusPromotion? manualPromotion = null;
         decimal manualDiscount = 0m;
 
-        // Load promotion by Id if provided and not auto apply
-        if (promotionId.HasValue &&
-      selectedOffer == null)
+        if (selectedOffer != null)
+        {
+            if (!string.IsNullOrWhiteSpace(couponCode))
+            {
+                throw new Exception("Featured offers cannot stack with manual coupons");
+            }
+
+            if (promotionId.HasValue && promotionId.Value != selectedOffer.PromotionId)
+            {
+                throw new Exception("Only one manual promotion/offer can be applied.");
+            }
+
+            manualPromotion = selectedOffer.Promotion;
+        }
+        else if (!skipCouponValidation && !string.IsNullOrWhiteSpace(couponCode))
+        {
+            var normalizedCoupon = couponCode.Trim().ToUpperInvariant();
+            var promoByCode = await _db.BusPromotions
+                .Include(x => x.Conditions)
+                .FirstOrDefaultAsync(x =>
+                    x.Code == normalizedCoupon &&
+                    x.IsActive &&
+                    !x.IsAutoApply);
+
+            if (promoByCode == null)
+            {
+                throw new Exception("Invalid or inactive coupon");
+            }
+
+            if (promotionId.HasValue && promotionId.Value != promoByCode.Id)
+            {
+                throw new Exception("Only one manual promotion/offer can be applied.");
+            }
+
+            manualPromotion = promoByCode;
+        }
+        else if (promotionId.HasValue)
         {
             var promoById = await _db.BusPromotions
                 .Include(x => x.Conditions)
                 .FirstOrDefaultAsync(x =>
                     x.Id == promotionId.Value &&
-                    x.IsActive);
+                    x.IsActive &&
+                    !x.IsAutoApply);
 
-            if (promoById != null &&
-                !promoById.IsAutoApply)
+            if (promoById == null)
             {
-                manualPromotion = promoById;
-            }
-        }
-        string? manualCouponCode = couponCode;
-
-        if (selectedOffer != null)
-        {
-            if (!string.IsNullOrWhiteSpace(manualCouponCode))
-            {
-                throw new Exception(
-                    "Featured offers cannot stack with manual coupons");
+                throw new Exception("Invalid or inactive promotion");
             }
 
-            if (string.IsNullOrWhiteSpace(
-                    selectedOffer.CouponCode))
-            {
-                throw new Exception(
-                    "Selected offer has no linked coupon");
-            }
-
-            couponCode =
-                selectedOffer.CouponCode
-                    .Trim()
-                    .ToUpperInvariant();
-        }
-        // Load promotion by couponCode if provided and not auto apply
-        if (!skipCouponValidation &&
-      !string.IsNullOrWhiteSpace(couponCode))
-        {
-            var normalizedCoupon = couponCode.Trim().ToUpperInvariant();
-            var promoByCode = await _db.BusPromotions
-     .Include(x => x.Conditions)
-     .FirstOrDefaultAsync(x =>
-         x.Code == normalizedCoupon &&
-         x.IsActive);
-
-            if (promoByCode == null)
-            {
-                throw new Exception(
-                    "Invalid or inactive coupon");
-            }
-
-            if (selectedOffer != null &&
-                !promoByCode.Code.Equals(
-                    selectedOffer.CouponCode,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                throw new Exception(
-                    "Offer coupon mismatch detected");
-            }
-            if (!promoByCode.IsAutoApply)
-            {
-                if (manualPromotion != null &&
-                    !manualPromotion.Id.Equals(promoByCode.Id))
-                {
-                    throw new InvalidOperationException(
-                        "Only one manual promotion can be used (coupon or offer).");
-                }
-
-                manualPromotion = promoByCode;
-            }
-
-            // If it's an auto apply promotion, ignore manual loading (will be considered in auto pool)
+            manualPromotion = promoById;
         }
 
         decimal couponDiscount = 0m;
@@ -304,6 +268,12 @@ public class BusPromotionEngineService
 
             if (valid)
             {
+                // Validate min booking amount
+                if (manualPromotion.MinBookingAmount > 0m && subtotal < manualPromotion.MinBookingAmount)
+                {
+                    throw new Exception($"Minimum booking amount of INR {manualPromotion.MinBookingAmount} is required.");
+                }
+
                 manualDiscount =
                     manualPromotion.DiscountType.Equals(
                         "Percentage",
@@ -326,7 +296,11 @@ public class BusPromotionEngineService
                 response.DiscountLabel = manualPromotion.Title;
 
                 // SPLIT MANUAL DISCOUNT BY TYPE
-                if (manualPromotion.PromotionType.Equals(
+                if (selectedOffer != null)
+                {
+                    offerDiscount = manualDiscount;
+                }
+                else if (manualPromotion.PromotionType.Equals(
                         "Coupon",
                         StringComparison.OrdinalIgnoreCase))
                 {
@@ -336,6 +310,10 @@ public class BusPromotionEngineService
                 {
                     offerDiscount = manualDiscount;
                 }
+            }
+            else
+            {
+                throw new Exception("Promotion conditions not met.");
             }
         }
 
@@ -387,7 +365,7 @@ public class BusPromotionEngineService
         response.TotalDiscount =
             totalDiscount;
 
-      
+
 
         // ========================================
         // TAXABLE FARE
@@ -446,7 +424,7 @@ public class BusPromotionEngineService
                 response.GstAmount +
                 convenienceFee,
                 2);
-        response.FinalAmount =response.GrandTotal;
+        response.FinalAmount = response.GrandTotal;
 
         return response;
     }

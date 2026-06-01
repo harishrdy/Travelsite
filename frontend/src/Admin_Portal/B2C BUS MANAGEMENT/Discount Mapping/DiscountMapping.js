@@ -568,4 +568,3 @@ function DiscountMapping() {
 }
 
 export default DiscountMapping;
-

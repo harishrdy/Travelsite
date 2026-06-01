@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { clearAuthSession } from '../../services/authSession';
 
 function getInitials(name) {
     const words = String(name || '')
@@ -49,14 +50,42 @@ function Topbar() {
     });
 
     const handleLogout = () => {
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('adminRole');
-        localStorage.removeItem('adminId');
-        localStorage.removeItem('adminName');
-        localStorage.removeItem('adminEmail');
-        localStorage.removeItem('adminLoginEmail');
-        localStorage.removeItem('adminChallengeId');
-        localStorage.removeItem('challengeId');
+        [
+            'adminToken',
+            'adminRole',
+            'adminId',
+            'adminName',
+            'adminEmail',
+            'adminLoginEmail',
+            'adminChallengeId',
+            'token',
+            'authToken',
+            'accessToken',
+            'user',
+            'userId',
+            'UserId',
+            'x-user-id',
+            'role',
+            'challengeId',
+        ].forEach((key) => localStorage.removeItem(key));
+        [
+            'adminToken',
+            'adminRole',
+            'adminId',
+            'token',
+            'authToken',
+            'accessToken',
+            'user',
+            'userId',
+            'UserId',
+            'x-user-id',
+            'role',
+            'challengeId',
+            'bus_booking_flow_state_v1',
+            'flight_booking_flow_state_v1',
+            'selectedOffer',
+        ].forEach((key) => sessionStorage.removeItem(key));
+        clearAuthSession();
         setIsDropdownOpen(false);
         navigate('/admin/login', { replace: true });
     };
@@ -682,4 +711,3 @@ function Topbar() {
 }
 
 export default Topbar;
-

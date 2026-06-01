@@ -945,4 +945,3 @@ export default function AdminB2CBookingListPage() {
   );
 }
 
-

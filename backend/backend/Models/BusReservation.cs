@@ -2,7 +2,7 @@
 {
     public class BusReservation
     {
-            public int Id { get; set; }
+        public int Id { get; set; }
         public string BookingReference { get; set; } = string.Empty;
         public string UserId { get; set; } = string.Empty;
         public int BusBookingId { get; set; }
@@ -40,8 +40,13 @@
 
         public string? AppliedPromotionType { get; set; }
 
-        public string? DiscountSource { get; set; }
+        public int? AppliedFeaturedOfferId { get; set; }
+
+        public int? AutoPromotionId { get; set; }
+
         public string? AutoPromotionCode { get; set; }
+
+        public string? DiscountSource { get; set; }
         public decimal AutoDiscountAmountInr { get; set; }
 
         public decimal CouponDiscountAmountInr { get; set; }

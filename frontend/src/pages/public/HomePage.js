@@ -23,6 +23,9 @@ import {
 import travelServiceRoute from "../../assets/images/travel-service-route.png";
 import travelServiceFares from "../../assets/images/travel-service-fares.png";
 import travelServiceTraveller from "../../assets/images/travel-service-traveller.png";
+import flightServiceRoute from "../../assets/images/flight-service-route.svg";
+import flightServiceFares from "../../assets/images/flight-service-fares.svg";
+import flightServiceTraveller from "../../assets/images/flight-service-traveller.svg";
 import airIndiaExpress from "../../assets/images/brands/air-india-express.png";
 import airIndia from "../../assets/images/brands/air-india.png";
 import akasaAir from "../../assets/images/brands/akasa-air.png";
@@ -33,10 +36,9 @@ import lufthansa from "../../assets/images/brands/lufthansa.png";
 import qatarAirways from "../../assets/images/brands/qatar-airways.png";
 import spiceJet from "../../assets/images/Spicejet.png";
 import { POPULAR_RTC_OPERATORS } from "../../data/popularBuses";
-import SiteFooter from "../../components/layout/SiteFooter";
 import "../../STYLES/HomePage.css";
 import { toDisplayDate } from "../../utils/apiDateFormat";
-import { getPublicFeaturedOffers, getActiveOffers } from "../../services/adminFeaturedOffersService";
+import { getActiveOffers } from "../../services/adminFeaturedOffersService";
 import { getPopularBusRoutesFromSearchHistory } from "../../services/busSearchHistoryService";
 import { listHotFlightRoutes } from "../../services/flightBookingService";
 import { toApiUrl } from "../../services/apiClient";
@@ -317,20 +319,6 @@ const HIGHLIGHTS = [
   },
 ];
 
-const HERO_METRICS = [
-  { id: "metric-1", value: "3,200+", label: "Verified Routes" },
-  { id: "metric-2", value: "180+", label: "Cities Connected" },
-  { id: "metric-3", value: "24/7", label: "Travel Assistance" },
-  { id: "metric-4", value: "98.7%", label: "On-Time Confirmations" },
-  { id: "metric-5", value: "1.2M+", label: "Tickets Booked" },
-];
-
-const HERO_TAGS = [
-  { id: "tag-1", label: "Live fares" },
-  { id: "tag-2", label: "Instant booking confirmation" },
-  { id: "tag-3", label: "Flexible trip combinations" },
-];
-
 const HOME_BOOKING_STEPS = [
   {
     id: "step-1",
@@ -467,6 +455,304 @@ const HOME_APP_BENEFITS = [
   "Quick access to PNR and ticket history",
   "Offers for repeat travellers and families",
 ];
+
+const FLIGHT_HIGHLIGHTS = [
+  {
+    id: "flight-highlight-1",
+    icon: Search,
+    value: "Smart",
+    title: "Compare Flight Choices",
+    text: "Check one-way, round-trip, and multi-city options with fares, timing, and cabin class in one flow.",
+  },
+  {
+    id: "flight-highlight-2",
+    icon: ShieldCheck,
+    value: "Official",
+    title: "Clear Booking Details",
+    text: "Review route, passenger, fare, and airline information before moving to payment.",
+  },
+  {
+    id: "flight-highlight-3",
+    icon: Clock3,
+    value: "Quick",
+    title: "Built For Time-Sensitive Travel",
+    text: "Find morning, evening, direct, and connecting flight options faster when plans change.",
+  },
+  {
+    id: "flight-highlight-4",
+    icon: RefreshCw,
+    value: "Flexible",
+    title: "Ready For Trip Changes",
+    text: "Keep return dates, traveller counts, and cabin choices easy to adjust while searching.",
+  },
+];
+
+const FLIGHT_SERVICE_BLOCKS = [
+  {
+    id: "flight-search",
+    kicker: "Flight Desk Services",
+    title: "Flight Search For Every Trip Type",
+    text:
+      "Search domestic and international routes, compare flight timings, and keep traveller details aligned from the first search.",
+    points: [
+      "One-way, round-trip, and multi-city planning",
+      "Traveller and cabin class selection",
+      "Route, timing, and fare details in one place",
+    ],
+    visual: "route",
+    image: flightServiceRoute,
+    imageAlt: "Flight route search shown in a travel booking flow",
+  },
+  {
+    id: "flight-fares",
+    kicker: "Fare Clarity",
+    title: "Choose The Fare That Fits The Journey",
+    text:
+      "Compare economy, premium economy, business, and first class options with practical date and traveller controls.",
+    points: [
+      "Economy",
+      "Premium Economy",
+      "Business",
+      "Premium Business",
+      "First Class",
+      "International Routes",
+    ],
+    visual: "fare",
+    image: flightServiceFares,
+    imageAlt: "Flight fare comparison cards with route options",
+  },
+  {
+    id: "flight-ready",
+    kicker: "Before You Fly",
+    title: "Keep Check-In And Ticket Actions Close",
+    text:
+      "A flight booking flow should make it easy to find booking references, review passenger details, and move to web check-in when needed.",
+    points: [
+      "Open web check-in from the travel desk",
+      "Keep PNR and passenger details ready",
+      "Review date, route, and cabin before payment",
+      "Use saved details for repeat searches",
+    ],
+    visual: "traveller",
+    image: flightServiceTraveller,
+    imageAlt: "Traveller checking flight booking details",
+  },
+];
+
+const FLIGHT_BOOKING_STEPS = [
+  {
+    id: "flight-step-1",
+    title: "Search Flights",
+    text: "Enter origin, destination, dates, travellers, and cabin class for the right flight list.",
+  },
+  {
+    id: "flight-step-2",
+    title: "Compare Schedules",
+    text: "Review direct, connecting, morning, evening, and premium options before choosing.",
+  },
+  {
+    id: "flight-step-3",
+    title: "Confirm And Fly",
+    text: "Add passenger details, complete payment, and keep the PNR ready for web check-in.",
+  },
+];
+
+const FLIGHT_GUIDE_NOTES = [
+  {
+    id: "flight-note-1",
+    title: "Flexible Date Planning",
+    text: "A nearby departure date or alternate return date can change fare and timing options. Compare the full journey before picking only the lowest price.",
+  },
+  {
+    id: "flight-note-2",
+    title: "Better Airport Readiness",
+    text: "Keep your PNR, passenger names, baggage rules, terminal information, and web check-in timing ready before travel day.",
+  },
+];
+
+const FLIGHT_ASSURANCE_POINTS = [
+  {
+    id: "flight-assurance-1",
+    icon: ShieldCheck,
+    title: "PNR Ready",
+    text: "Keep booking references easy to find after payment.",
+  },
+  {
+    id: "flight-assurance-2",
+    icon: Clock3,
+    title: "Schedule Aware",
+    text: "Review departure, arrival, and connection timing clearly.",
+  },
+  {
+    id: "flight-assurance-3",
+    icon: RefreshCw,
+    title: "Trip Flexible",
+    text: "Adjust dates, cabin, and traveller counts before search.",
+  },
+];
+
+const FLIGHT_REVIEWS = [
+  {
+    id: "flight-review-1",
+    type: "Flight Booking",
+    comment: "Round-trip search made the timing and fare comparison easy.",
+    author: "Ananya R.",
+    rating: "4.8/5",
+  },
+  {
+    id: "flight-review-2",
+    type: "Flight Booking",
+    comment: "Traveller and cabin selection stayed clear even for family tickets.",
+    author: "Vikram S.",
+    rating: "4.7/5",
+  },
+  {
+    id: "flight-review-3",
+    type: "Flight Booking",
+    comment: "The airline and route sections helped me choose quickly.",
+    author: "Meera K.",
+    rating: "4.9/5",
+  },
+  {
+    id: "flight-review-4",
+    type: "Flight Booking",
+    comment: "Web check-in access beside booking tools is very useful.",
+    author: "Rahul P.",
+    rating: "4.8/5",
+  },
+  {
+    id: "flight-review-5",
+    type: "Flight Booking",
+    comment: "Multi-city planning feels cleaner than switching between pages.",
+    author: "Farah N.",
+    rating: "4.7/5",
+  },
+  {
+    id: "flight-review-6",
+    type: "Flight Booking",
+    comment: "Fare, timing, and airline choices are simple to scan.",
+    author: "Nikhil D.",
+    rating: "4.8/5",
+  },
+];
+
+const HOME_FLIGHT_FAQS = [
+  {
+    id: "flight-faq-1",
+    question: "How do I search for flights online?",
+    answer:
+      "Choose source, destination, departure date, traveller count, and cabin class. For return or multi-city trips, add the extra dates and routes before searching.",
+  },
+  {
+    id: "flight-faq-2",
+    question: "Can I search one-way, round-trip, and multi-city flights?",
+    answer:
+      "Yes. The homepage flight form supports one-way, two-way, and multi-city trip planning with traveller and cabin class details.",
+  },
+  {
+    id: "flight-faq-3",
+    question: "What should I check before confirming a flight?",
+    answer:
+      "Review passenger names, travel dates, departure and arrival timing, fare rules, baggage details, and airline policy before payment.",
+  },
+  {
+    id: "flight-faq-4",
+    question: "Where do I complete web check-in?",
+    answer:
+      "Use the Web Check-In page to open the official airline check-in portal and download your boarding pass when the airline window opens.",
+  },
+];
+
+const HOME_FLIGHT_APP_BENEFITS = [
+  "Saved traveller and route preferences",
+  "Quick access to PNR and web check-in",
+  "Flight offers for domestic and international routes",
+];
+
+const HOME_MODE_CONTENT = {
+  buses: {
+    mode: "buses",
+    Icon: Bus,
+    heroTitle: "Book bus journeys with clearer routes and fares",
+    heroTags: ["Live bus fares", "Seat selection ready", "Boarding point clarity"],
+    insightsTitle: "Make every bus booking feel clear before you pay.",
+    insightsText:
+      "Travel Desk helps users compare the full bus journey, not just the price, so the final booking feels easier to trust.",
+    highlights: HIGHLIGHTS,
+    services: HOME_SERVICE_BLOCKS,
+    serviceHeading: "Plan, compare, and book buses with clearer choices",
+    guideHeading: "Book Bus Tickets With Less Guesswork",
+    guideIntro:
+      "A good bus booking flow should help you compare routes quickly, understand the fare clearly, and confirm the ticket without hunting for details later.",
+    bookingSteps: HOME_BOOKING_STEPS,
+    guideNotes: HOME_GUIDE_NOTES,
+    assuranceBadge: "Bus Travel Assured",
+    assuranceEnding: "Book bus tickets with confidence",
+    assuranceMapLabel: "Live journey view",
+    assurancePoints: HOME_ASSURANCE_POINTS,
+    assuranceProofs: [
+      ["Details verified", "Fare, pickup point, and rules are easy to review."],
+      ["Timing matched", "Departure and arrival stay easy to scan."],
+      ["Change-ready plan", "Review flexibility before confirming."],
+      ["Ticket ready", "Saved in one place after booking."],
+    ],
+    reviews: REVIEWS,
+    faqHeading: "Online Bus Booking FAQs",
+    faqs: HOME_BUS_FAQS,
+    appKicker: "Quick Booking",
+    appTitle: "Book buses faster on your next trip",
+    appText:
+      "Save common routes, compare buses quickly, and keep ticket details ready for city-to-city journeys.",
+    appOffer: "Use code TRAVELFIRST",
+    appBenefits: HOME_APP_BENEFITS,
+    aboutTitle: "About Travel Desk Bus Booking",
+    aboutParagraphs: [
+      "Travel Desk keeps bus booking simple for city-to-city journeys. The platform focuses on route search, practical filters, transparent fare checks, and ticket workflows that work for everyday intercity travel.",
+      "Whether it is a weekend visit home, a pilgrimage route, a business trip, or a family holiday, bus mode helps compare operators, pickup points, timings, and ticket details in one place.",
+    ],
+  },
+  flights: {
+    mode: "flights",
+    Icon: Plane,
+    heroTitle: "Search flights with fares, travellers, and cabin choices",
+    heroTags: ["Live flight fares", "One-way and round-trip", "Web check-in ready"],
+    insightsTitle: "Make every flight search feel organized before you book.",
+    insightsText:
+      "Travel Desk brings fare comparison, traveller details, cabin choices, and airline actions into a calmer flight booking flow.",
+    highlights: FLIGHT_HIGHLIGHTS,
+    services: FLIGHT_SERVICE_BLOCKS,
+    serviceHeading: "Plan, compare, and book flights with clearer choices",
+    guideHeading: "Book Flights With Less Guesswork",
+    guideIntro:
+      "A good flight booking flow should help you compare timing, fare, cabin class, traveller details, and airline actions before payment.",
+    bookingSteps: FLIGHT_BOOKING_STEPS,
+    guideNotes: FLIGHT_GUIDE_NOTES,
+    assuranceBadge: "Flight Travel Assured",
+    assuranceEnding: "Book flights with confidence",
+    assuranceMapLabel: "Flight journey view",
+    assurancePoints: FLIGHT_ASSURANCE_POINTS,
+    assuranceProofs: [
+      ["PNR checked", "Booking reference and passenger details stay easy to find."],
+      ["Schedule matched", "Departure, arrival, and route timing are simple to scan."],
+      ["Cabin ready", "Traveller count and cabin class stay visible before search."],
+      ["Check-in ready", "Official airline check-in stays close when you need it."],
+    ],
+    reviews: FLIGHT_REVIEWS,
+    faqHeading: "Online Flight Booking FAQs",
+    faqs: HOME_FLIGHT_FAQS,
+    appKicker: "Flight Desk",
+    appTitle: "Plan flights faster on your next trip",
+    appText:
+      "Save frequent flight routes, compare airline choices, and keep PNR and check-in actions ready.",
+    appOffer: "Use code FLYFIRST",
+    appBenefits: HOME_FLIGHT_APP_BENEFITS,
+    aboutTitle: "About Travel Desk Flight Booking",
+    aboutParagraphs: [
+      "Travel Desk flight mode is built for fast route search, clearer fare comparison, traveller selection, cabin choices, and web check-in readiness across popular airline routes.",
+      "Whether it is a domestic business trip, family vacation, international connection, or multi-city plan, flight mode keeps schedules, passenger details, PNR actions, and booking choices easy to review.",
+    ],
+  },
+};
 
 function getDateInputValue(offsetDays = 0) {
   const date = new Date();
@@ -632,10 +918,6 @@ function getFeaturedOffersPayload(payload) {
   return [];
 }
 
-function normalizeBookingType(value) {
-  return String(value || "").trim().toLowerCase();
-}
-
 function pickOfferValue(source, keys, fallback = "") {
   if (!source || typeof source !== "object") {
     return fallback;
@@ -704,8 +986,8 @@ function cleanFeaturedOfferImageUrl(value) {
 function isNgrokHostname(hostname) {
   const normalizedHostname = String(hostname || "").toLowerCase();
   return (
-    normalizedHostname.false ||
-    normalizedHostname.false
+    normalizedHostname.includes("ngrok-free.dev") ||
+    normalizedHostname.includes("ngrok.io")
   );
 }
 
@@ -773,17 +1055,76 @@ function normalizeFeaturedOffer(offer, index) {
     "ThumbnailUrl",
   ]);
 
+  const promo = offer?.promotion ?? offer?.Promotion ?? null;
+
+  const promotionId = offer?.promotionId ?? offer?.PromotionId ?? promo?.id ?? promo?.Id ?? null;
+  const promotionCode = offer?.promotionCode ?? offer?.PromotionCode ?? promo?.code ?? promo?.Code ?? null;
+  const promotionTitle = offer?.promotionTitle ?? offer?.PromotionTitle ?? promo?.title ?? promo?.Title ?? null;
+  const promotionType = offer?.promotionType ?? offer?.PromotionType ?? promo?.promotionType ?? promo?.PromotionType ?? null;
+  const discountType = offer?.discountType ?? offer?.DiscountType ?? promo?.discountType ?? promo?.DiscountType ?? null;
+  const discountValue = offer?.discountValue ?? offer?.DiscountValue ?? promo?.discountValue ?? promo?.DiscountValue ?? null;
+  const maxDiscountAmount = offer?.maxDiscountAmount ?? offer?.MaxDiscountAmount ?? promo?.maxDiscountAmount ?? promo?.MaxDiscountAmount ?? null;
+  const minBookingAmount = offer?.minBookingAmount ?? offer?.MinBookingAmount ?? promo?.minBookingAmount ?? promo?.MinBookingAmount ?? null;
+  const previewFinalPrice = offer?.previewFinalPrice ?? offer?.PreviewFinalPrice ?? null;
+  const rawConditions = offer?.conditions ?? offer?.Conditions ?? [];
+  const conditions = Array.isArray(rawConditions)
+    ? rawConditions.map((cond) => {
+        const typeRaw = cond?.conditionType ?? cond?.ConditionType;
+        const opRaw = cond?.conditionOperator ?? cond?.ConditionOperator;
+        
+        let conditionType = String(typeRaw || "");
+        if (typeRaw === 1 || conditionType.toLowerCase() === "sourcecity") {
+          conditionType = "SourceCity";
+        } else if (typeRaw === 2 || conditionType.toLowerCase() === "destinationcity") {
+          conditionType = "DestinationCity";
+        } else if (typeRaw === 3 || conditionType.toLowerCase() === "bustype") {
+          conditionType = "BusType";
+        } else if (typeRaw === 4 || conditionType.toLowerCase() === "traveldate") {
+          conditionType = "TravelDate";
+        }
+
+        let conditionOperator = String(opRaw || "Equals");
+        if (opRaw === 1 || conditionOperator.toLowerCase() === "equals") {
+          conditionOperator = "Equals";
+        } else if (opRaw === 2 || conditionOperator.toLowerCase() === "contains") {
+          conditionOperator = "Contains";
+        } else if (opRaw === 3 || conditionOperator.toLowerCase() === "between") {
+          conditionOperator = "Between";
+        }
+
+        return {
+          id: cond?.id ?? cond?.Id,
+          featuredOfferId: cond?.featuredOfferId ?? cond?.FeaturedOfferId,
+          conditionType,
+          conditionOperator,
+          value1: cond?.value1 ?? cond?.Value1 ?? "",
+          value2: cond?.value2 ?? cond?.Value2 ?? "",
+          isActive: cond?.isActive ?? cond?.IsActive ?? true,
+        };
+      })
+    : [];
+
   return {
     id,
     offerCode: pickOfferValue(offer, ["offerCode", "OfferCode", "offerId", "OfferId"]),
     title: pickOfferValue(offer, ["title", "Title", "name", "Name"], "Travel Offer"),
     subtitle: pickOfferValue(offer, ["subtitle", "Subtitle"]),
     description: pickOfferValue(offer, ["description", "Description", "subtitle", "Subtitle"]),
-    couponCode: pickOfferValue(offer, ["couponCode", "CouponCode", "code", "Code"]),
+    couponCode: pickOfferValue(offer, ["couponCode", "CouponCode", "code", "Code"]) || promotionCode,
     imageUrl: cleanFeaturedOfferImageUrl(imageUrl),
     bookingType,
     isActive: normalizeOfferActiveFlag(isActive),
-    couponExpiresAtUtc: pickOfferValue(offer, ["couponExpiresAtUtc", "CouponExpiresAtUtc"]),
+    couponExpiresAtUtc: pickOfferValue(offer, ["couponExpiresAtUtc", "CouponExpiresAtUtc"]) || promo?.endDateUtc || promo?.EndDateUtc || null,
+    promotionId,
+    promotionCode,
+    promotionTitle,
+    promotionType,
+    discountType,
+    discountValue,
+    maxDiscountAmount,
+    minBookingAmount,
+    previewFinalPrice,
+    conditions
   };
 }
 
@@ -1072,13 +1413,13 @@ function PlaceAutocomplete({
         endpoint.searchParams.set("limit", "20");
 
         const needsNgrokBypass =
-          endpoint.hostname.false ||
-          endpoint.hostname.false;
+          endpoint.hostname.includes("ngrok-free.dev") ||
+          endpoint.hostname.includes("ngrok.io");
 
         const response = await fetch(endpoint.toString(), {
           signal: controller.signal,
           headers: needsNgrokBypass
-            ? { "x-skip-browser-warning": "true" }
+            ? { "ngrok-skip-browser-warning": "true" }
             : undefined,
         });
 
@@ -1193,7 +1534,7 @@ export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") === "buses" ? "buses" : "flights";
 
-  const { selectedOffer, setSelectedOffer } = usePromo();
+  const { setSelectedOffer } = usePromo();
   const aiChatMessagesRef = useRef(null);
   const aiReplyTimerRef = useRef(null);
 
@@ -1596,21 +1937,46 @@ export default function HomePage() {
     setIsDealsDialogOpen(false);
     setSelectedOffer(offer);
 
+    let source = "";
+    let destination = "";
+    let travelDate = getDateInputValue(0);
+
+    if (offer.conditions && Array.isArray(offer.conditions)) {
+      const activeConditions = offer.conditions.filter((c) => c.isActive !== false);
+
+      const sourceCond = activeConditions.find((c) => c.conditionType === "SourceCity");
+      if (sourceCond) {
+        source = sourceCond.value1;
+      }
+
+      const destCond = activeConditions.find((c) => c.conditionType === "DestinationCity");
+      if (destCond) {
+        destination = destCond.value1;
+      }
+
+      const dateCond = activeConditions.find((c) => c.conditionType === "TravelDate");
+      if (dateCond) {
+        if (dateCond.value1) {
+          travelDate = dateCond.value1;
+        }
+      }
+    }
+
     if (offer.bookingType === "bus" || offer.bookingType === "Bus") {
       navigateToBusSearch({
-        source: "",
-        destination: "",
+        source,
+        destination,
         tripType: "oneway",
-        departureDate: getDateInputValue(0),
+        departureDate: travelDate,
       });
       return;
     }
 
     navigateToFlightSearch({
-      source: "",
-      destination: "",
+      source,
+      destination,
       tripType: "oneway",
-      departureDate: getDateInputValue(0),
+      departureDate: travelDate,
       travellers: "1 Adult",
       cabinClass: "Economy",
     });
@@ -1674,11 +2040,10 @@ export default function HomePage() {
       let hasError = false;
 
       if (isMultiCity) {
-        const validatedLegs = multiCityLegs.map(leg => {
+        multiCityLegs.forEach(leg => {
           if (!leg.from.trim() || !leg.to.trim()) {
             hasError = true;
           }
-          return leg;
         });
         if (hasError) {
           alert("Please fill all source and destination cities for multi-city legs.");
@@ -1932,8 +2297,11 @@ export default function HomePage() {
     </div>
   );
 
+  const homeContent = HOME_MODE_CONTENT[activeTab] || HOME_MODE_CONTENT.flights;
+  const HomeModeIcon = homeContent.Icon;
+
   return (
-    <div className="homepage">
+    <div className={`homepage homepage-${homeContent.mode}`}>
       <style>{`
         /* Custom Popular Route Card Embedded Styles */
         .pop-route-card {
@@ -2184,11 +2552,13 @@ export default function HomePage() {
         <div className="hero-content">
           {/* Left-aligned Heading and Point Tags */}
           <div className="hero-header-left">
-            <h1 className="hero-title-left">One app for every step of your journey</h1>
+            <h1 className="hero-title-left">{homeContent.heroTitle}</h1>
             <div className="hero-tag-row-left">
-              <span className="hero-tag-left">Live fares</span>
-              <span className="hero-tag-left">Instant booking confirmation</span>
-              <span className="hero-tag-left">Flexible trip combinations</span>
+              {homeContent.heroTags.map((tag) => (
+                <span className="hero-tag-left" key={tag}>
+                  {tag}
+                </span>
+              ))}
             </div>
           </div>
 
@@ -2562,14 +2932,12 @@ export default function HomePage() {
           <div className="offers-empty">No featured offers available.</div>
         ) : (
           <div className="offers-scroll-row">
-            {featuredOffers.map((offer) => {
-              const isSelected = selectedOffer && selectedOffer.offerCode === offer.offerCode;
-              return (
+            {featuredOffers.map((offer) => (
                 <article
-                  className={`offer-card ${isSelected ? "offer-card-selected" : ""}`}
+                  className="offer-card"
                   key={offer.id}
                 >
-                  {isSelected && (
+                  {false && (
                     <span className="offer-badge-applied">
                       Applied ✓
                     </span>
@@ -2585,12 +2953,11 @@ export default function HomePage() {
                       type="button"
                       onClick={() => handleOfferBooking(offer)}
                     >
-                      {isSelected ? "Applied" : "Book now"}
+                      Book now
                     </button>
                   </div>
                 </article>
-              );
-            })}
+            ))}
           </div>
         )}
       </section>
@@ -2598,15 +2965,12 @@ export default function HomePage() {
       <section className="insights-section section-shell">
         <div className="insights-banner">
           <div className="insights-copy">
-            <h2>Make every booking feel clear before you pay.</h2>
-            <p>
-              Travel Desk helps users compare the full journey, not just the
-              price, so the final booking feels easier to trust.
-            </p>
+            <h2>{homeContent.insightsTitle}</h2>
+            <p>{homeContent.insightsText}</p>
           </div>
 
           <div className="insights-grid">
-            {HIGHLIGHTS.map((item) => {
+            {homeContent.highlights.map((item) => {
               const Icon = item.icon;
 
               return (
@@ -2626,6 +2990,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {activeTab === "buses" && (
       <section className="popular-routes-section section-shell">
         <div className="section-header">
           <div>
@@ -2684,9 +3049,11 @@ export default function HomePage() {
           />
         )}
       </section>
+      )}
 
       {dealsDialog}
 
+      {activeTab === "buses" && (
       <section
         className="popular-buses-section section-shell"
         id="popular-buses"
@@ -2728,7 +3095,10 @@ export default function HomePage() {
           />
         </div>
       </section>
+      )}
 
+      {activeTab === "flights" && (
+      <>
       <section className="popular-section section-shell">
         <div className="section-header">
           <div>
@@ -2815,17 +3185,19 @@ export default function HomePage() {
           )}
         />
       </section>
+      </>
+      )}
 
       <section className="travel-services-section section-shell">
         <div className="section-header">
           <div>
             <span className="section-kicker">Booking Services</span>
-            <h2>Plan, compare, and book with clearer choices</h2>
+            <h2>{homeContent.serviceHeading}</h2>
           </div>
         </div>
 
         <div className="travel-services-grid">
-          {HOME_SERVICE_BLOCKS.map((block) => (
+          {homeContent.services.map((block) => (
             <article
               className={`travel-service-card ${block.visual}`}
               key={block.id}
@@ -2867,7 +3239,7 @@ export default function HomePage() {
         <div className="section-header">
           <div>
             <span className="section-kicker">Booking Guide</span>
-            <h2>Book Bus Tickets With Less Guesswork</h2>
+            <h2>{homeContent.guideHeading}</h2>
           </div>
         </div>
 
@@ -2877,12 +3249,12 @@ export default function HomePage() {
               <span className="route-node start">From</span>
               <span className="route-line" />
               <span className="route-bus">
-                <Bus size={18} />
+                <HomeModeIcon size={18} />
               </span>
               <span className="route-node end">To</span>
             </div>
             <div className="booking-visual-steps">
-              {HOME_BOOKING_STEPS.map((step, index) => (
+              {homeContent.bookingSteps.map((step, index) => (
                 <span key={step.id} style={{ "--step-index": index }}>
                   {step.title}
                 </span>
@@ -2891,13 +3263,9 @@ export default function HomePage() {
           </div>
 
           <div className="booking-guide-copy">
-            <p>
-              A good bus booking flow should help you compare routes quickly,
-              understand the fare clearly, and confirm the ticket without
-              hunting for details later.
-            </p>
+            <p>{homeContent.guideIntro}</p>
             <div className="booking-step-grid">
-              {HOME_BOOKING_STEPS.map((step, index) => (
+              {homeContent.bookingSteps.map((step, index) => (
                 <article className="booking-step-card" key={step.id}>
                   <span>{String(index + 1).padStart(2, "0")}</span>
                   <h3>{step.title}</h3>
@@ -2909,7 +3277,7 @@ export default function HomePage() {
         </div>
 
         <div className="booking-note-grid">
-          {HOME_GUIDE_NOTES.map((item) => (
+          {homeContent.guideNotes.map((item) => (
             <article className="booking-note-card" key={item.id}>
               <h3>{item.title}</h3>
               <p>{item.text}</p>
@@ -2923,11 +3291,11 @@ export default function HomePage() {
           <div className="assurance-panel">
             <span className="assurance-badge">
               <ShieldCheck size={17} />
-              Travel Assured
+              {homeContent.assuranceBadge}
             </span>
 
             <div className="assurance-list">
-              {HOME_ASSURANCE_POINTS.map((item) => {
+              {homeContent.assurancePoints.map((item) => {
                 const Icon = item.icon;
 
                 return (
@@ -2945,7 +3313,7 @@ export default function HomePage() {
             </div>
 
             <p className="assurance-ending">
-              Book with confidence
+              {homeContent.assuranceEnding}
             </p>
           </div>
 
@@ -2955,14 +3323,14 @@ export default function HomePage() {
             <div className="assurance-story-board">
               <div className="assurance-map-card">
                 <div className="assurance-map-header">
-                  <span>Live journey view</span>
+                  <span>{homeContent.assuranceMapLabel}</span>
                   <strong>3 checks passed</strong>
                 </div>
                 <div className="assurance-map-path">
                   <span className="map-pin source">Start</span>
                   <span className="map-line" />
                   <span className="map-bus">
-                    <Bus size={24} />
+                    <HomeModeIcon size={24} />
                   </span>
                   <span className="map-pin destination">Arrive</span>
                 </div>
@@ -2974,45 +3342,26 @@ export default function HomePage() {
               </div>
 
               <div className="assurance-proof-grid">
-                <div className="assurance-proof-card verified">
-                  <span className="assurance-proof-icon">
-                    <ShieldCheck size={20} />
-                  </span>
-                  <div>
-                    <strong>Details verified</strong>
-                    <span>Fare, pickup point, and rules are easy to review.</span>
-                  </div>
-                </div>
+                {homeContent.assuranceProofs.map(([title, text], index) => {
+                  const proofIcons = [ShieldCheck, Clock3, RefreshCw, Search];
+                  const ProofIcon = proofIcons[index] || ShieldCheck;
+                  const proofClasses = ["verified", "timing", "support", "ticket"];
 
-                <div className="assurance-proof-card timing">
-                  <span className="assurance-proof-icon">
-                    <Clock3 size={18} />
-                  </span>
-                  <div>
-                    <strong>Timing matched</strong>
-                    <span>Departure and arrival stay easy to scan.</span>
-                  </div>
-                </div>
-
-                <div className="assurance-proof-card support">
-                  <span className="assurance-proof-icon">
-                    <RefreshCw size={18} />
-                  </span>
-                  <div>
-                    <strong>Change-ready plan</strong>
-                    <span>Review flexibility before confirming.</span>
-                  </div>
-                </div>
-
-                <div className="assurance-proof-card ticket">
-                  <span className="assurance-proof-icon">
-                    <Search size={18} />
-                  </span>
-                  <div>
-                    <strong>Ticket ready</strong>
-                    <span>Saved in one place after booking.</span>
-                  </div>
-                </div>
+                  return (
+                    <div
+                      className={`assurance-proof-card ${proofClasses[index] || "verified"}`}
+                      key={title}
+                    >
+                      <span className="assurance-proof-icon">
+                        <ProofIcon size={index === 0 ? 20 : 18} />
+                      </span>
+                      <div>
+                        <strong>{title}</strong>
+                        <span>{text}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -3028,7 +3377,7 @@ export default function HomePage() {
         </div>
 
         <AutoMarquee
-          items={REVIEWS}
+          items={homeContent.reviews}
           className="review-marquee"
           duration={36}
           renderItem={(review) => (
@@ -3053,24 +3402,31 @@ export default function HomePage() {
             <h2>Sign Up For Exclusive Offers</h2>
             <p>Exclusive access to coupons, special offers and promotions.</p>
           </div>
-
+ 
           <form
             className="signup-form"
             onSubmit={(event) => event.preventDefault()}
           >
-            <input type="email" placeholder="Enter your email address" />
-            <input type="tel" placeholder="Enter your mobile no." />
+            <label className="signup-field signup-email-field">
+              <span>Email Address</span>
+              <input type="email" placeholder="Enter your email address" />
+            </label>
+            <label className="signup-field signup-mobile-field">
+              <span>Mobile Number</span>
+              <input type="tel" placeholder="Enter your mobile no." />
+            </label>
             <button type="submit">SUBMIT</button>
           </form>
         </div>
       </section>
+ 
 
       <section className="india-booking-section section-shell">
         <div className="india-faq-block">
           <div className="section-header india-static-header">
             <div>
               <span className="section-kicker">Help Center</span>
-              <h2>Online Bus Booking FAQs</h2>
+              <h2>{homeContent.faqHeading}</h2>
             </div>
             <button type="button" className="india-faq-link">
               View all FAQs
@@ -3078,7 +3434,7 @@ export default function HomePage() {
           </div>
 
           <div className="india-faq-list">
-            {HOME_BUS_FAQS.map((item) => (
+            {homeContent.faqs.map((item) => (
               <details className="india-faq-item" key={item.id}>
                 <summary>{item.question}</summary>
                 <p>{item.answer}</p>
@@ -3089,23 +3445,20 @@ export default function HomePage() {
 
         <div className="india-app-card">
           <div className="india-app-mark" aria-hidden="true">
-            <Bus size={42} />
+            <HomeModeIcon size={42} />
             <span>TD</span>
           </div>
 
           <div className="india-app-copy">
-            <span className="section-kicker">Quick Booking</span>
-            <h2>Book buses faster on your next trip</h2>
-            <p>
-              Save common routes, compare buses quickly, and keep ticket
-              details ready for city-to-city journeys.
-            </p>
-            <div className="india-offer-chip">Use code TRAVELFIRST</div>
+            <span className="section-kicker">{homeContent.appKicker}</span>
+            <h2>{homeContent.appTitle}</h2>
+            <p>{homeContent.appText}</p>
+            <div className="india-offer-chip">{homeContent.appOffer}</div>
           </div>
 
           <div className="india-app-side">
             <ul className="india-app-benefits">
-              {HOME_APP_BENEFITS.map((benefit) => (
+              {homeContent.appBenefits.map((benefit) => (
                 <li key={benefit}>{benefit}</li>
               ))}
             </ul>
@@ -3133,19 +3486,10 @@ export default function HomePage() {
         </div>
 
         <div className="india-about-block">
-          <h2>About Travel Desk</h2>
-          <p>
-            Travel Desk brings buses and flights into one simple booking
-            experience. The platform focuses on clear route search, practical
-            filters, transparent fare checks, and confirmation workflows that
-            work for everyday intercity travel.
-          </p>
-          <p>
-            Whether it is a weekend visit home, a business trip, a pilgrimage
-            route, or a family holiday, the goal is to make booking feel calm:
-            compare options, choose confidently, and keep every journey detail
-            available in one place.
-          </p>
+          <h2>{homeContent.aboutTitle}</h2>
+          {homeContent.aboutParagraphs.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
         </div>
       </section>
 
@@ -3231,10 +3575,6 @@ export default function HomePage() {
         )}
       </div>
 
-      <SiteFooter />
     </div>
   );
 }
-
-
-

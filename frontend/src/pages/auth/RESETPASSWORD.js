@@ -3,11 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { FaPlaneDeparture, FaSyncAlt,FaBus } from "react-icons/fa";
 import "../../STYLES/Login.css";
 import "../../STYLES/RESETPASSWORD.css";
+import "../../STYLES/AuthBackground.css";
 import { readApiMessage, requestAuth } from "../../services/authService";
 import { validateLowercaseEmail } from "../../utils/authValidation";
 import { generateMixedCaptcha, validateCaptcha } from "../../utils/captcha";
-// import flightCarImage from "../../assets/images/flightcar.png";
-import flightCarImage from "../../assets/images/loginimage.png";
 
 const ResetPassword = () => {
   const [email, setEmail] = useState("");
@@ -18,9 +17,6 @@ const ResetPassword = () => {
   const [apiMessage, setApiMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const navigate = useNavigate();
-  const authPageStyle = {
-    backgroundImage: `url(${flightCarImage})`
-  };
 
   const generateCaptcha = () => {
     setGeneratedCaptcha(generateMixedCaptcha());
@@ -29,6 +25,11 @@ const ResetPassword = () => {
 
   useEffect(() => {
     generateCaptcha();
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.add('auth-active');
+    return () => document.documentElement.classList.remove('auth-active');
   }, []);
 
   const showEmailSpaceError = () => {
@@ -109,11 +110,15 @@ const ResetPassword = () => {
   };
 
   return (
-    <div
-      className="travel-auth-page travel-auth-forgot"
-      style={authPageStyle}
-    >
-      <div className="travel-auth-card">
+    <div className="auth-container">
+      <div className="auth-animated-bg">
+        <div className="auth-animated-bg-image" />
+        <div className="auth-animated-bg-overlay" />
+      </div>
+      <div
+        className="travel-auth-page travel-auth-forgot"
+      >
+        <div className="travel-auth-card">
         <aside className="travel-auth-brand">
           <p className="travel-auth-kicker">Welcome to</p>
           <div className="travel-auth-logo">
@@ -231,6 +236,7 @@ const ResetPassword = () => {
             </div>
           </form>
         </section>
+      </div>
       </div>
     </div>
   );

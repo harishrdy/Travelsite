@@ -141,4 +141,3 @@ const DepositForm = ({ onSubmit, onBack }) => {
 };
 
 export default DepositForm;
-

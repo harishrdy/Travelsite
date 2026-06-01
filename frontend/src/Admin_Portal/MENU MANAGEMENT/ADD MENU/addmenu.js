@@ -161,4 +161,3 @@ export default function AdminMenuAddPage({ onBack }) {
     </section>
   );
 }
-

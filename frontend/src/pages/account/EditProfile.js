@@ -144,4 +144,3 @@ const EditProfileCard = () => {
 };
 
 export default EditProfileCard;
-

@@ -26,4 +26,3 @@ const Header = ({ onFilter, onForm }) => {
 };
 
 export default Header;
-

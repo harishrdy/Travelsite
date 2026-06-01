@@ -167,4 +167,3 @@ const DataTable = ({ headers, legend, data = [] }) => {
 
 export default DataTable;
 
-

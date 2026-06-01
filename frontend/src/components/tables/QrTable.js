@@ -58,4 +58,3 @@ const QRTable = ({
 };
 
 export default QRTable;
-

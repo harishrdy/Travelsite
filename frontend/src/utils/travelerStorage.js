@@ -116,4 +116,3 @@ export function saveBookingPassengersToTravelers(passengers, contact) {
 
   writeTravelerStorage(merged);
 }
-

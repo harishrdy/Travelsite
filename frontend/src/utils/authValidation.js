@@ -61,4 +61,3 @@ export function validateStrongPassword(value, label = "Password") {
 
   return "";
 }
-

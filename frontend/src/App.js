@@ -6,6 +6,7 @@ import { PromoProvider } from "./contexts/PromoContext";
 import BookingConfirmationPage from "./pages/booking/BookingConfirmationPage";
 
 import Topbar from "./components/layout/Topbar";
+import SiteFooter from "./components/layout/SiteFooter";
 import HomePage from "./pages/public/HomePage";
 import PrintTicketPage from "./pages/public/PrintTicketPage";
 import FetchTicket from "./pages/public/FetchTicket";
@@ -139,6 +140,11 @@ const HIDE_TOPBAR_PATHS = new Set([
   "/resetpassword",
 ]);
 
+const FORCE_FOOTER_PATHS = new Set([
+  "/fetch-ticket",
+  "/web-checkin",
+]);
+
 const LEGACY_REDIRECTS = [
   { from: "/Login", to: "/login" },
   { from: "/Register", to: "/register" },
@@ -236,8 +242,12 @@ function AdminOfferCategoryAddRoute() {
 function AppContent() {
   const location = useLocation();
   const normalizedPath = (location.pathname || "").toLowerCase();
+  const isAdminPath = normalizedPath.startsWith("/admin");
   const shouldHideTopbar =
-    normalizedPath.startsWith("/admin") || HIDE_TOPBAR_PATHS.has(normalizedPath);
+    isAdminPath || HIDE_TOPBAR_PATHS.has(normalizedPath);
+  const shouldShowFooter =
+    !isAdminPath &&
+    (FORCE_FOOTER_PATHS.has(normalizedPath) || !HIDE_TOPBAR_PATHS.has(normalizedPath));
 
   return (
     <>
@@ -419,6 +429,8 @@ function AppContent() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
+      {shouldShowFooter && <SiteFooter />}
     </>
   );
 }
@@ -436,4 +448,3 @@ function App() {
 }
 
 export default App;
-

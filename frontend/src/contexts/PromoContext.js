@@ -1,53 +1,47 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 const PromoContext = createContext(null);
 
 export function PromoProvider({ children }) {
-  const [selectedOffer, setSelectedOfferState] = useState(() => {
+  const [selectedOffer, setSelectedOfferState] = useState(null);
+
+  useEffect(() => {
     try {
-      const saved = sessionStorage.getItem("selectedOffer");
-      return saved ? JSON.parse(saved) : null;
-    } catch (e) {
-      console.error("Error reading selectedOffer from sessionStorage:", e);
-      return null;
+      sessionStorage.removeItem("selectedOffer");
+    } catch {
+      // Ignore storage errors in private mode or restricted environments.
     }
-  });
+  }, []);
 
   const setSelectedOffer = (offer) => {
-    setSelectedOfferState(offer);
-    if (offer) {
-      sessionStorage.setItem("selectedOffer", JSON.stringify(offer));
-    } else {
-      sessionStorage.removeItem("selectedOffer");
-    }
+    setSelectedOfferState(offer || null);
   };
 
   const clearSelectedOffer = () => {
     setSelectedOfferState(null);
-    sessionStorage.removeItem("selectedOffer");
   };
-  const selectedFeaturedOfferId =
-    selectedOffer?.selectedFeaturedOfferId ??
-    selectedOffer?.id ??
-    selectedOffer?.offerId ??
-    selectedOffer?.promotionId;
-  const selectedPromotionId =
-    selectedFeaturedOfferId !== undefined &&
-    selectedFeaturedOfferId !== null &&
-    selectedFeaturedOfferId !== ""
-      ? Number(selectedFeaturedOfferId)
-      : null;
+  const selectedPromotionId = (() => {
+    const promoId = selectedOffer?.promotionId ?? selectedOffer?.PromotionId;
+    if (promoId !== undefined && promoId !== null && promoId !== "") {
+      const parsed = Number(promoId);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    const otherId = selectedOffer?.selectedFeaturedOfferId ?? selectedOffer?.id ?? selectedOffer?.offerId;
+    if (otherId !== undefined && otherId !== null && otherId !== "") {
+      const parsed = Number(otherId);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    return null;
+  })();
+
+  const selectedFeaturedOfferId = selectedPromotionId;
 
   return (
     <PromoContext.Provider
       value={{
         selectedOffer,
-        selectedFeaturedOfferId: Number.isFinite(selectedPromotionId)
-          ? selectedPromotionId
-          : null,
-        selectedPromotionId: Number.isFinite(selectedPromotionId)
-          ? selectedPromotionId
-          : null,
+        selectedFeaturedOfferId,
+        selectedPromotionId,
         setSelectedOffer,
         clearSelectedOffer,
       }}
@@ -64,4 +58,3 @@ export function usePromo() {
   }
   return context;
 }
-

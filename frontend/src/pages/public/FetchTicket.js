@@ -1,8 +1,40 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  BusFront,
+  CalendarCheck,
+  Clock3,
+  Download,
+  Mail,
+  MapPinned,
+  Phone,
+  ReceiptText,
+  Search,
+  ShieldCheck,
+  TicketCheck,
+} from "lucide-react";
 import logo from "../../assets/images/printticket.png";
 import "../../STYLES/FetchTicket.css";
 import { fetchTicketByContact } from "../../services/ticketService";
+
+const TICKET_PROMOS = [
+  { id: "active", icon: TicketCheck, title: "Active Tickets", text: "Find current bus bookings" },
+  { id: "secure", icon: ShieldCheck, title: "Secure Lookup", text: "Matched with contact details" },
+  { id: "quick", icon: Clock3, title: "Fast Access", text: "Open and print in seconds" },
+  { id: "bus", icon: BusFront, title: "Bus Desk", text: "Route and passenger details" },
+];
+
+const TICKET_HELPERS = [
+  { id: "route", icon: MapPinned, title: "Route Details", text: "Boarding, dropping and timing in one view" },
+  { id: "receipt", icon: ReceiptText, title: "Booking Receipt", text: "Fare, passenger and operator details ready" },
+  { id: "download", icon: Download, title: "Print Ready", text: "Open the ticket and download whenever needed" },
+];
+
+const TICKET_STEPS = [
+  { id: "match", label: "Match contact", icon: Phone },
+  { id: "verify", label: "Verify active ticket", icon: ShieldCheck },
+  { id: "open", label: "Open printable copy", icon: TicketCheck },
+];
 
 const FetchTicket = () => {
   const navigate = useNavigate();
@@ -11,38 +43,6 @@ const FetchTicket = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const handleScrollLock = () => {
-      const rootEl = document.getElementById("root");
-      if (window.innerWidth > 920) {
-        document.body.style.setProperty("overflow", "hidden", "important");
-        document.documentElement.style.setProperty("overflow", "hidden", "important");
-        if (rootEl) {
-          rootEl.style.setProperty("overflow", "hidden", "important");
-        }
-      } else {
-        document.body.style.removeProperty("overflow");
-        document.documentElement.style.removeProperty("overflow");
-        if (rootEl) {
-          rootEl.style.removeProperty("overflow");
-        }
-      }
-    };
-
-    handleScrollLock();
-    window.addEventListener("resize", handleScrollLock);
-
-    return () => {
-      window.removeEventListener("resize", handleScrollLock);
-      document.body.style.removeProperty("overflow");
-      document.documentElement.style.removeProperty("overflow");
-      const rootEl = document.getElementById("root");
-      if (rootEl) {
-        rootEl.style.removeProperty("overflow");
-      }
-    };
-  }, []);
 
   const validateForm = () => {
     let nextError = "";
@@ -120,58 +120,137 @@ const FetchTicket = () => {
 
   return (
     <div className="fetch-ticket-page">
-      <section className="fetch-ticket-card">
-        <div className="fetch-ticket-visual">
-          <img src={logo} alt="Fetch ticket" />
-        </div>
+      <div className="fetch-ticket-shell">
+        <section className="fetch-ticket-marquee" aria-label="Ticket lookup benefits">
+          {[...TICKET_PROMOS, ...TICKET_PROMOS].map((item, index) => (
+            <article className="fetch-ticket-marquee-item" key={`${item.id}-${index}`}>
+              <span>
+                <item.icon size={16} />
+              </span>
+              <strong>{item.title}</strong>
+              <small>{item.text}</small>
+            </article>
+          ))}
+        </section>
 
-        <div className="fetch-ticket-form-wrap">
-          <span className="fetch-ticket-kicker">Ticket Access</span>
-          <h1>Fetch Ticket</h1>
-          <p>Enter your mobile number and email to open an active bus ticket.</p>
+        <section className="fetch-ticket-card">
+          <div className="fetch-ticket-visual">
+            <div className="fetch-ticket-visual-copy">
+              <span>Travel Desk</span>
+              <strong>Your bus ticket is a click away</strong>
+            </div>
+            <img src={logo} alt="Fetch ticket" />
+            <div className="fetch-ticket-visual-strip" aria-hidden="true">
+              <span>PNR</span>
+              <span>Seat</span>
+              <span>Fare</span>
+            </div>
+          </div>
 
-          <form onSubmit={handleFetchBooking} className="fetch-ticket-form">
-            <label htmlFor="fetch-ticket-mobile">Mobile Number</label>
-            <input
-              id="fetch-ticket-mobile"
-              type="tel"
-              value={mobile}
-              onChange={(event) => {
-                setMobile(event.target.value.replace(/\D/g, "").slice(0, 15));
-                if (error) setError("");
-              }}
-              inputMode="numeric"
-              maxLength={15}
-              placeholder="Enter mobile number"
-              className={error.toLowerCase().includes("mobile") ? "input-error" : ""}
-              disabled={loading}
-            />
+          <div className="fetch-ticket-form-wrap">
+            <span className="fetch-ticket-kicker">Ticket Access</span>
+            <h1>Fetch Ticket</h1>
+            <p>Use the same mobile number and email used during booking.</p>
 
-            <label htmlFor="fetch-ticket-email">Email</label>
-            <input
-              id="fetch-ticket-email"
-              type="email"
-              value={email}
-              onChange={(event) => {
-                setEmail(event.target.value);
-                if (error) setError("");
-              }}
-              placeholder="Enter booking email"
-              className={error.toLowerCase().includes("email") ? "input-error" : ""}
-              disabled={loading}
-            />
+            <div className="fetch-ticket-mini-steps">
+              <span><Phone size={14} /> Mobile</span>
+              <span><Mail size={14} /> Email</span>
+              <span><Search size={14} /> Match</span>
+            </div>
 
-            {error && <div className="fetch-ticket-error">{error}</div>}
+            <form onSubmit={handleFetchBooking} className="fetch-ticket-form">
+              <label htmlFor="fetch-ticket-mobile">Mobile Number</label>
+              <div className="fetch-ticket-input-wrap">
+                <Phone size={16} />
+                <input
+                  id="fetch-ticket-mobile"
+                  type="tel"
+                  value={mobile}
+                  onChange={(event) => {
+                    setMobile(event.target.value.replace(/\D/g, "").slice(0, 15));
+                    if (error) setError("");
+                  }}
+                  inputMode="numeric"
+                  maxLength={15}
+                  placeholder="Enter mobile number"
+                  className={error.toLowerCase().includes("mobile") ? "input-error" : ""}
+                  disabled={loading}
+                />
+              </div>
 
-            <button type="submit" className="fetch-ticket-submit" disabled={loading}>
-              {loading ? "Fetching..." : "Fetch Booking"}
-            </button>
-          </form>
-        </div>
-      </section>
+              <label htmlFor="fetch-ticket-email">Email</label>
+              <div className="fetch-ticket-input-wrap">
+                <Mail size={16} />
+                <input
+                  id="fetch-ticket-email"
+                  type="email"
+                  value={email}
+                  onChange={(event) => {
+                    setEmail(event.target.value);
+                    if (error) setError("");
+                  }}
+                  placeholder="Enter booking email"
+                  className={error.toLowerCase().includes("email") ? "input-error" : ""}
+                  disabled={loading}
+                />
+              </div>
+
+              {error && <div className="fetch-ticket-error">{error}</div>}
+
+              <button type="submit" className="fetch-ticket-submit" disabled={loading}>
+                {loading ? "Fetching..." : "Fetch Booking"}
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <section className="fetch-ticket-info-grid" aria-label="Fetch ticket information">
+          <article className="fetch-ticket-route-card">
+            <div>
+              <span className="fetch-ticket-pill"><BusFront size={15} /> Bus Ticket</span>
+              <h2>Find active journeys from your booking contact</h2>
+            </div>
+            <div className="fetch-ticket-route-line" aria-hidden="true">
+              <span>Booked</span>
+              <i />
+              <span>Verified</span>
+              <i />
+              <span>Printable</span>
+            </div>
+          </article>
+
+          <article className="fetch-ticket-calendar-card">
+            <CalendarCheck size={24} />
+            <strong>Keep travel dates handy</strong>
+            <span>Use the email and mobile number from your confirmed booking.</span>
+          </article>
+
+          <div className="fetch-ticket-helper-list">
+            {TICKET_HELPERS.map((item) => (
+              <article key={item.id} className="fetch-ticket-helper-card">
+                <span>
+                  <item.icon size={18} />
+                </span>
+                <div>
+                  <strong>{item.title}</strong>
+                  <small>{item.text}</small>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="fetch-ticket-step-row" aria-label="Ticket lookup steps">
+          {TICKET_STEPS.map((step) => (
+            <article key={step.id}>
+              <span><step.icon size={17} /></span>
+              <strong>{step.label}</strong>
+            </article>
+          ))}
+        </section>
+      </div>
     </div>
   );
 };
 
 export default FetchTicket;
-

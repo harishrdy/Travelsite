@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using PickNBook.Api.Data;
 using PickNBook.Api.Models.DTOs;
@@ -8,9 +10,10 @@ namespace PickNBook.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BDashboardController(AppDbContext dbContext) : BaseApiController
     {
-        private const string UserIdHeaderName = "X-User-Id";
+        //private const string UserIdHeaderName = "X-User-Id";
 
         [HttpGet("summary")]
         public async Task<IActionResult> GetSummary([FromQuery] int recentLimit = 10, [FromQuery] int travelerPendingDays = 7)
@@ -33,26 +36,56 @@ namespace PickNBook.Api.Controllers
             var recentCancellationFromUtc = nowUtc.AddDays(-7);
             var optionalUserId = GetCurrentUserIdOrNull();
 
-            var flightTotal = await dbContext.FlightReservations.AsNoTracking().CountAsync();
+            var flightTotal = await dbContext.FlightReservations.AsNoTracking()
+     .CountAsync(x => x.UserId == optionalUserId);
             var flightCancelled = await dbContext.FlightReservations.AsNoTracking()
-                .CountAsync(x => x.Status == "Cancelled");
-            var flightCompleted = await dbContext.FlightReservations.AsNoTracking()
-                .CountAsync(x => x.Status != "Cancelled" && x.FlightBooking != null && x.FlightBooking.DepartureTime <= nowUtc);
-            var flightUpcoming = await dbContext.FlightReservations.AsNoTracking()
-                .CountAsync(x => x.Status != "Cancelled" && x.FlightBooking != null && x.FlightBooking.DepartureTime > nowUtc);
+     .CountAsync(x =>
+         x.UserId == optionalUserId &&
+         x.Status == "Cancelled");
 
-            var busTotal = await dbContext.BusReservations.AsNoTracking().CountAsync();
+            var flightCompleted = await dbContext.FlightReservations.AsNoTracking()
+     .CountAsync(x =>
+         x.UserId == optionalUserId &&
+         x.Status != "Cancelled" &&
+         x.FlightBooking != null &&
+         x.FlightBooking.DepartureTime <= nowUtc);
+
+            var flightUpcoming = await dbContext.FlightReservations.AsNoTracking()
+     .CountAsync(x =>
+         x.UserId == optionalUserId &&
+         x.Status != "Cancelled" &&
+         x.FlightBooking != null &&
+         x.FlightBooking.DepartureTime > nowUtc);
+
+            var busTotal = await dbContext.BusReservations.AsNoTracking()
+     .CountAsync(x => x.UserId == optionalUserId);
+
             var busCancelled = await dbContext.BusReservations.AsNoTracking()
-                .CountAsync(x => x.Status == "Cancelled");
+      .CountAsync(x => x.Status == "Cancelled");
+
             var busCompleted = await dbContext.BusReservations.AsNoTracking()
-                .CountAsync(x => x.Status != "Cancelled" && x.BusBooking != null && x.BusBooking.DepartureTime <= nowUtc);
+    .CountAsync(x =>
+        x.UserId == optionalUserId &&
+        x.Status != "Cancelled" &&
+        x.BusBooking != null &&
+        x.BusBooking.DepartureTime <= nowUtc);
+
             var busUpcoming = await dbContext.BusReservations.AsNoTracking()
-                .CountAsync(x => x.Status != "Cancelled" && x.BusBooking != null && x.BusBooking.DepartureTime > nowUtc);
+     .CountAsync(x =>
+         x.UserId == optionalUserId &&
+         x.Status != "Cancelled" &&
+         x.BusBooking != null &&
+         x.BusBooking.DepartureTime > nowUtc);
 
             var pendingFlightCancellations = await dbContext.FlightReservations.AsNoTracking()
-                .CountAsync(x => x.Status == "Cancelled" && x.CancelledAtUtc != null && x.CancelledAtUtc >= recentCancellationFromUtc);
+     .CountAsync(x =>
+         x.UserId == optionalUserId &&
+         x.Status == "Cancelled" &&
+         x.CancelledAtUtc != null &&
+         x.CancelledAtUtc >= recentCancellationFromUtc);
+
             var pendingBusCancellations = await dbContext.BusReservations.AsNoTracking()
-                .CountAsync(x => x.Status == "Cancelled" && x.CancelledAtUtc != null && x.CancelledAtUtc >= recentCancellationFromUtc);
+                .CountAsync(x => x.UserId == optionalUserId && x.Status == "Cancelled" && x.CancelledAtUtc != null && x.CancelledAtUtc >= recentCancellationFromUtc);
 
             var travelerPendingQuery = dbContext.Travelers.AsNoTracking()
                 .Where(x => x.UpdatedAtUtc >= travelerPendingFromUtc);
@@ -64,44 +97,52 @@ namespace PickNBook.Api.Controllers
             var pendingTravelerUpdates = await travelerPendingQuery.CountAsync();
 
             var flightRevenue = await dbContext.FlightReservations.AsNoTracking()
-                .Where(x => x.Status != "Cancelled")
+               .Where(x =>
+    x.UserId == optionalUserId &&
+    x.Status != "Cancelled")
                 .Select(x => (decimal?)x.TotalPriceInr)
                 .SumAsync();
             var busRevenue = await dbContext.BusReservations.AsNoTracking()
-                .Where(x => x.Status != "Cancelled")
+               .Where(x =>
+    x.UserId == optionalUserId &&
+    x.Status != "Cancelled")
                 .Select(x => (decimal?)x.TotalPriceInr)
                 .SumAsync();
 
             var flightCancelledValue = await dbContext.FlightReservations.AsNoTracking()
-                .Where(x => x.Status == "Cancelled")
+
+                .Where(x => x.UserId == optionalUserId && x.Status == "Cancelled")
                 .Select(x => (decimal?)x.TotalPriceInr)
                 .SumAsync();
             var busCancelledValue = await dbContext.BusReservations.AsNoTracking()
-                .Where(x => x.Status == "Cancelled")
+                .Where(x => x.UserId == optionalUserId && x.Status == "Cancelled")
                 .Select(x => (decimal?)x.TotalPriceInr)
                 .SumAsync();
 
             var flightBookedEvents = await dbContext.FlightReservations.AsNoTracking()
-                .OrderByDescending(x => x.BookedAtUtc)
+     .Where(x => x.UserId == optionalUserId)
+                 .OrderByDescending(x => x.BookedAtUtc)
                 .Take(recentLimit)
                 .Select(x => new { x.BookingReference, x.PassengerName, x.BookedAtUtc, x.TotalPriceInr })
                 .ToListAsync();
 
             var flightCancelledEvents = await dbContext.FlightReservations.AsNoTracking()
-                .Where(x => x.CancelledAtUtc != null)
+                .Where(x => x.UserId == optionalUserId && x.CancelledAtUtc != null)
                 .OrderByDescending(x => x.CancelledAtUtc)
                 .Take(recentLimit)
                 .Select(x => new { x.BookingReference, x.PassengerName, CancelledAtUtc = x.CancelledAtUtc!.Value })
                 .ToListAsync();
 
             var busBookedEvents = await dbContext.BusReservations.AsNoTracking()
-                .OrderByDescending(x => x.BookedAtUtc)
+                .OrderByDescending(x => x.UserId == optionalUserId)
                 .Take(recentLimit)
                 .Select(x => new { x.BookingReference, x.PassengerName, x.BookedAtUtc, x.TotalPriceInr })
                 .ToListAsync();
 
             var busCancelledEvents = await dbContext.BusReservations.AsNoTracking()
-                .Where(x => x.CancelledAtUtc != null)
+                .Where(x =>
+    x.UserId == optionalUserId &&
+    x.CancelledAtUtc != null)
                 .OrderByDescending(x => x.CancelledAtUtc)
                 .Take(recentLimit)
                 .Select(x => new { x.BookingReference, x.PassengerName, CancelledAtUtc = x.CancelledAtUtc!.Value })
@@ -255,11 +296,7 @@ namespace PickNBook.Api.Controllers
                     WalletPaymentUpdates = 0,
                     BankAddUpdates = 0
                 },
-                TopRoutes = topRoutes
-                    .OrderByDescending(x => x.BookingCount)
-                    .ThenByDescending(x => x.SearchCount)
-                    .Take(10)
-                    .ToList()
+                TopRoutes = new List<DashboardTopRouteDto>()
             };
 
             return Ok(response);
@@ -267,13 +304,8 @@ namespace PickNBook.Api.Controllers
 
         private string? GetCurrentUserIdOrNull()
         {
-            if (!Request.Headers.TryGetValue(UserIdHeaderName, out var values))
-            {
-                return null;
-            }
-
-            var value = values.FirstOrDefault();
-            return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                   ?? User.FindFirst("sub")?.Value;
         }
     }
 

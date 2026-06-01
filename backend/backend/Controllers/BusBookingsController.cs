@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using PickNBook.Api.Data;
@@ -10,7 +12,7 @@ using PickNBook.Api.Services.SeatLayouts;
 
 namespace PickNBook.Api.Controllers
 {
-
+    [Authorize]
     public class BusBookingsController(
     AppDbContext dbContext,
       IBusPromotionEngineService promotionEngine,
@@ -18,7 +20,7 @@ namespace PickNBook.Api.Controllers
     IWhatsAppService whatsAppService,
     ILogger<BusBookingsController> logger) : BaseApiController
     {
-        private const string UserIdHeaderName = "X-User-Id";
+        //private const string UserIdHeaderName = "X-User-Id";
         private readonly IBusPromotionEngineService _promotionEngine
     = promotionEngine;
 
@@ -185,8 +187,8 @@ namespace PickNBook.Api.Controllers
                     x.FromCity,
                     x.ToCity,
                     x.BoardingPoint,
-                    DroppingPoint = x.DroppingPoint.Split(',').Last().Trim(),
-                   
+                    x.DroppingPoint,
+
 
                     DepartureTimeUtc = x.DepartureTime,
                     ArrivalTimeUtc = x.ArrivalTime,
@@ -275,18 +277,18 @@ namespace PickNBook.Api.Controllers
             var booked = seats.Count(x => x.IsBooked);
             // AFTER — layout-aware
             var layout = BusSeatLayoutRegistry.Resolve(bus.BusType);
-           
+
 
             var sections = layout.GetSections(
                          seats.Count,
                          bus.BusType)
                       .Select(s => new SeatSectionDto
                       {
-                                     Label = s.Label,
-                                     SeatCodes = s.SeatCodes,
-                                     ColumnsPerRow = s.ColumnsPerRow,
-                                     AisleAfterColumn = s.AisleAfterColumn
-                                 }).ToList();
+                          Label = s.Label,
+                          SeatCodes = s.SeatCodes,
+                          ColumnsPerRow = s.ColumnsPerRow,
+                          AisleAfterColumn = s.AisleAfterColumn
+                      }).ToList();
 
             var definitions =
    layout.GetSeatDefinitions(
@@ -385,7 +387,7 @@ namespace PickNBook.Api.Controllers
                  Column = d.Column,
                  IsSleeper = d.IsSleeper,
                  IsUpper = d.IsUpper,
-                 
+
              }).ToList(),
 
                 Sections = sections
@@ -507,7 +509,7 @@ namespace PickNBook.Api.Controllers
                         var bus = await dbContext.BusBookings.FirstOrDefaultAsync(x => x.Id == busId);
                         if (bus is null)
                             throw new Exception("Bus not found.");
-                       
+
 
                         if (bus.DepartureTime <= DateTime.UtcNow)
                             throw new Exception("Cannot book a bus that already departed.");
@@ -607,96 +609,109 @@ namespace PickNBook.Api.Controllers
                             throw new Exception("Seat allocation mismatch");
                         }
                         // ========================================
-                        // COUPON VALIDATION
+                        // UNIFIED PROMOTION VALIDATION
                         // ========================================
+                        BusPromotion? promotionToApply = null;
+                        FeaturedOffer? selectedFeaturedOffer = null;
 
-                        var couponCode =
-                            string.IsNullOrWhiteSpace(request.CouponCode)
-                                ? null
-                                : request.CouponCode.Trim();
-
-                        BusCoupon? appliedCoupon = null;
-
-                        if (!string.IsNullOrWhiteSpace(couponCode))
+                        if (request.SelectedFeaturedOfferId.HasValue)
                         {
-                            var normalizedCoupon =
-                                couponCode.Trim().ToUpperInvariant();
+                            selectedFeaturedOffer = await dbContext.FeaturedOffers
+                                .Include(x => x.Promotion)
+                                .ThenInclude(p => p!.Conditions)
+                                .FirstOrDefaultAsync(x => x.Id == request.SelectedFeaturedOfferId.Value && x.IsActive);
 
-                            // 🔥 FETCH COUPON
-                            appliedCoupon = await dbContext.BusCoupons
-                                .FirstOrDefaultAsync(x =>
-                                    x.CouponCode == normalizedCoupon);
+                            if (selectedFeaturedOffer == null)
+                                throw new Exception("Selected offer is invalid or inactive.");
 
-                            if (appliedCoupon is null)
-                                throw new Exception("Invalid coupon code.");
+                            if (selectedFeaturedOffer.Promotion == null || !selectedFeaturedOffer.Promotion.IsActive)
+                                throw new Exception("The promotion associated with this offer is invalid or inactive.");
 
-                            // 🔥 STATUS CHECK
-                            if (!appliedCoupon.Status.Equals(
-                                    "Active",
-                                    StringComparison.OrdinalIgnoreCase))
+                            if (!string.IsNullOrWhiteSpace(request.CouponCode))
                             {
-                                throw new Exception("Coupon is not active.");
+                                throw new Exception("Featured offers cannot stack with manual coupons.");
+                            }
+                            if (request.PromotionId.HasValue && request.PromotionId.Value != selectedFeaturedOffer.PromotionId)
+                            {
+                                throw new Exception("Only one manual promotion/offer can be applied.");
                             }
 
-                            // 🔥 USAGE LIMIT CHECK
-                            if (appliedCoupon.UseLimit > 0 &&
-                                appliedCoupon.UsedCount >= appliedCoupon.UseLimit)
+                            promotionToApply = selectedFeaturedOffer.Promotion;
+                        }
+                        else if (!string.IsNullOrWhiteSpace(request.CouponCode))
+                        {
+                            var normalizedCoupon = request.CouponCode.Trim().ToUpperInvariant();
+                            var promoByCode = await dbContext.BusPromotions
+                                .Include(x => x.Conditions)
+                                .FirstOrDefaultAsync(x => x.Code == normalizedCoupon && x.IsActive && !x.IsAutoApply);
+
+                            if (promoByCode == null)
                             {
-                                throw new Exception(
-                                    "Coupon usage limit reached.");
+                                throw new Exception("Invalid or inactive coupon code.");
                             }
 
-                            // 🔥 DATE VALIDATION
-                            var todayIst =
-                                DateOnly.FromDateTime(
-                                    DateTime.UtcNow.Add(IndiaOffset));
-
-                            if (todayIst < appliedCoupon.StartDate ||
-                                todayIst > appliedCoupon.ExpiryDate)
+                            if (request.PromotionId.HasValue && request.PromotionId.Value != promoByCode.Id)
                             {
-                                throw new Exception(
-                                    "Coupon is not valid.");
+                                throw new Exception("Only one manual promotion/offer can be applied.");
                             }
 
-                            // 🔥 PER USER LIMIT CHECK
-                            var userUsageCount =
-                                await dbContext.BusCouponUsages
-                                    .Where(x =>
-                                        x.CouponCode ==
-                                            appliedCoupon.CouponCode &&
-                                        x.UserId == userId &&
-                                        x.BookingStatus == "Booked")
-                                    .CountAsync();
+                            promotionToApply = promoByCode;
+                        }
+                        else if (request.PromotionId.HasValue)
+                        {
+                            var promoById = await dbContext.BusPromotions
+                                .Include(x => x.Conditions)
+                                .FirstOrDefaultAsync(x => x.Id == request.PromotionId.Value && x.IsActive && !x.IsAutoApply);
 
-                            if (appliedCoupon.MaxUsagePerUser > 0 &&
-                                userUsageCount >=
-                                    appliedCoupon.MaxUsagePerUser)
+                            if (promoById == null)
                             {
-                                throw new Exception(
-                                    "User coupon usage limit reached.");
+                                throw new Exception("Invalid or inactive promotion.");
+                            }
+
+                            promotionToApply = promoById;
+                        }
+
+                        if (promotionToApply != null)
+                        {
+                            var nowUtc = DateTime.UtcNow;
+
+                            if (promotionToApply.StartDateUtc.HasValue && promotionToApply.StartDateUtc.Value > nowUtc)
+                            {
+                                throw new Exception("Promotion has not started yet.");
+                            }
+
+                            if (promotionToApply.EndDateUtc.HasValue && promotionToApply.EndDateUtc.Value < nowUtc)
+                            {
+                                throw new Exception("Promotion has expired.");
+                            }
+
+                            if (promotionToApply.MaxUsage.HasValue && promotionToApply.UsedCount >= promotionToApply.MaxUsage.Value)
+                            {
+                                throw new Exception("Promotion usage limit reached.");
+                            }
+
+                            if (promotionToApply.MaxUsagePerUser > 0)
+                            {
+                                var userPromoUsageCount = await dbContext.BusPromotionUsages
+                                    .CountAsync(x => x.BusPromotionId == promotionToApply.Id && x.UserId == userId && x.BookingStatus == "Booked");
+
+                                if (userPromoUsageCount >= promotionToApply.MaxUsagePerUser)
+                                {
+                                    throw new Exception("Your usage limit for this promotion has been reached.");
+                                }
                             }
                         }
-                       
+
                         // ========================================
                         // CENTRALIZED PRICING ENGINE
                         // ========================================
-                        var pricing =
-                            await _promotionEngine.CalculateAsync(
-                                bus.Id,
-                                seatAssignedPassengers,
-                                request.CouponCode,
-                                request.PromotionId,
-                                int.Parse(userId!),
-                                 request.SelectedFeaturedOfferId);
-
-                        // 🔥 MIN BOOKING AMOUNT CHECK
-                        if (appliedCoupon is not null &&
-                            pricing.SubtotalBeforeCoupon <
-                                appliedCoupon.MinBookingAmount)
-                        {
-                            throw new Exception(
-                                $"Coupon valid only for bookings above ₹{appliedCoupon.MinBookingAmount}");
-                        }
+                        var pricing = await _promotionEngine.CalculateAsync(
+                            bus.Id,
+                            seatAssignedPassengers,
+                            request.CouponCode,
+                            request.PromotionId,
+                            int.Parse(userId!),
+                            request.SelectedFeaturedOfferId);
 
                         var reservation = new BusReservation
                         {
@@ -708,66 +723,100 @@ namespace PickNBook.Api.Controllers
                             PassengerEmail = string.IsNullOrWhiteSpace(request.PassengerEmail) ? null : request.PassengerEmail.Trim(),
                             SeatsBooked = seatsRequired,
                             TotalPriceInr = pricing.GrandTotal,
-
                             CustomerFareInr = pricing.GrandTotal,
-
                             NetFareInr = pricing.SubtotalBeforeCoupon,
-
                             BaseFareInr = pricing.Seats.Sum(x => x.BaseFare),
-
                             MarkupAmountInr = pricing.Seats.Sum(x => x.MarkupAmount),
-
                             TaxableFareInr = pricing.TaxableFare,
-
                             GstPercent = pricing.GstPercent,
-
                             GstAmountInr = pricing.GstAmount,
-
-                            AutoDiscountAmountInr =
-    pricing.AutoDiscountAmount,
-
-                            CouponDiscountAmountInr =
-    pricing.CouponDiscountAmount,
-
-                            DiscountAmountInr =
-    pricing.AutoDiscountAmount +
-    pricing.CouponDiscountAmount,
-
+                            AutoDiscountAmountInr = pricing.AutoDiscountAmount,
+                            CouponDiscountAmountInr = pricing.CouponDiscountAmount,
+                            DiscountAmountInr = pricing.AutoDiscountAmount + pricing.CouponDiscountAmount,
                             ConvenienceFeeInr = pricing.ConvenienceFee,
-                            CouponCode = string.IsNullOrWhiteSpace(couponCode) ? null : couponCode.Trim().ToUpperInvariant(),
-                            AppliedPromotionId = request.PromotionId,
-                            AppliedPromotionCode =
-pricing.AppliedPromotionCode,
-
-                            AppliedPromotionType =
-pricing.AppliedPromotionType
-    ?? pricing.DiscountSource,
-                            AutoPromotionCode =
-    pricing.AutoPromotionCode,
-
-                            DiscountSource =
-pricing.DiscountSource,
+                            CouponCode = string.IsNullOrWhiteSpace(request.CouponCode) ? null : request.CouponCode.Trim().ToUpperInvariant(),
+                            AppliedPromotionId = promotionToApply?.Id,
+                            AppliedPromotionCode = pricing.AppliedPromotionCode,
+                            AppliedPromotionType = pricing.AppliedPromotionType ?? pricing.DiscountSource,
+                            AppliedFeaturedOfferId = request.SelectedFeaturedOfferId,
+                            AutoPromotionId = pricing.AutoPromotionCode != null ? (await dbContext.BusPromotions.Where(x => x.Code == pricing.AutoPromotionCode).Select(x => (int?)x.Id).FirstOrDefaultAsync()) : null,
+                            AutoPromotionCode = pricing.AutoPromotionCode,
+                            DiscountSource = pricing.DiscountSource,
                             Status = "Booked",
                             BookedAtUtc = DateTime.UtcNow
                         };
 
                         dbContext.BusReservations.Add(reservation);
                         await dbContext.SaveChangesAsync();
-                        if (appliedCoupon != null)
-                        {
-                            // 🔥 ATOMIC GLOBAL LIMIT UPDATE
-                            var rowsAffected = await dbContext.Database.ExecuteSqlInterpolatedAsync($@"
-        UPDATE bus_coupons
-        SET UsedCount = UsedCount + 1
-        WHERE Id = {appliedCoupon.Id}
-        AND (UseLimit = 0 OR UsedCount < UseLimit)
-    ");
 
-                            if (rowsAffected == 0)
-                                throw new Exception("Coupon usage limit reached.");
+                        // ========================================
+                        // ATOMIC INCREMENT & USAGE LOGGING
+                        // ========================================
+                        if (pricing.AutoDiscountAmount > 0 && !string.IsNullOrEmpty(pricing.AutoPromotionCode))
+                        {
+                            var autoPromo = await dbContext.BusPromotions.FirstOrDefaultAsync(x => x.Code == pricing.AutoPromotionCode);
+                            if (autoPromo != null)
+                            {
+                                var autoUsage = new BusPromotionUsage
+                                {
+                                    BusPromotionId = autoPromo.Id,
+                                    FeaturedOfferId = null,
+                                    BusReservationId = reservation.Id,
+                                    UserId = userId!,
+                                    PromotionCode = autoPromo.Code,
+                                    PromotionType = autoPromo.PromotionType,
+                                    DiscountAmountInr = pricing.AutoDiscountAmount,
+                                    BookingTotalInr = pricing.GrandTotal,
+                                    BookingStatus = "Booked",
+                                    UsedAtUtc = DateTime.UtcNow
+                                };
+                                dbContext.BusPromotionUsages.Add(autoUsage);
+
+                                var autoRows = await dbContext.Database.ExecuteSqlInterpolatedAsync($@"
+                                    UPDATE buspromotions
+                                    SET UsedCount = UsedCount + 1
+                                    WHERE Id = {autoPromo.Id}
+                                    AND (MaxUsage IS NULL OR UsedCount < MaxUsage)
+                                ");
+                                if (autoRows == 0 && autoPromo.MaxUsage.HasValue)
+                                {
+                                    throw new Exception($"Auto-promotion '{autoPromo.Code}' usage limit reached concurrently.");
+                                }
+                            }
                         }
 
-                      
+                        if (promotionToApply != null)
+                        {
+                            var discountAmt = promotionToApply.PromotionType.Equals("Coupon", StringComparison.OrdinalIgnoreCase) && selectedFeaturedOffer == null
+                                ? pricing.CouponDiscountAmount
+                                : pricing.ManualDiscountAmount;
+
+                            var manualUsage = new BusPromotionUsage
+                            {
+                                BusPromotionId = promotionToApply.Id,
+                                FeaturedOfferId = request.SelectedFeaturedOfferId,
+                                BusReservationId = reservation.Id,
+                                UserId = userId!,
+                                PromotionCode = promotionToApply.Code,
+                                PromotionType = promotionToApply.PromotionType,
+                                DiscountAmountInr = discountAmt,
+                                BookingTotalInr = pricing.GrandTotal,
+                                BookingStatus = "Booked",
+                                UsedAtUtc = DateTime.UtcNow
+                            };
+                            dbContext.BusPromotionUsages.Add(manualUsage);
+
+                            var manualRows = await dbContext.Database.ExecuteSqlInterpolatedAsync($@"
+                                UPDATE buspromotions
+                                SET UsedCount = UsedCount + 1
+                                WHERE Id = {promotionToApply.Id}
+                                AND (MaxUsage IS NULL OR UsedCount < MaxUsage)
+                            ");
+                            if (manualRows == 0 && promotionToApply.MaxUsage.HasValue)
+                            {
+                                throw new Exception("Promotion usage limit reached concurrently.");
+                            }
+                        }
 
                         var passengers = new List<BusReservationPassenger>();
                         foreach (var p in normalizedPassengers)
@@ -782,25 +831,6 @@ pricing.DiscountSource,
                             });
                         }
                         dbContext.BusReservationPassengers.AddRange(passengers);
-
-                        if (appliedCoupon is not null &&
-    pricing.CouponAmount > 0)
-                        {
-                            dbContext.BusCouponUsages.Add(new BusCouponUsage
-                            {
-                                BusReservationId = reservation.Id,
-                                CouponCode = appliedCoupon.CouponCode,
-                                UsedAtUtc = DateTime.UtcNow,
-                                TotalFareInr = pricing.GrandTotal,
-                                CouponType = appliedCoupon.CouponType,
-                                CouponValue = appliedCoupon.Value,
-                                CouponAmountInr = pricing.CouponDiscountAmount,
-                                BookingStatus = reservation.Status,
-
-                                // 🔥 ADD THIS LINE
-                                UserId = userId
-                            });
-                        }
 
                         await TrackBusRouteBookingCounterAsync(bus.FromCity, bus.ToCity);
 
@@ -826,7 +856,7 @@ pricing.DiscountSource,
                     }
                 });
 
-               
+
 
                 try
                 {
@@ -913,7 +943,7 @@ pricing.DiscountSource,
             return Ok(response);
         }
 
-        
+
 
         [HttpGet("bookings/{bookingId:int}")]
         public async Task<IActionResult> GetBusBookingById(int bookingId)
@@ -1038,13 +1068,34 @@ pricing.DiscountSource,
 ");
                     }
 
+                    // Unified promotion cancellation handling:
+                    var unifiedUsages = await dbContext.BusPromotionUsages
+                        .Where(x => x.BusReservationId == booking.Id && x.BookingStatus == "Booked")
+                        .ToListAsync();
+
+                    foreach (var u in unifiedUsages)
+                    {
+                        u.BookingStatus = "Cancelled";
+                        u.UsedAtUtc = DateTime.UtcNow;
+
+                        // Decrement atomic promotion usage
+                        await dbContext.Database.ExecuteSqlInterpolatedAsync($@"
+                            UPDATE buspromotions
+                            SET UsedCount = CASE 
+                                WHEN UsedCount > 0 THEN UsedCount - 1 
+                                ELSE 0 
+                            END
+                            WHERE Id = {u.BusPromotionId}
+                        ");
+                    }
+
 
 
                     // 🔥 validation
                     if (booking.SeatsBooked <= 0)
                         throw new Exception("Invalid seat count in booking");
 
-                    
+
                     // ── Cancellation policy based on hours before departure ──
                     var istNow = DateTime.UtcNow.Add(IndiaOffset);
                     var istDeparture = booking.BusBooking.DepartureTime.Add(IndiaOffset);
@@ -1074,7 +1125,7 @@ pricing.DiscountSource,
 
                     booking.CancellationChargeInr = cancellationCharge;
                     booking.RefundAmountInr = refundAmount;
-                    
+
                     // 🔥 ALWAYS SYNC FROM SOURCE OF TRUTH
                     var actualAvailableSeats = await dbContext.BusSeats
                         .CountAsync(x => x.BusBookingId == booking.BusBookingId && !x.IsBooked);
@@ -1138,7 +1189,7 @@ pricing.DiscountSource,
                 FullName = x.FullName,
                 Gender = x.Gender,
                 SeatNumber = x.SeatNumber ?? string.Empty,
-                Age=x.Age
+                Age = x.Age
             }).ToList();
 
             var maleCount = passengers.Count(x => x.Gender.Equals("Male", StringComparison.OrdinalIgnoreCase));
@@ -1362,7 +1413,7 @@ pricing.DiscountSource,
                     FullName = passenger.FullName.Trim(),
                     Gender = normalizedGender,
                     SeatNumber = normalizedSeat,
-                    Age=passenger.Age
+                    Age = passenger.Age
                 });
             }
 
@@ -1402,7 +1453,7 @@ pricing.DiscountSource,
 
             return null;
         }
-        
+
 
         private static (DateTime StartUtc, DateTime EndUtc) GetUtcRangeForIstDate(DateOnly date)
         {
@@ -1435,130 +1486,130 @@ pricing.DiscountSource,
             // FIXED
             return markup.Value;
         }
-    //    private async Task<BusPricingPreviewResponseDto> CalculateBusPricingAsync(
-    //int busId,
-    //List<string> seatCodes,
-    //string? couponCode)
-    //    {
-    //        var bus = await dbContext.BusBookings
-    //            .AsNoTracking()
-    //            .FirstOrDefaultAsync(x => x.Id == busId);
+        //    private async Task<BusPricingPreviewResponseDto> CalculateBusPricingAsync(
+        //int busId,
+        //List<string> seatCodes,
+        //string? couponCode)
+        //    {
+        //        var bus = await dbContext.BusBookings
+        //            .AsNoTracking()
+        //            .FirstOrDefaultAsync(x => x.Id == busId);
 
-    //        if (bus is null)
-    //            throw new Exception("Bus not found.");
+        //        if (bus is null)
+        //            throw new Exception("Bus not found.");
 
-    //        var seats = await dbContext.BusSeats
-    //            .AsNoTracking()
-    //            .Where(x =>
-    //                x.BusBookingId == busId &&
-    //                seatCodes.Contains(x.SeatCode))
-    //            .ToListAsync();
+        //        var seats = await dbContext.BusSeats
+        //            .AsNoTracking()
+        //            .Where(x =>
+        //                x.BusBookingId == busId &&
+        //                seatCodes.Contains(x.SeatCode))
+        //            .ToListAsync();
 
-    //        var response = new BusPricingPreviewResponseDto
-    //        {
-    //            BusId = bus.Id,
-    //            GstCategory = bus.GstCategory
-    //        };
+        //        var response = new BusPricingPreviewResponseDto
+        //        {
+        //            BusId = bus.Id,
+        //            GstCategory = bus.GstCategory
+        //        };
 
-    //        decimal subtotal = 0m;
+        //        decimal subtotal = 0m;
 
-    //        foreach (var seat in seats)
-    //        {
-    //            var markup = await GetActiveSeatMarkupAsync(seat.SeatType);
+        //        foreach (var seat in seats)
+        //        {
+        //            var markup = await GetActiveSeatMarkupAsync(seat.SeatType);
 
-    //            var markupAmount = CalculateMarkupAmount(
-    //                bus.PriceInr,
-    //                markup);
+        //            var markupAmount = CalculateMarkupAmount(
+        //                bus.PriceInr,
+        //                markup);
 
-    //            var fareBeforeTax = bus.PriceInr + markupAmount;
+        //            var fareBeforeTax = bus.PriceInr + markupAmount;
 
-    //            subtotal += fareBeforeTax;
+        //            subtotal += fareBeforeTax;
 
-    //            response.Seats.Add(new BusSeatPriceBreakdownDto
-    //            {
-    //                SeatCode = seat.SeatCode,
-    //                SeatType = seat.SeatType,
-    //                BaseFare = bus.PriceInr,
+        //            response.Seats.Add(new BusSeatPriceBreakdownDto
+        //            {
+        //                SeatCode = seat.SeatCode,
+        //                SeatType = seat.SeatType,
+        //                BaseFare = bus.PriceInr,
 
-    //                MarkupAmount = decimal.Round(
-    //                    markupAmount,
-    //                    2,
-    //                    MidpointRounding.AwayFromZero),
+        //                MarkupAmount = decimal.Round(
+        //                    markupAmount,
+        //                    2,
+        //                    MidpointRounding.AwayFromZero),
 
-    //                FareBeforeTax = decimal.Round(
-    //                    fareBeforeTax,
-    //                    2,
-    //                    MidpointRounding.AwayFromZero)
-    //            });
-    //        }
+        //                FareBeforeTax = decimal.Round(
+        //                    fareBeforeTax,
+        //                    2,
+        //                    MidpointRounding.AwayFromZero)
+        //            });
+        //        }
 
-    //        response.SubtotalBeforeCoupon = decimal.Round(
-    //            subtotal,
-    //            2,
-    //            MidpointRounding.AwayFromZero);
+        //        response.SubtotalBeforeCoupon = decimal.Round(
+        //            subtotal,
+        //            2,
+        //            MidpointRounding.AwayFromZero);
 
-    //        decimal couponAmount = 0m;
+        //        decimal couponAmount = 0m;
 
-    //        if (!string.IsNullOrWhiteSpace(couponCode))
-    //        {
-    //            var coupon = await dbContext.BusCoupons
-    //                .FirstOrDefaultAsync(x =>
-    //                    x.CouponCode == couponCode &&
-    //                    x.Status == "Active");
+        //        if (!string.IsNullOrWhiteSpace(couponCode))
+        //        {
+        //            var coupon = await dbContext.BusCoupons
+        //                .FirstOrDefaultAsync(x =>
+        //                    x.CouponCode == couponCode &&
+        //                    x.Status == "Active");
 
-    //            if (coupon is not null)
-    //            {
-    //                couponAmount =
-    //coupon.CouponType.Equals(
-    //    "Percentage",
-    //    StringComparison.OrdinalIgnoreCase)
-    //? subtotal * coupon.Value / 100m
-    //: coupon.Value;
-    //            }
-    //        }
+        //            if (coupon is not null)
+        //            {
+        //                couponAmount =
+        //coupon.CouponType.Equals(
+        //    "Percentage",
+        //    StringComparison.OrdinalIgnoreCase)
+        //? subtotal * coupon.Value / 100m
+        //: coupon.Value;
+        //            }
+        //        }
 
-    //        couponAmount = Math.Min(couponAmount, subtotal);
+        //        couponAmount = Math.Min(couponAmount, subtotal);
 
-    //        response.CouponAmount = decimal.Round(
-    //            couponAmount,
-    //            2,
-    //            MidpointRounding.AwayFromZero);
+        //        response.CouponAmount = decimal.Round(
+        //            couponAmount,
+        //            2,
+        //            MidpointRounding.AwayFromZero);
 
-    //        var taxableFare = subtotal - couponAmount;
+        //        var taxableFare = subtotal - couponAmount;
 
-    //        response.TaxableFare = decimal.Round(
-    //            taxableFare,
-    //            2,
-    //            MidpointRounding.AwayFromZero);
+        //        response.TaxableFare = decimal.Round(
+        //            taxableFare,
+        //            2,
+        //            MidpointRounding.AwayFromZero);
 
-    //        var gstSetting = await GetActiveBusGstAsync(
-    //            bus.GstCategory);
+        //        var gstSetting = await GetActiveBusGstAsync(
+        //            bus.GstCategory);
 
-    //        var gstPercent = gstSetting?.GstPercent ?? 0m;
+        //        var gstPercent = gstSetting?.GstPercent ?? 0m;
 
-    //        response.GstPercent = gstPercent;
+        //        response.GstPercent = gstPercent;
 
-    //        var gstAmount = taxableFare * gstPercent / 100m;
+        //        var gstAmount = taxableFare * gstPercent / 100m;
 
-    //        response.GstAmount = decimal.Round(
-    //            gstAmount,
-    //            2,
-    //            MidpointRounding.AwayFromZero);
+        //        response.GstAmount = decimal.Round(
+        //            gstAmount,
+        //            2,
+        //            MidpointRounding.AwayFromZero);
 
-    //        var convenienceFee =
-    //            await GetActiveBusConvenienceFeeAsync();
+        //        var convenienceFee =
+        //            await GetActiveBusConvenienceFeeAsync();
 
-    //        response.ConvenienceFee = convenienceFee;
+        //        response.ConvenienceFee = convenienceFee;
 
-    //        response.GrandTotal = decimal.Round(
-    //            taxableFare +
-    //            gstAmount +
-    //            convenienceFee,
-    //            2,
-    //            MidpointRounding.AwayFromZero);
+        //        response.GrandTotal = decimal.Round(
+        //            taxableFare +
+        //            gstAmount +
+        //            convenienceFee,
+        //            2,
+        //            MidpointRounding.AwayFromZero);
 
-    //        return response;
-    //    }
+        //        return response;
+        //    }
         private async Task<decimal> GetSeatFinalFareAsync(
             decimal baseFare,
             string seatType)
@@ -1697,7 +1748,7 @@ pricing.DiscountSource,
                 }
             }
         }
-       
+
         private Dictionary<string, (int row, int col, int sectionIndex)> BuildSeatGrid(
     List<SeatSection> sections)
         {
@@ -1750,27 +1801,25 @@ pricing.DiscountSource,
 
 
 
-        private bool TryGetCurrentUserId(out string? userId, out string? error)
+        private bool TryGetCurrentUserId(out string? userId, out IActionResult? errorResult)
         {
-            userId = null;
-            error = null;
+            userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                  ?? User.FindFirst("sub")?.Value;
 
-            if (!Request.Headers.TryGetValue(UserIdHeaderName, out var values))
+            if (string.IsNullOrWhiteSpace(userId))
             {
-                error = $"{UserIdHeaderName} header is required.";
+                errorResult = Unauthorized(new
+                {
+                    message = "User is not authenticated."
+                });
+
                 return false;
             }
 
-            var value = values.FirstOrDefault();
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                error = $"{UserIdHeaderName} header cannot be empty.";
-                return false;
-            }
-
-            userId = value.Trim();
+            errorResult = null;
             return true;
         }
+
         private async Task TrySendBusCancellationNotificationsAsync(int bookingId, string userId)
         {
             var booking = await dbContext.BusReservations
@@ -1802,68 +1851,68 @@ pricing.DiscountSource,
                 //}
                 try
                 {
-                    
-    await _ticketEmailService.SendBusCancellationAsync(
-    new SendBusTicketEmailRequest
-    {
-        ToEmail = booking.PassengerEmail,
-        PassengerName = booking.PassengerName,
-        BookingReference = booking.BookingReference,
-        OperatorName = booking.BusBooking.OperatorName,
-        BusType = booking.BusBooking.BusType,
-        Origin = booking.BusBooking.FromCity,
-        Destination = booking.BusBooking.ToCity,
-        DepartureTime = booking.BusBooking.DepartureTime,
-        ArrivalTime = booking.BusBooking.ArrivalTime,
-        IsOvernightArrival = booking.BusBooking.ArrivalTime.Date > booking.BusBooking.DepartureTime.Date,
-        DurationMinutes = (int)(booking.BusBooking.ArrivalTime - booking.BusBooking.DepartureTime).TotalMinutes,
-        BoardingPoint = booking.BusBooking.BoardingPoint,
-        ArrivalPoint = booking.BusBooking.ToCity,
 
-        // Fare breakdown
-        Price = booking.TotalPriceInr,
-        BaseFare = booking.BaseFareInr,
-        ConvenienceFee = booking.ConvenienceFeeInr,
-        Currency = "INR",
+                    await _ticketEmailService.SendBusCancellationAsync(
+                    new SendBusTicketEmailRequest
+                    {
+                        ToEmail = booking.PassengerEmail,
+                        PassengerName = booking.PassengerName,
+                        BookingReference = booking.BookingReference,
+                        OperatorName = booking.BusBooking.OperatorName,
+                        BusType = booking.BusBooking.BusType,
+                        Origin = booking.BusBooking.FromCity,
+                        Destination = booking.BusBooking.ToCity,
+                        DepartureTime = booking.BusBooking.DepartureTime,
+                        ArrivalTime = booking.BusBooking.ArrivalTime,
+                        IsOvernightArrival = booking.BusBooking.ArrivalTime.Date > booking.BusBooking.DepartureTime.Date,
+                        DurationMinutes = (int)(booking.BusBooking.ArrivalTime - booking.BusBooking.DepartureTime).TotalMinutes,
+                        BoardingPoint = booking.BusBooking.BoardingPoint,
+                        ArrivalPoint = booking.BusBooking.ToCity,
 
-        NetFare = booking.NetFareInr,
-        GstPercent = booking.GstPercent,
-        GstAmount = booking.GstAmountInr,
+                        // Fare breakdown
+                        Price = booking.TotalPriceInr,
+                        BaseFare = booking.BaseFareInr,
+                        ConvenienceFee = booking.ConvenienceFeeInr,
+                        Currency = "INR",
 
-        AppliedPromotionCode =
-    booking.AppliedPromotionCode,
+                        NetFare = booking.NetFareInr,
+                        GstPercent = booking.GstPercent,
+                        GstAmount = booking.GstAmountInr,
 
-        AppliedPromotionType =
-    booking.AppliedPromotionType,
+                        AppliedPromotionCode =
+                    booking.AppliedPromotionCode,
 
-        DiscountSource =
-    booking.DiscountSource,
+                        AppliedPromotionType =
+                    booking.AppliedPromotionType,
 
-        DiscountAmount =
-    booking.DiscountAmountInr > 0
-        ? booking.DiscountAmountInr
-        : null,
+                        DiscountSource =
+                    booking.DiscountSource,
 
-        // Legacy fallback
-        SeatNumber = seatNumbers,
-        AutoDiscountAmount =
-    booking.AutoDiscountAmountInr,
+                        DiscountAmount =
+                    booking.DiscountAmountInr > 0
+                        ? booking.DiscountAmountInr
+                        : null,
 
-        CouponDiscountAmount =
-    booking.CouponDiscountAmountInr,
+                        // Legacy fallback
+                        SeatNumber = seatNumbers,
+                        AutoDiscountAmount =
+                    booking.AutoDiscountAmountInr,
 
-        // Per-passenger details
-        Passengers = passengers.Select(p => new BusPassengerSeatDto
-        {
-            FullName = p.FullName,
-            Gender = p.Gender,
-            SeatNumber = p.SeatNumber ?? string.Empty
-        }).ToList()
+                        CouponDiscountAmount =
+                    booking.CouponDiscountAmountInr,
 
-    },
-    booking.RefundAmountInr ?? 0m
-);
-                
+                        // Per-passenger details
+                        Passengers = passengers.Select(p => new BusPassengerSeatDto
+                        {
+                            FullName = p.FullName,
+                            Gender = p.Gender,
+                            SeatNumber = p.SeatNumber ?? string.Empty
+                        }).ToList()
+
+                    },
+                    booking.RefundAmountInr ?? 0m
+                );
+
                 }
                 catch (Exception ex)
                 {
@@ -1891,13 +1940,8 @@ pricing.DiscountSource,
         }
         private string? GetOptionalUserId()
         {
-            if (!Request.Headers.TryGetValue(UserIdHeaderName, out var values))
-            {
-                return null;
-            }
-
-            var value = values.FirstOrDefault();
-            return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                   ?? User.FindFirst("sub")?.Value;
         }
         private async Task TrySendBusBookingNotificationsAsync(
      BusReservation reservation,
@@ -2005,7 +2049,7 @@ pricing.DiscountSource,
             if (!sent)
                 logger.LogWarning("WhatsApp booking failed: {Message}", msg);
         }
-       
+
     }
 
 }

@@ -100,12 +100,10 @@ function clearSearchHistoryEntries({ searchType } = {}) {
 }
 
 const FALLBACK_API_BASE_URL =
-  "http://3.111.182.53:8080";
+  "https://undogmatically-knotlike-evita.ngrok-free.dev";
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "0.0.0.0"]);
 const BUS_BOOKINGS_ROOT = "/api/BusBookings";
 const BUS_SEARCH_LOGS_ROOT = "/api/BusSearchLogs";
-const DEFAULT_API_USER_ID =
-  String(process.env.REACT_APP_API_USER_ID || "").trim() || "user_123";
 
 function isLocalDevelopment() {
   if (process.env.NODE_ENV !== "development") {
@@ -172,7 +170,8 @@ function shouldUseNgrokBypass(urlOrPath) {
   try {
     const parsed = new URL(toAbsoluteUrl(urlOrPath), window.location.origin);
     return (
-      false
+      parsed.hostname.includes("ngrok-free.dev") ||
+      parsed.hostname.includes("ngrok.io")
     );
   } catch {
     return false;
@@ -199,58 +198,6 @@ function buildUrl(path, query = {}) {
   return params.toString() ? `${base}?${params.toString()}` : base;
 }
 
-function resolveCurrentUserId(explicitUserId) {
-  const directValue = normalizeText(explicitUserId, "");
-  if (directValue) {
-    return directValue;
-  }
-
-  if (typeof window === "undefined") {
-    return DEFAULT_API_USER_ID;
-  }
-
-  try {
-    const directStoredUserId = normalizeText(
-      window.localStorage.getItem("userId") ||
-      window.localStorage.getItem("UserId"),
-      ""
-    );
-
-    if (directStoredUserId) {
-      return directStoredUserId;
-    }
-
-    const rawUser = window.localStorage.getItem("user") || "";
-    if (!rawUser) {
-      return DEFAULT_API_USER_ID;
-    }
-
-    const parsed = JSON.parse(rawUser) || {};
-    const nestedUser =
-      parsed.user && typeof parsed.user === "object" ? parsed.user : {};
-
-    const resolved = normalizeText(
-      parsed.userId ||
-      parsed.UserId ||
-      parsed.id ||
-      parsed.Id ||
-      parsed.uid ||
-      parsed.Uid ||
-      nestedUser.userId ||
-      nestedUser.UserId ||
-      nestedUser.id ||
-      nestedUser.Id ||
-      nestedUser.uid ||
-      nestedUser.Uid,
-      ""
-    );
-
-    return resolved || DEFAULT_API_USER_ID;
-  } catch {
-    return DEFAULT_API_USER_ID;
-  }
-}
-
 function readStoredValue(storage, key) {
   try {
     return storage?.getItem(key) || "";
@@ -270,7 +217,7 @@ function getStoredValue(key) {
   );
 }
 
-function getRequestAuthHeaders(resolvedUserId) {
+function getRequestAuthHeaders() {
   const token =
     getStoredValue("adminToken") ||
     getStoredValue("token") ||
@@ -282,7 +229,6 @@ function getRequestAuthHeaders(resolvedUserId) {
   return {
     Accept: "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(resolvedUserId ? { "X-User-Id": resolvedUserId } : {}),
     ...(adminId ? { "X-Admin-Id": adminId } : {}),
     ...(adminRole ? { "X-Admin-Role": adminRole } : {}),
   };
@@ -559,9 +505,8 @@ function normalizeErrorMessage(payload) {
 }
 
 async function requestJson(urlOrPath, options = {}) {
-  const resolvedUserId = resolveCurrentUserId(options.userId);
   const headers = {
-    ...getRequestAuthHeaders(resolvedUserId),
+    ...getRequestAuthHeaders(),
     ...(options.headers || {}),
   };
 
@@ -570,7 +515,7 @@ async function requestJson(urlOrPath, options = {}) {
   }
 
   if (shouldUseNgrokBypass(urlOrPath)) {
-    headers["x-skip-browser-warning"] = "true";
+    headers["ngrok-skip-browser-warning"] = "true";
   }
 
   const url = toAbsoluteUrl(urlOrPath);
@@ -1240,6 +1185,4 @@ export default function AdminSearchHistoryPage() {
     </section>
   );
 }
-
-
 

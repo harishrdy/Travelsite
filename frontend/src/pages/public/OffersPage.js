@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Tag, Bus, ArrowLeft } from "lucide-react";
 import { getPublicFeaturedOffers } from "../../services/adminFeaturedOffersService";
 import { sanitizeApiUrlValue, toApiAssetUrl } from "../../services/apiClient";
-import SiteFooter from "../../components/layout/SiteFooter";
 import { usePromo } from "../../contexts/PromoContext";
 import "../../STYLES/OffersPage.css";
 
@@ -12,15 +11,73 @@ function normalizeFeaturedOffer(offer, index) {
   const id = featuredOfferId ?? offer?.offerCode ?? `offer-${index}`;
   const bookingType = String(offer?.bookingType || "").trim();
 
+  const promo = offer?.promotion ?? offer?.Promotion ?? null;
+
+  const promotionId = offer?.promotionId ?? offer?.PromotionId ?? promo?.id ?? promo?.Id ?? null;
+  const promotionCode = offer?.promotionCode ?? offer?.PromotionCode ?? promo?.code ?? promo?.Code ?? null;
+  const promotionTitle = offer?.promotionTitle ?? offer?.PromotionTitle ?? promo?.title ?? promo?.Title ?? null;
+  const promotionType = offer?.promotionType ?? offer?.PromotionType ?? promo?.promotionType ?? promo?.PromotionType ?? null;
+  const discountType = offer?.discountType ?? offer?.DiscountType ?? promo?.discountType ?? promo?.DiscountType ?? null;
+  const discountValue = offer?.discountValue ?? offer?.DiscountValue ?? promo?.discountValue ?? promo?.DiscountValue ?? null;
+  const maxDiscountAmount = offer?.maxDiscountAmount ?? offer?.MaxDiscountAmount ?? promo?.maxDiscountAmount ?? promo?.MaxDiscountAmount ?? null;
+  const minBookingAmount = offer?.minBookingAmount ?? offer?.MinBookingAmount ?? promo?.minBookingAmount ?? promo?.MinBookingAmount ?? null;
+  const previewFinalPrice = offer?.previewFinalPrice ?? offer?.PreviewFinalPrice ?? null;
+  const rawConditions = offer?.conditions ?? offer?.Conditions ?? [];
+  const conditions = Array.isArray(rawConditions)
+    ? rawConditions.map((cond) => {
+        const typeRaw = cond?.conditionType ?? cond?.ConditionType;
+        const opRaw = cond?.conditionOperator ?? cond?.ConditionOperator;
+        
+        let conditionType = String(typeRaw || "");
+        if (typeRaw === 1 || conditionType.toLowerCase() === "sourcecity") {
+          conditionType = "SourceCity";
+        } else if (typeRaw === 2 || conditionType.toLowerCase() === "destinationcity") {
+          conditionType = "DestinationCity";
+        } else if (typeRaw === 3 || conditionType.toLowerCase() === "bustype") {
+          conditionType = "BusType";
+        } else if (typeRaw === 4 || conditionType.toLowerCase() === "traveldate") {
+          conditionType = "TravelDate";
+        }
+
+        let conditionOperator = String(opRaw || "Equals");
+        if (opRaw === 1 || conditionOperator.toLowerCase() === "equals") {
+          conditionOperator = "Equals";
+        } else if (opRaw === 2 || conditionOperator.toLowerCase() === "contains") {
+          conditionOperator = "Contains";
+        } else if (opRaw === 3 || conditionOperator.toLowerCase() === "between") {
+          conditionOperator = "Between";
+        }
+
+        return {
+          id: cond?.id ?? cond?.Id,
+          featuredOfferId: cond?.featuredOfferId ?? cond?.FeaturedOfferId,
+          conditionType,
+          conditionOperator,
+          value1: cond?.value1 ?? cond?.Value1 ?? "",
+          value2: cond?.value2 ?? cond?.Value2 ?? "",
+          isActive: cond?.isActive ?? cond?.IsActive ?? true,
+        };
+      })
+    : [];
+
   return {
     id,
     selectedFeaturedOfferId: featuredOfferId,
-    promotionId: offer?.promotionId ?? offer?.PromotionId ?? null,
+    promotionId,
+    promotionCode,
+    promotionTitle,
+    promotionType,
+    discountType,
+    discountValue,
+    maxDiscountAmount,
+    minBookingAmount,
+    previewFinalPrice,
+    conditions,
     offerCode: String(offer?.offerCode || "").trim(),
     title: String(offer?.title || "Travel Offer").trim(),
     subtitle: String(offer?.subtitle || "").trim(),
     description: String(offer?.description || offer?.subtitle || "").trim(),
-    couponCode: String(offer?.couponCode || "").trim(),
+    couponCode: String(offer?.couponCode || "").trim() || promotionCode,
     imageUrl: sanitizeApiUrlValue(offer?.imageUrl),
     bookingType,
     isActive: offer?.isActive !== false,
@@ -100,7 +157,55 @@ export default function OffersPage() {
 
   const handleBookNow = (offer) => {
     setSelectedOffer(offer);
-    navigate("/?tab=buses");
+
+    let source = "";
+    let destination = "";
+    let travelDate = "";
+
+    if (offer.conditions && Array.isArray(offer.conditions)) {
+      const activeConditions = offer.conditions.filter((c) => c.isActive !== false);
+
+      const sourceCond = activeConditions.find((c) => c.conditionType === "SourceCity");
+      if (sourceCond) {
+        source = sourceCond.value1;
+      }
+
+      const destCond = activeConditions.find((c) => c.conditionType === "DestinationCity");
+      if (destCond) {
+        destination = destCond.value1;
+      }
+
+      const dateCond = activeConditions.find((c) => c.conditionType === "TravelDate");
+      if (dateCond) {
+        if (dateCond.value1) {
+          travelDate = dateCond.value1;
+        }
+      }
+    }
+
+    if (!travelDate) {
+      const date = new Date();
+      const timezoneOffset = date.getTimezoneOffset() * 60000;
+      travelDate = new Date(date.getTime() - timezoneOffset).toISOString().slice(0, 10);
+    }
+
+    const busParams = new URLSearchParams();
+    const busPayload = {
+      source,
+      destination,
+      tripType: "oneway",
+      departureDate: travelDate,
+    };
+
+    Object.entries(busPayload).forEach(([key, value]) => {
+      if (typeof value === "string" && value.trim()) {
+        busParams.set(key, value.trim());
+      }
+    });
+
+    navigate(`/search/buses${busParams.toString() ? `?${busParams.toString()}` : ""}`, {
+      state: busPayload,
+    });
   };
 
   return (
@@ -166,8 +271,6 @@ export default function OffersPage() {
           </div>
         )}
       </main>
-      <SiteFooter />
     </div>
   );
 }
-

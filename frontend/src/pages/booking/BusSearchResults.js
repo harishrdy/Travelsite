@@ -2,13 +2,22 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeftRight,
+  Armchair,
+  Bed,
   BusFront,
+  CalendarDays,
   CheckCircle2,
+  ChevronDown,
+  Clock3,
   Filter,
+  Fan,
+  IndianRupee,
   Loader2,
   Moon,
+  RotateCw,
   Search,
   ShieldAlert,
+  Snowflake,
   Sun,
   Sunrise,
   Sunset,
@@ -17,7 +26,6 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { searchBuses } from "../../services/busBookingService";
 import "../../STYLES/BusSearchResults.css";
-import { toDisplayDate } from "../../utils/apiDateFormat";
 
 const USE_DIRECT_API_IN_DEV =
   String(process.env.REACT_APP_USE_DIRECT_API_IN_DEV || "").toLowerCase() ===
@@ -66,18 +74,51 @@ const TIME_WINDOWS = [
 ];
 
 const SORT_OPTIONS = [
-  { key: "departure", label: "Departure" },
-  { key: "duration", label: "Duration" },
-  { key: "arrival", label: "Arrival" },
-  { key: "fare", label: "Fare" },
-  { key: "seats", label: "Seats Available" },
+  { key: "departure", label: "Departure", icon: BusFront },
+  { key: "duration", label: "Duration", icon: Clock3 },
+  { key: "arrival", label: "Arrival", icon: BusFront },
+  { key: "fare", label: "Fare", icon: IndianRupee },
+  { key: "seats", label: "Seats Available", icon: Armchair },
 ];
 
 const BUS_TYPE_FILTERS = [
-  { key: "ac", label: "AC" },
-  { key: "nonac", label: "Non AC" },
-  { key: "seater", label: "Seater" },
-  { key: "sleeper", label: "Sleeper" },
+  { key: "ac", label: "AC", icon: Snowflake },
+  { key: "nonac", label: "Non AC", icon: Fan },
+  { key: "seater", label: "Seater", icon: Armchair },
+  { key: "sleeper", label: "Sleeper", icon: Bed },
+];
+
+const BUS_PROMO_ITEMS = [
+  {
+    id: "route-offers",
+    icon: IndianRupee,
+    title: "Route Offers",
+    text: "Check coupons before payment",
+  },
+  {
+    id: "seat-sync",
+    icon: Armchair,
+    title: "Live Seats",
+    text: "Fresh seat availability",
+  },
+  {
+    id: "trusted-travels",
+    icon: ShieldAlert,
+    title: "Trusted Travels",
+    text: "Compare verified operators",
+  },
+  {
+    id: "quick-ticket",
+    icon: BusFront,
+    title: "Quick Ticket",
+    text: "Print ticket after booking",
+  },
+  {
+    id: "time-picks",
+    icon: Clock3,
+    title: "Smart Timings",
+    text: "Sort buses by departure",
+  },
 ];
 
 const BUS_RESULTS_CACHE_VERSION = 2;
@@ -391,13 +432,13 @@ function ModifyPlaceAutocomplete({
         endpoint.searchParams.set("limit", "20");
 
         const needsNgrokBypass =
-          endpoint.hostname.false ||
-          endpoint.hostname.false;
+          endpoint.hostname.includes("ngrok-free.dev") ||
+          endpoint.hostname.includes("ngrok.io");
 
         const response = await fetch(endpoint.toString(), {
           signal: controller.signal,
           headers: needsNgrokBypass
-            ? { "x-skip-browser-warning": "true" }
+            ? { "ngrok-skip-browser-warning": "true" }
             : undefined,
         });
 
@@ -464,15 +505,18 @@ function ModifyPlaceAutocomplete({
   return (
     <label className="bus-modify-field bus-modify-place" ref={wrapperRef}>
       <span>{label}</span>
-      <input
-        type="text"
-        value={inputValue}
-        onChange={handleInputChange}
-        onFocus={() => setOpen(inputValue.trim().length > 0)}
-        className="bus-modify-place-input"
-        placeholder={placeholder}
-        autoComplete="off"
-      />
+      <div className="bus-modify-control-wrap">
+        <BusFront size={18} />
+        <input
+          type="text"
+          value={inputValue}
+          onChange={handleInputChange}
+          onFocus={() => setOpen(inputValue.trim().length > 0)}
+          className="bus-modify-place-input with-leading-icon"
+          placeholder={placeholder}
+          autoComplete="off"
+        />
+      </div>
 
       {open && (
         <div className="bus-place-dropdown">
@@ -516,9 +560,6 @@ export default function BusSearchResults() {
   const [sourceName, setSourceName] = useState(initialSourceName);
   const [destinationName, setDestinationName] = useState(initialDestinationName);
   const [tripType, setTripType] = useState(initialTripType);
-  const [isModifySearchOpen, setIsModifySearchOpen] = useState(
-    () => !initialSourceName.trim() || !initialDestinationName.trim()
-  );
   const [modifyForm, setModifyForm] = useState({
     source: initialSourceName,
     destination: initialDestinationName,
@@ -584,6 +625,7 @@ export default function BusSearchResults() {
   const [boardingSearchText, setBoardingSearchText] = useState(() => cachedFilters?.boardingSearchText ?? "");
   const [droppingSearchText, setDroppingSearchText] = useState(() => cachedFilters?.droppingSearchText ?? "");
   const [travelSearchText, setTravelSearchText] = useState(() => cachedFilters?.travelSearchText ?? "");
+  const [openFilterPanel, setOpenFilterPanel] = useState("travels");
   const [expandedCard, setExpandedCard] = useState(() => cachedFilters?.expandedCard ?? null);
   const [expandedOperatorGroups, setExpandedOperatorGroups] = useState(() => cachedFilters?.expandedOperatorGroups ?? {});
   const [seatLoadingBusId, setSeatLoadingBusId] = useState(null);
@@ -806,11 +848,8 @@ export default function BusSearchResults() {
     [apiBuses, sourceName, destinationName, selectedDate]
   );
 
-  const maxFare = useMemo(
-    () => (buses.length === 0 ? 0 : Math.max(...buses.map((bus) => bus.fare))),
-    [buses]
-  );
-  const priceFloor = 0;
+  const priceFloor = 500;
+  const maxFare = 3000;
   const isPriceRangeDisabled = maxFare <= priceFloor;
   const priceRangeSpread = Math.max(1, maxFare - priceFloor);
   const priceMinPercent = ((priceMin - priceFloor) / priceRangeSpread) * 100;
@@ -1021,17 +1060,6 @@ export default function BusSearchResults() {
     { id: "seat-sync", label: "Seat Sync", value: "Syncing latest seat availability" },
   ];
 
-
-  const toggleModifySearch = () => {
-    setModifyForm({
-      source: sourceName,
-      destination: destinationName,
-      departureDate: formatDateInput(selectedDate),
-      tripType,
-    });
-    setIsModifySearchOpen((previous) => !previous);
-  };
-
   const handleSwapModifyCities = () => {
     setModifyForm((previous) => ({
       ...previous,
@@ -1058,7 +1086,6 @@ export default function BusSearchResults() {
     setTripType(nextTripType);
     setSelectedDate(parseDateInput(nextDateInput));
     setSearchVersion((previous) => previous + 1);
-    setIsModifySearchOpen(false);
 
     const nextParams = new URLSearchParams(location.search);
     nextParams.set("source", nextSource);
@@ -1250,129 +1277,73 @@ export default function BusSearchResults() {
     <main className="bus-results-page">
       <div className="bus-results-shell">
         <section className="bus-search-summary">
-          <article className="route-part route-source">
-            <span>From</span>
-            <strong>{sourceName}</strong>
-          </article>
+          <div className="bus-search-card">
+            <ModifyPlaceAutocomplete
+              label="From"
+              value={modifyForm.source}
+              onChange={(nextValue) =>
+                setModifyForm((previous) => ({
+                  ...previous,
+                  source: nextValue,
+                }))
+              }
+              tripType="bus"
+              field="from"
+              placeholder="Source"
+            />
 
-          <div className="route-switch-icon" aria-hidden="true">
-            <ArrowLeftRight size={16} />
-          </div>
+            <button
+              type="button"
+              className="bus-modify-swap"
+              onClick={handleSwapModifyCities}
+              aria-label="Swap source and destination"
+            >
+              <ArrowLeftRight size={20} />
+            </button>
 
-          <article className="route-part route-destination">
-            <span>To</span>
-            <strong>{destinationName}</strong>
-          </article>
+            <ModifyPlaceAutocomplete
+              label="To"
+              value={modifyForm.destination}
+              onChange={(nextValue) =>
+                setModifyForm((previous) => ({
+                  ...previous,
+                  destination: nextValue,
+                }))
+              }
+              tripType="bus"
+              field="to"
+              placeholder="Destination"
+            />
 
-          <article className="route-part route-date">
-            <span>Date</span>
-            <strong>{formatLongDate(selectedDate)}</strong>
-          </article>
-
-          <button
-            type="button"
-            className="bus-modify-btn"
-            onClick={toggleModifySearch}
-          >
-            Modify Search
-          </button>
-        </section>
-
-        {isModifySearchOpen && (
-          <section className="bus-modify-search-panel">
-            <div className="bus-modify-grid">
-              <ModifyPlaceAutocomplete
-                label="Source"
-                value={modifyForm.source}
-                onChange={(nextValue) =>
-                  setModifyForm((previous) => ({
-                    ...previous,
-                    source: nextValue,
-                  }))
-                }
-                tripType="bus"
-                field="from"
-                placeholder="Source"
-              />
-
-              <button
-                type="button"
-                className="bus-modify-swap"
-                onClick={handleSwapModifyCities}
-                aria-label="Swap source and destination"
-              >
-                <ArrowLeftRight size={16} />
-              </button>
-
-              <ModifyPlaceAutocomplete
-                label="Destination"
-                value={modifyForm.destination}
-                onChange={(nextValue) =>
-                  setModifyForm((previous) => ({
-                    ...previous,
-                    destination: nextValue,
-                  }))
-                }
-                tripType="bus"
-                field="to"
-                placeholder="Destination"
-              />
-
-             <label className="bus-modify-field" style={{ position: "relative" }}>
-  <span>Departure Date</span>
-  <input
-    type="text"
-    readOnly
-    value={toDisplayDate(modifyForm.departureDate)}
-    placeholder="DD-MM-YYYY"
-    style={{ cursor: "pointer" }}
-    onClick={() => document.getElementById("bus-date-hidden").showPicker?.()}
-  />
-  <input
-    id="bus-date-hidden"
-    type="date"
-    value={modifyForm.departureDate}
-    onChange={(event) =>
-      setModifyForm((previous) => ({
-        ...previous,
-        departureDate: event.target.value,
-      }))
-    }
-    style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
-  />
-</label>
-
-              <label className="bus-modify-field">
-                <span>Trip Type</span>
-                <select
-                  value={modifyForm.tripType}
+            <label className="bus-modify-field bus-modify-date">
+              <span>Date</span>
+              <div className="bus-modify-control-wrap">
+                <CalendarDays size={18} />
+                <input
+                  id="bus-date-hidden"
+                  type="date"
+                  value={modifyForm.departureDate}
                   onChange={(event) =>
                     setModifyForm((previous) => ({
                       ...previous,
-                      tripType: event.target.value,
+                      departureDate: event.target.value,
                     }))
                   }
-                >
-                  <option value="oneway">One Way</option>
-                  <option value="twoway">Two Way</option>
-                </select>
-              </label>
-            </div>
+                  onClick={(event) => {
+                    try {
+                      event.currentTarget.showPicker();
+                    } catch (err) {}
+                  }}
+                  style={{ cursor: "pointer" }}
+                />
+              </div>
+            </label>
 
-            <div className="bus-modify-actions">
-              <button
-                type="button"
-                className="secondary"
-                onClick={() => setIsModifySearchOpen(false)}
-              >
-                Close
-              </button>
-              <button type="button" className="primary" onClick={handleApplyModifySearch}>
-                Apply Search
-              </button>
-            </div>
-          </section>
-        )}
+            <button type="button" className="bus-modify-btn" onClick={handleApplyModifySearch}>
+              Modify Search
+            </button>
+          </div>
+        </section>
 
         {searchError && (
           <div className="bus-feedback error">
@@ -1387,6 +1358,20 @@ export default function BusSearchResults() {
             <span>{actionMessage}</span>
           </div>
         )}
+
+        <section className="bus-promo-scroller" aria-label="Travel booking highlights">
+          {BUS_PROMO_ITEMS.map((item) => (
+            <article className="bus-promo-chip" key={item.id}>
+              <span className="bus-promo-icon" aria-hidden="true">
+                <item.icon size={16} />
+              </span>
+              <div>
+                <strong>{item.title}</strong>
+                <small>{item.text}</small>
+              </div>
+            </article>
+          ))}
+        </section>
 
         {isLoadingBuses ? (
           <section className="bus-loading-screen" aria-live="polite" aria-busy="true">
@@ -1622,12 +1607,14 @@ export default function BusSearchResults() {
                   <span>Filters</span>
                 </div>
                 <button type="button" onClick={resetFilters}>
+                  <RotateCw size={13} />
                   Reset
                 </button>
               </header>
 
               <section className="bus-filter-card">
                 <h3 className="bus-price-title">
+                  <IndianRupee size={17} />
                   <strong>Price</strong> Range
                 </h3>
                 <div
@@ -1671,46 +1658,8 @@ export default function BusSearchResults() {
                     />
                   </div>
                   <div className="bus-range-endpoints">
-                    <span>{formatCurrency(priceFloor)}</span>
-                    <span>{formatCurrency(maxFare)}</span>
-                  </div>
-                  <div className="bus-price-inputs">
-                    <label>
-                      <span>From</span>
-                      <input
-                        type="number"
-                        min={priceFloor}
-                        max={maxFare}
-                        value={priceMin}
-                        disabled={isPriceRangeDisabled}
-                        onChange={(event) =>
-                          setPriceMin(
-                            Math.max(
-                              priceFloor,
-                              Math.min(Number(event.target.value), priceMax)
-                            )
-                          )
-                        }
-                      />
-                    </label>
-                    <label>
-                      <span>To</span>
-                      <input
-                        type="number"
-                        min={priceFloor}
-                        max={maxFare}
-                        value={priceMax}
-                        disabled={isPriceRangeDisabled}
-                        onChange={(event) =>
-                          setPriceMax(
-                            Math.min(
-                              maxFare,
-                              Math.max(Number(event.target.value), priceMin)
-                            )
-                          )
-                        }
-                      />
-                    </label>
+                    <span>{formatCurrency(priceMin)}</span>
+                    <span>{formatCurrency(priceMax)}</span>
                   </div>
                 </div>
               </section>
@@ -1725,7 +1674,8 @@ export default function BusSearchResults() {
                       className={`bus-type-chip ${busTypeFilters[item.key] ? "active" : ""}`}
                       onClick={() => toggleSimpleFilter(setBusTypeFilters, item.key)}
                     >
-                      {item.label}
+                      <item.icon size={22} />
+                      <span>{item.label}</span>
                     </button>
                   ))}
                 </div>
@@ -1764,88 +1714,122 @@ export default function BusSearchResults() {
                   ))}
                 </div>
               </section>
-              <section className="bus-filter-card">
-                <h3>Boarding Points</h3>
-                <div className="point-search">
-                  <Search size={14} />
-                  <input
-                    type="text"
-                    value={boardingSearchText}
-                    onChange={(event) => setBoardingSearchText(event.target.value)}
-                    placeholder="Choose Boarding Point"
-                  />
-                </div>
-                <div className="point-list">
-                  {visibleBoarding.map((point) => (
-                    <label
-                      key={point}
-                      className={`point-row ${boardingFilters[point] ? "active" : ""}`}
-                    >
+
+              <section className={`bus-filter-card bus-collapse-card ${openFilterPanel === "travels" ? "open" : ""}`}>
+                <button
+                  type="button"
+                  className="bus-collapse-head"
+                  onClick={() => setOpenFilterPanel(openFilterPanel === "travels" ? "" : "travels")}
+                >
+                  <span>Travels</span>
+                  <ChevronDown size={16} />
+                </button>
+                {openFilterPanel === "travels" && (
+                  <div className="bus-collapse-body">
+                    <div className="point-search">
                       <input
-                        type="checkbox"
-                        checked={Boolean(boardingFilters[point])}
-                        onChange={() => toggleSimpleFilter(setBoardingFilters, point)}
+                        type="text"
+                        value={travelSearchText}
+                        onChange={(event) => setTravelSearchText(event.target.value)}
+                        placeholder="Search here"
                       />
-                      <span>{point}</span>
-                    </label>
-                  ))}
-                </div>
+                      <Search size={20} />
+                    </div>
+                    <div className="point-list">
+                      {visibleTravels.map((name) => (
+                        <label
+                          key={name}
+                          className={`point-row ${travelFilters[name] ? "active" : ""}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={Boolean(travelFilters[name])}
+                            onChange={() => toggleSimpleFilter(setTravelFilters, name)}
+                          />
+                          <span>{name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </section>
 
-              <section className="bus-filter-card">
-                <h3>Dropping Point</h3>
-                <div className="point-search">
-                  <Search size={14} />
-                  <input
-                    type="text"
-                    value={droppingSearchText}
-                    onChange={(event) => setDroppingSearchText(event.target.value)}
-                    placeholder="Choose Dropping Point"
-                  />
-                </div>
-                <div className="point-list">
-                  {visibleDropping.map((point) => (
-                    <label
-                      key={point}
-                      className={`point-row ${droppingFilters[point] ? "active" : ""}`}
-                    >
+              <section className={`bus-filter-card bus-collapse-card ${openFilterPanel === "boarding" ? "open" : ""}`}>
+                <button
+                  type="button"
+                  className="bus-collapse-head"
+                  onClick={() => setOpenFilterPanel(openFilterPanel === "boarding" ? "" : "boarding")}
+                >
+                  <span>Boarding Point</span>
+                  <ChevronDown size={16} />
+                </button>
+                {openFilterPanel === "boarding" && (
+                  <div className="bus-collapse-body">
+                    <div className="point-search">
                       <input
-                        type="checkbox"
-                        checked={Boolean(droppingFilters[point])}
-                        onChange={() => toggleSimpleFilter(setDroppingFilters, point)}
+                        type="text"
+                        value={boardingSearchText}
+                        onChange={(event) => setBoardingSearchText(event.target.value)}
+                        placeholder="Search here"
                       />
-                      <span>{point}</span>
-                    </label>
-                  ))}
-                </div>
+                      <Search size={20} />
+                    </div>
+                    <div className="point-list">
+                      {visibleBoarding.map((point) => (
+                        <label
+                          key={point}
+                          className={`point-row ${boardingFilters[point] ? "active" : ""}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={Boolean(boardingFilters[point])}
+                            onChange={() => toggleSimpleFilter(setBoardingFilters, point)}
+                          />
+                          <span>{point}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </section>
 
-              <section className="bus-filter-card">
-                <h3>Travels</h3>
-                <div className="point-search">
-                  <Search size={14} />
-                  <input
-                    type="text"
-                    value={travelSearchText}
-                    onChange={(event) => setTravelSearchText(event.target.value)}
-                    placeholder="Choose Travel Name"
-                  />
-                </div>
-                <div className="point-list">
-                  {visibleTravels.map((name) => (
-                    <label
-                      key={name}
-                      className={`point-row ${travelFilters[name] ? "active" : ""}`}
-                    >
+              <section className={`bus-filter-card bus-collapse-card ${openFilterPanel === "dropping" ? "open" : ""}`}>
+                <button
+                  type="button"
+                  className="bus-collapse-head"
+                  onClick={() => setOpenFilterPanel(openFilterPanel === "dropping" ? "" : "dropping")}
+                >
+                  <span>Dropping Point</span>
+                  <ChevronDown size={16} />
+                </button>
+                {openFilterPanel === "dropping" && (
+                  <div className="bus-collapse-body">
+                    <div className="point-search">
                       <input
-                        type="checkbox"
-                        checked={Boolean(travelFilters[name])}
-                        onChange={() => toggleSimpleFilter(setTravelFilters, name)}
+                        type="text"
+                        value={droppingSearchText}
+                        onChange={(event) => setDroppingSearchText(event.target.value)}
+                        placeholder="Search here"
                       />
-                      <span>{name}</span>
-                    </label>
-                  ))}
-                </div>
+                      <Search size={20} />
+                    </div>
+                    <div className="point-list">
+                      {visibleDropping.map((point) => (
+                        <label
+                          key={point}
+                          className={`point-row ${droppingFilters[point] ? "active" : ""}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={Boolean(droppingFilters[point])}
+                            onChange={() => toggleSimpleFilter(setDroppingFilters, point)}
+                          />
+                          <span>{point}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </section>
             </aside>
 
@@ -1864,7 +1848,8 @@ export default function BusSearchResults() {
                         className={sortBy === option.key ? "active" : ""}
                         onClick={() => setSortBy(option.key)}
                       >
-                        {option.label}
+                        <option.icon size={17} />
+                        <span>{option.label}</span>
                       </button>
                     ))}
                   </div>
@@ -1937,6 +1922,3 @@ export default function BusSearchResults() {
     </main>
   );
 }
-
-
-

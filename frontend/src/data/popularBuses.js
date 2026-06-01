@@ -331,4 +331,3 @@ export const POPULAR_RTC_OPERATORS = [
 export function getPopularBusOperatorById(operatorId) {
   return POPULAR_RTC_OPERATORS.find((item) => item.id === operatorId) || null;
 }
-

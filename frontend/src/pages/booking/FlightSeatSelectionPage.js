@@ -674,4 +674,3 @@ export default function FlightSeatSelectionPage() {
     </main>
   );
 }
-

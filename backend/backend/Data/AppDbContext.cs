@@ -54,21 +54,20 @@ namespace PickNBook.Api.Data
         public DbSet<FlightAmendmentRequest> FlightAmendmentRequests => Set<FlightAmendmentRequest>();
         public DbSet<BusPromotion> BusPromotions => Set<BusPromotion>();
 
-        public DbSet<BusPromotionCondition>
-            BusPromotionConditions => Set<BusPromotionCondition>();
+        public DbSet<BusPromotionCondition> BusPromotionConditions => Set<BusPromotionCondition>();
 
-        public DbSet<BusPromotionUsage>
-            BusPromotionUsages => Set<BusPromotionUsage>();
+        public DbSet<BusPromotionUsage> BusPromotionUsages => Set<BusPromotionUsage>();
 
-        public DbSet<BusDiscountCondition>
-            BusDiscountConditions => Set<BusDiscountCondition>();
+        public DbSet<FeaturedOfferCondition> FeaturedOfferConditions => Set<FeaturedOfferCondition>();
+
+        public DbSet<BusDiscountCondition> BusDiscountConditions => Set<BusDiscountCondition>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<BusPromotion>()
-    .ToTable("buspromotions");
+                .ToTable("buspromotions");
 
             modelBuilder.Entity<BusPromotionCondition>()
                 .ToTable("buspromotionconditions");
@@ -78,6 +77,7 @@ namespace PickNBook.Api.Data
 
             modelBuilder.Entity<BusDiscountCondition>()
                 .ToTable("busdiscountconditions");
+
             // =============================
             // TABLE NAME MAPPING
             // =============================
@@ -88,7 +88,6 @@ namespace PickNBook.Api.Data
             modelBuilder.Entity<CouponRedemption>().ToTable("couponredemptions");
             modelBuilder.Entity<OfferSubscriber>().ToTable("offersubscribers");
             modelBuilder.Entity<BlogPost>().ToTable("blogposts");
-
 
             // =============================
             // User Configuration
@@ -131,7 +130,6 @@ namespace PickNBook.Api.Data
             // =============================
             // CheapestFlight Configuration
             // =============================
-
             modelBuilder.Entity<CheapestFlight>()
                 .HasIndex(x => new { x.Origin, x.Destination, x.RecordedAt });
 
@@ -139,49 +137,13 @@ namespace PickNBook.Api.Data
                 .Property(x => x.Price)
                 .HasPrecision(18, 2);
 
-            // Ensure PostgreSQL stores UTC timestamps correctly
-            modelBuilder.Entity<CheapestFlight>()
-                .Property(x => x.DepartureDate);
-            //.HasColumnType("timestamp with time zone");
-
-            modelBuilder.Entity<CheapestFlight>()
-                .Property(x => x.ArrivalDate);
-            //.HasColumnType("timestamp with time zone");
-
-            modelBuilder.Entity<CheapestFlight>()
-                .Property(x => x.RecordedAt);
-                //.HasColumnType("timestamp with time zone");
+            modelBuilder.Entity<CheapestFlight>().Property(x => x.DepartureDate);
+            modelBuilder.Entity<CheapestFlight>().Property(x => x.ArrivalDate);
+            modelBuilder.Entity<CheapestFlight>().Property(x => x.RecordedAt);
 
             // =============================
             // FeaturedOffer Configuration
             // =============================
-            modelBuilder.Entity<FeaturedOffer>()
-                .HasIndex(x => x.OfferCode)
-                .IsUnique();
-
-            modelBuilder.Entity<FeaturedOffer>()
-                .Property(x => x.BasePrice)
-                .HasPrecision(18, 2);
-
-            modelBuilder.Entity<FeaturedOffer>()
-                .Property(x => x.DiscountValue)
-                .HasPrecision(18, 2);
-
-            modelBuilder.Entity<FeaturedOffer>()
-                .Property(x => x.CouponExpiresAtUtc);
-            //.HasColumnType("timestamp with time zone");
-
-            modelBuilder.Entity<FeaturedOffer>()
-                .Property(x => x.CreatedAtUtc);
-            //.HasColumnType("timestamp with time zone");
-
-            modelBuilder.Entity<FeaturedOffer>()
-                .Property(x => x.UpdatedAtUtc);
-                //.HasColumnType("timestamp with time zone");
-
-            modelBuilder.Entity<FeaturedOffer>()
-                .HasIndex(x => new { x.IsActive, x.CouponExpiresAtUtc });
-
             modelBuilder.Entity<FeaturedOffer>()
                 .HasIndex(x => x.PromotionId);
 
@@ -189,7 +151,48 @@ namespace PickNBook.Api.Data
                 .HasOne(x => x.Promotion)
                 .WithMany()
                 .HasForeignKey(x => x.PromotionId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // =============================
+            // FeaturedOfferCondition Configuration
+            // =============================
+            modelBuilder.Entity<FeaturedOfferCondition>(entity =>
+            {
+                entity.ToTable("featuredofferconditions");
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.ConditionType).HasMaxLength(50).IsRequired();
+                entity.Property(x => x.Value1).HasMaxLength(200).IsRequired();
+                entity.Property(x => x.Value2).HasMaxLength(200);
+                entity.HasOne(x => x.FeaturedOffer)
+                    .WithMany(x => x.Conditions)
+                    .HasForeignKey(x => x.FeaturedOfferId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // =============================
+            // BusPromotionUsage Configuration
+            // =============================
+            modelBuilder.Entity<BusPromotionUsage>(entity =>
+            {
+                entity.ToTable("buspromotionusages");
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.UserId).HasMaxLength(50).IsRequired();
+                entity.Property(x => x.PromotionCode).HasMaxLength(40).IsRequired();
+                entity.Property(x => x.PromotionType).HasMaxLength(20).IsRequired();
+                entity.Property(x => x.BookingStatus).HasMaxLength(20).IsRequired();
+                entity.Property(x => x.DiscountAmountInr).HasPrecision(10, 2);
+                entity.Property(x => x.BookingTotalInr).HasPrecision(10, 2);
+
+                entity.HasOne(x => x.Promotion)
+                    .WithMany()
+                    .HasForeignKey(x => x.BusPromotionId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(x => x.BusReservation)
+                    .WithMany()
+                    .HasForeignKey(x => x.BusReservationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             // =============================
             // CouponRedemption Configuration
@@ -206,16 +209,14 @@ namespace PickNBook.Api.Data
                 .Property(x => x.FinalPrice)
                 .HasPrecision(18, 2);
 
-            modelBuilder.Entity<CouponRedemption>()
-                .Property(x => x.RedeemedAtUtc);
-                //.HasColumnType("timestamp with time zone");
+            modelBuilder.Entity<CouponRedemption>().Property(x => x.RedeemedAtUtc);
 
             modelBuilder.Entity<CouponRedemption>()
                 .HasIndex(x => new { x.OfferCode, x.CouponCode, x.RedeemedAtUtc });
 
             modelBuilder.Entity<CouponRedemption>()
                 .HasOne(x => x.FeaturedOffer)
-                .WithMany(x => x.CouponRedemptions)
+                .WithMany()
                 .HasForeignKey(x => x.FeaturedOfferId)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -226,13 +227,8 @@ namespace PickNBook.Api.Data
                 .HasIndex(x => x.Email)
                 .IsUnique();
 
-            modelBuilder.Entity<OfferSubscriber>()
-                .Property(x => x.SubscribedAtUtc);
-            //.HasColumnType("timestamp with time zone");
-
-            modelBuilder.Entity<OfferSubscriber>()
-                .Property(x => x.UpdatedAtUtc);
-                //.HasColumnType("timestamp with time zone");
+            modelBuilder.Entity<OfferSubscriber>().Property(x => x.SubscribedAtUtc);
+            modelBuilder.Entity<OfferSubscriber>().Property(x => x.UpdatedAtUtc);
 
             // =============================
             // BlogPost Configuration
@@ -291,17 +287,9 @@ namespace PickNBook.Api.Data
                 .Property(x => x.AddedByName)
                 .HasMaxLength(120);
 
-            modelBuilder.Entity<BlogPost>()
-                .Property(x => x.CreatedAtUtc);
-            //.HasColumnType("timestamp with time zone");
-
-            modelBuilder.Entity<BlogPost>()
-                .Property(x => x.UpdatedAtUtc);
-            //.HasColumnType("timestamp with time zone");
-
-            modelBuilder.Entity<BlogPost>()
-                .Property(x => x.PublishedAtUtc);
-                //.HasColumnType("timestamp with time zone");
+            modelBuilder.Entity<BlogPost>().Property(x => x.CreatedAtUtc);
+            modelBuilder.Entity<BlogPost>().Property(x => x.UpdatedAtUtc);
+            modelBuilder.Entity<BlogPost>().Property(x => x.PublishedAtUtc);
 
             modelBuilder.Entity<FlightBooking>(entity =>
             {
@@ -328,8 +316,7 @@ namespace PickNBook.Api.Data
                 entity.Property(x => x.BoardingPoint).HasMaxLength(120).IsRequired();
                 entity.Property(x => x.DroppingPoint).HasMaxLength(120).IsRequired();
                 entity.Property(x => x.PriceInr).HasPrecision(10, 2);
-                entity.HasIndex(x => new { x.BusNumber, x.FromCity, x.ToCity, x.DepartureTime })
-       .IsUnique();
+                entity.HasIndex(x => new { x.BusNumber, x.FromCity, x.ToCity, x.DepartureTime }).IsUnique();
             });
 
             modelBuilder.Entity<FlightClassInventory>(entity =>
@@ -408,8 +395,7 @@ namespace PickNBook.Api.Data
                 entity.Property(x => x.Gender).HasMaxLength(20).IsRequired();
                 entity.Property(x => x.SeatNumber).HasMaxLength(10);
                 entity.HasIndex(x => x.BusReservationId);
-                entity.HasIndex(x => new { x.BusReservationId, x.SeatNumber })
-      .IsUnique();
+                entity.HasIndex(x => new { x.BusReservationId, x.SeatNumber }).IsUnique();
                 entity.HasOne(x => x.BusReservation)
                     .WithMany()
                     .HasForeignKey(x => x.BusReservationId)
@@ -502,12 +488,8 @@ namespace PickNBook.Api.Data
             modelBuilder.Entity<BusCoupon>(entity =>
             {
                 entity.ToTable("bus_coupons");
-                entity.Property(x => x.MinBookingAmount)
-                              .HasPrecision(10, 2)
-                              .HasDefaultValue(0);
-                entity.Property(x => x.MaxUsagePerUser)
-                              .IsRequired()
-                              .HasDefaultValue(1);
+                entity.Property(x => x.MinBookingAmount).HasPrecision(10, 2).HasDefaultValue(0);
+                entity.Property(x => x.MaxUsagePerUser).IsRequired().HasDefaultValue(1);
                 entity.HasKey(x => x.Id);
                 entity.Property(x => x.Value).HasPrecision(10, 2);
                 entity.Property(x => x.CouponType).HasMaxLength(20).IsRequired();
@@ -521,9 +503,7 @@ namespace PickNBook.Api.Data
             {
                 entity.ToTable("bus_coupon_usages");
                 entity.HasKey(x => x.Id);
-                entity.Property(x => x.UserId)
-                                .HasMaxLength(50)
-                                .IsRequired();
+                entity.Property(x => x.UserId).HasMaxLength(50).IsRequired();
                 entity.HasIndex(x => new { x.CouponCode, x.UserId });
                 entity.Property(x => x.CouponCode).HasMaxLength(40).IsRequired();
                 entity.Property(x => x.CouponType).HasMaxLength(20).IsRequired();
@@ -556,56 +536,28 @@ namespace PickNBook.Api.Data
                 entity.HasIndex(x => x.SearchedAtUtc);
                 entity.HasIndex(x => new { x.FromCity, x.ToCity });
             });
+
             modelBuilder.Entity<BusMarkupSetting>(entity =>
             {
                 entity.ToTable("bus_markup_settings");
-
                 entity.HasKey(x => x.Id);
-
-                entity.Property(x => x.SeatType)
-                    .HasMaxLength(50)
-                    .IsRequired();
-
-                entity.Property(x => x.Value)
-                    .HasPrecision(10, 2);
-
-                entity.Property(x => x.MarkupType)
-                    .HasMaxLength(20)
-                    .IsRequired();
-
-                entity.Property(x => x.Status)
-                    .HasMaxLength(20)
-                    .IsRequired();
-
-                entity.Property(x => x.UpdatedBy)
-                    .HasMaxLength(120);
-
-                entity.Property(x => x.Remark)
-                    .HasMaxLength(300);
+                entity.Property(x => x.SeatType).HasMaxLength(50).IsRequired();
+                entity.Property(x => x.Value).HasPrecision(10, 2);
+                entity.Property(x => x.MarkupType).HasMaxLength(20).IsRequired();
+                entity.Property(x => x.Status).HasMaxLength(20).IsRequired();
+                entity.Property(x => x.UpdatedBy).HasMaxLength(120);
+                entity.Property(x => x.Remark).HasMaxLength(300);
             });
 
             modelBuilder.Entity<BusGstSetting>(entity =>
             {
                 entity.ToTable("bus_gst_settings");
-
                 entity.HasKey(x => x.Id);
-
-                entity.Property(x => x.GstCategory)
-                    .HasMaxLength(50)
-                    .IsRequired();
-
-                entity.Property(x => x.GstPercent)
-                    .HasPrecision(10, 2);
-
-                entity.Property(x => x.Status)
-                    .HasMaxLength(20)
-                    .IsRequired();
-
-                entity.Property(x => x.UpdatedBy)
-                    .HasMaxLength(120);
-
-                entity.Property(x => x.Remark)
-                    .HasMaxLength(300);
+                entity.Property(x => x.GstCategory).HasMaxLength(50).IsRequired();
+                entity.Property(x => x.GstPercent).HasPrecision(10, 2);
+                entity.Property(x => x.Status).HasMaxLength(20).IsRequired();
+                entity.Property(x => x.UpdatedBy).HasMaxLength(120);
+                entity.Property(x => x.Remark).HasMaxLength(300);
             });
 
             modelBuilder.Entity<FlightDiscount>(entity =>

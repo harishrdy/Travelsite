@@ -1,15 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaPlaneDeparture, FaEye, FaEyeSlash,FaBus } from "react-icons/fa";
 import "../../STYLES/Login.css";
 import "../../STYLES/Verify.css";
+import "../../STYLES/AuthBackground.css";
 import { readApiMessage, requestAuth } from "../../services/authService";
 import {
   validateLowercaseEmail,
   validateStrongPassword,
 } from "../../utils/authValidation";
-// import flightCarImage from "../../assets/images/flightcar.png";
-import flightCarImage from "../../assets/images/loginimage.png";
+
 
 const VerifyOtp = () => {
   const navigate = useNavigate();
@@ -28,9 +28,6 @@ const VerifyOtp = () => {
   const [otpVerified, setOtpVerified] = useState(false);
   const [apiMessage, setApiMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
-  const authPageStyle = {
-    backgroundImage: `url(${flightCarImage})`
-  };
   const resetEmail = String(
     location.state?.email ||
       (typeof window !== "undefined"
@@ -41,6 +38,11 @@ const VerifyOtp = () => {
   const hasOtp = Boolean(form.otp.trim());
   const normalizeOtp = (value) => String(value || "").replace(/\D/g, "").slice(0, 6);
   const resetEmailError = resetEmail ? validateLowercaseEmail(resetEmail) : "";
+
+  useEffect(() => {
+    document.documentElement.classList.add('auth-active');
+    return () => document.documentElement.classList.remove('auth-active');
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -230,11 +232,15 @@ const VerifyOtp = () => {
   };
 
   return (
-    <div
-      className="travel-auth-page travel-auth-verify"
-      style={authPageStyle}
-    >
-      <div className="travel-auth-card">
+    <div className="auth-container">
+      <div className="auth-animated-bg">
+        <div className="auth-animated-bg-image" />
+        <div className="auth-animated-bg-overlay" />
+      </div>
+      <div
+        className="travel-auth-page travel-auth-verify"
+      >
+        <div className="travel-auth-card">
         <aside className="travel-auth-brand">
           <p className="travel-auth-kicker">Welcome to</p>
           <div className="travel-auth-logo">
@@ -379,6 +385,7 @@ const VerifyOtp = () => {
             </div>
           </form>
         </section>
+      </div>
       </div>
     </div>
   );

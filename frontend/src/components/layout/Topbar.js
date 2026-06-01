@@ -13,6 +13,7 @@ import {
   User,
 } from "lucide-react";
 import '../../STYLES/Topbar.css';
+import { clearAuthSession } from "../../services/authSession";
 
 function decodeJwtPayload(token) {
   if (!token || typeof token !== "string") {
@@ -133,11 +134,35 @@ export default function Topbar() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("role");
-    localStorage.removeItem("challengeId");
+    [
+      "user",
+      "token",
+      "authToken",
+      "accessToken",
+      "userId",
+      "UserId",
+      "x-user-id",
+      "role",
+      "challengeId",
+      "my_traveler_data",
+    ].forEach((key) => localStorage.removeItem(key));
+    [
+      "user",
+      "token",
+      "authToken",
+      "accessToken",
+      "userId",
+      "UserId",
+      "x-user-id",
+      "role",
+      "challengeId",
+      "bus_booking_flow_state_v1",
+      "flight_booking_flow_state_v1",
+      "latest_ticket_confirmation_v1",
+      "ticket_confirmation_history_v1",
+      "selectedOffer",
+    ].forEach((key) => sessionStorage.removeItem(key));
+    clearAuthSession();
     setAuthProfile({ isLoggedIn: false, displayName: "User", email: "" });
     setOpen(false);
     navigate("/login");
@@ -253,4 +278,3 @@ export default function Topbar() {
     </header>
   );
 }
-

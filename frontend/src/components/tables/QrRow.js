@@ -251,4 +251,3 @@ const QRRow = ({
 };
 
 export default QRRow;
-

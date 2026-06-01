@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using PickNBook.Api.Data;
 using PickNBook.Api.Models;
@@ -10,12 +12,13 @@ namespace PickNBook.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class FlightBookingsController(
     AppDbContext dbContext,
     IBookingNotificationService bookingNotificationService,
     ILogger<FlightBookingsController> logger) : BaseApiController
     {
-        private const string UserIdHeaderName = "X-User-Id";
+        //private const string UserIdHeaderName = "X-User-Id";
         private static readonly TimeSpan IndiaOffset = TimeSpan.FromHours(5.5);
         private static readonly string[] AllowedPassengerTypes = ["Adult", "Child", "Infant"];
         private static readonly string[] AllowedPassengerGenders = ["Male", "Female", "Other"];
@@ -1293,37 +1296,29 @@ namespace PickNBook.Api.Controllers
             }
         }
 
-        private bool TryGetCurrentUserId(out string? userId, out string? error)
+        private bool TryGetCurrentUserId(out string? userId, out IActionResult? errorResult)
         {
-            userId = null;
-            error = null;
+            userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                  ?? User.FindFirst("sub")?.Value;
 
-            if (!Request.Headers.TryGetValue(UserIdHeaderName, out var values))
+            if (string.IsNullOrWhiteSpace(userId))
             {
-                error = $"{UserIdHeaderName} header is required.";
+                errorResult = Unauthorized(new
+                {
+                    message = "User is not authenticated."
+                });
+
                 return false;
             }
 
-            var value = values.FirstOrDefault();
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                error = $"{UserIdHeaderName} header cannot be empty.";
-                return false;
-            }
-
-            userId = value.Trim();
+            errorResult = null;
             return true;
         }
 
         private string? GetOptionalUserId()
         {
-            if (!Request.Headers.TryGetValue(UserIdHeaderName, out var values))
-            {
-                return null;
-            }
-
-            var value = values.FirstOrDefault();
-            return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                   ?? User.FindFirst("sub")?.Value;
         }
     }
 }

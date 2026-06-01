@@ -106,4 +106,3 @@ export default function AdminAddOfferCategoryPage({ onBack }) {
     </section>
   );
 }
-

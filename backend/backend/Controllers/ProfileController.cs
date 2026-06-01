@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using PickNBook.Api.Data;
@@ -132,7 +134,11 @@ public class ProfileController : BaseApiController
 
     private bool TryGetCurrentUserId(out int userId)
     {
-        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        return int.TryParse(userIdClaim, out userId);
+        userId = 0;
+
+        var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                       ?? User.FindFirst("sub")?.Value;
+
+        return int.TryParse(userIdValue, out userId);
     }
 }

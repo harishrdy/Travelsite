@@ -102,4 +102,3 @@ const AllPages = () => {
 };
 
 export default AllPages;
-

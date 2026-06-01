@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using PickNBook.Api.Data;
 using PickNBook.Api.Models;
@@ -9,7 +11,7 @@ using System.Globalization;
 
 namespace PickNBook.Api.Controllers
 {
-
+    [Authorize]
     public class TravelersController(AppDbContext dbContext) : BaseApiController
     {
         private const string UserIdHeaderName = "X-User-Id";
@@ -250,7 +252,7 @@ namespace PickNBook.Api.Controllers
             normalizedType = ResolveAllowedValue(request.Type, AllowedTypes);
             normalizedTitle = ResolveAllowedValue(request.Title, AllowedTitles);
             normalizedGender = ResolveAllowedValue(request.Gender, AllowedGenders);
-           
+
 
 
             if (normalizedType is null)
@@ -324,7 +326,7 @@ namespace PickNBook.Api.Controllers
             return null;
         }
 
-        
+
 
         private static string? ResolveAllowedValue(string? value, string[] allowed)
         {
@@ -339,23 +341,16 @@ namespace PickNBook.Api.Controllers
 
         private bool TryGetCurrentUserId(out string? userId, out string? error)
         {
-            userId = null;
+            userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                  ?? User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                error = "User is not authenticated.";
+                return false;
+            }
+
             error = null;
-
-            if (!Request.Headers.TryGetValue(UserIdHeaderName, out var values))
-            {
-                error = $"{UserIdHeaderName} header is required.";
-                return false;
-            }
-
-            var value = values.FirstOrDefault();
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                error = $"{UserIdHeaderName} header cannot be empty.";
-                return false;
-            }
-
-            userId = value.Trim();
             return true;
         }
     }

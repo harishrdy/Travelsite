@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11801.241 oobstable
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PickNBook.Api", "PickNBook.Api.csproj", "{B0236D66-4DE0-92BC-EB9B-CE0BADFAD4DF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B0236D66-4DE0-92BC-EB9B-CE0BADFAD4DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0236D66-4DE0-92BC-EB9B-CE0BADFAD4DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0236D66-4DE0-92BC-EB9B-CE0BADFAD4DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0236D66-4DE0-92BC-EB9B-CE0BADFAD4DF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8067945B-E14C-4E87-8C1A-B148B831DFF9}
+	EndGlobalSection
+EndGlobal

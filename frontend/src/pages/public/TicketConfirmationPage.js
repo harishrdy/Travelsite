@@ -517,4 +517,3 @@ export default function TicketConfirmationPage() {
     </main>
   );
 }
-

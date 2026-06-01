@@ -719,6 +719,9 @@ export default function BusSeatSelectionPage() {
       couponCode: null,
       couponDiscount: 0,
       appliedCoupon: null,
+      selectedOffer: null,
+      selectedFeaturedOfferId: null,
+      promotionId: null,
       pricingPreview: null,
     });
   }, []);
@@ -1334,8 +1337,8 @@ export default function BusSeatSelectionPage() {
 
   return (
     <main className="bus-flow-page">
-      <div className="bus-flow-shell">
-        <section className="bus-flow-summary-card">
+      <div className="bus-flow-shell" style={{ marginBottom: '40px' }}>
+        <section className="bus-flow-summary-card" style={{ marginBottom: '40px' }}>
           <div className="bus-flow-overview-banner">
             <img
               src={busOverview.background}
@@ -1665,4 +1668,3 @@ export default function BusSeatSelectionPage() {
     </main>
   );
 }
-

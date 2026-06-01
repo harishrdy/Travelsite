@@ -1994,55 +1994,75 @@ select.field-control option {
   background:
     radial-gradient(circle at 95% 18%, rgba(53, 123, 214, 0.12), transparent 35%),
     radial-gradient(circle at 3% 96%, rgba(28, 86, 161, 0.13), transparent 33%),
-    #ffffff;
+  #ffffff;
   box-shadow: var(--shadow-md);
-  padding: 24px;
+  padding: 20px 26px;
   display: grid;
   grid-template-columns: 1fr 1.25fr;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
 }
-
+ 
 .signup-copy h2 {
   margin: 0;
-  font-size: clamp(24.3px, 2.7vw, 36px);
-  line-height: 1.08;
+  font-size: clamp(20px, 2.2vw, 28px);
+  line-height: 1.05;
   color: #1d395f;
   letter-spacing: -0.02em;
   text-transform: uppercase;
 }
-
+ 
 .signup-copy p {
-  margin: 10px 0 0;
+  margin: 8px 0 0;
   color: #556f92;
-  font-size: 13.5px;
+  font-size: 12px;
 }
-
+ 
 .signup-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
-  gap: 10px;
+  gap: 12px;
+  align-items: end;
 }
-
+ 
+.signup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+ 
+.signup-field span {
+  color: #0b1730;
+  font-size: 11px;
+  font-weight: 800;
+}
+ 
 .signup-form input {
-  min-height: 45px;
+  min-height: 40px;
   border: 1px solid #dbe7f7;
-  border-radius: 10px;
+  border-radius: 11px;
   padding: 0 14px;
-  font-size: 12.6px;
+  font-size: 12px;
   color: #213d61;
 }
-
+ 
 .signup-form button {
-  min-height: 45px;
+  min-height: 40px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 11px;
   padding: 0 18px;
   background: linear-gradient(135deg, #367edc, #2165bd);
   color: #ffffff;
-  font-size: 12.6px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+ 
+.signup-form button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(54, 126, 220, 0.22);
+  filter: brightness(1.02);
 }
 
 /* ─── Brands ──────────────────────────────────────────────────────────────── */
@@ -5173,15 +5193,28 @@ select.field-control option {
 }
 
 /* Final homepage section rhythm */
+.homepage {
+  --home-section-gap: 6px;
+}
+
 .homepage > section.section-shell {
-  padding-top: 2px !important;
-  padding-bottom: 2px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
 
+.homepage > .hero-section + section.section-shell,
 .homepage > section.section-shell + section.section-shell {
-  margin-top: 2px !important;
+  margin-top: var(--home-section-gap) !important;
+}
+
+.homepage > .india-booking-section {
+  padding-bottom: 0 !important;
+}
+
+.homepage + .travel-footer {
+  margin-top: 8px !important;
 }
 
 .homepage .offers-section,
@@ -5198,8 +5231,8 @@ select.field-control option {
 .homepage .booking-guide-section,
 .homepage .insights-section,
 .homepage .india-booking-section {
-  padding-top: 2px !important;
-  padding-bottom: 2px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .homepage .marquee-slide {

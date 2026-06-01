@@ -87,4 +87,3 @@ export const getNextNumericId = (items, fallback = 1) => {
 
   return max + 1;
 };
-

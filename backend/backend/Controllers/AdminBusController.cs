@@ -15,16 +15,16 @@ namespace PickNBook.Api.Controllers
         private static readonly TimeSpan IndiaOffset = TimeSpan.FromHours(5.5);
         private static readonly string[] AllowedDiscountTypes = ["Percentage", "Fixed"];
         private static readonly string[] AllowedMarkupTypes = ["Percentage", "Fixed"];
-        private static readonly string[] AllowedGstCategories = ["AC", "Non-AC","VOLVO"];
+        private static readonly string[] AllowedGstCategories = ["AC", "Non-AC", "VOLVO"];
 
-      
+
 
         [HttpGet("bookings")]
         public async Task<IActionResult> GetBookingList(
             [FromQuery] string? status,
             [FromQuery] string? pnr,
             [FromQuery] DateOnly? journeyDate,
-            [FromQuery] int limit = 200) 
+            [FromQuery] int limit = 200)
         {
             if (limit <= 0)
             {
@@ -132,11 +132,11 @@ namespace PickNBook.Api.Controllers
                 x.UpdatedBy,
                 x.Remark,
                 x.Status,
-               
+
                 x.Priority,
                 x.IsExclusive,
                 x.MinBookingAmount,
-               
+
                 x.StartDateUtc,
                 x.EndDateUtc
             });
@@ -554,7 +554,7 @@ namespace PickNBook.Api.Controllers
             {
                 return BadRequest($"Coupon code '{normalizedCode}' already exists.");
             }
-           
+
 
             // Step 5: Update fields
             coupon.Value = request.Value;
@@ -611,10 +611,10 @@ namespace PickNBook.Api.Controllers
             {
                 linkedPromotion.IsActive = false;
             }
+            var linkedPromotionId = linkedPromotion?.Id ?? 0;
             var linkedOffers = await dbContext.FeaturedOffers
-    .Where(x =>
-        x.CouponId == coupon.Id)
-    .ToListAsync();
+                .Where(x => x.PromotionId == linkedPromotionId)
+                .ToListAsync();
 
             foreach (var offer in linkedOffers)
             {
@@ -861,7 +861,7 @@ namespace PickNBook.Api.Controllers
                 return "MinBookingAmount must be >= 0.";
             }
 
-            
+
 
             return null;
         }
@@ -960,7 +960,7 @@ namespace PickNBook.Api.Controllers
             promo.SourceId =
     coupon.Id;
         }
-        private async Task SyncPromotionFromDiscountAsync( BusDiscount discount)
+        private async Task SyncPromotionFromDiscountAsync(BusDiscount discount)
         {
             var promo =
                 await dbContext.BusPromotions

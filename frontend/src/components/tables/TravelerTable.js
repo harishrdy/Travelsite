@@ -169,4 +169,3 @@ const TravelerTable = ({ data, onUpdate, onDelete }) => {
 };
 
 export default TravelerTable;
-

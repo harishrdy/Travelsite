@@ -235,6 +235,7 @@ function getPromotionDiscountAmount(pricingPreview, fallbackDiscount = 0) {
 
   return Math.max(
     Number(fallbackDiscount) || 0,
+    Number(pricingPreview?.couponAmount) || 0,
     Number(pricingPreview?.couponDiscountAmount) || 0,
     Number(pricingPreview?.manualDiscountAmount) || 0,
     nonAutoDiscount
@@ -347,7 +348,7 @@ export default function BusPassengerDetailsPage() {
     () => ({
       baseFare: Number(pricingPreview.subtotalBeforeCoupon) || 0,
       subtotalBeforeCoupon: Number(pricingPreview.subtotalBeforeCoupon) || 0,
-      couponAmount: Number(pricingPreview.couponDiscountAmount) || 0,
+      couponAmount: getPromotionDiscountAmount(pricingPreview, 0),
       taxableFare: Number(pricingPreview.taxableFare) || 0,
       gstPercent: Number(pricingPreview.gstPercent) || 0,
       gstAmount: Number(pricingPreview.gstAmount) || 0,
@@ -475,6 +476,13 @@ export default function BusPassengerDetailsPage() {
     if (isFeatured) return null;
     return flowState.appliedCoupon || (flowState.selectedOffer?.couponCode ? { couponCode: flowState.selectedOffer.couponCode } : null);
   });
+
+  useEffect(() => {
+    if (validatedContextOffer) {
+      clearSelectedOffer();
+    }
+  }, [validatedContextOffer, clearSelectedOffer]);
+
   const [couponMessage, setCouponMessage] = useState("");
   const [couponMessageType, setCouponMessageType] = useState("");
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
@@ -588,10 +596,7 @@ export default function BusPassengerDetailsPage() {
         setBasePricingPreview(preview);
       }
 
-      const backendCouponDiscount =
-        Number(preview.couponDiscountAmount) ||
-        Number(preview.manualDiscountAmount) ||
-        0;
+      const backendCouponDiscount = getPromotionDiscountAmount(preview, 0);
       const activeOffer =
         featuredOfferIdParam
           ? selectedFeaturedOffer ||
@@ -866,6 +871,7 @@ export default function BusPassengerDetailsPage() {
   };
 
   const handleRemoveOffer = async () => {
+    clearSelectedOffer();
     setSelectedFeaturedOffer(null);
     setManualCouponCode("");
     setCouponDiscount(0);
@@ -882,6 +888,7 @@ export default function BusPassengerDetailsPage() {
   };
 
   const handleCouponCodeChange = (event) => {
+    clearSelectedOffer();
     setSelectedFeaturedOffer(null);
     setManualCouponCode(event.target.value);
     setCouponDiscount(0);
@@ -904,6 +911,7 @@ export default function BusPassengerDetailsPage() {
     }
 
     setManualCouponCode(normalized);
+    clearSelectedOffer();
     setSelectedFeaturedOffer(null);
     setIsApplyingCoupon(true);
     setCouponMessage("");
@@ -915,10 +923,7 @@ export default function BusPassengerDetailsPage() {
         { selectedFeaturedOfferId: null, couponCode: normalized }
       );
 
-      const effectiveDiscount =
-        Number(preview.couponDiscountAmount) > 0
-          ? Number(preview.couponDiscountAmount)
-          : Number(preview.manualDiscountAmount) || 0;
+      const effectiveDiscount = getPromotionDiscountAmount(preview, 0);
 
       if (effectiveDiscount <= 0) {
         setAppliedCoupon(null);
@@ -954,6 +959,7 @@ export default function BusPassengerDetailsPage() {
 
       if (couponCodeValue) {
         // This is a manual coupon applied via chip
+        clearSelectedOffer();
         setSelectedFeaturedOffer(null);
         setManualCouponCode(couponCodeValue);
 
@@ -961,10 +967,7 @@ export default function BusPassengerDetailsPage() {
           { selectedFeaturedOfferId: null, couponCode: couponCodeValue }
         );
 
-        const effectiveDiscount =
-          Number(preview.couponDiscountAmount) > 0
-            ? Number(preview.couponDiscountAmount)
-            : Number(preview.manualDiscountAmount) || 0;
+        const effectiveDiscount = getPromotionDiscountAmount(preview, 0);
 
         if (effectiveDiscount <= 0) {
           setManualCouponCode("");
@@ -998,6 +1001,7 @@ export default function BusPassengerDetailsPage() {
   const handleApplyCoupon = async () => applyCouponCode(manualCouponCode);
 
   const handleRemoveCoupon = async () => {
+    clearSelectedOffer();
     setSelectedFeaturedOffer(null);
     setManualCouponCode("");
     setCouponDiscount(0);
@@ -1846,4 +1850,3 @@ export default function BusPassengerDetailsPage() {
     </main>
   );
 }
-

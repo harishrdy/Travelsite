@@ -2,8 +2,8 @@
   position: sticky;
   top: 0;
   z-index: 1100;
-  min-height: 70px;
-  padding: 8px 20px;
+  min-height: 56px;
+  padding: 4px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -12,6 +12,16 @@
   box-shadow: 0 10px 34px rgba(125, 59, 31, 0.08);
   backdrop-filter: blur(10px);
   background: rgba(255, 255, 255, 0.96);
+}
+
+::selection {
+  background: var(--theme-primary, #f05a28);
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background: var(--theme-primary, #f05a28);
+  color: #ffffff;
 }
 
 .brand {

@@ -461,4 +461,3 @@ export default function AdminAddOfferPage({ onBack }) {
     </section>
   );
 }
-
