@@ -7,7 +7,11 @@ import {
   Wallet,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { bookBus } from "../../services/busBookingService";
+import {
+  bookBus,
+  calculateBusPayableAmount,
+  getBusPromotionDiscountAmount,
+} from "../../services/busBookingService";
 import { sendBookingNotifications } from "../../services/bookingNotificationsService";
 import "../../STYLES/BusBookingFlow.css";
 import { saveBookingPassengersToTravelers } from "../../utils/travelerStorage";
@@ -171,6 +175,15 @@ function buildBusTicketPayload(
     ? flowState.passengers
     : [];
   const fareSummary = flowState.fareSummary || {};
+  const hasAppliedFareDiscount = Boolean(
+    flowState.couponCode ||
+      flowState.appliedCoupon ||
+      flowState.selectedFeaturedOfferId ||
+      flowState.selectedOffer?.selectedFeaturedOfferId ||
+      flowState.selectedOffer?.id ||
+      flowState.selectedOffer?.offerId ||
+      flowState.pricingPreview?.appliedPromotionCode
+  );
 
   return {
     ticketType: "bus",
@@ -203,27 +216,21 @@ function buildBusTicketPayload(
     fare: {
       subtotalBeforeCoupon: Number(flowState.pricingPreview?.subtotalBeforeCoupon || fareSummary.subtotalBeforeCoupon || fareSummary.baseFare || 0),
       autoDiscountAmount: Number(flowState.pricingPreview?.autoDiscountAmount || 0),
-      couponDiscountAmount: Number(flowState.pricingPreview?.couponDiscountAmount || flowState.couponDiscount || 0),
+      couponDiscountAmount: hasAppliedFareDiscount
+        ? getBusPromotionDiscountAmount(flowState.pricingPreview, flowState.couponDiscount)
+        : 0,
       taxableFare: Number(flowState.pricingPreview?.taxableFare || fareSummary.taxableFare || 0),
       gstPercent: Number(flowState.pricingPreview?.gstPercent || fareSummary.gstPercent || 0),
       gstAmount: Number(flowState.pricingPreview?.gstAmount || fareSummary.gstAmount || fareSummary.tax || 0),
       convenienceFee: Number(flowState.pricingPreview?.convenienceFee || fareSummary.convenienceFee || 0),
-      totalFare: Number(
-        flowState.pricingPreview?.finalAmount ||
-          flowState.pricingPreview?.grandTotal ||
-          flowState.payableAmount ||
-          fareSummary.grandTotal ||
-          fareSummary.totalFare ||
-          0
+      totalFare: calculateBusPayableAmount(
+        flowState.pricingPreview,
+        flowState.payableAmount || fareSummary.grandTotal || fareSummary.totalFare || 0
       ),
     },
-    totalPaid: Number(
-      flowState.pricingPreview?.finalAmount ||
-        flowState.pricingPreview?.grandTotal ||
-        flowState.payableAmount ||
-        fareSummary.grandTotal ||
-        fareSummary.totalFare ||
-        0
+    totalPaid: calculateBusPayableAmount(
+      flowState.pricingPreview,
+      flowState.payableAmount || fareSummary.grandTotal || fareSummary.totalFare || 0
     ),
     notifications: {
       email: "Queued",
@@ -265,13 +272,9 @@ export default function BusPaymentPage() {
   const droppingPoint = flowState.droppingPoint || null;
   const passengers = flowState.passengers || [];
   const fareSummary = flowState.fareSummary || {};
-  const payableAmount = Number(
-    flowState.pricingPreview?.finalAmount ||
-      flowState.pricingPreview?.grandTotal ||
-      flowState.payableAmount ||
-      fareSummary.grandTotal ||
-      fareSummary.totalFare ||
-      0
+  const payableAmount = calculateBusPayableAmount(
+    flowState.pricingPreview,
+    flowState.payableAmount || fareSummary.grandTotal || fareSummary.totalFare || 0
   );
 
   const [selectedMethod, setSelectedMethod] = useState("upi");
@@ -578,13 +581,6 @@ export default function BusPaymentPage() {
                 )}
 
                 {(() => {
-                  const effectiveCouponDiscount =
-                    Number(flowState.pricingPreview?.couponDiscountAmount) > 0
-                      ? Number(flowState.pricingPreview.couponDiscountAmount)
-                      : Number(flowState.pricingPreview?.manualDiscountAmount) ||
-                        Number(flowState.couponDiscount) ||
-                        0;
-
                   const appliedCode = flowState.pricingPreview?.appliedPromotionCode || flowState.couponCode;
                   const isPromotion = Boolean(
                     flowState.selectedFeaturedOfferId ||
@@ -592,13 +588,20 @@ export default function BusPaymentPage() {
                       flowState.selectedOffer?.id ||
                       flowState.selectedOffer?.offerId
                   );
+                  const hasAppliedDiscount = Boolean(appliedCode || flowState.appliedCoupon || isPromotion);
+                  const effectiveCouponDiscount = hasAppliedDiscount
+                    ? getBusPromotionDiscountAmount(
+                        flowState.pricingPreview,
+                        flowState.couponDiscount
+                      )
+                    : 0;
                   const label = appliedCode
                     ? `Coupon Discount (${appliedCode})`
                     : isPromotion
                     ? `Offer Discount (${flowState.selectedOffer?.title || flowState.selectedFeaturedOfferId || ""})`
                     : "Coupon Discount";
 
-                  return effectiveCouponDiscount > 0 ? (
+                  return hasAppliedDiscount && effectiveCouponDiscount > 0 ? (
                     <div>
                       <span>{label}</span>
                       <strong>(-) {formatCurrency(effectiveCouponDiscount)}</strong>

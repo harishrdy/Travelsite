@@ -108,13 +108,14 @@
 }
 
 .flight-markup-table-scroll {
-  overflow-x: auto;
+  overflow: hidden;
 }
 
 .flight-markup-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
+  table-layout: fixed;
 }
 
 .flight-markup-table thead {
@@ -124,10 +125,13 @@
 
 .flight-markup-table th,
 .flight-markup-table td {
-  padding: 12px 14px;
+  padding: 6px 8px;
   border-bottom: 1px solid var(--border);
   text-align: left;
   vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .flight-markup-th-pill {

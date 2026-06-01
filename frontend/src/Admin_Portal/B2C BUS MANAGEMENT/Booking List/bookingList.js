@@ -99,7 +99,7 @@ function sumFinancialCollection(record, collectionKeys, valueKeys) {
   return 0;
 }
 
-function getTaxableFareInr(record) {
+const getTaxableFareInr = (record) => {
   return pickFinancialNumber(
     record,
     [
@@ -112,17 +112,17 @@ function getTaxableFareInr(record) {
     ],
     0
   );
-}
+};
 
-function getNetFareInr(record) {
+const getNetFareInr = (record) => {
   return pickFinancialNumber(
     record,
     ["netFareInr", "NetFareInr", "netFare", "NetFare"],
     0
   );
-}
+};
 
-function getDiscountAmountInr(record) {
+const getDiscountAmountInr = (record) => {
   return pickFinancialNumber(
     record,
     [
@@ -137,9 +137,9 @@ function getDiscountAmountInr(record) {
     ],
     0
   );
-}
+};
 
-function getBaseFareInr(record) {
+const getBaseFareInr = (record) => {
   const directBaseFare = pickFinancialNumber(
     record,
     ["baseFareInr", "BaseFareInr", "baseFare", "BaseFare"],
@@ -155,7 +155,7 @@ function getBaseFareInr(record) {
     ["seats", "Seats", "passengers", "Passengers"],
     ["baseFareInr", "BaseFareInr", "baseFare", "BaseFare"]
   );
-}
+};
 
 function calculateBookingProfit(record) {
   const netFareInr = getNetFareInr(record);
@@ -573,6 +573,13 @@ export default function AdminB2CBookingListPage() {
   ).length;
 
   const filteredProfit = filteredBookings.reduce((sum, item) => sum + (Number(item.calculatedProfit) || 0), 0);
+  const todayProfit = bookings
+    .filter(
+      (item) =>
+        mapAdminStatusClass(item.status) === "success" &&
+        isBookingOnDate(item, todayDate)
+    )
+    .reduce((sum, item) => sum + (Number(item.calculatedProfit) || 0), 0);
   const currentMonth = todayDate.slice(0, 7);
   const monthProfit = bookings
     .filter(
@@ -759,7 +766,7 @@ export default function AdminB2CBookingListPage() {
           <span>Current Filter Profit</span>
         </article>
         <div className="admin-stat-stack">
-          <button type="button">Today Profit {adminProfitFormatter.format(filteredProfit)}</button>
+          <button type="button">Today Profit {adminProfitFormatter.format(todayProfit)}</button>
           <button type="button">Month Profit {adminProfitFormatter.format(monthProfit)}</button>
         </div>
       </section>
@@ -944,4 +951,3 @@ export default function AdminB2CBookingListPage() {
     </section>
   );
 }
-

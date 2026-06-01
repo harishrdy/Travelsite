@@ -98,6 +98,21 @@ const escapeCsvValue = (value) => {
   return safeValue;
 };
 
+const renderDateTime = (dateStr) => {
+  if (!dateStr) return '--';
+  const parts = String(dateStr).split(', ');
+  if (parts.length === 2) {
+    return (
+      <div style={{ whiteSpace: 'nowrap' }}>
+        {parts[0]}
+        <br />
+        <span style={{ fontSize: '11px', color: 'var(--admin-muted)', fontWeight: 'normal' }}>{parts[1]}</span>
+      </div>
+    );
+  }
+  return dateStr;
+};
+
 function DiscountList() {
   const navigate = useNavigate();
   const [rows, setRows] = useState(() => readStoredRows() || initialRows);
@@ -187,7 +202,7 @@ function DiscountList() {
   };
 
   return (
-    <>
+    <div className="discount-list-page-container">
       <section className="discount-heading">
         <p className="discount-heading-main">B2C Flight Management</p>
         <p className="discount-heading-sub">Discount List</p>
@@ -336,14 +351,14 @@ function DiscountList() {
                   </td>
                   <td>{row.type}</td>
                   <td className="amount-cell">INR {row.value}</td>
-                  <td>
+                  <td className="status-cell">
                     <span className={`status-pill ${row.status.toLowerCase()}`}>
                       <span className="status-dot" />
                       {row.status}
                     </span>
                   </td>
-                  <td>{row.entryDate}</td>
-                  <td>{row.updateDate}</td>
+                  <td>{renderDateTime(row.entryDate)}</td>
+                  <td>{renderDateTime(row.updateDate)}</td>
                   <td>{row.updatedBy}</td>
                   <td className="remark-cell">{row.remark}</td>
                   <td>
@@ -372,7 +387,7 @@ function DiscountList() {
           </tbody>
         </table>
       </section>
-    </>
+    </div>
   );
 }
 

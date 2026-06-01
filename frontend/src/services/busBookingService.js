@@ -418,6 +418,14 @@ function normalizeBusPricingPreview(payload) {
   const finalAmount =
     Number(pickFirst(payload, ["finalAmount", "FinalAmount", "grandTotal", "GrandTotal"], 0)) ||
     0;
+  const subtotalBeforeCoupon =
+    Number(pickFirst(payload, ["subtotalBeforeCoupon", "SubtotalBeforeCoupon"], 0)) || 0;
+  const taxableFare =
+    Number(pickFirst(payload, ["taxableFare", "TaxableFare"], 0)) || 0;
+  const gstAmount =
+    Number(pickFirst(payload, ["gstAmount", "GstAmount"], 0)) || 0;
+  const convenienceFee =
+    Number(pickFirst(payload, ["convenienceFee", "ConvenienceFee"], 0)) || 0;
   const couponDiscountAmount =
     Number(
       pickFirst(
@@ -439,22 +447,26 @@ function normalizeBusPricingPreview(payload) {
   const totalDiscount =
     Number(pickFirst(payload, ["totalDiscount", "TotalDiscount"], 0)) ||
     couponDiscountAmount + autoDiscountAmount + manualDiscountAmount;
+  const rawCouponAmount = pickFirst(payload, ["couponAmount", "CouponAmount"], null);
+  const couponAmount =
+    rawCouponAmount !== null && rawCouponAmount !== undefined && rawCouponAmount !== ""
+      ? Number(rawCouponAmount) || 0
+      : Math.max(
+          couponDiscountAmount,
+          manualDiscountAmount,
+          Math.max(0, totalDiscount - autoDiscountAmount)
+        );
 
   return {
     busId: pickFirst(payload, ["busId", "BusId"], null),
     gstCategory: pickFirst(payload, ["gstCategory", "GstCategory"], null),
-    subtotalBeforeCoupon:
-      Number(pickFirst(payload, ["subtotalBeforeCoupon", "SubtotalBeforeCoupon"], 0)) || 0,
-    couponAmount:
-      Number(pickFirst(payload, ["couponAmount", "CouponAmount"], 0)) || totalDiscount,
-    taxableFare:
-      Number(pickFirst(payload, ["taxableFare", "TaxableFare"], 0)) || 0,
+    subtotalBeforeCoupon,
+    couponAmount,
+    taxableFare,
     gstPercent:
       Number(pickFirst(payload, ["gstPercent", "GstPercent"], 0)) || 0,
-    gstAmount:
-      Number(pickFirst(payload, ["gstAmount", "GstAmount"], 0)) || 0,
-    convenienceFee:
-      Number(pickFirst(payload, ["convenienceFee", "ConvenienceFee"], 0)) || 0,
+    gstAmount,
+    convenienceFee,
     grandTotal: finalAmount,
     finalAmount,
     totalDiscount,
@@ -470,6 +482,24 @@ function normalizeBusPricingPreview(payload) {
     couponAllowed: pickFirst(payload, ["couponAllowed", "CouponAllowed"], true) !== false,
     seats,
   };
+}
+
+export function getBusPromotionDiscountAmount(pricingPreview, fallbackDiscount = 0) {
+  const totalDiscount = Number(pricingPreview?.totalDiscount) || 0;
+  const autoDiscount = Number(pricingPreview?.autoDiscountAmount) || 0;
+  const nonAutoDiscount = Math.max(0, totalDiscount - autoDiscount);
+
+  return Math.max(
+    Number(fallbackDiscount) || 0,
+    Number(pricingPreview?.couponAmount) || 0,
+    Number(pricingPreview?.couponDiscountAmount) || 0,
+    Number(pricingPreview?.manualDiscountAmount) || 0,
+    nonAutoDiscount
+  );
+}
+
+export function calculateBusPayableAmount(pricingPreview, fallbackTotal = 0) {
+  return Number(pricingPreview?.finalAmount || pricingPreview?.grandTotal) || Number(fallbackTotal) || 0;
 }
 
 function normalizeBusPassenger(passenger, index = 0) {
@@ -1238,7 +1268,28 @@ function normalizeFeaturedOffer(record) {
 
   const rawId = pickFirst(record, ["id", "Id"], null);
   const rawOfferId = pickFirst(record, ["offerId", "OfferId"], null);
-  const rawPromotionId = pickFirst(record, ["promotionId", "PromotionId"], null);
+
+  const promo = record?.promotion || record?.Promotion || null;
+
+  const rawPromotionId = promo
+    ? pickFirst(promo, ["id", "Id"], null)
+    : pickFirst(record, ["promotionId", "PromotionId"], null);
+
+  const couponCode = promo
+    ? String(pickFirst(promo, ["code", "Code"], "") || "").toUpperCase()
+    : String(pickFirst(record, ["couponCode", "CouponCode"], "") || "").toUpperCase();
+
+  const isPercentageDiscount = promo
+    ? String(pickFirst(promo, ["discountType", "DiscountType"], "")).toLowerCase() === "percentage"
+    : Boolean(pickFirst(record, ["isPercentageDiscount", "IsPercentageDiscount"], false));
+
+  const discountValue = promo
+    ? Number(pickFirst(promo, ["discountValue", "DiscountValue"], 0)) || 0
+    : Number(pickFirst(record, ["discountValue", "DiscountValue"], 0)) || 0;
+
+  const couponExpiresAtUtc = promo
+    ? pickFirst(promo, ["endDateUtc", "EndDateUtc"], null)
+    : pickFirst(record, ["couponExpiresAtUtc", "CouponExpiresAtUtc"], null);
 
   return {
     id: rawId !== null ? Number(rawId) : null,
@@ -1254,11 +1305,11 @@ function normalizeFeaturedOffer(record) {
     title: String(pickFirst(record, ["title", "Title"], "") || ""),
     subtitle: String(pickFirst(record, ["subtitle", "Subtitle"], "") || ""),
     description: String(pickFirst(record, ["description", "Description"], "") || ""),
-    couponCode: String(pickFirst(record, ["couponCode", "CouponCode"], "") || "").toUpperCase(),
+    couponCode,
     basePrice: Number(pickFirst(record, ["basePrice", "BasePrice"], 0)) || 0,
-    isPercentageDiscount: Boolean(pickFirst(record, ["isPercentageDiscount", "IsPercentageDiscount"], false)),
-    discountValue: Number(pickFirst(record, ["discountValue", "DiscountValue"], 0)) || 0,
-    couponExpiresAtUtc: pickFirst(record, ["couponExpiresAtUtc", "CouponExpiresAtUtc"], null),
+    isPercentageDiscount,
+    discountValue,
+    couponExpiresAtUtc,
     isCouponActive: pickFirst(record, ["isCouponActive", "IsCouponActive"], true) !== false,
     bookingType: String(pickFirst(record, ["bookingType", "BookingType"], "") || ""),
     imageUrl: absoluteImageUrl,

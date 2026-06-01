@@ -140,32 +140,36 @@
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  overflow-x: auto;
 }
 
 .admin-markup-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  min-width: 900px;
+  table-layout: fixed;
 }
 
 .admin-markup-table th {
   background: #f8fafc;
-  padding: 14px 16px;
-  font-size: 13px;
+  padding: 6px 8px;
+  font-size: 11px;
   font-weight: 600;
   color: #475569;
   border-bottom: 1px solid #e2e8f0;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .admin-markup-table td {
-  padding: 14px 16px;
-  font-size: 14px;
+  padding: 6px 8px;
+  font-size: 12px;
   color: #1e293b;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .admin-markup-table tbody tr:hover {

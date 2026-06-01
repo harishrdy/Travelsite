@@ -11,6 +11,8 @@ import {
   getBusPricingPreview,
   listAvailableBusCoupons,
   getFeaturedBusOffers,
+  calculateBusPayableAmount,
+  getBusPromotionDiscountAmount,
 } from "../../services/busBookingService";
 import { usePromo } from "../../contexts/PromoContext";
 
@@ -229,17 +231,7 @@ function isSameFeaturedOffer(leftOffer, rightOffer) {
 }
 
 function getPromotionDiscountAmount(pricingPreview, fallbackDiscount = 0) {
-  const totalDiscount = Number(pricingPreview?.totalDiscount) || 0;
-  const autoDiscount = Number(pricingPreview?.autoDiscountAmount) || 0;
-  const nonAutoDiscount = Math.max(0, totalDiscount - autoDiscount);
-
-  return Math.max(
-    Number(fallbackDiscount) || 0,
-    Number(pricingPreview?.couponAmount) || 0,
-    Number(pricingPreview?.couponDiscountAmount) || 0,
-    Number(pricingPreview?.manualDiscountAmount) || 0,
-    nonAutoDiscount
-  );
+  return getBusPromotionDiscountAmount(pricingPreview, fallbackDiscount);
 }
 
 function hasBackendConfirmedPromotion(pricingPreview) {
@@ -345,18 +337,25 @@ export default function BusPassengerDetailsPage() {
     flowState.basePricingPreview || flowState.pricingPreview || null
   );
   const fareSummary = useMemo(
-    () => ({
-      baseFare: Number(pricingPreview.subtotalBeforeCoupon) || 0,
-      subtotalBeforeCoupon: Number(pricingPreview.subtotalBeforeCoupon) || 0,
-      couponAmount: getPromotionDiscountAmount(pricingPreview, 0),
-      taxableFare: Number(pricingPreview.taxableFare) || 0,
-      gstPercent: Number(pricingPreview.gstPercent) || 0,
-      gstAmount: Number(pricingPreview.gstAmount) || 0,
-      tax: Number(pricingPreview.gstAmount) || 0,
-      convenienceFee: Number(pricingPreview.convenienceFee) || 0,
-      grandTotal: Number(pricingPreview.finalAmount || pricingPreview.grandTotal) || 0,
-      totalFare: Number(pricingPreview.finalAmount || pricingPreview.grandTotal) || 0,
-    }),
+    () => {
+      const calculatedTotal = calculateBusPayableAmount(
+        pricingPreview,
+        Number(pricingPreview.finalAmount || pricingPreview.grandTotal) || 0
+      );
+
+      return {
+        baseFare: Number(pricingPreview.subtotalBeforeCoupon) || 0,
+        subtotalBeforeCoupon: Number(pricingPreview.subtotalBeforeCoupon) || 0,
+        couponAmount: getPromotionDiscountAmount(pricingPreview, 0),
+        taxableFare: Number(pricingPreview.taxableFare) || 0,
+        gstPercent: Number(pricingPreview.gstPercent) || 0,
+        gstAmount: Number(pricingPreview.gstAmount) || 0,
+        tax: Number(pricingPreview.gstAmount) || 0,
+        convenienceFee: Number(pricingPreview.convenienceFee) || 0,
+        grandTotal: calculatedTotal,
+        totalFare: calculatedTotal,
+      };
+    },
     [pricingPreview]
   );
 
@@ -555,7 +554,7 @@ export default function BusPassengerDetailsPage() {
     return () => { isMounted = false; };
   }, []);
 
-  const totalAfterDiscount = Number(pricingPreview.finalAmount || pricingPreview.grandTotal) || Number(fareSummary.grandTotal) || 0;
+  const totalAfterDiscount = Number(fareSummary.grandTotal) || 0;
 
   const loadPricingPreview = async (
     { selectedFeaturedOfferId = null, promotionId = null, couponCode = null } = {}
@@ -596,7 +595,10 @@ export default function BusPassengerDetailsPage() {
         setBasePricingPreview(preview);
       }
 
-      const backendCouponDiscount = getPromotionDiscountAmount(preview, 0);
+      const hasAppliedPromotion = Boolean(couponCodeParam || featuredOfferIdParam);
+      const backendCouponDiscount = hasAppliedPromotion
+        ? getPromotionDiscountAmount(preview, 0)
+        : 0;
       const activeOffer =
         featuredOfferIdParam
           ? selectedFeaturedOffer ||
@@ -1472,8 +1474,11 @@ export default function BusPassengerDetailsPage() {
                     {/* Discount row — uses appliedPromotionCode / discountSource for featured offers */}
                     {(() => {
                       const isFeaturedActive = Boolean(selectedFeaturedOffer);
-                      const displayDiscount = getPromotionDiscountAmount(pricingPreview, couponDiscount);
                       const appliedCode = pricingPreview.appliedPromotionCode || appliedCoupon?.couponCode;
+                      const hasAppliedDiscount = isFeaturedActive || Boolean(appliedCoupon || appliedCode);
+                      const displayDiscount = hasAppliedDiscount
+                        ? getPromotionDiscountAmount(pricingPreview, couponDiscount)
+                        : 0;
                       const featuredTitle =
                         selectedFeaturedOffer?.title ||
                         pricingPreview.appliedPromotionTitle ||
@@ -1485,7 +1490,7 @@ export default function BusPassengerDetailsPage() {
                         : appliedCode
                         ? `Coupon Discount (${appliedCode})`
                         : "Coupon Discount";
-                      return displayDiscount > 0 ? (
+                      return hasAppliedDiscount && displayDiscount > 0 ? (
                         <div>
                           <span>{label}</span>
                           <strong>(-) {formatCurrency(displayDiscount)}</strong>
@@ -1502,7 +1507,7 @@ export default function BusPassengerDetailsPage() {
                     </div>
                     <div className="grand-total">
                       <span>Grand Total</span>
-                      <strong>{formatCurrency(pricingPreview.grandTotal)}</strong>
+                      <strong>{formatCurrency(fareSummary.grandTotal)}</strong>
                     </div>
                   </>
                 )}
@@ -1790,8 +1795,11 @@ export default function BusPassengerDetailsPage() {
                       {/* Discount row in confirmation modal */}
                       {(() => {
                         const isFeaturedActive = Boolean(selectedFeaturedOffer);
-                        const displayDiscount = getPromotionDiscountAmount(pricingPreview, couponDiscount);
                         const appliedCode = pricingPreview.appliedPromotionCode || appliedCoupon?.couponCode;
+                        const hasAppliedDiscount = isFeaturedActive || Boolean(appliedCoupon || appliedCode);
+                        const displayDiscount = hasAppliedDiscount
+                          ? getPromotionDiscountAmount(pricingPreview, couponDiscount)
+                          : 0;
                         const featuredTitle =
                           selectedFeaturedOffer?.title ||
                           pricingPreview.appliedPromotionTitle ||
@@ -1803,7 +1811,7 @@ export default function BusPassengerDetailsPage() {
                           : appliedCode
                           ? `Coupon Discount (${appliedCode})`
                           : "Coupon Discount";
-                        return displayDiscount > 0 ? (
+                        return hasAppliedDiscount && displayDiscount > 0 ? (
                           <div>
                             <span>{label}</span>
                             <strong>(-) {formatCurrency(displayDiscount)}</strong>
@@ -1820,7 +1828,7 @@ export default function BusPassengerDetailsPage() {
                       </div>
                       <div className="grand-total">
                         <span>Total Fare</span>
-                        <strong>{formatCurrency(pricingPreview.grandTotal)}</strong>
+                        <strong>{formatCurrency(fareSummary.grandTotal)}</strong>
                       </div>
                     </div>
                   </article>

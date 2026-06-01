@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import './sidebar_admin.css';
 
 const iconProps = {
   viewBox: '0 0 24 24',
@@ -318,10 +319,12 @@ const navItems = [
   // }
 ];
 
-function Sidebar() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isCollapsed, setIsCollapsed] = useState(true);
+function Sidebar({ isCollapsed: externalCollapsed, setIsCollapsed: setExternalCollapsed, searchQuery = '', setSearchQuery }) {
+  const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [expandedMenu, setExpandedMenu] = useState(null);
+
+  const isCollapsed = externalCollapsed !== undefined ? externalCollapsed : internalCollapsed;
+  const setIsCollapsed = setExternalCollapsed !== undefined ? setExternalCollapsed : setInternalCollapsed;
 
   // Filter nav items based on search query
   const filteredItems = navItems.filter(item =>
@@ -405,7 +408,8 @@ function Sidebar() {
       top: '50%',
       transform: 'translateY(-50%)',
       color: 'var(--text-secondary)',
-      fontSize: '16px',
+      display: 'flex',
+      alignItems: 'center',
       pointerEvents: 'none',
     },
     sidebarNav: {
@@ -420,22 +424,14 @@ function Sidebar() {
       gap: '10px',
       padding: '10px',
       borderRadius: '8px',
-      color: 'var(--text-secondary)',
       textDecoration: 'none',
       transition: 'all 0.2s ease',
-      border: '1px solid transparent',
       fontSize: '0.88rem',
       fontWeight: 500,
       justifyContent: isCollapsed ? 'center' : 'flex-start',
       minHeight: '40px',
       cursor: 'pointer',
-      background: 'none',
       position: 'relative',
-    },
-    navItemActive: {
-      color: 'var(--primary)',
-      background: 'var(--surface-soft)',
-      borderColor: 'var(--primary)',
     },
     navIcon: {
       display: 'flex',
@@ -475,9 +471,9 @@ function Sidebar() {
       display: 'flex',
       flexDirection: 'column',
       gap: '4px',
-      paddingLeft: '20px',
+      paddingLeft: '12px',
       marginTop: '4px',
-      borderLeft: '2px solid var(--border)',
+      borderLeft: 'none',
       paddingTop: '4px',
     },
     submenuItem: {
@@ -486,18 +482,11 @@ function Sidebar() {
       gap: '8px',
       padding: '8px 10px',
       borderRadius: '6px',
-      color: 'var(--text-secondary)',
       textDecoration: 'none',
       transition: 'all 0.2s ease',
-      border: '1px solid transparent',
       fontSize: '0.8rem',
       fontWeight: 400,
       cursor: 'pointer',
-    },
-    submenuItemActive: {
-      color: 'var(--primary)',
-      background: 'var(--surface-soft)',
-      borderColor: 'var(--primary)',
     },
     noResults: {
       padding: '20px 10px',
@@ -529,17 +518,22 @@ function Sidebar() {
 
       {/* Search Bar */}
       <div style={styles.sidebarSearch}>
-        <span style={styles.searchIcon}>🔍</span>
+        <span style={styles.searchIcon}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </span>
         <input
           type="text"
-          placeholder="Search in menu..."
+          placeholder="Search anything..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={styles.searchInput}
           onFocus={(e) => {
             e.target.style.borderColor = 'var(--primary)';
             e.target.style.background = 'var(--panel)';
-            e.target.style.boxShadow = '0 0 0 3px rgba(227, 28, 95, 0.1)';
+            e.target.style.boxShadow = '0 0 0 3px rgba(30, 117, 255, 0.15)';
           }}
           onBlur={(e) => {
             e.target.style.borderColor = 'var(--border)';
@@ -559,40 +553,17 @@ function Sidebar() {
                 <NavLink
                   to={item.to}
                   end={item.to === ADMIN_BASE}
-                  style={({ isActive }) => ({
-                    ...styles.navItem,
-                    ...(isActive && styles.navItemActive),
-                  })}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'var(--surface-soft)';
-                    e.currentTarget.style.borderColor = 'var(--primary)';
-                    e.currentTarget.style.color = 'var(--primary)';
-                  }}
-                  onMouseLeave={(e) => {
-                    const isActive = e.currentTarget.classList.contains('active');
-                    e.currentTarget.style.background = isActive ? 'var(--surface-soft)' : 'transparent';
-                    e.currentTarget.style.borderColor = isActive ? 'var(--primary)' : 'transparent';
-                    e.currentTarget.style.color = isActive ? 'var(--primary)' : 'var(--text-secondary)';
-                  }}
+                  className="nav-link-item"
+                  style={{ justifyContent: isCollapsed ? 'center' : 'flex-start' }}
                 >
                   <span style={styles.navIcon}>{item.icon}</span>
                   <span style={styles.navLabel}>{item.label}</span>
                 </NavLink>
               ) : (
                 <div
-                  style={styles.navItem}
+                  className={`nav-link-item ${expandedMenu === item.to ? 'active' : ''}`}
+                  style={{ justifyContent: isCollapsed ? 'center' : 'flex-start' }}
                   onClick={() => setExpandedMenu(expandedMenu === item.to ? null : item.to)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'var(--surface-soft)';
-                    e.currentTarget.style.borderColor = 'var(--primary)';
-                    e.currentTarget.style.color = 'var(--primary)';
-                  }}
-                  onMouseLeave={(e) => {
-                    const isExpanded = expandedMenu === item.to;
-                    e.currentTarget.style.background = isExpanded ? 'var(--surface-soft)' : 'transparent';
-                    e.currentTarget.style.borderColor = isExpanded ? 'var(--primary)' : 'transparent';
-                    e.currentTarget.style.color = isExpanded ? 'var(--primary)' : 'var(--text-secondary)';
-                  }}
                 >
                   <span style={styles.navIcon}>{item.icon}</span>
                   <span style={styles.navLabel}>{item.label}</span>
@@ -617,23 +588,9 @@ function Sidebar() {
                       key={subitem.to}
                       to={subitem.to}
                       title={subitem.label}
-                      style={({ isActive }) => ({
-                        ...styles.submenuItem,
-                        ...(isActive && styles.submenuItemActive),
-                      })}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'var(--surface-soft)';
-                        e.currentTarget.style.borderColor = 'var(--primary)';
-                        e.currentTarget.style.color = 'var(--primary)';
-                      }}
-                      onMouseLeave={(e) => {
-                        const isActive = e.currentTarget.classList.contains('active');
-                        e.currentTarget.style.background = isActive ? 'var(--surface-soft)' : 'transparent';
-                        e.currentTarget.style.borderColor = isActive ? 'var(--primary)' : 'transparent';
-                        e.currentTarget.style.color = isActive ? 'var(--primary)' : 'var(--text-secondary)';
-                      }}
+                      className="sub-link-item"
                     >
-                      • {subitem.label}
+                      {subitem.label}
                     </NavLink>
                   ))}
                 </div>

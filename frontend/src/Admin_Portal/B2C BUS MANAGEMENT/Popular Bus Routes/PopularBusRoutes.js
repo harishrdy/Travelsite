@@ -136,7 +136,6 @@ export default function AdminBusPopularRoutesPage() {
           <h1>
             <strong>B2C Popular</strong> Bus Routes
           </h1>
-          <span className="admin-markup-popular-title-line" />
         </div>
 
         <div className="admin-markup-popular-actions">

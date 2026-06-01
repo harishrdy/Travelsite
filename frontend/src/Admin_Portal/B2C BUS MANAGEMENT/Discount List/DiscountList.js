@@ -186,7 +186,7 @@ function DiscountList() {
   };
 
   return (
-    <>
+    <div className="discount-list-page-container">
       <section className="discount-heading">
         <p className="discount-heading-main">B2C Bus Management</p>
         <p className="discount-heading-sub">Discount List</p>
@@ -251,30 +251,26 @@ function DiscountList() {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Code</th>
-              <th>Title</th>
-              <th>Discount Type</th>
+              <th>Discount / Code</th>
               <th>Value</th>
-              <th>Auto</th>
-              <th>Priority</th>
+              <th>Apply Rules</th>
               <th>Min Booking</th>
               <th>Validity</th>
               <th>Status</th>
               <th>Updated By</th>
-              <th>Remark</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={13} className="empty-cell">
+                <td colSpan={9} className="empty-cell">
                   Loading discounts...
                 </td>
               </tr>
             ) : filteredDiscounts.length === 0 ? (
               <tr>
-                <td colSpan={13} className="empty-cell">
+                <td colSpan={9} className="empty-cell">
                   No discounts match your filters.
                 </td>
               </tr>
@@ -284,28 +280,32 @@ function DiscountList() {
                   <td>
                     <div className="id-chip">{row.id}</div>
                   </td>
-                  <td>{row.code || '--'}</td>
-                  <td>{row.title || '--'}</td>
-                  <td>{row.type}</td>
+                  <td>
+                    <div style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.title || '--'}</div>
+                    <small style={{ color: 'var(--admin-muted)', fontSize: '10px' }}>
+                      {row.code || '--'} &bull; {row.type}
+                    </small>
+                  </td>
                   <td className="amount-cell">
                     {row.type === 'Percentage' ? `${row.value}%` : `INR ${row.value}`}
                   </td>
-                  <td>{row.isAutoApply ? 'Yes' : 'No'}{row.isExclusive ? ' / Exclusive' : ''}</td>
-                  <td>{row.priority}</td>
-                  <td>{row.minBookingAmount ? `INR ${row.minBookingAmount}` : '--'}</td>
                   <td>
+                    <div style={{ fontSize: '11px' }}>{row.isAutoApply ? 'Auto' : 'Manual'}{row.isExclusive ? ' · Excl.' : ''}</div>
+                    <small style={{ color: 'var(--admin-muted)', fontSize: '10px' }}>Pri: {row.priority}</small>
+                  </td>
+                  <td style={{ textAlign: 'right', fontSize: '11px' }}>{row.minBookingAmount ? `INR ${row.minBookingAmount}` : '--'}</td>
+                  <td style={{ fontSize: '10px', lineHeight: 1.5 }}>
                     {formatDate(row.startDateUtc)}
                     <br />
                     {formatDate(row.endDateUtc)}
                   </td>
-                  <td>
+                  <td className="status-cell">
                     <span className={`status-pill ${row.status.toLowerCase()}`}>
                       <span className="status-dot" />
                       {row.status}
                     </span>
                   </td>
-                  <td>{row.updatedBy}</td>
-                  <td className="remark-cell">{row.remark || '--'}</td>
+                  <td style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.updatedBy}</td>
                   <td>
                     <div className="table-actions">
                       <button type="button" className="ghost-btn small icon-btn" onClick={() => handleView(row)}>
@@ -332,7 +332,7 @@ function DiscountList() {
           </tbody>
         </table>
       </section>
-    </>
+    </div>
   );
 }
 

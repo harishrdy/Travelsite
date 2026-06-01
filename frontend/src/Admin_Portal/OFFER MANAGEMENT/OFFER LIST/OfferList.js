@@ -6,10 +6,6 @@ import {
   getAdminFeaturedOfferById,
   updateAdminFeaturedOffer,
   deleteAdminFeaturedOffer,
-  getOfferConditions,
-  addOfferCondition,
-  updateOfferCondition,
-  deleteOfferCondition,
 } from "../../../services/adminFeaturedOffersService";
 import { toApiUrl } from "../../../services/apiClient";
 
@@ -125,65 +121,27 @@ function toUtcIso(value) {
 }
 
 function normalizeOffer(raw) {
-  const promo = raw?.promotion || raw?.Promotion || null;
-
-  const couponId = promo
-    ? getField(promo, "sourceId", "SourceId")
-    : getField(raw, "couponId", "CouponId");
-
-  const couponCode = promo
-    ? getField(promo, "code", "Code")
-    : getField(raw, "couponCode", "CouponCode");
-
-  const couponExpiresAtUtc = promo
-    ? getField(promo, "endDateUtc", "EndDateUtc")
-    : getField(raw, "couponExpiresAtUtc", "CouponExpiresAtUtc", null);
-
-  const discountValue = promo
-    ? getField(promo, "discountValue", "DiscountValue")
-    : getField(raw, "discountValue", "DiscountValue");
-
-  const maxCouponUsage = promo
-    ? getField(promo, "maxUsage", "MaxUsage")
-    : getField(raw, "maxCouponUsage", "MaxCouponUsage");
-
-  const couponUsedCount = promo
-    ? getField(promo, "usedCount", "UsedCount", 0)
-    : getField(raw, "couponUsedCount", "CouponUsedCount", 0);
-
-  const isPercentageDiscount = promo
-    ? String(getField(promo, "discountType", "DiscountType")).toLowerCase() === "percentage"
-    : toBoolean(getField(raw, "isPercentageDiscount", "IsPercentageDiscount", false), false);
-
-  const startDateUtc = promo
-    ? getField(promo, "startDateUtc", "StartDateUtc")
-    : getField(raw, "startDateUtc", "StartDateUtc", null);
-
-  const endDateUtc = promo
-    ? getField(promo, "endDateUtc", "EndDateUtc")
-    : getField(raw, "endDateUtc", "EndDateUtc", null);
-
   return {
     id: getField(raw, "id", "Id"),
     title: getField(raw, "title", "Title"),
     offerCode: getField(raw, "offerCode", "OfferCode"),
-    couponId,
-    couponCode,
+    couponId: getField(raw, "couponId", "CouponId"),
+    couponCode: getField(raw, "couponCode", "CouponCode"),
     promotionId: getField(raw, "promotionId", "PromotionId"),
     displayOrder: getField(raw, "displayOrder", "DisplayOrder", 0),
     bookingType: normalizeBookingType(getField(raw, "bookingType", "BookingType", "Bus")),
     isActive: toBoolean(getField(raw, "isActive", "IsActive", false), false),
-    couponExpiresAtUtc,
-    startDateUtc,
-    endDateUtc,
+    couponExpiresAtUtc: getField(raw, "couponExpiresAtUtc", "CouponExpiresAtUtc", null),
+    startDateUtc: getField(raw, "startDateUtc", "StartDateUtc", null),
+    endDateUtc: getField(raw, "endDateUtc", "EndDateUtc", null),
     imageUrl: getField(raw, "imageUrl", "ImageUrl"),
     shortDescription: getField(raw, "subtitle", "Subtitle"),
     longDescription: getField(raw, "description", "Description"),
     basePrice: getField(raw, "basePrice", "BasePrice"),
-    isPercentageDiscount,
-    discountValue,
-    maxCouponUsage,
-    couponUsedCount,
+    isPercentageDiscount: toBoolean(getField(raw, "isPercentageDiscount", "IsPercentageDiscount", false), false),
+    discountValue: getField(raw, "discountValue", "DiscountValue"),
+    maxCouponUsage: getField(raw, "maxCouponUsage", "MaxCouponUsage"),
+    couponUsedCount: getField(raw, "couponUsedCount", "CouponUsedCount", 0),
     createdAtUtc: getField(raw, "createdAtUtc", "CreatedAtUtc", null),
     updatedAtUtc: getField(raw, "updatedAtUtc", "UpdatedAtUtc", null),
   };
@@ -264,142 +222,6 @@ export default function AdminOfferListPage({ onAddOffer }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [editError, setEditError] = useState("");
   const [deleteOffer, setDeleteOffer] = useState(null);
-
-  const [conditions, setConditions] = useState([]);
-  const [conditionsLoading, setConditionsLoading] = useState(false);
-  const [conditionsError, setConditionsError] = useState("");
-  const [newCondition, setNewCondition] = useState({
-    conditionType: "SourceCity",
-    conditionOperator: "Equals",
-    value1: "",
-    value2: "",
-    isActive: true
-  });
-  const [showAddCondition, setShowAddCondition] = useState(false);
-  const [editingConditionId, setEditingConditionId] = useState(null);
-
-  const loadConditions = useCallback(async (offerId) => {
-    setConditionsLoading(true);
-    setConditionsError("");
-    try {
-      const payload = await getOfferConditions(offerId);
-      const rows = Array.isArray(payload)
-        ? payload
-        : payload?.data || payload?.items || payload?.Items || [];
-      
-      const normalized = rows.map((cond) => {
-        const typeRaw = cond?.conditionType ?? cond?.ConditionType;
-        const opRaw = cond?.conditionOperator ?? cond?.ConditionOperator;
-        
-        let conditionType = String(typeRaw || "");
-        if (typeRaw === 1 || conditionType.toLowerCase() === "sourcecity") {
-          conditionType = "SourceCity";
-        } else if (typeRaw === 2 || conditionType.toLowerCase() === "destinationcity") {
-          conditionType = "DestinationCity";
-        } else if (typeRaw === 3 || conditionType.toLowerCase() === "bustype") {
-          conditionType = "BusType";
-        } else if (typeRaw === 4 || conditionType.toLowerCase() === "traveldate") {
-          conditionType = "TravelDate";
-        }
-
-        let conditionOperator = String(opRaw || "Equals");
-        if (opRaw === 1 || conditionOperator.toLowerCase() === "equals") {
-          conditionOperator = "Equals";
-        } else if (opRaw === 2 || conditionOperator.toLowerCase() === "contains") {
-          conditionOperator = "Contains";
-        } else if (opRaw === 3 || conditionOperator.toLowerCase() === "between") {
-          conditionOperator = "Between";
-        }
-
-        return {
-          ...cond,
-          id: cond?.id ?? cond?.Id,
-          featuredOfferId: cond?.featuredOfferId ?? cond?.FeaturedOfferId,
-          conditionType,
-          conditionOperator,
-          value1: cond?.value1 ?? cond?.Value1 ?? "",
-          value2: cond?.value2 ?? cond?.Value2 ?? "",
-          isActive: cond?.isActive ?? cond?.IsActive ?? true,
-        };
-      });
-
-      setConditions(normalized);
-    } catch (err) {
-      setConditionsError(err.message || "Failed to load conditions.");
-    } finally {
-      setConditionsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (detailsOffer?.id) {
-      loadConditions(detailsOffer.id);
-    }
-  }, [detailsOffer?.id, loadConditions]);
-
-  const handleAddCondition = async () => {
-    if (!newCondition.value1.trim()) {
-      setConditionsError("Value 1 is required.");
-      return;
-    }
-    setConditionsError("");
-    try {
-      if (editingConditionId) {
-        await updateOfferCondition(detailsOffer.id, editingConditionId, {
-          conditionType: newCondition.conditionType,
-          conditionOperator: newCondition.conditionOperator,
-          value1: newCondition.value1.trim(),
-          value2: newCondition.value2?.trim() || null,
-          isActive: newCondition.isActive
-        });
-      } else {
-        await addOfferCondition(detailsOffer.id, {
-          conditionType: newCondition.conditionType,
-          conditionOperator: newCondition.conditionOperator,
-          value1: newCondition.value1.trim(),
-          value2: newCondition.value2?.trim() || null,
-          isActive: newCondition.isActive
-        });
-      }
-      setNewCondition({
-        conditionType: "SourceCity",
-        conditionOperator: "Equals",
-        value1: "",
-        value2: "",
-        isActive: true
-      });
-      setShowAddCondition(false);
-      setEditingConditionId(null);
-      await loadConditions(detailsOffer.id);
-    } catch (err) {
-      setConditionsError(err.message || "Failed to save condition.");
-    }
-  };
-
-  const handleEditConditionClick = (cond) => {
-    setNewCondition({
-      conditionType: cond.conditionType,
-      conditionOperator: cond.conditionOperator || "Equals",
-      value1: cond.value1,
-      value2: cond.value2 || "",
-      isActive: cond.isActive
-    });
-    setEditingConditionId(cond.id);
-    setShowAddCondition(true);
-  };
-
-  const handleDeleteConditionClick = async (conditionId) => {
-    if (!window.confirm("Are you sure you want to delete this condition?")) {
-      return;
-    }
-    setConditionsError("");
-    try {
-      await deleteOfferCondition(detailsOffer.id, conditionId);
-      await loadConditions(detailsOffer.id);
-    } catch (err) {
-      setConditionsError(err.message || "Failed to delete condition.");
-    }
-  };
 
   const loadOffers = useCallback(async () => {
     setLoading(true);
@@ -703,191 +525,6 @@ export default function AdminOfferListPage({ onAddOffer }) {
               <div className="offer-details-copy offer-details-long-copy">
                 {detailsOffer.longDescription || "--"}
               </div>
-            </div>
-
-            <div className="offer-details-section">
-              <div className="offer-details-section-bar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span>Search Prefill Conditions</span>
-                <button
-                  type="button"
-                  className="admin-markup-coupon-btn generate"
-                  style={{ height: "30px", padding: "0 12px", fontSize: "12px", margin: 0 }}
-                  onClick={() => {
-                    setEditingConditionId(null);
-                    setNewCondition({
-                      conditionType: "SourceCity",
-                      conditionOperator: "Equals",
-                      value1: "",
-                      value2: "",
-                      isActive: true
-                    });
-                    setShowAddCondition((prev) => !prev);
-                  }}
-                >
-                  {showAddCondition ? "Cancel" : "Add Condition"}
-                </button>
-              </div>
-
-              {conditionsError && (
-                <p className="admin-markup-form-error" style={{ margin: "10px 0" }}>
-                  {conditionsError}
-                </p>
-              )}
-
-              {showAddCondition && (
-                <div style={{ background: "#f8fafc", padding: "16px", borderRadius: "10px", border: "1px solid #e2e8f0", marginBottom: "16px" }}>
-                  <h3 style={{ margin: "0 0 12px 0", fontSize: "14px", fontWeight: 600, color: "#1e293b" }}>
-                    {editingConditionId ? "Edit Condition" : "Add New Condition"}
-                  </h3>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px", marginBottom: "12px" }}>
-                    <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                      <span style={{ fontSize: "12px", fontWeight: 600, color: "#475569" }}>Condition Type</span>
-                      <select
-                        value={newCondition.conditionType}
-                        onChange={(e) => setNewCondition(prev => ({ ...prev, conditionType: e.target.value }))}
-                        style={{ height: "36px", border: "1.5px solid #cbd5e1", borderRadius: "6px", padding: "0 8px" }}
-                      >
-                        <option value="SourceCity">SourceCity (Origin)</option>
-                        <option value="DestinationCity">DestinationCity (Destination)</option>
-                        <option value="BusType">BusType</option>
-                        <option value="TravelDate">TravelDate</option>
-                      </select>
-                    </label>
-
-                    <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                      <span style={{ fontSize: "12px", fontWeight: 600, color: "#475569" }}>Operator</span>
-                      <select
-                        value={newCondition.conditionOperator}
-                        onChange={(e) => setNewCondition(prev => ({ ...prev, conditionOperator: e.target.value }))}
-                        style={{ height: "36px", border: "1.5px solid #cbd5e1", borderRadius: "6px", padding: "0 8px" }}
-                      >
-                        <option value="Equals">Equals</option>
-                        <option value="Contains">Contains</option>
-                        <option value="Between">Between</option>
-                      </select>
-                    </label>
-
-                    <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                      <span style={{ fontSize: "12px", fontWeight: 600, color: "#475569" }}>Value 1 *</span>
-                      <input
-                        type="text"
-                        value={newCondition.value1}
-                        onChange={(e) => setNewCondition(prev => ({ ...prev, value1: e.target.value }))}
-                        placeholder={newCondition.conditionType === "TravelDate" ? "YYYY-MM-DD" : "Value 1"}
-                        style={{ height: "36px", border: "1.5px solid #cbd5e1", borderRadius: "6px", padding: "0 8px" }}
-                      />
-                    </label>
-
-                    {newCondition.conditionOperator === "Between" && (
-                      <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                        <span style={{ fontSize: "12px", fontWeight: 600, color: "#475569" }}>Value 2 (For range) *</span>
-                        <input
-                          type="text"
-                          value={newCondition.value2}
-                          onChange={(e) => setNewCondition(prev => ({ ...prev, value2: e.target.value }))}
-                          placeholder={newCondition.conditionType === "TravelDate" ? "YYYY-MM-DD" : "Value 2"}
-                          style={{ height: "36px", border: "1.5px solid #cbd5e1", borderRadius: "6px", padding: "0 8px" }}
-                        />
-                      </label>
-                    )}
-
-                    <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                      <span style={{ fontSize: "12px", fontWeight: 600, color: "#475569" }}>Is Active</span>
-                      <select
-                        value={newCondition.isActive ? "active" : "inactive"}
-                        onChange={(e) => setNewCondition(prev => ({ ...prev, isActive: e.target.value === "active" }))}
-                        style={{ height: "36px", border: "1.5px solid #cbd5e1", borderRadius: "6px", padding: "0 8px" }}
-                      >
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                      </select>
-                    </label>
-                  </div>
-                  <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-                    <button
-                      type="button"
-                      className="admin-markup-coupon-btn clear"
-                      style={{ height: "30px", margin: 0 }}
-                      onClick={() => {
-                        setShowAddCondition(false);
-                        setEditingConditionId(null);
-                      }}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      className="admin-markup-coupon-btn generate"
-                      style={{ height: "30px", margin: 0 }}
-                      onClick={handleAddCondition}
-                    >
-                      {editingConditionId ? "Update Condition" : "Save Condition"}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {conditionsLoading ? (
-                <p style={{ textAlign: "center", color: "#64748b", margin: "16px 0" }}>Loading conditions...</p>
-              ) : conditions.length === 0 ? (
-                <p style={{ textAlign: "center", color: "#64748b", margin: "16px 0" }}>No conditions set for this offer.</p>
-              ) : (
-                <div className="admin-markup-table-wrap" style={{ marginTop: "12px", maxHeight: "300px", overflowY: "auto" }}>
-                  <table className="admin-markup-table">
-                    <thead>
-                      <tr>
-                        <th>Condition Type</th>
-                        <th>Operator</th>
-                        <th>Value 1</th>
-                        <th>Value 2</th>
-                        <th>Status</th>
-                        <th className="action-col">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {conditions.map((cond) => (
-                        <tr key={cond.id}>
-                          <td><strong>{cond.conditionType}</strong></td>
-                          <td>{cond.conditionOperator || "Equals"}</td>
-                          <td>{cond.value1}</td>
-                          <td>{cond.value2 || "--"}</td>
-                          <td>
-                            <span style={{
-                              padding: "4px 8px",
-                              borderRadius: "4px",
-                              fontSize: "11px",
-                              fontWeight: 600,
-                              background: cond.isActive ? "#f0fdf4" : "#f1f5f9",
-                              color: cond.isActive ? "#166534" : "#475569"
-                            }}>
-                              {cond.isActive ? "Active" : "Inactive"}
-                            </span>
-                          </td>
-                          <td className="action-col">
-                            <div className="markup-action-group">
-                              <button
-                                type="button"
-                                title="Edit"
-                                onClick={() => handleEditConditionClick(cond)}
-                              >
-                                <Pencil size={12} />
-                              </button>
-                              <button
-                                type="button"
-                                title="Delete"
-                                className="danger"
-                                onClick={() => handleDeleteConditionClick(cond.id)}
-                              >
-                                <Trash2 size={12} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
             </div>
           </section>
         </section>

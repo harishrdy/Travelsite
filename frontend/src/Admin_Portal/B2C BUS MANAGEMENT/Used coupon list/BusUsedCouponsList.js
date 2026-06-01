@@ -178,7 +178,6 @@ export default function AdminBusUsedCouponListPage() {
           <h1>
             <strong>B2C Bus Used</strong> Coupon List
           </h1>
-          <span className="admin-markup-used-title-line" />
         </div>
 
         <div className="admin-markup-used-actions">

@@ -294,7 +294,7 @@
 
 .admin-markup-view-table-wrap {
   margin-top: 14px;
-  overflow-x: auto;
+  overflow: hidden;
 }
 
 .admin-markup-view-table {
