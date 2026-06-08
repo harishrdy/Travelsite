@@ -1,4 +1,4 @@
-﻿namespace PickNBook.Api.Models.DTOs
+namespace PickNBook.Api.Models.DTOs
 {
     public class FeaturedOfferConditionRequestDto
     {

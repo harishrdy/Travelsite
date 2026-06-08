@@ -194,63 +194,207 @@ function normalizeBusBookingRecord(record) {
     : [];
   const seatsBookedFallback = passengers.length;
 
+  // Define potential nested structures to search for fields
+  const sources = [
+    record,
+    record?.bus,
+    record?.busDetails,
+    record?.ticket,
+    record?.trip,
+    record?.journey,
+    record?.raw,
+    record?.bookingDetails,
+    record?.details,
+    record?.ticketDetails,
+  ].filter(Boolean);
+
+  const getFieldValue = (keys, fallback = "") => {
+    for (const source of sources) {
+      const val = pickFirst(source, keys, null);
+      if (val !== undefined && val !== null && val !== "") {
+        return val;
+      }
+    }
+    return fallback;
+  };
+
+  // Dynamically resolve segment, fromCity, and toCity
+  const rawSegment = getFieldValue(["segment", "Segment", "route", "Route"], null);
+  let fromCity = "";
+  let toCity = "";
+  let segment = "";
+
+  if (rawSegment) {
+    segment = String(rawSegment).trim();
+    const parts = segment.split(/[-–]| to /i);
+    if (parts.length === 2) {
+      fromCity = parts[0].trim();
+      toCity = parts[1].trim();
+    }
+  }
+
+  if (!fromCity) {
+    fromCity = String(
+      getFieldValue(
+        [
+          "fromCity",
+          "FromCity",
+          "source",
+          "Source",
+          "from",
+          "From",
+          "origin",
+          "Origin",
+          "sourceCity",
+          "SourceCity",
+        ],
+        ""
+      )
+    ).trim();
+  }
+
+  if (!toCity) {
+    toCity = String(
+      getFieldValue(
+        [
+          "toCity",
+          "ToCity",
+          "destination",
+          "Destination",
+          "to",
+          "To",
+          "arrivalCity",
+          "ArrivalCity",
+          "destinationCity",
+          "DestinationCity",
+        ],
+        ""
+      )
+    ).trim();
+  }
+
+  if (!segment && fromCity && toCity) {
+    segment = `${fromCity} - ${toCity}`;
+  }
+
+  // Resolve departure date/time
+  const departureTimeUtc = getFieldValue(
+    [
+      "departureTimeUtc",
+      "DepartureTimeUtc",
+      "departureDateTimeUtc",
+      "DepartureDateTimeUtc",
+      "departureTimeIst",
+      "DepartureTimeIst",
+      "departureTime",
+      "DepartureTime",
+      "departureDateTime",
+      "DepartureDateTime",
+      "journeyDateTime",
+      "JourneyDateTime",
+      "journeyDate",
+      "JourneyDate",
+      "departDate",
+      "DepartDate",
+    ],
+    null
+  );
+
   return {
-    bookingId: pickFirst(record, ["bookingId", "BookingId"], null),
+    bookingId: getFieldValue(["bookingId", "BookingId"], null),
     bookingReference: String(
-      pickFirst(record, ["bookingReference", "BookingReference"], "") || ""
+      getFieldValue(["bookingReference", "BookingReference"], "")
     ),
-    tripType: String(pickFirst(record, ["tripType", "TripType"], "Bus") || "Bus"),
-    tripId: pickFirst(record, ["tripId", "TripId"], null),
+    tripType: String(getFieldValue(["tripType", "TripType"], "Bus")),
+    tripId: getFieldValue(["tripId", "TripId"], null),
     passengerName: String(
-      pickFirst(record, ["passengerName", "PassengerName"], "") || ""
+      getFieldValue(["passengerName", "PassengerName"], "")
     ),
     passengerPhone: String(
-      pickFirst(record, ["passengerPhone", "PassengerPhone"], "") || ""
+      getFieldValue(["passengerPhone", "PassengerPhone"], "")
     ),
     passengerEmail: String(
-      pickFirst(record, ["passengerEmail", "PassengerEmail"], "") || ""
+      getFieldValue(["passengerEmail", "PassengerEmail"], "")
     ),
-    fromCity: String(pickFirst(record, ["fromCity", "FromCity"], "") || ""),
-    toCity: String(pickFirst(record, ["toCity", "ToCity"], "") || ""),
+    fromCity,
+    toCity,
+    segment,
     providerName: String(
-      pickFirst(
-        record,
-        ["providerName", "ProviderName", "operatorName", "OperatorName"],
+      getFieldValue(
+        [
+          "providerName",
+          "ProviderName",
+          "operatorName",
+          "OperatorName",
+          "operator",
+          "Operator",
+        ],
         ""
-      ) || ""
+      )
     ),
-    departureTimeUtc: pickFirst(
-      record,
-      [
-        "departureTimeUtc",
-        "DepartureTimeUtc",
-        "departureDateTimeUtc",
-        "DepartureDateTimeUtc",
-      ],
-      null
-    ),
-    arrivalTimeUtc: pickFirst(
-      record,
+    departureTimeUtc,
+    arrivalTimeUtc: getFieldValue(
       [
         "arrivalTimeUtc",
         "ArrivalTimeUtc",
         "arrivalDateTimeUtc",
         "ArrivalDateTimeUtc",
+        "arrivalTimeIst",
+        "ArrivalTimeIst",
+        "arrivalTime",
+        "ArrivalTime",
+        "arrivalDateTime",
+        "ArrivalDateTime",
+        "dropTime",
+        "DropTime",
+        "droppingTime",
+        "DroppingTime",
       ],
       null
     ),
     travelClass: String(
-      pickFirst(record, ["travelClass", "TravelClass"], "Not Applicable") ||
+      getFieldValue(
+        [
+          "travelClass",
+          "TravelClass",
+          "busType",
+          "BusType",
+          "className",
+          "ClassName",
+          "class",
+          "Class",
+          "vehicleType",
+          "VehicleType",
+        ],
         "Not Applicable"
+      )
     ),
-    adults: Number(pickFirst(record, ["adults", "Adults"], 0)) || 0,
-    children: Number(pickFirst(record, ["children", "Children"], 0)) || 0,
-    infants: Number(pickFirst(record, ["infants", "Infants"], 0)) || 0,
+    adults: Number(getFieldValue(["adults", "Adults"], 0)) || 0,
+    children: Number(getFieldValue(["children", "Children"], 0)) || 0,
+    infants: Number(getFieldValue(["infants", "Infants"], 0)) || 0,
     seatsBooked:
-      Number(pickFirst(record, ["seatsBooked", "SeatsBooked"], null)) ||
+      Number(getFieldValue(["seatsBooked", "SeatsBooked", "seats", "Seats"], null)) ||
       seatsBookedFallback,
     totalPriceInr:
-      Number(pickFirst(record, ["totalPriceInr", "TotalPriceInr"], 0)) || 0,
+      Number(
+        getFieldValue(
+          [
+            "totalPriceInr",
+            "TotalPriceInr",
+            "totalPaid",
+            "TotalPaid",
+            "totalFare",
+            "TotalFare",
+            "amountInr",
+            "AmountInr",
+            "amount",
+            "Amount",
+            "fare",
+            "Fare",
+          ],
+          0
+        )
+      ) || 0,
     taxableFareInr: getTaxableFareInr(record),
     baseFareInr: getBaseFareInr(record),
     calculatedProfit: calculateBookingProfit(record),
@@ -295,18 +439,50 @@ function normalizeBusBookingRecord(record) {
       "PlatformFee",
     ]),
     profit: calculateBookingProfit(record),
-    status: String(pickFirst(record, ["status", "Status"], "Unknown") || "Unknown"),
-    bookedAtUtc: pickFirst(record, ["bookedAtUtc", "BookedAtUtc"], null),
-    cancelledAtUtc: pickFirst(record, ["cancelledAtUtc", "CancelledAtUtc"], null),
+    status: String(getFieldValue(["status", "Status"], "Unknown") || "Unknown"),
+    bookedAtUtc: getFieldValue(
+      [
+        "bookedAtUtc",
+        "BookedAtUtc",
+        "bookedAt",
+        "BookedAt",
+        "createdAt",
+        "CreatedAt",
+        "createdDate",
+        "CreatedDate",
+        "createdDateUtc",
+        "CreatedDateUtc",
+        "timestamp",
+        "Timestamp",
+      ],
+      null
+    ),
+    cancelledAtUtc: getFieldValue(
+      [
+        "cancelledAtUtc",
+        "CancelledAtUtc",
+        "cancelledAt",
+        "CancelledAt",
+        "cancelledDateUtc",
+        "CancelledDateUtc",
+      ],
+      null
+    ),
     cancellationReason: String(
-      pickFirst(record, ["cancellationReason", "CancellationReason"], "") || ""
+      getFieldValue(["cancellationReason", "CancellationReason", "reason", "Reason"], "")
     ),
     tripNumber: String(
-      pickFirst(
-        record,
-        ["tripNumber", "TripNumber", "busNumber", "BusNumber"],
+      getFieldValue(
+        [
+          "tripNumber",
+          "TripNumber",
+          "busNumber",
+          "BusNumber",
+          "busNo",
+          "BusNo",
+        ],
         ""
-      ) || ""
+      )
     ),
     passengers,
   };
@@ -322,12 +498,26 @@ const toDateKey = (value) => {
     return "";
   }
 
-  const parsed = new Date(value);
+  const raw = String(value).trim();
+
+  // 1. Try to match YYYY-MM-DD directly
+  const isoDateMatch = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (isoDateMatch) {
+    return isoDateMatch[1];
+  }
+
+  // 2. Try to parse with standard Date but don't convert to ISO if it shifts
+  const parsed = new Date(raw);
   if (Number.isNaN(parsed.getTime())) {
+    // Fallback: slice first 10 chars
     return normalizeText(value, "").slice(0, 10);
   }
 
-  return parsed.toISOString().slice(0, 10);
+  // To avoid timezone shifting, format in local timezone parts
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 };
 
 const toTimeKey = (value) => {
@@ -335,17 +525,29 @@ const toTimeKey = (value) => {
     return "";
   }
 
-  const parsed = new Date(value);
+  const raw = String(value).trim();
+
+  // 1. Try regex match for HH:MM (e.g. 15:30)
+  const timeMatch = raw.match(/(?:T|\s|^)(\d{1,2}:\d{2})/);
+  if (timeMatch?.[1]) {
+    // Pad single-digit hours if any, like "5:30" -> "05:30"
+    const [h, m] = timeMatch[1].split(":");
+    return `${h.padStart(2, "0")}:${m}`;
+  }
+
+  const parsed = new Date(raw);
   if (Number.isNaN(parsed.getTime())) {
     const text = normalizeText(value, "");
     if (text.includes("T")) {
       return text.split("T")[1]?.slice(0, 5) || "";
     }
-
     return text.slice(11, 16);
   }
 
-  return parsed.toISOString().slice(11, 16);
+  // Format local parts to avoid timezone shifting
+  const hours = String(parsed.getHours()).padStart(2, "0");
+  const minutes = String(parsed.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
 };
 
 const BOOKED_STATUS_SET = new Set(["booked", "success", "confirmed", "ticketed"]);
@@ -418,11 +620,28 @@ const toUnifiedAdminBooking = (record, sourceType) => {
   const bookingId = normalizeText(record?.bookingId, "");
   const tripNumber = normalizeText(record?.tripNumber, "");
   const bookedAtValue = record?.bookedAtUtc || null;
-  const departureValue = record?.departureTimeUtc || null;
+  const departureValue = record?.departureTimeUtc || record?.departureTime || record?.departureDateTime || null;
+  const arrivalValue = record?.arrivalTimeUtc || record?.arrivalTime || record?.arrivalDateTime || record?.droppingTime || record?.dropTime || null;
+
+  const depTime = toTimeKey(departureValue);
+  const arrTime = toTimeKey(arrivalValue);
+  const journeyTime = depTime && arrTime ? `${depTime} - ${arrTime}` : (depTime || arrTime || "--");
 
   const fare = Math.max(parseNumber(record?.totalPriceInr, 0), 0);
   const calculatedProfit = parseNumber(record?.calculatedProfit, calculateBookingProfit(record));
   const profit = calculatedProfit;
+
+  let fromCity = record?.fromCity || "";
+  let toCity = record?.toCity || "";
+  if (record?.segment && (!fromCity || !toCity)) {
+    const parts = record.segment.split("-");
+    if (parts.length === 2) {
+      fromCity = parts[0].trim();
+      toCity = parts[1].trim();
+    } else {
+      fromCity = record.segment;
+    }
+  }
 
   return {
     id: bookingReference || bookingId || "--",
@@ -433,10 +652,10 @@ const toUnifiedAdminBooking = (record, sourceType) => {
     createdAtValue: bookedAtValue,
     passengerName: normalizeText(record?.passengerName, "--"),
     passengerPhone: normalizeText(record?.passengerPhone, "--"),
-    from: normalizeText(record?.fromCity, "--"),
-    to: normalizeText(record?.toCity, "--"),
+    from: normalizeText(fromCity, "--"),
+    to: normalizeText(toCity, "--"),
     journeyDate: toDateKey(departureValue),
-    journeyTime: toTimeKey(departureValue),
+    journeyTime,
     pnr: bookingReference || tripNumber || bookingId || "--",
     status,
     operator: normalizeText(record?.providerName, "--"),

@@ -66,7 +66,7 @@ function buildTravelerRecord(passenger, contact, index) {
     id: Date.now() + index,
     name: fullName || `Passenger ${index + 1}`,
     email: normalizeText(passenger?.email) || normalizeText(contact?.email),
-    mobile: normalizeText(passenger?.phone) || normalizeText(contact?.mobile),
+    mobile: normalizeText(passenger?.mobile) || normalizeText(passenger?.phone) || normalizeText(contact?.mobile),
     gender: normalizeText(passenger?.gender),
     age: calculateAge(passenger?.dob),
   };

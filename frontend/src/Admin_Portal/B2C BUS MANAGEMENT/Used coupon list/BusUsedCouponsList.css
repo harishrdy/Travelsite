@@ -1,6 +1,10 @@
 .admin-markup-used-shell {
   display: grid;
   gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .admin-markup-used-header {
@@ -20,11 +24,7 @@
 .admin-markup-used-title-wrap h1 {
   margin: 0;
   font-size: 1.6rem;
-  color: var(--text-primary);
-}
-
-.admin-markup-used-title-wrap strong {
-  color: var(--primary);
+  color: var(--primary) !important;
 }
 
 .admin-markup-used-title-line {
@@ -109,13 +109,35 @@
   background: var(--panel);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.admin-markup-used-table-scroll {
+  overflow-x: auto;
+  width: 100%;
 }
 
 .admin-markup-used-table {
-  width: 100%;
+  width: 100% !important;
   border-collapse: collapse;
-  font-size: 0.88rem;
+  font-size: 11px !important;
+  min-width: 100% !important;
+  table-layout: fixed;
 }
+
+.admin-markup-used-table th:nth-child(1), .admin-markup-used-table td:nth-child(1) { width: 4%; }
+.admin-markup-used-table th:nth-child(2), .admin-markup-used-table td:nth-child(2) { width: 12%; }
+.admin-markup-used-table th:nth-child(3), .admin-markup-used-table td:nth-child(3) { width: 12%; }
+.admin-markup-used-table th:nth-child(4), .admin-markup-used-table td:nth-child(4) { width: 10%; }
+.admin-markup-used-table th:nth-child(5), .admin-markup-used-table td:nth-child(5) { width: 15%; }
+.admin-markup-used-table th:nth-child(6), .admin-markup-used-table td:nth-child(6) { width: 9%; }
+.admin-markup-used-table th:nth-child(7), .admin-markup-used-table td:nth-child(7) { width: 9%; }
+.admin-markup-used-table th:nth-child(8), .admin-markup-used-table td:nth-child(8) { width: 9%; }
+.admin-markup-used-table th:nth-child(9), .admin-markup-used-table td:nth-child(9) { width: 9%; }
+.admin-markup-used-table th:nth-child(10), .admin-markup-used-table td:nth-child(10) { width: 11%; }
 
 .admin-markup-used-table thead {
   background: linear-gradient(135deg, var(--primary), var(--primary-strong));
@@ -124,9 +146,13 @@
 
 .admin-markup-used-table th,
 .admin-markup-used-table td {
-  padding: 12px 14px;
+  padding: 8px 6px !important;
   border-bottom: 1px solid var(--border);
-  text-align: left;
+  text-align: center !important;
+  vertical-align: middle !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .admin-markup-used-blank-row td {

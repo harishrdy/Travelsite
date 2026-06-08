@@ -294,3 +294,76 @@
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   }
 }
+
+/* Toolbar equal line alignment and premium button colors */
+.admin-booking-page .admin-toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-booking-page .admin-chip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-booking-page .admin-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Make both chips and buttons have exactly the same height and alignment */
+.admin-booking-page .admin-chip,
+.admin-booking-page .admin-actions-row button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  box-sizing: border-box;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 999px; /* Make buttons also pills to align beautifully with chips */
+  padding: 0 16px;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Specific styling for the total chip */
+.admin-booking-page .admin-total-chip {
+  background: var(--admin-primary);
+  color: #ffffff;
+  border: 1px solid var(--admin-primary);
+}
+
+/* Open Filter / Close Filter button */
+.admin-booking-page .admin-actions-row button:first-child {
+  background: var(--admin-soft);
+  color: var(--admin-primary);
+  border: 1.5px solid var(--admin-primary);
+  cursor: pointer;
+}
+
+.admin-booking-page .admin-actions-row button:first-child:hover {
+  background: var(--admin-primary);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(30, 117, 255, 0.2);
+}
+
+/* Export button */
+.admin-booking-page .admin-actions-row button:last-child {
+  background: var(--admin-success-soft);
+  color: var(--admin-success);
+  border: 1.5px solid var(--admin-success);
+  cursor: pointer;
+}
+
+.admin-booking-page .admin-actions-row button:last-child:hover {
+  background: var(--admin-success);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}

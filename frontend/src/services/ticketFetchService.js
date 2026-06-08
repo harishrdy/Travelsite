@@ -27,11 +27,8 @@ function getAuthHeaders() {
   }
 
   const token = window.localStorage.getItem("token");
-  const userId = window.localStorage.getItem("userId");
-
   return {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(userId ? { "X-User-Id": userId } : {}),
   };
 }
 
@@ -255,4 +252,3 @@ export async function fetchTicketByContact({
     matchingTickets: normalizedTickets,
   };
 }
-

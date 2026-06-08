@@ -1,11 +1,6 @@
 const FALLBACK_API_BASE_URL =
   "http://3.111.182.53:8080";
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "0.0.0.0"]);
-const DEFAULT_FLIGHT_USER_ID =
-  process.env.REACT_APP_FLIGHT_USER_ID ||
-  process.env.REACT_APP_DEFAULT_USER_ID ||
-  "user_123";
-
 function isLocalDevelopment() {
   if (process.env.NODE_ENV !== "development") {
     return false;
@@ -114,7 +109,8 @@ function shouldUseNgrokBypass(urlOrPath) {
   try {
     const parsed = new URL(toAbsoluteUrl(urlOrPath), window.location.origin);
     return (
-      false
+      parsed.hostname.includes("ngrok-free.dev") ||
+      parsed.hostname.includes("ngrok.io")
     );
   } catch {
     return false;
@@ -234,56 +230,6 @@ function normalizeText(value, fallback = "") {
   return text || fallback;
 }
 
-function decodeJwtPayload(token) {
-  const rawToken = normalizeText(token, "");
-  if (!rawToken) {
-    return {};
-  }
-
-  const parts = rawToken.split(".");
-  if (parts.length < 2) {
-    return {};
-  }
-
-  try {
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
-    const payload = atob(padded);
-    return JSON.parse(payload) || {};
-  } catch {
-    return {};
-  }
-}
-
-function resolveUserIdFromTokenPayload(tokenPayload) {
-  return normalizeText(
-    pickFirst(
-      tokenPayload,
-      [
-        "userId",
-        "UserId",
-        "uid",
-        "Uid",
-        "id",
-        "Id",
-        "sub",
-        "nameid",
-        "user_id",
-        "preferred_username",
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid",
-        "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid",
-        "email",
-        "upn",
-        "unique_name",
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
-      ],
-      ""
-    ),
-    ""
-  );
-}
-
 function resolveAuthToken() {
   if (typeof window === "undefined") {
     return "";
@@ -294,114 +240,6 @@ function resolveAuthToken() {
   } catch {
     return "";
   }
-}
-
-function resolveCurrentUserId(explicitUserId) {
-  const directValue = normalizeText(explicitUserId, "");
-  if (directValue) {
-    return directValue;
-  }
-
-  if (typeof window === "undefined") {
-    return "";
-  }
-
-  let rawUser = "";
-  let rawToken = "";
-  let explicitStoredUserId = "";
-
-  try {
-    rawUser = window.localStorage.getItem("user") || "";
-    rawToken = window.localStorage.getItem("token") || "";
-    explicitStoredUserId =
-      window.localStorage.getItem("userId") ||
-      window.localStorage.getItem("UserId") ||
-      "";
-  } catch {
-    return "";
-  }
-
-  const tokenPayload = decodeJwtPayload(rawToken);
-  const tokenUserId = resolveUserIdFromTokenPayload(tokenPayload);
-
-  if (!rawUser) {
-    return normalizeText(explicitStoredUserId || tokenUserId, "");
-  }
-
-  let parsed = {};
-
-  try {
-    parsed = JSON.parse(rawUser) || {};
-  } catch {
-    return normalizeText(explicitStoredUserId || tokenUserId, "");
-  }
-
-  const nestedUser = pickFirst(parsed, ["user", "User"], {});
-  const profileUserId = normalizeText(
-    pickFirst(
-      parsed,
-      ["userId", "UserId", "id", "Id", "uid", "Uid", "userID", "UserID"],
-      ""
-    ),
-    ""
-  );
-  const nestedProfileUserId = normalizeText(
-    pickFirst(
-      nestedUser,
-      ["userId", "UserId", "id", "Id", "uid", "Uid", "userID", "UserID"],
-      ""
-    ),
-    ""
-  );
-  const emailFallback = normalizeText(
-    pickFirst(parsed, ["email", "Email"], "") ||
-      pickFirst(
-        tokenPayload,
-        ["email", "upn", "unique_name", "preferred_username"],
-        ""
-      ),
-    ""
-  );
-
-  const resolved = normalizeText(
-    profileUserId ||
-      nestedProfileUserId ||
-      explicitStoredUserId ||
-      tokenUserId ||
-      emailFallback,
-    ""
-  );
-
-  if (!resolved) {
-    return "";
-  }
-
-  try {
-    window.localStorage.setItem("userId", resolved);
-
-    if (!profileUserId && parsed && typeof parsed === "object") {
-      window.localStorage.setItem(
-        "user",
-        JSON.stringify({
-          ...parsed,
-          userId: resolved,
-        })
-      );
-    }
-  } catch {
-    // Ignore storage update failures.
-  }
-
-  return resolved;
-}
-
-function resolveRequiredUserId(userId) {
-  const resolved = resolveCurrentUserId(userId) || DEFAULT_FLIGHT_USER_ID;
-  if (!resolved) {
-    throw new Error("X-User-Id header is required. Please sign in again.");
-  }
-
-  return resolved;
 }
 
 function normalizeFlightClassOption(option) {
@@ -715,14 +553,12 @@ function normalizeErrorMessage(payload) {
 }
 
 async function requestJson(urlOrPath, options = {}) {
-  const { userId, requireUserId, ...fetchOptions } = options;
-  const resolvedUserId = requireUserId
-    ? resolveRequiredUserId(userId)
-    : resolveCurrentUserId(userId);
+  const fetchOptions = { ...options };
+  delete fetchOptions.userId;
+  delete fetchOptions.requireUserId;
   const resolvedToken = resolveAuthToken();
   const headers = {
     Accept: "application/json",
-    ...(resolvedUserId ? { "X-User-Id": resolvedUserId } : {}),
     ...(resolvedToken && !options?.headers?.Authorization
       ? { Authorization: `Bearer ${resolvedToken}` }
       : {}),
@@ -907,5 +743,3 @@ export async function getFlightSeatMap(flightId, travelClass, { userId } = {}) {
 
   return requestJson(url, { method: "GET", userId });
 }
-
-

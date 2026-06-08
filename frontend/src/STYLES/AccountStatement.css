@@ -4,10 +4,10 @@
   --stmt-border: #cfdbea;
   --stmt-text: #1c395f;
   --stmt-muted: #597293;
-  --stmt-primary: var(--theme-primary-strong, #df3f1f);
-  --stmt-primary-strong: #0c2f5d;
-  --stmt-danger: var(--theme-primary, #f04423);
-  --stmt-success: var(--theme-primary, #f04423);
+  --stmt-primary: var(--theme-primary-strong, #006f7a);
+  --stmt-primary-strong: #17242d;
+  --stmt-danger: var(--theme-primary, #009b8f);
+  --stmt-success: var(--theme-primary, #009b8f);
   --stmt-shadow-sm: 0 8px 18px rgba(13, 30, 52, 0.08);
   --stmt-heading-font: var(--app-font-family);
   --stmt-body-font: var(--app-font-family);
@@ -18,15 +18,15 @@
   color: var(--stmt-text);
 }
 
-/* Unified orange travel theme */
+/* Unified Atlas travel theme */
 .account-statement-page {
-  --stmt-border: var(--theme-border, #f2cbbf);
+  --stmt-border: var(--theme-border, #cfded8);
   --stmt-text: var(--theme-navy, #1f2a44);
   --stmt-muted: var(--theme-muted, #64748b);
-  --stmt-primary: var(--theme-primary, #f04423);
-  --stmt-primary-strong: var(--theme-primary-strong, #df3f1f);
-  --stmt-danger: var(--theme-primary-strong, #df3f1f);
-  --stmt-success: var(--theme-primary, #f04423);
+  --stmt-primary: var(--theme-primary, #009b8f);
+  --stmt-primary-strong: var(--theme-primary-strong, #006f7a);
+  --stmt-danger: var(--theme-primary-strong, #006f7a);
+  --stmt-success: var(--theme-primary, #009b8f);
   --stmt-shadow-sm: var(--theme-shadow-sm, 0 10px 24px rgba(125, 59, 31, 0.08));
 }
 
@@ -173,7 +173,7 @@
 }
 
 .statement-table thead {
-  background: linear-gradient(135deg, var(--theme-primary, #f04423), var(--theme-primary-strong, #df3f1f));
+  background: linear-gradient(135deg, var(--theme-primary, #009b8f), var(--theme-primary-strong, #006f7a));
   color: #ffffff;
 }
 
@@ -214,7 +214,7 @@
 }
 
 .statement-debit {
-  color: var(--theme-primary-strong, #df3f1f);
+  color: var(--theme-primary-strong, #006f7a);
   font-weight: 700;
 }
 

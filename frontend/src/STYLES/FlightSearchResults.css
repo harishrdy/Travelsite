@@ -6,12 +6,12 @@
   --fr-border: #cfdbea;
   --fr-text: #1c395f;
   --fr-muted: #597293;
-  --fr-primary: #0e3a73;
-  --fr-primary-strong: #0c2f5d;
-  --fr-accent: #185fbc;
+  --fr-primary: #17242d;
+  --fr-primary-strong: #17242d;
+  --fr-accent: #3656d4;
   --fr-accent-strong: #144f9c;
-  --fr-success: #185fbc;
-  --fr-danger: #185fbc;
+  --fr-success: #3656d4;
+  --fr-danger: #3656d4;
   --fr-shadow: 0 12px 26px rgba(13, 30, 52, 0.1);
   --fr-heading-font: var(--app-font-family);
   --fr-body-font: var(--app-font-family);
@@ -24,6 +24,55 @@
     radial-gradient(circle at 3% 8%, rgba(34, 87, 157, 0.09), transparent 30%),
     radial-gradient(circle at 98% 6%, rgba(37, 109, 204, 0.08), transparent 28%),
     var(--fr-bg);
+}
+
+/* Atlas flight results theme */
+.flight-results-page {
+  --fr-bg: var(--theme-page, #eef7f4) !important;
+  --fr-surface: #ffffff !important;
+  --fr-border: #cfded8 !important;
+  --fr-text: var(--theme-navy, #17242d) !important;
+  --fr-muted: var(--theme-muted, #66757b) !important;
+  --fr-primary: var(--theme-primary, #009b8f) !important;
+  --fr-primary-strong: var(--theme-primary-strong, #006f7a) !important;
+  --fr-accent: var(--theme-blue, #3656d4) !important;
+  --fr-accent-strong: #273fb0 !important;
+  --fr-success: var(--theme-primary, #009b8f) !important;
+  --fr-danger: var(--theme-coral, #f36f5f) !important;
+  --fr-shadow: 0 14px 32px rgba(12, 46, 51, 0.1) !important;
+  background:
+    linear-gradient(135deg, rgba(0, 155, 143, 0.1) 0%, transparent 34%),
+    linear-gradient(225deg, rgba(54, 86, 212, 0.1) 0%, transparent 32%),
+    var(--fr-bg) !important;
+}
+
+.summary-strip,
+.modify-search-panel,
+.flight-card,
+.flight-result-card,
+.flight-filter-panel,
+.flight-sort-strip,
+.fare-card {
+  border-color: #cfded8 !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  box-shadow: 0 14px 32px rgba(12, 46, 51, 0.1) !important;
+}
+
+.modify-btn,
+.flight-book-btn,
+.flight-action-btn,
+.fare-select-btn,
+.flight-filter-apply,
+.flight-sort-pill.active {
+  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.22) !important;
+}
+
+.route-block h2,
+.meta-line svg {
+  color: var(--theme-primary-strong, #006f7a) !important;
 }
 
 .flight-results-page *,
@@ -114,7 +163,7 @@
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 10px 20px rgba(28, 93, 177, 0.28);
+  box-shadow: 0 10px 20px rgba(54, 86, 212, 0.28);
 }
 
 .modify-search-panel {
@@ -225,7 +274,7 @@
 .search-feedback.success {
   border: 1px solid #e4eefc;
   background: #f6f9fe;
-  color: #185fbc;
+  color: #3656d4;
 }
 
 .flight-results-page.is-loading {
@@ -954,4 +1003,63 @@
   .booking-form-group.small {
     grid-column: span 2;
   }
+}
+
+/* Final atlas flight results sweep */
+.flight-results-page {
+  --fr-bg: var(--theme-page, #eef7f4) !important;
+  --fr-surface: #ffffff !important;
+  --fr-border: #cfded8 !important;
+  --fr-text: var(--theme-navy, #17242d) !important;
+  --fr-muted: var(--theme-muted, #66757b) !important;
+  --fr-primary: var(--theme-primary, #009b8f) !important;
+  --fr-primary-strong: var(--theme-primary-strong, #006f7a) !important;
+  --fr-accent: var(--theme-blue, #3656d4) !important;
+  --fr-accent-strong: #273fb0 !important;
+  --fr-success: var(--theme-primary, #009b8f) !important;
+  --fr-danger: var(--theme-coral, #f36f5f) !important;
+  background:
+    linear-gradient(135deg, rgba(0, 155, 143, 0.1) 0%, transparent 34%),
+    linear-gradient(225deg, rgba(54, 86, 212, 0.1) 0%, transparent 32%),
+    var(--fr-bg) !important;
+}
+
+.summary-strip,
+.modify-search-panel,
+.flight-card,
+.flight-result-card,
+.flight-filter-panel,
+.flight-sort-strip,
+.fare-card {
+  border-color: #cfded8 !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  box-shadow: 0 14px 32px rgba(12, 46, 51, 0.1) !important;
+}
+
+.modify-btn,
+.primary-btn,
+.flight-book-btn,
+.flight-action-btn,
+.fare-select-btn,
+.flight-filter-apply,
+.flight-sort-pill.active {
+  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.22) !important;
+}
+
+.route-block h2,
+.meta-line svg {
+  color: var(--theme-primary-strong, #006f7a) !important;
+}
+
+/* Neutralize focus outlines on modify search and booking form fields on flight search results */
+.modify-field input:focus,
+.modify-field select:focus,
+.booking-form-group input:focus,
+.booking-form-group select:focus {
+  border-color: #c9d6e8 !important;
+  box-shadow: none !important;
+  outline: none !important;
 }

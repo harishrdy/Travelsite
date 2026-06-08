@@ -1,4 +1,4 @@
-﻿namespace PickNBook.Api.Models
+namespace PickNBook.Api.Models
 {
     public class BusBooking
     {
@@ -16,5 +16,7 @@
         public int TotalSeats { get; set; }
         public string BoardingPoint { get; set; } = string.Empty;
         public string DroppingPoint { get; set; } = string.Empty;
+        public string? BoardingPointsJson { get; set; }
+        public string? DroppingPointsJson { get; set; }
     }
 }

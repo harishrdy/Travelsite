@@ -35,6 +35,8 @@ public class SeatMapResponseDto
     public List<SeatDefinitionDto> SeatDefinitions { get; set; }
     = [];
     public string? Variant { get; set; }
+    public List<BusPointDto> BoardingPoints { get; set; } = [];
+    public List<BusPointDto> DroppingPoints { get; set; } = [];
 }
 
 public class SeatMapItemDto

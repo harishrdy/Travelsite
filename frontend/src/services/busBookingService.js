@@ -11,15 +11,11 @@ function getAuthHeaders() {
   const token = isAdminRoute
     ? localStorage.getItem("adminToken") || localStorage.getItem("token")
     : localStorage.getItem("token");
-  const userId = isAdminRoute
-    ? localStorage.getItem("adminId") || localStorage.getItem("userId")
-    : localStorage.getItem("userId");
 
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(userId ? { "X-User-Id": userId } : {}),
   };
 }
 
@@ -89,7 +85,8 @@ function shouldUseNgrokBypass(urlOrPath) {
   try {
     const parsed = new URL(toAbsoluteUrl(urlOrPath), window.location.origin);
     return (
-      false
+      parsed.hostname.includes("ngrok-free.dev") ||
+      parsed.hostname.includes("ngrok.io")
     );
   } catch {
     return false;
@@ -771,7 +768,7 @@ function validateCouponRecord(coupon, { couponCode, totalFare } = {}) {
   if (minBookingAmount > 0 && fare < minBookingAmount) {
     return {
       valid: false,
-      message: `Minimum booking amount for this coupon is ₹ ${new Intl.NumberFormat(
+      message: `Minimum booking amount for this coupon is â‚¹ ${new Intl.NumberFormat(
         "en-IN"
       ).format(minBookingAmount)}.`,
     };
@@ -857,30 +854,42 @@ function normalizeErrorMessage(payload) {
       return "";
     }
 
-    const preMatch = text.match(/<pre>(.*?)<\/pre>/i);
+    // Filter style and script tags and their content to prevent CSS/JS from spilling into error message
+    const cleaned = text.replace(/<(style|script)\b[^>]*>([\s\S]*?)<\/\1>/gi, "");
+
+    const preMatch = cleaned.match(/<pre>(.*?)<\/pre>/i);
     if (preMatch?.[1]) {
-      return preMatch[1].replace(/\s+/g, " ").trim();
+      return preMatch[1].replace(/\s+/g, " ").trim().slice(0, 250);
     }
 
-    const noTags = text.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    const noTags = cleaned.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
     if (noTags) {
-      return noTags;
+      return noTags.slice(0, 250);
     }
 
-    return text;
+    return text.slice(0, 250);
   }
 
-  if (payload && typeof payload?.message === "string") {
-    return payload.message.trim();
-  }
-
-  if (payload && typeof payload?.title === "string") {
-    const validationMessages =
-      payload.errors && typeof payload.errors === "object"
-        ? Object.values(payload.errors).flat().filter(Boolean)
-        : [];
-
-    return [payload.title, ...validationMessages].join(" ").trim();
+  if (payload && typeof payload === "object") {
+    if (typeof payload.message === "string" && payload.message.trim()) {
+      return payload.message.trim();
+    }
+    if (typeof payload.error === "string" && payload.error.trim()) {
+      return payload.error.trim();
+    }
+    if (typeof payload.title === "string" && payload.title.trim()) {
+      const validationMessages =
+        payload.errors && typeof payload.errors === "object"
+          ? Object.values(payload.errors).flat().filter(Boolean)
+          : [];
+      return [payload.title, ...validationMessages].join(" ").trim();
+    }
+    if (typeof payload.exception === "string" && payload.exception.trim()) {
+      return payload.exception.trim();
+    }
+    if (typeof payload.detail === "string" && payload.detail.trim()) {
+      return payload.detail.trim();
+    }
   }
 
   return "";
@@ -888,7 +897,7 @@ function normalizeErrorMessage(payload) {
 
 async function requestJson(urlOrPath, options = {}) {
   const headers = {
-  ...getAuthHeaders(),   // ðŸ”¥ THIS FIXES YOUR ISSUE
+  ...getAuthHeaders(),   // Ã°Å¸â€Â¥ THIS FIXES YOUR ISSUE
   ...(options.headers || {}),
 };
 
@@ -1338,5 +1347,3 @@ export async function getFeaturedBusOffers() {
     return [];
   }
 }
-
-

@@ -1,4 +1,4 @@
-﻿namespace PickNBook.Api.Models;
+namespace PickNBook.Api.Models;
 
 public class BusPromotion
 {
@@ -11,8 +11,6 @@ public class BusPromotion
     public string? Description { get; set; }
 
     public string PromotionType { get; set; } = string.Empty;
-
-    public string TriggerType { get; set; } = string.Empty;
 
     public string DiscountType { get; set; } = string.Empty;
 

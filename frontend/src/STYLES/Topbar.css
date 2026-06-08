@@ -8,7 +8,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  border-bottom: 1px solid var(--theme-border-soft, #f7ded5);
+  border-bottom: 1px solid var(--theme-border-soft, #e1ebe7);
   box-shadow: 0 10px 34px rgba(125, 59, 31, 0.08);
   backdrop-filter: blur(10px);
   background: rgba(255, 255, 255, 0.96);
@@ -36,6 +36,14 @@
   color: inherit;
 }
 
+.brand-logo {
+  display: block;
+  width: clamp(126px, 11vw, 160px);
+  height: 38px;
+  object-fit: contain;
+  object-position: left center;
+}
+
 .brand-icon {
   width: 38px;
   height: 38px;
@@ -44,7 +52,7 @@
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  background: linear-gradient(135deg, var(--theme-primary, #f05a28), var(--theme-primary-strong, #df3f1f));
+  background: linear-gradient(135deg, var(--theme-primary, #f05a28), var(--theme-primary-strong, #006f7a));
   box-shadow: 0 14px 26px rgba(240, 90, 40, 0.28);
 }
 
@@ -59,12 +67,12 @@
   font-size: 22px;
   font-weight: 600;
   letter-spacing: 0.01em;
-  color: var(--theme-primary-strong, #df3f1f);
+  color: var(--theme-primary-strong, #006f7a);
   text-transform: uppercase;
 }
 
 .brand-title-accent {
-  color: var(--theme-primary-strong, #df3f1f);
+  color: var(--theme-primary-strong, #006f7a);
 }
 
 .brand-subtitle {
@@ -103,14 +111,14 @@
 }
 
 .menu-item:hover {
-  color: var(--theme-primary-strong, #df3f1f);
-  background: var(--theme-primary-soft, #fff0e9);
+  color: var(--theme-primary-strong, #006f7a);
+  background: var(--theme-primary-soft, #dff8f3);
 }
 
 .menu-item.active {
   color: #ffffff;
-  background: linear-gradient(135deg, var(--theme-primary, #f04423), var(--theme-primary-strong, #df3f1f));
-  box-shadow: 0 14px 28px rgba(240, 68, 35, 0.22);
+  background: linear-gradient(135deg, var(--theme-primary, #009b8f), var(--theme-primary-strong, #006f7a));
+  box-shadow: 0 14px 28px rgba(0, 155, 143, 0.22);
 }
 
 .user-section {
@@ -171,7 +179,7 @@
   width: 188px;
   background: #ffffff;
   border-radius: 12px;
-  border: 1px solid var(--theme-border-soft, #f7ded5);
+  border: 1px solid var(--theme-border-soft, #e1ebe7);
   box-shadow: var(--theme-shadow, 0 18px 45px rgba(125, 59, 31, 0.12));
   padding: 6px;
   overflow: hidden;
@@ -195,7 +203,7 @@
 }
 
 .dropdown-item:hover {
-  background: var(--theme-primary-soft, #fff0e9);
+  background: var(--theme-primary-soft, #dff8f3);
 }
 
 .dropdown-item.logout {
@@ -236,6 +244,11 @@
     flex-wrap: wrap;
   }
 
+  .brand-logo {
+    width: 144px;
+    height: 38px;
+  }
+
   .brand-title {
     font-size: 18.9px;
   }
@@ -265,6 +278,11 @@
 }
 
 @media (max-width: 640px) {
+  .brand-logo {
+    width: 126px;
+    height: 34px;
+  }
+
   .brand-subtitle {
     display: none;
   }
@@ -282,4 +300,65 @@
   .user-name {
     min-height: 36px;
   }
+}
+
+/* Atlas navigation theme */
+.topbar {
+  border-bottom-color: rgba(207, 222, 216, 0.92);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.96), rgba(247, 251, 248, 0.94)),
+    linear-gradient(135deg, rgba(0, 155, 143, 0.1), rgba(54, 86, 212, 0.08));
+  box-shadow: 0 12px 34px rgba(12, 46, 51, 0.1);
+}
+
+.brand-icon {
+  border-radius: 11px;
+  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4));
+  box-shadow: 0 14px 28px rgba(0, 111, 122, 0.24);
+}
+
+.brand-title {
+  color: var(--theme-navy, #17242d);
+}
+
+.brand-subtitle {
+  color: var(--theme-primary, #009b8f);
+}
+
+.menu-item {
+  color: #506166;
+}
+
+.menu-item:hover {
+  color: var(--theme-primary-strong, #006f7a);
+  background: rgba(0, 155, 143, 0.1);
+}
+
+.menu-item.active {
+  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  box-shadow: 0 14px 28px rgba(0, 111, 122, 0.22) !important;
+}
+
+.user-name {
+  border-color: #cfded8;
+  background: #ffffff;
+  color: var(--theme-navy, #17242d);
+}
+
+.user-name:hover {
+  border-color: rgba(0, 155, 143, 0.48);
+  box-shadow: 0 0 0 3px rgba(0, 155, 143, 0.12);
+}
+
+.dropdown {
+  border-color: #dce8e3;
+  box-shadow: 0 22px 55px rgba(12, 46, 51, 0.16);
+}
+
+.dropdown-item {
+  color: #253b42;
+}
+
+.dropdown-item:hover {
+  background: rgba(0, 155, 143, 0.1);
 }

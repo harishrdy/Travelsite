@@ -6,28 +6,35 @@ body,
 
 :root {
   --app-font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
-  --theme-page: #fff7f2;
-  --theme-page-soft: #fff1e9;
+  --theme-page: #eef7f4;
+  --theme-page-soft: #f7fbf8;
   --theme-surface: #ffffff;
-  --theme-surface-warm: #fffaf6;
-  --theme-border: #f2cbbf;
-  --theme-border-soft: #f7ded5;
-  --theme-text: #111827;
-  --theme-muted: #64748b;
-  --theme-primary: #f04423;
-  --theme-primary-strong: #df3f1f;
-  --theme-primary-soft: #fff0e9;
-  --theme-navy: #1f2a44;
-  --theme-blue: #2f74ed;
-  --theme-pink: #ec4b9a;
-  --theme-shadow: 0 18px 45px rgba(125, 59, 31, 0.12);
-  --theme-shadow-sm: 0 10px 24px rgba(125, 59, 31, 0.08);
+  --theme-surface-warm: #f9fbf6;
+  --theme-border: #cfded8;
+  --theme-border-soft: #e1ebe7;
+  --theme-text: #162126;
+  --theme-muted: #66757b;
+  --theme-primary: #009b8f;
+  --theme-primary-strong: #006f7a;
+  --theme-primary-soft: #dff8f3;
+  --theme-navy: #17242d;
+  --theme-blue: #3656d4;
+  --theme-pink: #f36f5f;
+  --theme-coral: #f36f5f;
+  --theme-gold: #eab84e;
+  --theme-shadow: 0 22px 55px rgba(12, 46, 51, 0.15);
+  --theme-shadow-sm: 0 12px 28px rgba(12, 46, 51, 0.09);
+  --theme-gradient: linear-gradient(135deg, #009b8f 0%, #3656d4 58%, #f36f5f 100%);
+  --theme-gradient-action: linear-gradient(135deg, #009b8f 0%, #006f7a 54%, #3656d4 100%);
 }
 
 body {
   margin: 0;
   font-family: var(--app-font-family);
-  background: var(--theme-page);
+  background:
+    linear-gradient(135deg, rgba(0, 155, 143, 0.08) 0%, transparent 30%),
+    linear-gradient(225deg, rgba(243, 111, 95, 0.1) 0%, transparent 34%),
+    var(--theme-page);
   color: var(--theme-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -72,12 +79,18 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible,
-textarea:focus-visible {
-  outline: 3px solid rgba(240, 68, 35, 0.18);
-  outline-offset: 2px;
+textarea:focus-visible,
+input:focus,
+select:focus,
+textarea:focus,
+button:focus,
+a:focus {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
 }
 
-/* App-wide orange travel theme guards */
+/* App-wide atlas theme guards */
 .dashboard-layout,
 .bank-page,
 .bank-container,
@@ -177,8 +190,8 @@ textarea:focus-visible {
 .account-page,
 .edit-profile-page {
   background:
-    radial-gradient(circle at 3% 8%, rgba(240, 68, 35, 0.1), transparent 30%),
-    radial-gradient(circle at 98% 6%, rgba(255, 137, 91, 0.14), transparent 28%),
+    linear-gradient(135deg, rgba(0, 155, 143, 0.1) 0%, transparent 34%),
+    linear-gradient(225deg, rgba(243, 111, 95, 0.1) 0%, transparent 30%),
     var(--theme-page) !important;
 }
 
@@ -218,9 +231,49 @@ textarea:focus-visible {
 .trip-chip.active,
 .menu-item.active {
   border-color: transparent !important;
-  background: linear-gradient(135deg, var(--theme-primary), var(--theme-primary-strong)) !important;
+  background: var(--theme-gradient-action) !important;
   color: #ffffff !important;
-  box-shadow: 0 14px 28px rgba(240, 68, 35, 0.22) !important;
+  box-shadow: 0 14px 28px rgba(0, 111, 122, 0.22) !important;
+}
+
+/* Atlas theme override layer */
+.topbar,
+.travel-footer,
+.dashboard-layout,
+.bank-page,
+.bank-container,
+.traveller-container,
+.qr-container,
+.account-statement-page,
+.deposit-container,
+.account-page,
+.edit-profile-page,
+.flight-ops-page,
+.ticket-confirmation-page,
+.bus-results-page,
+.fetch-ticket-page,
+.bus-flow-page {
+  --surface: var(--theme-surface) !important;
+  --surface-soft: var(--theme-surface-warm) !important;
+  --surface-border: var(--theme-border) !important;
+  --text: var(--theme-text) !important;
+  --text-soft: var(--theme-muted) !important;
+  --primary: var(--theme-primary) !important;
+  --primary-strong: var(--theme-primary-strong) !important;
+  --accent: var(--theme-coral) !important;
+}
+
+.search-btn,
+.dashboard-primary-btn,
+.quick-action.primary,
+.flow-continue-btn,
+.flow-pay-btn,
+.coupon-box button,
+.tab.active,
+.trip-chip.active {
+  background: var(--theme-gradient-action) !important;
+  color: #ffffff !important;
+  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.22) !important;
 }
 
 /* Hide browser-default password reveal eye and clear button in Edge/IE/Chrome */
@@ -238,3 +291,4 @@ input::-ms-clear {
 .pulse {
   animation: pulse 1.5s infinite ease-in-out;
 }
+

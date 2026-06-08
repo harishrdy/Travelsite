@@ -65,7 +65,8 @@ function shouldUseNgrokBypass(urlOrPath) {
       typeof window !== "undefined" ? window.location.origin : undefined
     );
     return (
-      false
+      parsed.hostname.includes("ngrok-free.dev") ||
+      parsed.hostname.includes("ngrok.io")
     );
   } catch {
     return false;
@@ -151,5 +152,3 @@ export async function requestAuth(
 
   return payload;
 }
-
-

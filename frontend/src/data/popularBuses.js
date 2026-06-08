@@ -1,14 +1,14 @@
-import apsrtcLogo from "../assets/images/apsrtc-logo.svg";
-import tgsrtcLogo from "../assets/images/tgsrtc-logo.svg";
-import ksrtcLogo from "../assets/images/ksrtc-logo.svg";
-import keralaRtcLogo from "../assets/images/kerala-rtc-logo.svg";
-import gsrtcLogo from "../assets/images/gsrtc-logo.svg";
+import apsrtcLogo from "../assets/images/buses/apsrtc-logo.svg";
+import tgsrtcLogo from "../assets/images/buses/tgsrtc-logo.svg";
+import ksrtcLogo from "../assets/images/buses/ksrtc-logo.svg";
+import keralaRtcLogo from "../assets/images/buses/kerala-rtc-logo.svg";
+import gsrtcLogo from "../assets/images/buses/gsrtc-logo.svg";
 
-import apsrtcBg from "../assets/images/apsrtc-bg.svg";
-import tgsrtcBg from "../assets/images/tgsrtc-bg.svg";
-import ksrtcBg from "../assets/images/ksrtc-bg.svg";
-import keralaRtcBg from "../assets/images/kerala-rtc-bg.svg";
-import gsrtcBg from "../assets/images/gsrtc-bg.svg";
+import apsrtcBg from "../assets/images/buses/apsrtc-bg.svg";
+import tgsrtcBg from "../assets/images/buses/tgsrtc-bg.svg";
+import ksrtcBg from "../assets/images/buses/ksrtc-bg.svg";
+import keralaRtcBg from "../assets/images/buses/kerala-rtc-bg.svg";
+import gsrtcBg from "../assets/images/buses/gsrtc-bg.svg";
 
 export const POPULAR_RTC_OPERATORS = [
   {

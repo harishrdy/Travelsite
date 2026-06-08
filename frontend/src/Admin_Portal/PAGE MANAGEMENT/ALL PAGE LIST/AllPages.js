@@ -1,41 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./AllPages.css";
 import { useNavigate } from "react-router-dom";
 import { useAdminList } from "../../../utils/adminPortalStorage";
+import { DEFAULT_CMS_PAGES, ensureCurrentLegalPageContent } from "../../../data/legalPages";
 
 const AllPages = () => {
   const navigate = useNavigate();
   const pageCreatePath = "/admin/page-management/pages/new";
 
-  const [pages, setPages] = useAdminList("cms-pages", [
-    {
-      id: 1,
-      title: "Terms & Conditions",
-      slug: "terms-conditions",
-      module: "All",
-      updateDate: "10:30, 20 Oct 2025",
-      entryDate: "16:23, 13 Sep 2025",
-      status: "Active",
-    },
-    {
-      id: 2,
-      title: "Privacy Policy",
-      slug: "privacy-policy",
-      module: "All",
-      updateDate: "14:44, 21 Nov 2025",
-      entryDate: "16:25, 13 Sep 2025",
-      status: "Active",
-    },
-    {
-      id: 3,
-      title: "Refund & Cancellation Policy",
-      slug: "refund-cancellation-policy",
-      module: "All",
-      updateDate: "16:31, 28 Oct 2025",
-      entryDate: "16:29, 28 Oct 2025",
-      status: "Active",
-    },
-  ]);
+  const [pages, setPages] = useAdminList("cms-pages", DEFAULT_CMS_PAGES);
+
+  useEffect(() => {
+    const nextPages = ensureCurrentLegalPageContent(pages);
+    if (JSON.stringify(nextPages) !== JSON.stringify(pages)) {
+      setPages(nextPages);
+    }
+  }, [pages, setPages]);
 
   const handleDelete = (id) => {
     setPages(pages.filter((page) => page.id !== id));

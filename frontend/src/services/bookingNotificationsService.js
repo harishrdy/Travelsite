@@ -68,7 +68,8 @@ function shouldUseNgrokBypass(urlOrPath) {
   try {
     const parsed = new URL(toAbsoluteUrl(urlOrPath), window.location.origin);
     return (
-      false
+      parsed.hostname.includes("ngrok-free.dev") ||
+      parsed.hostname.includes("ngrok.io")
     );
   } catch {
     return false;
@@ -351,5 +352,3 @@ export async function sendBookingNotifications({
     source: clientDispatch.source,
   };
 }
-
-

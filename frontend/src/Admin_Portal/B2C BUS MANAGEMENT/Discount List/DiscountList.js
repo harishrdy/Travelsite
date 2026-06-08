@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FaEdit, FaEye, FaPlus, FaTrashAlt } from 'react-icons/fa';
+import { FaEdit, FaEye, FaPlus, FaTrashAlt, FaFileExport, FaChevronDown, FaSearch } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import './DiscountList.css';
 import {
@@ -39,8 +39,6 @@ const toBoolean = (value, fallback = false) => {
   return String(value).trim().toLowerCase() === 'true';
 };
 
-
-
 function DiscountList() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
@@ -48,8 +46,19 @@ function DiscountList() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeDropdownId, setActiveDropdownId] = useState(null);
 
-
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (!event.target.closest('.actions-dropdown-container')) {
+        setActiveDropdownId(null);
+      }
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+    };
+  }, []);
 
   const loadDiscounts = async () => {
     setLoading(true);
@@ -58,7 +67,7 @@ function DiscountList() {
       const normalized = (data || []).map((item) => ({
         id: item.id || item.discountId || '',
         code: item.code || item.discountCode || '',
-        title: item.title || item.name || '',
+        title: item.title || item.name || item.remark || '',
         description: item.description || '',
         value: Number(item.value) || 0,
         type: item.discountType || item.type || 'Percentage',
@@ -68,8 +77,8 @@ function DiscountList() {
         minBookingAmount: Number(item.minBookingAmount) || 0,
         startDateUtc: item.startDateUtc || item.startDate || null,
         endDateUtc: item.endDateUtc || item.endDate || null,
-        entryDate: item.entryDate || item.createdDate || item.createdAt || 'N/A',
-        updateDate: item.updateDate || item.updatedDate || item.updatedAt || 'N/A',
+        entryDate: item.entryDate || item.entryDateUtc || item.createdDate || item.createdAt || 'N/A',
+        updateDate: item.updateDate || item.updateDateUtc || item.updatedDate || item.updatedAt || 'N/A',
         updatedBy: item.updatedBy || 'Pick N Book',
         remark: item.remark || '',
         status: item.status || 'Active',
@@ -88,7 +97,21 @@ function DiscountList() {
   }, []);
 
   const filteredDiscounts = useMemo(() => {
-    return rows.filter((row) => {
+    const sorted = [...rows].sort((a, b) => {
+      const numA = parseInt(String(a.id).replace(/\D/g, '')) || 0;
+      const numB = parseInt(String(b.id).replace(/\D/g, '')) || 0;
+      if (numA !== numB) {
+        return numB - numA;
+      }
+      const dateA = new Date(a.entryDate);
+      const dateB = new Date(b.entryDate);
+      if (!isNaN(dateA) && !isNaN(dateB)) {
+        return dateB - dateA;
+      }
+      return String(b.id).localeCompare(String(a.id));
+    });
+
+    return sorted.filter((row) => {
       const matchesSearch =
         String(row.id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         String(row.code || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -186,7 +209,7 @@ function DiscountList() {
   };
 
   return (
-    <div className="discount-list-page-container">
+    <div className="discount-list-page-container bus-discount-list-page-container">
       <section className="discount-heading">
         <p className="discount-heading-main">B2C Bus Management</p>
         <p className="discount-heading-sub">Discount List</p>
@@ -216,13 +239,18 @@ function DiscountList() {
         <div className="toolbar-group">
           <label className="field">
             <span>Search discounts</span>
-            <input
-              type="text"
-              placeholder="Search by ID, code, title, type, remark"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-            />
+            <div className="search-input-wrapper">
+              <FaSearch className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search by ID, code, title, type, remark"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+              />
+            </div>
           </label>
+        </div>
+        <div className="toolbar-actions">
           <label className="field">
             <span>Status</span>
             <select
@@ -234,13 +262,12 @@ function DiscountList() {
               <option value="Inactive">Inactive</option>
             </select>
           </label>
-        </div>
-        <div className="toolbar-actions">
           <button type="button" className="primary-btn" onClick={() => navigate('/admin/b2c-bus/discounts/new')}>
             <FaPlus aria-hidden="true" />
             Add B2C Discount
           </button>
-          <button type="button" className="ghost-btn" onClick={handleExport}>
+          <button type="button" className="primary-btn export-btn" onClick={handleExport}>
+            <FaFileExport aria-hidden="true" />
             Export
           </button>
         </div>
@@ -281,7 +308,7 @@ function DiscountList() {
                     <div className="id-chip">{row.id}</div>
                   </td>
                   <td>
-                    <div style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.title || '--'}</div>
+                    <div style={{ fontWeight: 600, whiteSpace: 'normal', wordBreak: 'break-word' }}>{row.title || '--'}</div>
                     <small style={{ color: 'var(--admin-muted)', fontSize: '10px' }}>
                       {row.code || '--'} &bull; {row.type}
                     </small>
@@ -293,37 +320,72 @@ function DiscountList() {
                     <div style={{ fontSize: '11px' }}>{row.isAutoApply ? 'Auto' : 'Manual'}{row.isExclusive ? ' · Excl.' : ''}</div>
                     <small style={{ color: 'var(--admin-muted)', fontSize: '10px' }}>Pri: {row.priority}</small>
                   </td>
-                  <td style={{ textAlign: 'right', fontSize: '11px' }}>{row.minBookingAmount ? `INR ${row.minBookingAmount}` : '--'}</td>
+                  <td style={{ fontSize: '11px' }}>{row.minBookingAmount ? `INR ${row.minBookingAmount}` : '--'}</td>
                   <td style={{ fontSize: '10px', lineHeight: 1.5 }}>
                     {formatDate(row.startDateUtc)}
                     <br />
                     {formatDate(row.endDateUtc)}
                   </td>
                   <td className="status-cell">
-                    <span className={`status-pill ${row.status.toLowerCase()}`}>
-                      <span className="status-dot" />
+                    <span className={`discount-status-pill ${row.status.toLowerCase()}`}>
+                      <span className="discount-status-dot" />
                       {row.status}
                     </span>
                   </td>
                   <td style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.updatedBy}</td>
                   <td>
-                    <div className="table-actions">
-                      <button type="button" className="ghost-btn small icon-btn" onClick={() => handleView(row)}>
-                        <FaEye aria-hidden="true" />
-                        <span className="sr-only">View</span>
-                      </button>
+                    <div className="actions-dropdown-container">
                       <button
                         type="button"
-                        className="ghost-btn small icon-btn"
-                        onClick={() => handleEdit(row)}
+                        className={`actions-trigger-btn ${activeDropdownId === row.id ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveDropdownId(activeDropdownId === row.id ? null : row.id);
+                        }}
                       >
-                        <FaEdit aria-hidden="true" />
-                        <span className="sr-only">Edit</span>
+                        <span>Actions</span>
+                        <FaChevronDown className="chevron-icon" />
                       </button>
-                      <button type="button" className="danger-btn small icon-btn" onClick={() => handleDelete(row.id)}>
-                        <FaTrashAlt aria-hidden="true" />
-                        <span className="sr-only">Delete</span>
-                      </button>
+                      {activeDropdownId === row.id && (
+                        <div className="actions-dropdown-menu">
+                          <button
+                            type="button"
+                            className="dropdown-item view"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleView(row);
+                              setActiveDropdownId(null);
+                            }}
+                          >
+                            <FaEye className="item-icon" />
+                            <span>View Mapping</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="dropdown-item edit"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(row);
+                              setActiveDropdownId(null);
+                            }}
+                          >
+                            <FaEdit className="item-icon" />
+                            <span>Edit Discount</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="dropdown-item delete"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(row.id);
+                              setActiveDropdownId(null);
+                            }}
+                          >
+                            <FaTrashAlt className="item-icon" />
+                            <span>Delete Discount</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </td>
                 </tr>

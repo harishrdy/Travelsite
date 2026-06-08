@@ -18,10 +18,8 @@ function pickFirst(source, keys, fallback = null) {
 function getAuthHeaders() {
   if (typeof window === "undefined") return {};
   const token = window.localStorage.getItem("token");
-  const userId = window.localStorage.getItem("userId");
   return {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(userId ? { "X-User-Id": userId } : {}),
   };
 }
 
@@ -186,4 +184,3 @@ export async function fetchTicketByContact({ mobile, email, bookingType, activeO
 
   throw new Error("No active booking found");
 }
-

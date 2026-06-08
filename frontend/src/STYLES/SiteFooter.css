@@ -9,6 +9,32 @@
   border-top: 1px solid rgba(220, 232, 247, 0.28);
 }
 
+/* Atlas footer theme */
+.travel-footer {
+  background:
+    linear-gradient(145deg, rgba(0, 155, 143, 0.18), transparent 38%),
+    linear-gradient(25deg, rgba(243, 111, 95, 0.16), transparent 42%),
+    linear-gradient(135deg, #101e24, #162a30 58%, #0b171b) !important;
+  border-top-color: rgba(207, 222, 216, 0.28) !important;
+}
+
+.footer-branding p,
+.footer-contact-inline span,
+.footer-contact-link,
+.footer-bottomline {
+  color: rgba(247, 251, 248, 0.72) !important;
+}
+
+.footer-top-btn {
+  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.24);
+}
+
+.footer-link-item {
+  border-color: rgba(223, 248, 243, 0.2) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
 .footer-shell {
   max-width: 1240px;
   margin: 0 auto;
@@ -29,6 +55,15 @@
   letter-spacing: -0.01em;
 }
 
+.footer-brand-logo {
+  display: block;
+  width: 150px;
+  height: 38px;
+  object-fit: contain;
+  object-position: left center;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.16));
+}
+
 .footer-branding p {
   margin: 5px 0 0;
   color: #bdd4f3;
@@ -41,7 +76,7 @@
   border-radius: 999px;
   min-height: 36px;
   padding: 0 15px;
-  background: linear-gradient(135deg, #367ddb, #2264bb);
+  background: linear-gradient(135deg, #3656d4, #273fb0);
   color: #ffffff;
   font-size: 9.9px;
   letter-spacing: 0.08em;
@@ -220,7 +255,7 @@
   border-radius: 18px;
   border: 1px solid rgba(211, 226, 246, 0.9);
   background:
-    radial-gradient(circle at 92% 8%, rgba(54, 125, 219, 0.13), transparent 28%),
+    radial-gradient(circle at 92% 8%, rgba(54, 86, 212, 0.13), transparent 28%),
     #ffffff;
   color: #20314a;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
@@ -236,7 +271,7 @@
 
 .footer-policy-modal-head span {
   display: block;
-  color: #367ddb;
+  color: #3656d4;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -266,8 +301,8 @@
 
 .footer-policy-close:hover {
   color: #ffffff;
-  border-color: #367ddb;
-  background: #367ddb;
+  border-color: #3656d4;
+  background: #3656d4;
 }
 
 .footer-policy-modal p {
@@ -301,8 +336,8 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #367ddb;
-  box-shadow: 0 0 0 4px rgba(54, 125, 219, 0.12);
+  background: #3656d4;
+  box-shadow: 0 0 0 4px rgba(54, 86, 212, 0.12);
 }
 
 @media (max-width: 900px) {
@@ -313,6 +348,11 @@
   .footer-topline {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .footer-brand-logo {
+    width: 140px;
+    height: 36px;
   }
 
   .footer-top-btn {
@@ -328,4 +368,30 @@
   .footer-policy-actions {
     justify-content: flex-start;
   }
+}
+
+/* Final atlas footer sweep */
+.travel-footer {
+  background:
+    linear-gradient(145deg, rgba(0, 155, 143, 0.18), transparent 38%),
+    linear-gradient(25deg, rgba(243, 111, 95, 0.16), transparent 42%),
+    linear-gradient(135deg, #101e24, #162a30 58%, #0b171b) !important;
+  border-top-color: rgba(207, 222, 216, 0.28) !important;
+}
+
+.footer-top-btn {
+  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.24) !important;
+}
+
+.footer-policy-modal-head span,
+.footer-contact-inline svg,
+.footer-contact-link svg {
+  color: var(--theme-primary, #009b8f) !important;
+}
+
+.footer-policy-close:hover,
+.footer-policy-modal li::before {
+  background: var(--theme-primary, #009b8f) !important;
+  border-color: var(--theme-primary, #009b8f) !important;
 }

@@ -59,7 +59,7 @@ function buildInitialForm(row) {
 
   return {
     code: row.code || '',
-    title: row.title || '',
+    title: row.title || row.remark || '',
     description: row.description || '',
     value: row.value !== undefined && row.value !== null ? String(row.value) : '',
     discountType: row.type || row.discountType || 'Percentage',
@@ -177,183 +177,185 @@ function AddB2CBusDiscount() {
   };
 
   return (
-    <section className="add-discount-page">
-      <header className="add-discount-header">
-        <div>
-          <p className="add-discount-title">{editingRow ? 'Edit B2C Bus Discount' : 'Add B2C Bus Discount'}</p>
-          <p className="add-discount-subtitle">Configure auto-apply discounts, validity, and pricing rules.</p>
-        </div>
-        <button type="button" className="ghost-btn" onClick={() => navigate('/admin/b2c-bus/discounts')}>
-          B2C Bus Discount List
-        </button>
-      </header>
-
-      <form className="add-discount-form" onSubmit={handleSubmit}>
-        <label className="add-field">
-          <span>Discount Code</span>
-          <input
-            type="text"
-            placeholder="DISC-NEW"
-            value={formValues.code}
-            onChange={(event) =>
-              setFormValues((previous) => ({
-                ...previous,
-                code: event.target.value.toUpperCase().replace(/\s+/g, ''),
-              }))
-            }
-            disabled={submitting}
-          />
-        </label>
-
-        <label className="add-field">
-          <span>Title</span>
-          <input
-            type="text"
-            placeholder="Sleeper Special"
-            value={formValues.title}
-            onChange={handleChange('title')}
-            disabled={submitting}
-          />
-        </label>
-
-        <label className="add-field">
-          <span>Discount Type</span>
-          <select
-            value={formValues.discountType}
-            onChange={handleChange('discountType')}
-            disabled={submitting}
-          >
-            <option value="Percentage">Percentage</option>
-            <option value="Fixed">Fixed</option>
-          </select>
-        </label>
-
-        <label className="add-field">
-          <span>Value</span>
-          <input
-            type="number"
-            min="0"
-            placeholder="0"
-            value={formValues.value}
-            onChange={handleChange('value')}
-            disabled={submitting}
-          />
-        </label>
-
-        <label className="add-field">
-          <span>Min Booking Amount</span>
-          <input
-            type="number"
-            min="0"
-            placeholder="500"
-            value={formValues.minBookingAmount}
-            onChange={handleChange('minBookingAmount')}
-            disabled={submitting}
-          />
-        </label>
-
-        <label className="add-field">
-          <span>Priority</span>
-          <input
-            type="number"
-            min="0"
-            placeholder="5"
-            value={formValues.priority}
-            onChange={handleChange('priority')}
-            disabled={submitting}
-          />
-        </label>
-
-        <label className="add-field">
-          <span>Auto Apply</span>
-          <select
-            value={String(formValues.isAutoApply)}
-            onChange={handleChange('isAutoApply')}
-            disabled={submitting}
-          >
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </select>
-        </label>
-
-        <label className="add-field">
-          <span>Exclusive</span>
-          <select
-            value={String(formValues.isExclusive)}
-            onChange={handleChange('isExclusive')}
-            disabled={submitting}
-          >
-            <option value="false">No</option>
-            <option value="true">Yes</option>
-          </select>
-        </label>
-
-        <label className="add-field">
-          <span>Start Date</span>
-          <input
-            type="datetime-local"
-            value={formValues.startDateUtc}
-            onChange={handleChange('startDateUtc')}
-            disabled={submitting}
-          />
-        </label>
-
-        <label className="add-field">
-          <span>End Date</span>
-          <input
-            type="datetime-local"
-            value={formValues.endDateUtc}
-            onChange={handleChange('endDateUtc')}
-            disabled={submitting}
-          />
-        </label>
-
-        <label className="add-field">
-          <span>Status</span>
-          <select
-            value={formValues.status}
-            onChange={handleChange('status')}
-            disabled={submitting}
-          >
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-        </label>
-
-        <label className="add-field add-field-wide">
-          <span>Description</span>
-          <input
-            type="text"
-            placeholder="10% off sleeper bookings"
-            value={formValues.description}
-            onChange={handleChange('description')}
-            disabled={submitting}
-          />
-        </label>
-
-        <label className="add-field add-field-wide">
-          <span>Remark</span>
-          <input
-            type="text"
-            placeholder="Remark"
-            value={formValues.remark}
-            onChange={handleChange('remark')}
-            disabled={submitting}
-          />
-        </label>
-
-        {error ? <p className="form-error">{error}</p> : null}
-
-        <div className="form-actions">
-          <button type="submit" className="primary-btn" disabled={submitting}>
-            {submitting ? 'Saving...' : 'Submit'}
+    <div className="admin-b2c-page">
+      <section className="add-discount-card">
+        <header className="add-discount-header">
+          <div>
+            <p className="add-discount-title">{editingRow ? 'Edit B2C Bus Discount' : 'Add B2C Bus Discount'}</p>
+            <p className="add-discount-subtitle">Configure auto-apply discounts, validity, and pricing rules.</p>
+          </div>
+          <button type="button" className="ghost-btn" onClick={() => navigate('/admin/b2c-bus/discounts')}>
+            B2C Bus Discount List
           </button>
-          <button type="button" className="ghost-btn" onClick={handleReset} disabled={submitting}>
-            Reset
-          </button>
-        </div>
-      </form>
-    </section>
+        </header>
+
+        <form className="add-discount-form" onSubmit={handleSubmit}>
+          <label className="add-field">
+            <span>Discount Code</span>
+            <input
+              type="text"
+              placeholder="DISC-NEW"
+              value={formValues.code}
+              onChange={(event) =>
+                setFormValues((previous) => ({
+                  ...previous,
+                  code: event.target.value.toUpperCase().replace(/\s+/g, ''),
+                }))
+              }
+              disabled={submitting}
+            />
+          </label>
+
+          <label className="add-field add-field-medium">
+            <span>Title</span>
+            <input
+              type="text"
+              placeholder="Sleeper Special"
+              value={formValues.title}
+              onChange={handleChange('title')}
+              disabled={submitting}
+            />
+          </label>
+
+          <label className="add-field">
+            <span>Discount Type</span>
+            <select
+              value={formValues.discountType}
+              onChange={handleChange('discountType')}
+              disabled={submitting}
+            >
+              <option value="Percentage">Percentage</option>
+              <option value="Fixed">Fixed</option>
+            </select>
+          </label>
+
+          <label className="add-field">
+            <span>Value</span>
+            <input
+              type="number"
+              min="0"
+              placeholder="0"
+              value={formValues.value}
+              onChange={handleChange('value')}
+              disabled={submitting}
+            />
+          </label>
+
+          <label className="add-field">
+            <span>Min Booking Amount</span>
+            <input
+              type="number"
+              min="0"
+              placeholder="500"
+              value={formValues.minBookingAmount}
+              onChange={handleChange('minBookingAmount')}
+              disabled={submitting}
+            />
+          </label>
+
+          <label className="add-field">
+            <span>Priority</span>
+            <input
+              type="number"
+              min="0"
+              placeholder="5"
+              value={formValues.priority}
+              onChange={handleChange('priority')}
+              disabled={submitting}
+            />
+          </label>
+
+          <label className="add-field">
+            <span>Auto Apply</span>
+            <select
+              value={String(formValues.isAutoApply)}
+              onChange={handleChange('isAutoApply')}
+              disabled={submitting}
+            >
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </label>
+
+          <label className="add-field">
+            <span>Exclusive</span>
+            <select
+              value={String(formValues.isExclusive)}
+              onChange={handleChange('isExclusive')}
+              disabled={submitting}
+            >
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </label>
+
+          <label className="add-field">
+            <span>Start Date</span>
+            <input
+              type="datetime-local"
+              value={formValues.startDateUtc}
+              onChange={handleChange('startDateUtc')}
+              disabled={submitting}
+            />
+          </label>
+
+          <label className="add-field">
+            <span>End Date</span>
+            <input
+              type="datetime-local"
+              value={formValues.endDateUtc}
+              onChange={handleChange('endDateUtc')}
+              disabled={submitting}
+            />
+          </label>
+
+          <label className="add-field">
+            <span>Status</span>
+            <select
+              value={formValues.status}
+              onChange={handleChange('status')}
+              disabled={submitting}
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </label>
+
+          <label className="add-field add-field-medium">
+            <span>Description</span>
+            <textarea
+              placeholder="10% off sleeper bookings"
+              value={formValues.description}
+              onChange={handleChange('description')}
+              disabled={submitting}
+              rows={2}
+            />
+          </label>
+
+          <label className="add-field add-field-medium">
+            <span>Remark</span>
+            <textarea
+              placeholder="Remark"
+              value={formValues.remark}
+              onChange={handleChange('remark')}
+              disabled={submitting}
+              rows={2}
+            />
+          </label>
+
+          {error ? <p className="form-error">{error}</p> : null}
+
+          <div className="form-actions">
+            <button type="submit" className="primary-btn" disabled={submitting}>
+              {submitting ? 'Saving...' : 'Submit'}
+            </button>
+            <button type="button" className="ghost-btn" onClick={handleReset} disabled={submitting}>
+              Reset
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
   );
 }
 

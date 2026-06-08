@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { Clock3, Mail, Phone, User, X } from "lucide-react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
+import { Mail, Phone, User, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../STYLES/BusBookingFlow.css";
 import {
@@ -77,6 +77,9 @@ function buildPassengerSeed(selectedSeats, passengers) {
           (fullNameParts.length > 1 ? fullNameParts.slice(1).join(" ") : ""),
         age: savedAge ? String(savedAge) : "",
         gender,
+        email: passenger.email || "",
+        mobile: passenger.mobile || passenger.phone || "",
+        phone: passenger.phone || passenger.mobile || "",
         selectedTravelerId: "",
         id: passenger.id || `p-${seatLabel || index + 1}-${index + 1}`,
       };
@@ -93,10 +96,36 @@ function buildPassengerSeed(selectedSeats, passengers) {
       lastName: "",
       age: "",
       gender: isFemaleRestricted ? "Female" : (isMaleRestricted ? "Male" : ""),
+      email: "",
+      mobile: "",
+      phone: "",
       selectedTravelerId: "",
       id: `p-${seat.label}-${index + 1}`,
     };
   });
+}
+
+function getTravelerMobile(traveler) {
+  return String(traveler?.mobile || traveler?.phone || traveler?.phoneNo || "").trim();
+}
+
+function getTravelerEmail(traveler) {
+  return String(traveler?.email || "").trim();
+}
+
+function buildContactFromPassenger(passenger, fallback = {}) {
+  const email = String(passenger?.email || fallback.email || "").trim();
+  const mobile = String(passenger?.mobile || passenger?.phone || fallback.mobile || "").trim();
+  const whatsappNumber = fallback.whatsappUpdates
+    ? String(fallback.whatsappNumber || mobile || "").trim()
+    : String(fallback.whatsappNumber || "").trim();
+
+  return {
+    ...fallback,
+    email,
+    mobile,
+    whatsappNumber,
+  };
 }
 
 function isValidEmail(email) {
@@ -121,52 +150,13 @@ function hasAdjacentFemaleSeat(seat) {
     : false;
 }
 
-function getFemaleAdjacentSeatMessage(seatLabel) {
-  return `Seat ${seatLabel || ""} is beside a female-booked seat. Only female passengers can book this seat.`;
-}
-
 function hasAdjacentMaleSeat(seat) {
   return Array.isArray(seat?.adjacentBookedGenders)
     ? seat.adjacentBookedGenders.some((gender) => normalizeGender(gender) === "Male")
     : false;
 }
 
-function getMaleAdjacentSeatMessage(seatLabel) {
-  return `Seat ${seatLabel || ""} is beside a male-booked seat. Only male passengers can book this seat.`;
-}
 
-function getGenderSeatConflict(passengers, selectedSeats) {
-  for (let index = 0; index < passengers.length; index += 1) {
-    const passenger = passengers[index] || {};
-    const seat = selectedSeats[index] || {};
-
-    if (
-      normalizeGender(passenger.gender) === "Male" &&
-      (seat.bookedGender === "Female" || hasAdjacentFemaleSeat(seat))
-    ) {
-      return {
-        passengerNumber: index + 1,
-        seatLabel: passenger.seatLabel || passenger.seatNumber || seat.label || "",
-        isReserved: seat.bookedGender === "Female",
-        isMaleAdjacentConflict: false,
-      };
-    }
-
-    if (
-      normalizeGender(passenger.gender) === "Female" &&
-      (seat.bookedGender === "Male" || hasAdjacentMaleSeat(seat))
-    ) {
-      return {
-        passengerNumber: index + 1,
-        seatLabel: passenger.seatLabel || passenger.seatNumber || seat.label || "",
-        isReserved: seat.bookedGender === "Male",
-        isMaleAdjacentConflict: true,
-      };
-    }
-  }
-
-  return null;
-}
 
 function getCouponDescription(coupon) {
   const code = String(coupon?.couponCode || "").trim().toUpperCase();
@@ -184,6 +174,29 @@ function getCouponDescription(coupon) {
   }
 
   return `Use Coupon ${code} & Get ${formatCurrency(value)} OFF`;
+}
+
+function formatCouponErrorMessage(rawMessage) {
+  const msg = String(rawMessage || "").trim();
+  if (!msg) {
+    return "";
+  }
+
+  // Check if this is a raw backend stack trace / exception details
+  if (
+    msg.includes("System.Exception:") ||
+    msg.includes("Exception:") ||
+    msg.includes("at PickNBook") ||
+    msg.includes("Stack trace") ||
+    msg.includes("PromotionEngine")
+  ) {
+    if (msg.includes("Featured offer conditions not met")) {
+      return "Featured offer conditions not met. Please review seats, routes, or eligibility criteria.";
+    }
+    return "This coupon or offer cannot be applied to your current booking. Please check terms.";
+  }
+
+  return msg;
 }
 
 function getCouponStatus(coupon) {
@@ -253,6 +266,106 @@ function readLocalTravelers() {
   } catch {
     return [];
   }
+}
+
+function attachHorizontalAutoScroller(track) {
+  if (!track || typeof window === "undefined") return undefined;
+
+  let frameId = 0;
+  let resumeTimer = 0;
+  let lastFrameTime = 0;
+  let direction = 1;
+  let isPaused = false;
+  let isDragging = false;
+  let dragStartX = 0;
+  let dragStartScrollLeft = 0;
+
+  const hasHorizontalOverflow = () => track.scrollWidth > track.clientWidth + 4;
+
+  const pause = () => {
+    isPaused = true;
+    window.clearTimeout(resumeTimer);
+  };
+
+  const resume = () => {
+    window.clearTimeout(resumeTimer);
+    resumeTimer = window.setTimeout(() => {
+      isPaused = false;
+    }, 700);
+  };
+
+  const onPointerDown = (event) => {
+    const target = event.target;
+    if (
+      event.button !== 0 ||
+      (target instanceof Element && target.closest("button,a,input,select,textarea"))
+    ) {
+      return;
+    }
+
+    isDragging = true;
+    pause();
+    dragStartX = event.clientX;
+    dragStartScrollLeft = track.scrollLeft;
+    track.classList.add("is-dragging");
+    track.setPointerCapture?.(event.pointerId);
+  };
+
+  const onPointerMove = (event) => {
+    if (!isDragging) return;
+    event.preventDefault();
+    track.scrollLeft = dragStartScrollLeft - (event.clientX - dragStartX);
+  };
+
+  const onPointerEnd = (event) => {
+    if (!isDragging) return;
+    isDragging = false;
+    track.classList.remove("is-dragging");
+    track.releasePointerCapture?.(event.pointerId);
+    resume();
+  };
+
+  const tick = (time) => {
+    if (!lastFrameTime) lastFrameTime = time;
+    const delta = Math.min(time - lastFrameTime, 48);
+    lastFrameTime = time;
+
+    if (!isPaused && !isDragging && hasHorizontalOverflow()) {
+      const maxScrollLeft = track.scrollWidth - track.clientWidth;
+      track.scrollLeft += delta * 0.035 * direction;
+
+      if (track.scrollLeft >= maxScrollLeft - 1) {
+        direction = -1;
+      } else if (track.scrollLeft <= 1) {
+        direction = 1;
+      }
+    }
+
+    frameId = window.requestAnimationFrame(tick);
+  };
+
+  track.addEventListener("mouseenter", pause);
+  track.addEventListener("mouseleave", resume);
+  track.addEventListener("focusin", pause);
+  track.addEventListener("focusout", resume);
+  track.addEventListener("pointerdown", onPointerDown);
+  track.addEventListener("pointermove", onPointerMove);
+  track.addEventListener("pointerup", onPointerEnd);
+  track.addEventListener("pointercancel", onPointerEnd);
+  frameId = window.requestAnimationFrame(tick);
+
+  return () => {
+    window.cancelAnimationFrame(frameId);
+    window.clearTimeout(resumeTimer);
+    track.removeEventListener("mouseenter", pause);
+    track.removeEventListener("mouseleave", resume);
+    track.removeEventListener("focusin", pause);
+    track.removeEventListener("focusout", resume);
+    track.removeEventListener("pointerdown", onPointerDown);
+    track.removeEventListener("pointermove", onPointerMove);
+    track.removeEventListener("pointerup", onPointerEnd);
+    track.removeEventListener("pointercancel", onPointerEnd);
+  };
 }
 
 export default function BusPassengerDetailsPage() {
@@ -494,9 +607,23 @@ export default function BusPassengerDetailsPage() {
     Boolean(flowState.agreedToFare)
   );
   const [formError, setFormError] = useState("");
+  const [errors, setErrors] = useState({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [formErrorList, setFormErrorList] = useState([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const featuredOffersScrollerRef = useRef(null);
+  const couponScrollerRef = useRef(null);
 
 
+
+  useEffect(() => {
+    const cleanups = [
+      attachHorizontalAutoScroller(featuredOffersScrollerRef.current),
+      attachHorizontalAutoScroller(couponScrollerRef.current),
+    ].filter(Boolean);
+
+    return () => cleanups.forEach((cleanup) => cleanup());
+  }, [featuredOffers.length, availableCoupons.length]);
 
   useEffect(() => {
     let isMounted = true;
@@ -661,7 +788,20 @@ export default function BusPassengerDetailsPage() {
       })
       .catch((error) => {
         if (isMounted) {
-          setFormError(error.message || "Unable to refresh pricing.");
+          const errMsg = String(error.message || "");
+          if (
+            errMsg.includes("conditions not met") ||
+            errMsg.includes("PromotionEngine") ||
+            errMsg.includes("System.Exception")
+          ) {
+            clearSelectedOffer();
+            setSelectedFeaturedOffer(null);
+            setAppliedCoupon(null);
+            setManualCouponCode("");
+            loadPricingPreview();
+          } else {
+            setFormError(error.message || "Unable to refresh pricing.");
+          }
         }
       });
 
@@ -671,22 +811,7 @@ export default function BusPassengerDetailsPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const allPassengersValid = useMemo(
-    () =>
-      passengers.every((passenger) => {
-        const age = Number(passenger.age);
-        return (
-          passenger.title &&
-          String(passenger.firstName || "").trim() &&
-          String(passenger.lastName || "").trim() &&
-          normalizeGender(passenger.gender) &&
-          !Number.isNaN(age) &&
-          age > 0 &&
-          age <= 120
-        );
-      }),
-    [passengers]
-  );
+
 
   if (!bus || selectedSeats.length === 0 || !boardingPoint || !droppingPoint) {
     return (
@@ -709,31 +834,34 @@ export default function BusPassengerDetailsPage() {
 
   const updatePassenger = (index, field, value) => {
     const seat = selectedSeats[index] || {};
+    const nextValue = field === "mobile" || field === "phone"
+      ? String(value || "").replace(/\D/g, "").slice(0, 13)
+      : value;
 
     if (
       field === "gender" &&
-      normalizeGender(value) === "Male" &&
+      normalizeGender(nextValue) === "Male" &&
       (seat.bookedGender === "Female" || hasAdjacentFemaleSeat(seat))
     ) {
       const isReserved = seat.bookedGender === "Female";
       setFormError(
         isReserved
           ? `Seat ${seat.label || seat.seatLabel || ""} is reserved for females. Only female passengers can book this seat.`
-          : getFemaleAdjacentSeatMessage(seat.label || seat.seatLabel)
+          : `Seat ${seat.label || seat.seatLabel || ""} is beside a female-booked seat. Only female passengers can book this seat.`
       );
       return;
     }
 
     if (
       field === "gender" &&
-      normalizeGender(value) === "Female" &&
+      normalizeGender(nextValue) === "Female" &&
       (seat.bookedGender === "Male" || hasAdjacentMaleSeat(seat))
     ) {
       const isReserved = seat.bookedGender === "Male";
       setFormError(
         isReserved
           ? `Seat ${seat.label || seat.seatLabel || ""} is reserved for males. Only male passengers can book this seat.`
-          : getMaleAdjacentSeatMessage(seat.label || seat.seatLabel)
+          : `Seat ${seat.label || seat.seatLabel || ""} is beside a male-booked seat. Only male passengers can book this seat.`
       );
       return;
     }
@@ -741,9 +869,229 @@ export default function BusPassengerDetailsPage() {
     setFormError("");
     setPassengers((previous) =>
       previous.map((passenger, i) =>
-        i === index ? { ...passenger, [field]: value } : passenger
+        i === index
+          ? {
+              ...passenger,
+              [field]: nextValue,
+              ...(field === "mobile" ? { phone: nextValue } : {}),
+            }
+          : passenger
       )
     );
+
+    if (index === 0 && (field === "email" || field === "mobile" || field === "phone")) {
+      const contactField = field === "email" ? "email" : "mobile";
+      setContact((prev) => {
+        const nextContact = { ...prev, [contactField]: nextValue };
+        if (contactField === "mobile" && prev.whatsappUpdates && !prev.whatsappNumber) {
+          nextContact.whatsappNumber = nextValue;
+        }
+        return nextContact;
+      });
+    }
+
+    if (submitAttempted) {
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy[`passenger_${index}_${field}`];
+        if (field === "mobile") {
+          delete copy[`passenger_${index}_phone`];
+        }
+        if (index === 0 && (field === "email" || field === "mobile" || field === "phone")) {
+          delete copy[`contact_${field === "email" ? "email" : "mobile"}`];
+        }
+        return copy;
+      });
+    }
+  };
+
+  const updateContactField = (field, value) => {
+    setContact((prev) => {
+      const copy = { ...prev, [field]: value };
+      if (field === "mobile" && prev.whatsappUpdates && !prev.whatsappNumber) {
+        copy.whatsappNumber = value;
+      }
+      return copy;
+    });
+
+    if (submitAttempted) {
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy[`contact_${field}`];
+        if (field === "mobile") {
+          delete copy.contact_whatsappNumber;
+        }
+        return copy;
+      });
+    }
+  };
+
+  const toggleWhatsappUpdates = (checked) => {
+    setContact((prev) => ({
+      ...prev,
+      whatsappUpdates: checked,
+      whatsappNumber: checked && !prev.whatsappNumber ? prev.mobile : prev.whatsappNumber,
+    }));
+
+    if (submitAttempted) {
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy.contact_whatsappNumber;
+        return copy;
+      });
+    }
+  };
+
+  const handleToggleAgree = (checked) => {
+    setAgreedToFare(checked);
+    if (submitAttempted) {
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy.agreedToFare;
+        return copy;
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    const errorDetails = [];
+
+    // Validate passengers
+    passengers.forEach((passenger, index) => {
+      const seat = selectedSeats[index] || {};
+      const seatLabel = passenger.seatNumber || seat.label || `Seat ${index + 1}`;
+      const prefix = `passenger_${index}_`;
+
+      if (!passenger.title) {
+        newErrors[`${prefix}title`] = "Required";
+        errorDetails.push(`${seatLabel}: Title is required to verify the salutation.`);
+      }
+
+      const firstName = String(passenger.firstName || "").trim();
+      if (!firstName) {
+        newErrors[`${prefix}firstName`] = "Required";
+        errorDetails.push(`${seatLabel}: First name is required.`);
+      } else if (!/^[A-Za-z\s]+$/.test(firstName)) {
+        newErrors[`${prefix}firstName`] = "Letters only";
+        errorDetails.push(`${seatLabel}: First name must contain only alphabetical letters.`);
+      }
+
+      const lastName = String(passenger.lastName || "").trim();
+      if (!lastName) {
+        newErrors[`${prefix}lastName`] = "Required";
+        errorDetails.push(`${seatLabel}: Last name is required.`);
+      } else if (!/^[A-Za-z\s]+$/.test(lastName)) {
+        newErrors[`${prefix}lastName`] = "Letters only";
+        errorDetails.push(`${seatLabel}: Last name must contain only alphabetical letters.`);
+      }
+
+      const ageVal = passenger.age;
+      if (ageVal === undefined || ageVal === null || String(ageVal).trim() === "") {
+        newErrors[`${prefix}age`] = "Required";
+        errorDetails.push(`${seatLabel}: Age is required.`);
+      } else {
+        const age = Number(ageVal);
+        if (Number.isNaN(age) || age < 1 || age > 120) {
+          newErrors[`${prefix}age`] = "1-120";
+          errorDetails.push(`${seatLabel}: Age must be a number between 1 and 120.`);
+        }
+      }
+
+      if (!passenger.gender) {
+        newErrors[`${prefix}gender`] = "Required";
+        errorDetails.push(`${seatLabel}: Gender selection is required.`);
+      }
+
+      const passengerEmail = String(passenger.email || "").trim();
+      if (!passengerEmail) {
+        newErrors[`${prefix}email`] = "Required";
+        errorDetails.push(`${seatLabel}: Email address is required for this traveler.`);
+      } else if (!isValidEmail(passengerEmail)) {
+        newErrors[`${prefix}email`] = "Invalid";
+        errorDetails.push(`${seatLabel}: Enter a valid traveler email address.`);
+      }
+
+      const passengerMobile = String(passenger.mobile || passenger.phone || "").trim();
+      if (!passengerMobile) {
+        newErrors[`${prefix}mobile`] = "Required";
+        errorDetails.push(`${seatLabel}: Mobile number is required for this traveler.`);
+      } else if (!isValidMobile(passengerMobile)) {
+        newErrors[`${prefix}mobile`] = "Invalid";
+        errorDetails.push(`${seatLabel}: Mobile number must be 10 to 13 digits.`);
+      }
+    });
+
+    // Gender Seat Adjacent restriction checks
+    passengers.forEach((passenger, index) => {
+      const seat = selectedSeats[index] || {};
+      const seatLabel = passenger.seatNumber || seat.label || `Seat ${index + 1}`;
+      const prefix = `passenger_${index}_`;
+
+      if (passenger.gender) {
+        const normGen = normalizeGender(passenger.gender);
+        if (normGen === "Male" && (seat.bookedGender === "Female" || hasAdjacentFemaleSeat(seat))) {
+          newErrors[`${prefix}gender`] = "Conflict";
+          errorDetails.push(
+            seat.bookedGender === "Female"
+              ? `${seatLabel}: Seat is strictly reserved for females.`
+              : `${seatLabel}: Seat is adjacent to a female-only booking. Male passengers cannot book this adjacent seat.`
+          );
+        }
+        if (normGen === "Female" && (seat.bookedGender === "Male" || hasAdjacentMaleSeat(seat))) {
+          newErrors[`${prefix}gender`] = "Conflict";
+          errorDetails.push(
+            seat.bookedGender === "Male"
+              ? `${seatLabel}: Seat is strictly reserved for males.`
+              : `${seatLabel}: Seat is adjacent to a male-only booking. Female passengers cannot book this adjacent seat.`
+          );
+        }
+      }
+    });
+
+    // Validate contact
+    if (!contact.email) {
+      newErrors.contact_email = "Required";
+      errorDetails.push("Contact Email: Email address is required.");
+    } else if (!isValidEmail(contact.email)) {
+      newErrors.contact_email = "Invalid";
+      errorDetails.push("Contact Email: Enter a valid email address (e.g. name@example.com) to receive the e-ticket.");
+    }
+
+    if (!contact.mobile) {
+      newErrors.contact_mobile = "Required";
+      errorDetails.push("Contact Mobile: Mobile number is required.");
+    } else if (!isValidMobile(contact.mobile)) {
+      newErrors.contact_mobile = "Invalid";
+      errorDetails.push("Contact Mobile: Mobile number must be exactly 10 digits to receive SMS updates.");
+    }
+
+    if (contact.whatsappUpdates) {
+      const whatsappValue = contact.whatsappNumber || contact.mobile;
+      if (!whatsappValue) {
+        newErrors.contact_whatsappNumber = "Required";
+        errorDetails.push("WhatsApp Updates: WhatsApp number is required when WhatsApp updates are enabled.");
+      } else if (!isValidMobile(whatsappValue)) {
+        newErrors.contact_whatsappNumber = "Invalid";
+        errorDetails.push("WhatsApp Updates: WhatsApp number must be exactly 10 digits.");
+      }
+    }
+
+    // Validate agreement
+    if (!agreedToFare) {
+      newErrors.agreedToFare = "Required";
+      errorDetails.push("Terms Agreement: You must accept the fare rules and booking terms to proceed.");
+    }
+
+    // Validate coupon
+    if (manualCouponCode.trim() && !appliedCoupon) {
+      newErrors.coupon = "Action Needed";
+      errorDetails.push("Coupon Code: You entered a coupon code. Click 'APPLY' to redeem the discount, or clear it.");
+    }
+
+    setErrors(newErrors);
+    setFormErrorList(errorDetails);
+    return Object.keys(newErrors).length === 0;
   };
 
   const setPassengerMode = (index, isExisting) => {
@@ -763,14 +1111,46 @@ export default function BusPassengerDetailsPage() {
           lastName: "",
           age: "",
           gender: isFemaleRestricted ? "Female" : (isMaleRestricted ? "Male" : ""),
+          email: "",
+          mobile: "",
+          phone: "",
         };
       })
     );
+
+    if (index === 0) {
+      setContact((prev) => ({
+        ...prev,
+        email: "",
+        mobile: "",
+        whatsappNumber: prev.whatsappUpdates ? "" : prev.whatsappNumber,
+      }));
+    }
   };
 
   const handleSelectExistingTraveler = (index, travelerId) => {
     if (!travelerId) {
-      updatePassenger(index, "selectedTravelerId", "");
+      setPassengers((prev) =>
+        prev.map((passenger, i) =>
+          i === index
+            ? {
+                ...passenger,
+                selectedTravelerId: "",
+                email: "",
+                mobile: "",
+                phone: "",
+              }
+            : passenger
+        )
+      );
+      if (index === 0) {
+        setContact((prev) => ({
+          ...prev,
+          email: "",
+          mobile: "",
+          whatsappNumber: prev.whatsappUpdates ? "" : prev.whatsappNumber,
+        }));
+      }
       return;
     }
 
@@ -785,7 +1165,7 @@ export default function BusPassengerDetailsPage() {
       setFormError(
         isReserved
           ? `Seat ${seat.label || seat.seatLabel || ""} is reserved for females. Only female passengers can book this seat.`
-          : getFemaleAdjacentSeatMessage(seat.label || seat.seatLabel)
+          : `Seat ${seat.label || seat.seatLabel || ""} is beside a female-booked seat. Only female passengers can book this seat.`
       );
       return;
     }
@@ -795,12 +1175,14 @@ export default function BusPassengerDetailsPage() {
       setFormError(
         isReserved
           ? `Seat ${seat.label || seat.seatLabel || ""} is reserved for males. Only male passengers can book this seat.`
-          : getMaleAdjacentSeatMessage(seat.label || seat.seatLabel)
+          : `Seat ${seat.label || seat.seatLabel || ""} is beside a male-booked seat. Only male passengers can book this seat.`
       );
       return;
     }
 
     setFormError("");
+    const travelerEmail = getTravelerEmail(found);
+    const travelerMobile = getTravelerMobile(found);
     setPassengers((prev) =>
       prev.map((passenger, i) =>
         i === index
@@ -812,10 +1194,22 @@ export default function BusPassengerDetailsPage() {
               lastName:  found.lastName  || "",
               gender:    travelerGender  || "",
               age:       found.age       ? String(found.age) : "",
+              email:     travelerEmail,
+              mobile:    travelerMobile,
+              phone:     travelerMobile,
             }
           : passenger
       )
     );
+
+    if (index === 0 || (!contact.email && !contact.mobile)) {
+      setContact((prev) =>
+        buildContactFromPassenger(
+          { email: travelerEmail, mobile: travelerMobile },
+          prev
+        )
+      );
+    }
   };
 
   const handleSelectOffer = async (offer) => {
@@ -865,7 +1259,7 @@ export default function BusPassengerDetailsPage() {
       setManualCouponCode("");
       setAppliedCoupon(null);
       if (snapshotBase) setPricingPreview(snapshotBase);
-      setCouponMessage(error.message || "Offer saved, but pricing preview failed.");
+      setCouponMessage(formatCouponErrorMessage(error.message) || "Offer saved, but pricing preview failed.");
       setCouponMessageType("error");
     } finally {
       setIsApplyingCoupon(false);
@@ -884,7 +1278,7 @@ export default function BusPassengerDetailsPage() {
       await loadPricingPreview();
     } catch (err) {
       if (basePricingPreview) setPricingPreview(basePricingPreview);
-      setCouponMessage(err.message || "Unable to refresh pricing.");
+      setCouponMessage(formatCouponErrorMessage(err.message) || "Unable to refresh pricing.");
       setCouponMessageType("error");
     }
   };
@@ -941,7 +1335,7 @@ export default function BusPassengerDetailsPage() {
       return { valid: true, preview };
     } catch (error) {
       setAppliedCoupon(null);
-      setCouponMessage(error.message || "Unable to apply coupon right now.");
+      setCouponMessage(formatCouponErrorMessage(error.message) || "Unable to apply coupon right now.");
       setCouponMessageType("error");
       return null;
     } finally {
@@ -993,7 +1387,7 @@ export default function BusPassengerDetailsPage() {
       setManualCouponCode("");
       setAppliedCoupon(null);
       if (snapshotBase) setPricingPreview(snapshotBase);
-      setCouponMessage(error.message || "Unable to apply coupon.");
+      setCouponMessage(formatCouponErrorMessage(error.message) || "Unable to apply coupon.");
       setCouponMessageType("error");
     } finally {
       setIsApplyingCoupon(false);
@@ -1014,7 +1408,7 @@ export default function BusPassengerDetailsPage() {
       await loadPricingPreview();
     } catch (error) {
       if (basePricingPreview) setPricingPreview(basePricingPreview);
-      setCouponMessage(error.message || "Unable to refresh pricing.");
+      setCouponMessage(formatCouponErrorMessage(error.message) || "Unable to refresh pricing.");
       setCouponMessageType("error");
     }
   };
@@ -1022,48 +1416,10 @@ export default function BusPassengerDetailsPage() {
 
 
   const handleOpenConfirmation = async () => {
-    if (!allPassengersValid) {
-      setFormError("Please fill all passenger fields, including gender. Age must be between 1 and 120.");
-      return;
-    }
-    const genderSeatConflict = getGenderSeatConflict(passengers, selectedSeats);
-    if (genderSeatConflict) {
-      if (genderSeatConflict.isMaleAdjacentConflict) {
-        setFormError(
-          genderSeatConflict.isReserved
-            ? `Seat ${genderSeatConflict.seatLabel} is reserved for males. Only male passengers can book this seat.`
-            : getMaleAdjacentSeatMessage(genderSeatConflict.seatLabel)
-        );
-      } else {
-        setFormError(
-          genderSeatConflict.isReserved
-            ? `Seat ${genderSeatConflict.seatLabel} is reserved for females. Only female passengers can book this seat.`
-            : getFemaleAdjacentSeatMessage(genderSeatConflict.seatLabel)
-        );
-      }
-      return;
-    }
-    if (!isValidEmail(contact.email)) {
-      setFormError("Enter a valid email address.");
-      return;
-    }
-    if (!isValidMobile(contact.mobile)) {
-      setFormError("Enter a valid mobile number.");
-      return;
-    }
-    if (contact.whatsappUpdates) {
-      const whatsappValue = contact.whatsappNumber || contact.mobile;
-      if (!isValidMobile(whatsappValue)) {
-        setFormError("Enter a valid WhatsApp number or disable WhatsApp updates.");
-        return;
-      }
-    }
-    if (!agreedToFare) {
-      setFormError("Please accept fare rules and terms.");
-      return;
-    }
-    if (manualCouponCode.trim() && !appliedCoupon) {
-      setFormError("Apply the coupon or clear the coupon code before continuing.");
+    setSubmitAttempted(true);
+    const isValid = validateForm();
+    if (!isValid) {
+      setFormError("Please correct the errors in the form to proceed.");
       return;
     }
     setFormError("");
@@ -1077,10 +1433,14 @@ export default function BusPassengerDetailsPage() {
         ...passenger,
         firstName: String(passenger.firstName || "").trim(),
         lastName: String(passenger.lastName || "").trim(),
+        email: String(passenger.email || "").trim(),
+        mobile: String(passenger.mobile || passenger.phone || "").trim(),
+        phone: String(passenger.mobile || passenger.phone || "").trim(),
         age: ageNumber,
         Age: ageNumber,
       };
     });
+    const bookingContact = buildContactFromPassenger(cleanedPassengers[0], contact);
 
     const isFeatured = Boolean(selectedFeaturedOffer);
     const finalCouponCode = isFeatured ? null : (appliedCoupon?.couponCode || manualCouponCode || null);
@@ -1097,7 +1457,7 @@ export default function BusPassengerDetailsPage() {
     const payload = {
       ...flowState,
       passengers: cleanedPassengers,
-      contact,
+      contact: bookingContact,
       couponCode: finalCouponCode,
       promotionId: null,
       selectedFeaturedOfferId: finalFeaturedOfferId,
@@ -1123,67 +1483,118 @@ export default function BusPassengerDetailsPage() {
     return (
       <div className="passenger-fields">
         <label className="passenger-field">
-          <span>Title</span>
+          <span>Title *</span>
           <select
             value={passenger.title}
             onChange={(e) => updatePassenger(index, "title", e.target.value)}
+            className={errors[`passenger_${index}_title`] ? "field-has-error" : ""}
           >
-            <option value="">Title</option>
+            <option value="">Title *</option>
             <option value="Mr">Mr</option>
             <option value="Mrs">Mrs</option>
             <option value="Ms">Ms</option>
           </select>
+          {errors[`passenger_${index}_title`] && (
+            <span className="field-error-text">{errors[`passenger_${index}_title`]}</span>
+          )}
         </label>
 
         <label className="passenger-field">
-          <span>First Name</span>
+          <span>First Name *</span>
           <input
             type="text"
-            placeholder="First Name"
+            placeholder="First Name *"
             value={passenger.firstName}
             onChange={(e) => updatePassenger(index, "firstName", e.target.value)}
+            className={errors[`passenger_${index}_firstName`] ? "field-has-error" : ""}
           />
+          {errors[`passenger_${index}_firstName`] && (
+            <span className="field-error-text">{errors[`passenger_${index}_firstName`]}</span>
+          )}
         </label>
 
         <label className="passenger-field">
-          <span>Last Name</span>
+          <span>Last Name *</span>
           <input
             type="text"
-            placeholder="Last Name"
+            placeholder="Last Name *"
             value={passenger.lastName}
             onChange={(e) => updatePassenger(index, "lastName", e.target.value)}
+            className={errors[`passenger_${index}_lastName`] ? "field-has-error" : ""}
           />
+          {errors[`passenger_${index}_lastName`] && (
+            <span className="field-error-text">{errors[`passenger_${index}_lastName`]}</span>
+          )}
         </label>
 
         <label className="passenger-field">
-          <span>Age</span>
+          <span>Age *</span>
           <input
             type="number"
-            placeholder="Age"
+            placeholder="Age *"
             value={passenger.age}
             onChange={(e) => updatePassenger(index, "age", e.target.value)}
+            className={errors[`passenger_${index}_age`] ? "field-has-error" : ""}
           />
+          {errors[`passenger_${index}_age`] && (
+            <span className="field-error-text">{errors[`passenger_${index}_age`]}</span>
+          )}
         </label>
 
         <label className="passenger-field">
-          <span>Gender</span>
+          <span>Gender *</span>
           <select
             value={passenger.gender}
             onChange={(e) => updatePassenger(index, "gender", e.target.value)}
+            className={errors[`passenger_${index}_gender`] ? "field-has-error" : ""}
           >
-            <option value="">Gender</option>
+            <option value="">Gender *</option>
             <option value="Male" disabled={isFemaleOnlySeat}>Male</option>
             <option value="Female" disabled={isMaleOnlySeat}>Female</option>
           </select>
-          {isFemaleOnlySeat && (
+          {errors[`passenger_${index}_gender`] && (
+            <span className="field-error-text">{errors[`passenger_${index}_gender`]}</span>
+          )}
+          {isFemaleOnlySeat && !errors[`passenger_${index}_gender`] && (
             <small className="passenger-restriction-note">
-              Female passenger required for this seat.
+              Female passenger required.
             </small>
           )}
-          {isMaleOnlySeat && (
+          {isMaleOnlySeat && !errors[`passenger_${index}_gender`] && (
             <small className="passenger-restriction-note">
-              Male passenger required for this seat.
+              Male passenger required.
             </small>
+          )}
+        </label>
+
+        <label className="passenger-field passenger-field--contact">
+          <span>Email *</span>
+          <input
+            type="email"
+            placeholder="Email *"
+            value={passenger.email || ""}
+            onChange={(e) => updatePassenger(index, "email", e.target.value)}
+            readOnly={Boolean(passenger.selectedTravelerId && passenger.email)}
+            className={errors[`passenger_${index}_email`] ? "field-has-error" : ""}
+          />
+          {errors[`passenger_${index}_email`] && (
+            <span className="field-error-text">{errors[`passenger_${index}_email`]}</span>
+          )}
+        </label>
+
+        <label className="passenger-field passenger-field--contact">
+          <span>Mobile *</span>
+          <input
+            type="tel"
+            inputMode="numeric"
+            placeholder="Mobile *"
+            value={passenger.mobile || passenger.phone || ""}
+            onChange={(e) => updatePassenger(index, "mobile", e.target.value)}
+            readOnly={Boolean(passenger.selectedTravelerId && (passenger.mobile || passenger.phone))}
+            className={errors[`passenger_${index}_mobile`] ? "field-has-error" : ""}
+          />
+          {errors[`passenger_${index}_mobile`] && (
+            <span className="field-error-text">{errors[`passenger_${index}_mobile`]}</span>
           )}
         </label>
       </div>
@@ -1200,52 +1611,88 @@ export default function BusPassengerDetailsPage() {
 
             {/* Bus Details */}
             <article className="flow-card">
-              <header>Bus Details</header>
-              <div className="flow-card-body bus-journey-grid">
-                <div>
-                  <small>{bus.fromCity} - {bus.toCity}</small>
-                  <strong>
-                    {formatDateLabel(
-                      flowState.searchContext?.departureDate || bus.departureDate
-                    )}
-                  </strong>
+              <header>
+                <span className="header-icon-wrap" style={{ marginRight: '8px', display: 'inline-flex', alignItems: 'center' }}>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="6" width="18" height="12" rx="2" />
+                    <path d="M4 18v2a1 1 0 0 0 1 1h1" />
+                    <path d="M18 18v2a1 1 0 0 0 1 1h1" />
+                    <path d="M4 10h16" />
+                  </svg>
+                </span>
+                Bus Details
+              </header>
+              <div className="flow-card-body">
+                <div className="bus-journey-grid">
+                  <div>
+                    <strong style={{ fontSize: '1.05rem', color: '#0f172a', fontWeight: 'bold', display: 'block' }}>
+                      {bus.fromCity} → {bus.toCity}
+                    </strong>
+                    <span className="date-badge">
+                      {formatDateLabel(
+                        flowState.searchContext?.departureDate || bus.departureDate
+                      )}
+                    </span>
+                  </div>
+                  <div>
+                    <small>Depart Time</small>
+                    <strong>{bus.departureTime}</strong>
+                  </div>
+                  <div className="journey-timeline-center">
+                    <div className="timeline-line-wrap">
+                      <div className="timeline-dot"></div>
+                      <div className="timeline-line"></div>
+                      <span className="timeline-bus-icon">🚌</span>
+                      <div className="timeline-line"></div>
+                      <div className="timeline-dot"></div>
+                    </div>
+                    <span className="timeline-duration">{bus.duration}</span>
+                  </div>
+                  <div>
+                    <small>Arrival Time</small>
+                    <strong>{bus.arrivalTime}</strong>
+                  </div>
+                  <div>
+                    <small>Seat No</small>
+                    <strong>
+                      {selectedSeats.map((s) => s.label).join(", ")}
+                    </strong>
+                  </div>
                 </div>
-                <div>
-                  <small>Depart Time</small>
-                  <strong>{bus.departureTime}</strong>
-                </div>
-                <div className="journey-duration">
-                  <Clock3 size={16} />
-                  <strong>{bus.duration}</strong>
-                </div>
-                <div>
-                  <small>Arrival Time</small>
-                  <strong>{bus.arrivalTime}</strong>
-                </div>
-                <div>
-                  <small>Seat No</small>
-                  <strong>
-                    {selectedSeats.map((s) => s.label).join(", ")}
-                  </strong>
-                </div>
-                <div className="journey-point">
-                  <span>Boarding Time &amp; Address</span>
-                  <strong>{boardingPoint.time}</strong>
-                  <p>{boardingPoint.name}</p>
-                  <small>{boardingPoint.address}</small>
-                </div>
-                <div className="journey-point">
-                  <span>Dropping Time &amp; Address</span>
-                  <strong>{droppingPoint.time}</strong>
-                  <p>{droppingPoint.name}</p>
-                  <small>{droppingPoint.address}</small>
+
+                <div className="bus-journey-points-row">
+                  <div className="journey-point">
+                    <span className="point-header">Bus Operator</span>
+                    <p>{bus.operatorName}</p>
+                    <small>{bus.busType}</small>
+                  </div>
+                  <div className="journey-point">
+                    <span className="point-header">Boarding Time &amp; Address</span>
+                    <strong>{boardingPoint.time}</strong>
+                    <p>{boardingPoint.name}</p>
+                    <small>{boardingPoint.address}</small>
+                  </div>
+                  <div className="journey-point">
+                    <span className="point-header">Dropping Time &amp; Address</span>
+                    <strong>{droppingPoint.time}</strong>
+                    <p>{droppingPoint.name}</p>
+                    <small>{droppingPoint.address}</small>
+                  </div>
                 </div>
               </div>
             </article>
 
             {/* Passenger Details */}
             <article className="flow-card">
-              <header>Passenger Details</header>
+              <header>
+                <span className="header-icon-wrap" style={{ marginRight: '8px', display: 'inline-flex', alignItems: 'center' }}>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </span>
+                Passenger Details
+              </header>
               <div className="flow-card-body">
                 {passengers.map((passenger, index) => {
                   const isExisting = passengerModes[index];
@@ -1255,7 +1702,7 @@ export default function BusPassengerDetailsPage() {
 
                       <h4>
                         Passenger {index + 1}
-                        <span>Seat {passenger.seatLabel}</span>
+                        <span>(Seat {passenger.seatLabel})</span>
                       </h4>
 
                       {/* ── Mode Toggle ── */}
@@ -1323,105 +1770,122 @@ export default function BusPassengerDetailsPage() {
 
             {/* Contact Details */}
             <article className="flow-card">
-              <header>Contact Details</header>
+              <header>
+                <span className="header-icon-wrap" style={{ marginRight: '8px', display: 'inline-flex', alignItems: 'center' }}>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                  </svg>
+                </span>
+                Contact Details
+              </header>
               <div className="flow-card-body contact-grid">
                 <label>
-                  <span>Enter Your Email:</span>
-                  <div className="contact-input">
+                  <span>Enter Your Email: *</span>
+                  <div className={`contact-input ${errors.contact_email ? "field-has-error" : ""}`}>
                     <Mail size={14} />
                     <input
                       type="email"
-                      placeholder="Email id"
+                      placeholder="Email id *"
                       value={contact.email}
-                      onChange={(e) =>
-                        setContact((prev) => ({ ...prev, email: e.target.value }))
-                      }
+                      onChange={(e) => updateContactField("email", e.target.value)}
                     />
                   </div>
+                  {errors.contact_email && (
+                    <span className="field-error-text">{errors.contact_email}</span>
+                  )}
                 </label>
 
                 <label>
-                  <span>Enter Your Mobile:</span>
-                  <div className="contact-input">
+                  <span>Enter Your Mobile: *</span>
+                  <div className={`contact-input ${errors.contact_mobile ? "field-has-error" : ""}`}>
                     <Phone size={14} />
                     <input
                       type="text"
-                      placeholder="Mobile"
+                      placeholder="Mobile *"
                       value={contact.mobile}
-                      onChange={(e) =>
-                        setContact((prev) => ({
-                          ...prev,
-                          mobile: e.target.value,
-                          whatsappNumber:
-                            prev.whatsappUpdates && !prev.whatsappNumber
-                              ? e.target.value
-                              : prev.whatsappNumber,
-                        }))
-                      }
+                      onChange={(e) => updateContactField("mobile", e.target.value)}
                     />
                   </div>
+                  {errors.contact_mobile && (
+                    <span className="field-error-text">{errors.contact_mobile}</span>
+                  )}
                 </label>
 
                 <label style={{ gridColumn: "1 / -1" }}>
                   <span>WhatsApp Updates:</span>
                   <div
-                    className="contact-input"
+                    className={`contact-input ${errors.contact_whatsappNumber ? "field-has-error" : ""}`}
                     style={{ gridTemplateColumns: "auto 1fr" }}
                   >
                     <input
                       type="checkbox"
                       checked={contact.whatsappUpdates}
-                      onChange={(e) =>
-                        setContact((prev) => ({
-                          ...prev,
-                          whatsappUpdates: e.target.checked,
-                          whatsappNumber:
-                            e.target.checked && !prev.whatsappNumber
-                              ? prev.mobile
-                              : prev.whatsappNumber,
-                        }))
-                      }
+                      onChange={(e) => toggleWhatsappUpdates(e.target.checked)}
                       style={{ width: 16, height: 16, margin: 0 }}
                     />
                     <input
                       type="text"
                       placeholder="WhatsApp no. (defaults to mobile)"
                       value={contact.whatsappNumber}
-                      onChange={(e) =>
-                        setContact((prev) => ({
-                          ...prev,
-                          whatsappNumber: e.target.value,
-                        }))
-                      }
+                      onChange={(e) => updateContactField("whatsappNumber", e.target.value)}
                       disabled={!contact.whatsappUpdates}
                     />
                   </div>
+                  {errors.contact_whatsappNumber && (
+                    <span className="field-error-text">{errors.contact_whatsappNumber}</span>
+                  )}
                 </label>
               </div>
             </article>
 
             {/* Acknowledgement */}
             <article className="flow-card">
-              <header>Acknowledgement</header>
+              <header>
+                <span className="header-icon-wrap" style={{ marginRight: '8px', display: 'inline-flex', alignItems: 'center' }}>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                </span>
+                Acknowledgement
+              </header>
               <div className="flow-card-body acknowledgement">
-                <label className="ack-checkbox">
+                <label className={`ack-checkbox ${errors.agreedToFare ? "field-has-error-text" : ""}`}>
                   <input
                     type="checkbox"
                     checked={agreedToFare}
-                    onChange={(e) => setAgreedToFare(e.target.checked)}
+                    onChange={(e) => handleToggleAgree(e.target.checked)}
                   />
                   <span>
                     I agree to the rules and restrictions of this fare, and the
-                    terms of this fare.
+                    terms of this fare. <span className="mandatory-star" style={{ color: 'red', fontWeight: 'bold', marginLeft: '4px' }}>*</span>
                   </span>
                 </label>
+                {errors.agreedToFare && (
+                  <span className="field-error-text" style={{ marginTop: '2px' }}>{errors.agreedToFare}</span>
+                )}
 
                 <div className="ack-pay-strip">
                   <span>Travel....</span>
                   <small>VISA Mastercard RuPay UPI</small>
                 </div>
 
-                {formError && <p className="flow-error">{formError}</p>}
+                {formError && (
+                  <div className="form-error-summary-box">
+                    <div className="error-summary-header">
+                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2.5" fill="none">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                      </svg>
+                      <span>Please correct the following issues to proceed:</span>
+                    </div>
+                    <ul className="error-summary-list">
+                      {formErrorList.map((err, i) => (
+                        <li key={i}>{err}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 <button
                   type="button"
@@ -1437,7 +1901,12 @@ export default function BusPassengerDetailsPage() {
           {/* ── RIGHT SIDEBAR ── */}
           <aside className="bus-passenger-side">
             <article className="flow-card">
-              <header>Fare Details</header>
+              <header>
+                <span className="header-icon-wrap" style={{ marginRight: '8px', display: 'inline-flex', alignItems: 'center' }}>
+                  <span style={{ fontSize: '1.2rem', fontWeight: 'bold', lineHeight: 1 }}>₹</span>
+                </span>
+                Fare Details
+              </header>
               <div className="flow-card-body fare-list">
                 {isCalculatingPrice ? (
                   <div className="skeleton-loader-container" style={{ padding: "10px 0" }}>
@@ -1462,12 +1931,12 @@ export default function BusPassengerDetailsPage() {
                 ) : (
                   <>
                     <div>
-                      <span>Subtotal Before Coupon</span>
+                      <span>Base Fare</span>
                       <strong>{formatCurrency(pricingPreview.subtotalBeforeCoupon)}</strong>
                     </div>
                     {Number(pricingPreview.autoDiscountAmount) > 0 && (
                       <div>
-                        <span>Auto Discount</span>
+                        <span>Discount</span>
                         <strong>(-) {formatCurrency(pricingPreview.autoDiscountAmount)}</strong>
                       </div>
                     )}
@@ -1479,17 +1948,7 @@ export default function BusPassengerDetailsPage() {
                       const displayDiscount = hasAppliedDiscount
                         ? getPromotionDiscountAmount(pricingPreview, couponDiscount)
                         : 0;
-                      const featuredTitle =
-                        selectedFeaturedOffer?.title ||
-                        pricingPreview.appliedPromotionTitle ||
-                        selectedFeaturedOffer?.offerCode ||
-                        selectedFeaturedOffer?.selectedFeaturedOfferId ||
-                        "";
-                      const label = isFeaturedActive
-                        ? `Featured Offer${featuredTitle ? ` (${featuredTitle})` : ""}`
-                        : appliedCode
-                        ? `Coupon Discount (${appliedCode})`
-                        : "Coupon Discount";
+                      const label = "Discount";
                       return hasAppliedDiscount && displayDiscount > 0 ? (
                         <div>
                           <span>{label}</span>
@@ -1498,7 +1957,7 @@ export default function BusPassengerDetailsPage() {
                       ) : null;
                     })()}
                     <div>
-                      <span>GST {pricingPreview.gstPercent ? `(${pricingPreview.gstPercent}%)` : ""}</span>
+                      <span>Tax</span>
                       <strong>(+) {formatCurrency(pricingPreview.gstAmount)}</strong>
                     </div>
                     <div>
@@ -1515,20 +1974,68 @@ export default function BusPassengerDetailsPage() {
             </article>
 
             {/* Coupons & Featured Offers */}
-            <article className="flow-card">
-              <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span>Coupons &amp; Offers</span>
+            <article className="flow-card coupon-sheet-card">
+              <header className="coupon-sheet-header">
+                <span className="header-icon-wrap" style={{ marginRight: '8px', display: 'inline-flex', alignItems: 'center' }}>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                    <line x1="7" y1="7" x2="7.01" y2="7" />
+                  </svg>
+                </span>
+                <span>Apply Coupon</span>
                 {(isLoadingCoupons || isLoadingOffers || isApplyingCoupon) && (
-                  <span style={{ fontSize: "11px", color: "#9ca3af", fontWeight: "normal" }}>Loading...</span>
+                  <span className="coupon-sheet-loading">Loading...</span>
                 )}
               </header>
-              <div className="flow-card-body">
+              <div className="flow-card-body coupon-sheet-body">
+
+                <div className={`coupon-manual-row ${errors.coupon ? "field-has-error" : ""}`}>
+                  <input
+                    type="text"
+                    placeholder="Enter Coupon code"
+                    value={manualCouponCode}
+                    onChange={handleCouponCodeChange}
+                    disabled={isApplyingCoupon || Boolean(selectedFeaturedOffer)}
+                  />
+                  {appliedCoupon ? (
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      className="coupon-action-button is-remove"
+                    >Remove</button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={isApplyingCoupon || !manualCouponCode.trim() || Boolean(selectedFeaturedOffer)}
+                      className="coupon-action-button is-apply"
+                    >{isApplyingCoupon ? "Applying..." : "APPLY"}</button>
+                  )}
+                </div>
+                {errors.coupon && (
+                  <span className="field-error-text" style={{ marginTop: '2px' }}>{errors.coupon}</span>
+                )}
+                {selectedFeaturedOffer && (
+                  <p className="coupon-featured-note">
+                    Featured offer applied. Remove it to use a manual coupon.
+                  </p>
+                )}
+
+                {couponMessage && (
+                  <p className={`coupon-sheet-message ${couponMessageType === "success" ? "is-success" : "is-error"}`}>
+                    {couponMessage}
+                  </p>
+                )}
 
                 {/* ── Featured Offer Cards ── */}
                 {featuredOffers.length > 0 && (
-                  <div style={{ marginBottom: "14px" }}>
-                    <p style={{ fontSize: "12px", color: "#6b7280", marginBottom: "8px", fontWeight: "600" }}>Featured Offers:</p>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <div className="coupon-featured-block">
+                    <p className="coupon-section-label">Featured Offers:</p>
+                    <div
+                      className="coupon-featured-list"
+                      ref={featuredOffersScrollerRef}
+                      aria-label="Featured offers carousel"
+                    >
                       {featuredOffers.map((offer) => {
                         const isThisSelected = isSameFeaturedOffer(selectedFeaturedOffer, offer);
                         const anotherOfferSelected = Boolean(selectedFeaturedOffer) && !isThisSelected;
@@ -1542,66 +2049,35 @@ export default function BusPassengerDetailsPage() {
                         return (
                           <div
                             key={offer.offerId || offer.id || offer.couponCode}
-                            style={{
-                              border: isThisSelected ? "2px solid #10b981" : "1px solid #e5e7eb",
-                              borderRadius: "10px",
-                              padding: "10px",
-                              background: isThisSelected ? "#f0fdf4" : anotherOfferSelected ? "#f9fafb" : "#fff",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "10px",
-                              position: "relative",
-                              transition: "border 0.2s, opacity 0.2s",
-                              opacity: anotherOfferSelected ? 0.5 : 1,
-                            }}
+                            className={`coupon-voucher-card coupon-featured-offer${isThisSelected ? " is-selected" : ""}${
+                              anotherOfferSelected ? " is-muted" : ""
+                            }`}
                           >
-                            {offer.imageUrl && (
-                              <img
-                                src={offer.imageUrl}
-                                alt={appliedTitle}
-                                style={{ width: 44, height: 44, borderRadius: 8, objectFit: "cover", flexShrink: 0 }}
-                                onError={(e) => { e.target.style.display = "none"; }}
-                              />
-                            )}
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                <strong style={{ fontSize: "13px", color: "#111827" }}>{appliedTitle}</strong>
-                                <span style={{
-                                  fontSize: "10px", fontWeight: "700", padding: "2px 6px",
-                                  borderRadius: "4px", background: "#fef9c3", color: "#854d0e"
-                                }}>{discountLabel}</span>
-                                {isThisSelected && (
-                                  <span style={{
-                                    fontSize: "10px", fontWeight: "700", padding: "2px 6px",
-                                    borderRadius: "4px", background: "#dcfce7", color: "#166534"
-                                  }}>✓ Offer Applied</span>
+                            <div className="voucher-header">
+                              <span className="voucher-discount">{discountLabel}</span>
+                              <span className="voucher-code-badge">{offer.couponCode || "OFFER"}</span>
+                            </div>
+                            <div className="voucher-body">
+                              <div className="voucher-title">{appliedTitle}</div>
+                              <p className="voucher-description">{offer.subtitle || offer.description}</p>
+                              <div className="voucher-action-row">
+                                {isThisSelected ? (
+                                  <button
+                                    type="button"
+                                    onClick={handleRemoveOffer}
+                                    disabled={isApplyingCoupon}
+                                    className="voucher-remove-btn"
+                                  >Remove</button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSelectOffer(offer)}
+                                    disabled={isApplyingCoupon || anotherOfferSelected}
+                                    className="voucher-apply-btn"
+                                  >{isApplyingCoupon && isThisSelected ? "Applying..." : "Apply"}</button>
                                 )}
                               </div>
-                              <p style={{ fontSize: "11px", color: "#6b7280", margin: "2px 0 0" }}>{offer.subtitle || offer.description}</p>
                             </div>
-                            {isThisSelected ? (
-                              <button
-                                type="button"
-                                onClick={handleRemoveOffer}
-                                disabled={isApplyingCoupon}
-                                style={{
-                                  padding: "5px 10px", borderRadius: "6px", border: "none",
-                                  background: "#ef4444", color: "#fff", fontSize: "11px",
-                                  fontWeight: "600", cursor: "pointer", flexShrink: 0,
-                                }}
-                              >Remove</button>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => handleSelectOffer(offer)}
-                                disabled={isApplyingCoupon || anotherOfferSelected}
-                                style={{
-                                  padding: "5px 10px", borderRadius: "6px", border: "none",
-                                  background: anotherOfferSelected ? "#9ca3af" : "#10b981", color: "#fff", fontSize: "11px",
-                                  fontWeight: "600", cursor: anotherOfferSelected ? "not-allowed" : "pointer", flexShrink: 0,
-                                }}
-                              >{isApplyingCoupon && isThisSelected ? "Applying..." : "Apply"}</button>
-                            )}
                           </div>
                         );
                       })}
@@ -1609,102 +2085,61 @@ export default function BusPassengerDetailsPage() {
                   </div>
                 )}
 
-                {/* ── Manual Coupon Input ── */}
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <input
-                    type="text"
-                    placeholder="Enter Coupon Code"
-                    value={manualCouponCode}
-                    onChange={handleCouponCodeChange}
-                    disabled={isApplyingCoupon || Boolean(selectedFeaturedOffer)}
-                    style={{
-                      flex: 1, padding: "8px 12px", borderRadius: "6px",
-                      border: "1px solid #d1d5db", textTransform: "uppercase", fontSize: "14px",
-                      opacity: selectedFeaturedOffer ? 0.5 : 1,
-                    }}
-                  />
-                  {appliedCoupon ? (
-                    <button
-                      type="button"
-                      onClick={handleRemoveCoupon}
-                      style={{
-                        padding: "8px 16px", borderRadius: "6px", backgroundColor: "#ef4444",
-                        color: "#ffffff", border: "none", fontWeight: "600", cursor: "pointer",
-                      }}
-                    >Remove</button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleApplyCoupon}
-                      disabled={isApplyingCoupon || !manualCouponCode.trim() || Boolean(selectedFeaturedOffer)}
-                      style={{
-                        padding: "8px 16px", borderRadius: "6px", backgroundColor: "#10b981",
-                        color: "#ffffff", border: "none", fontWeight: "600", cursor: "pointer",
-                        opacity: (!manualCouponCode.trim() || isApplyingCoupon || selectedFeaturedOffer) ? 0.6 : 1,
-                      }}
-                    >{isApplyingCoupon ? "Applying..." : "Apply"}</button>
-                  )}
-                </div>
-                {selectedFeaturedOffer && (
-                  <div style={{ marginTop: "8px", display: "flex", gap: "8px", alignItems: "center", justifyContent: "space-between" }}>
-                    <p style={{ margin: 0, fontSize: "12px", color: "#6b7280", lineHeight: 1.35 }}>
-                      Featured offer applied. Remove it to use a manual coupon.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleRemoveOffer}
-                      disabled={isApplyingCoupon}
-                      style={{
-                        padding: "6px 10px",
-                        borderRadius: "6px",
-                        border: "none",
-                        background: "#ef4444",
-                        color: "#fff",
-                        fontSize: "11px",
-                        fontWeight: "700",
-                        cursor: isApplyingCoupon ? "not-allowed" : "pointer",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                )}
-
-                {couponMessage && (
-                  <p style={{
-                    marginTop: "8px", fontSize: "13px", fontWeight: "500",
-                    color: couponMessageType === "success" ? "#10b981" : "#ef4444",
-                  }}>{couponMessage}</p>
-                )}
-
-                {/* ── Coupon Chips ── */}
+                {/* ── Coupon Cards ── */}
                 {availableCoupons.length > 0 && (
-                  <div style={{ marginTop: "12px" }}>
-                    <p style={{ fontSize: "12px", color: "#6b7280", marginBottom: "6px" }}>Available Coupons:</p>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                  <div className="coupon-chip-block">
+                    <p className="coupon-section-label">Available Coupons:</p>
+                    <div
+                      className="coupon-chip-list"
+                      ref={couponScrollerRef}
+                      aria-label="Available coupons carousel"
+                    >
                       {availableCoupons.map((coupon, idx) => {
                         const code = coupon.couponCode || `Promo #${coupon.id}`;
+                        const value = Number(coupon?.value) || 0;
+                        const isPercent = String(coupon?.couponType || coupon?.cpnType || "")
+                          .toLowerCase()
+                          .includes("percent");
+                        const discountLabel = isPercent
+                          ? `${value}% OFF`
+                          : `₹${value} OFF`;
+                        const description = getCouponDescription(coupon);
                         const isChipSelected = appliedCoupon?.couponCode === coupon.couponCode;
+                        const anotherOfferSelected = Boolean(selectedFeaturedOffer);
+
                         return (
-                          <button
+                          <div
                             key={coupon.id || idx}
-                            type="button"
-                            onClick={() => handleSelectCoupon(coupon)}
-                            disabled={isApplyingCoupon || Boolean(selectedFeaturedOffer)}
-                            title={getCouponDescription(coupon)}
-                            style={{
-                              padding: "4px 8px",
-                              borderRadius: "4px",
-                              border: isChipSelected ? "1px solid #10b981" : "1px dashed #10b981",
-                              backgroundColor: isChipSelected ? "#dcfce7" : "#ecfdf5",
-                              color: isChipSelected ? "#065f46" : "#047857",
-                              fontSize: "11px",
-                              fontWeight: "600",
-                              cursor: selectedFeaturedOffer ? "not-allowed" : "pointer",
-                              opacity: selectedFeaturedOffer ? 0.5 : 1,
-                            }}
-                          >{code}</button>
+                            className={`coupon-voucher-card${isChipSelected ? " is-selected" : ""}${
+                              anotherOfferSelected ? " is-muted" : ""
+                            }`}
+                          >
+                            <div className="voucher-header">
+                              <span className="voucher-discount">{discountLabel}</span>
+                              <span className="voucher-code-badge">{code}</span>
+                            </div>
+                            <div className="voucher-body">
+                              <div className="voucher-title">{code}</div>
+                              <p className="voucher-description">{description}</p>
+                              <div className="voucher-action-row">
+                                {isChipSelected ? (
+                                  <button
+                                    type="button"
+                                    onClick={handleRemoveCoupon}
+                                    disabled={isApplyingCoupon}
+                                    className="voucher-remove-btn"
+                                  >Remove</button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSelectCoupon(coupon)}
+                                    disabled={isApplyingCoupon || anotherOfferSelected}
+                                    className="voucher-apply-btn"
+                                  >Apply</button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
                         );
                       })}
                     </div>
@@ -1783,12 +2218,12 @@ export default function BusPassengerDetailsPage() {
                     <header>Fare Details</header>
                     <div className="flow-card-body fare-list">
                       <div>
-                        <span>Subtotal Before Coupon</span>
+                        <span>Base Fare</span>
                                 <strong>{formatCurrency(pricingPreview.subtotalBeforeCoupon)}</strong>
                       </div>
                       {Number(pricingPreview.autoDiscountAmount) > 0 && (
                         <div>
-                          <span>Auto Discount</span>
+                          <span>Discount</span>
                           <strong>(-) {formatCurrency(pricingPreview.autoDiscountAmount)}</strong>
                         </div>
                       )}
@@ -1800,17 +2235,7 @@ export default function BusPassengerDetailsPage() {
                         const displayDiscount = hasAppliedDiscount
                           ? getPromotionDiscountAmount(pricingPreview, couponDiscount)
                           : 0;
-                        const featuredTitle =
-                          selectedFeaturedOffer?.title ||
-                          pricingPreview.appliedPromotionTitle ||
-                          selectedFeaturedOffer?.offerCode ||
-                          selectedFeaturedOffer?.selectedFeaturedOfferId ||
-                          "";
-                        const label = isFeaturedActive
-                          ? `Featured Offer${featuredTitle ? ` (${featuredTitle})` : ""}`
-                          : appliedCode
-                          ? `Coupon Discount (${appliedCode})`
-                          : "Coupon Discount";
+                        const label = "Discount";
                         return hasAppliedDiscount && displayDiscount > 0 ? (
                           <div>
                             <span>{label}</span>
@@ -1819,7 +2244,7 @@ export default function BusPassengerDetailsPage() {
                         ) : null;
                       })()}
                       <div>
-                        <span>GST {pricingPreview.gstPercent ? `(${pricingPreview.gstPercent}%)` : ""}</span>
+                        <span>Tax</span>
                         <strong>(+) {formatCurrency(pricingPreview.gstAmount)}</strong>
                       </div>
                       <div>

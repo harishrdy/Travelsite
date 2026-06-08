@@ -3,7 +3,7 @@ const FALLBACK_API_BASE_URL =
 
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "0.0.0.0"]);
 
-// ✅ SINGLE SOURCE OF TRUTH
+// âœ… SINGLE SOURCE OF TRUTH
 const DASHBOARD_ROOT = "/api/BDashboard";
 
 function isLocalDevelopment() {
@@ -76,7 +76,8 @@ function shouldUseNgrokBypass(urlOrPath) {
   try {
     const parsed = new URL(toAbsoluteUrl(urlOrPath), window.location.origin);
     return (
-      false
+      parsed.hostname.includes("ngrok-free.dev") ||
+      parsed.hostname.includes("ngrok.io")
     );
   } catch {
     return false;
@@ -186,7 +187,6 @@ function getAdminAuthHeaders() {
 
   if (adminId) {
     headers["X-Admin-Id"] = adminId;
-    headers["X-User-Id"] = adminId;
   }
 
   return headers;
@@ -324,5 +324,3 @@ export async function getAdminDashboardBookingStats() {
     { headers: getAdminAuthHeaders() }
   );
 }
-
-

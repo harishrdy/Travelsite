@@ -1,9 +1,7 @@
-
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { List } from "lucide-react";
 import "./AddOffer.css";
 import { createAdminFeaturedOffer } from "../../../services/adminFeaturedOffersService";
-import { listBusCoupons } from "../../../services/busBookingService";
 
 const BOOKING_TYPE_OPTIONS = [
   { value: "Bus", label: "Bus" },
@@ -13,24 +11,20 @@ const BOOKING_TYPE_OPTIONS = [
 
 const DEFAULT_FORM = {
   title: "",
-  couponId: "",
-  couponCode: "",
   bookingType: "Bus",
   isActive: true,
-  couponExpiresAtUtc: "",
   startDateUtc: "",
   endDateUtc: "",
   shortDescription: "",
-  offerCode: "",
-  promotionId: "",
+  longDescription: "",
   displayOrder: "0",
-  basePrice: "",
+  discountType: "Flat",
   isPercentageDiscount: false,
   discountValue: "",
-  maxCouponUsage: "",
+  maxUsage: "",
+  maxDiscountAmount: "",
+  minBookingAmount: "0",
 };
-
-
 
 function toUtcIso(value) {
   if (!value) {
@@ -47,26 +41,20 @@ function buildOfferFormData(formValues, fileInputObject) {
   formData.append("BookingType", formValues.bookingType);
   formData.append("IsActive", Boolean(formValues.isActive));
   
-  if (formValues.couponId !== undefined && formValues.couponId !== null && formValues.couponId !== "") {
-    formData.append("CouponId", Number(formValues.couponId));
-  }
-  if (formValues.offerCode !== undefined && formValues.offerCode !== null) {
-    formData.append("OfferCode", String(formValues.offerCode).trim());
-  }
-  if (formValues.promotionId !== undefined && formValues.promotionId !== null && formValues.promotionId !== "") {
-    formData.append("PromotionId", Number(formValues.promotionId));
-  }
+  // Generate unique code to satisfy the DB constraint (IX_FeaturedOffers_OfferCode)
+  const generatedCode = `OFFER-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  formData.append("OfferCode", generatedCode);
+  
   if (formValues.displayOrder !== undefined && formValues.displayOrder !== null && formValues.displayOrder !== "") {
     formData.append("DisplayOrder", Number(formValues.displayOrder));
   }
   if (formValues.shortDescription !== undefined && formValues.shortDescription !== null) {
     formData.append("Subtitle", String(formValues.shortDescription).trim());
-    formData.append("Description", String(formValues.shortDescription).trim());
+  }
+  if (formValues.longDescription !== undefined && formValues.longDescription !== null) {
+    formData.append("Description", String(formValues.longDescription).trim());
   }
   
-  if (formValues.couponExpiresAtUtc) {
-    formData.append("CouponExpiresAtUtc", toUtcIso(formValues.couponExpiresAtUtc));
-  }
   if (formValues.startDateUtc) {
     formData.append("StartDateUtc", toUtcIso(formValues.startDateUtc));
   }
@@ -74,19 +62,28 @@ function buildOfferFormData(formValues, fileInputObject) {
     formData.append("EndDateUtc", toUtcIso(formValues.endDateUtc));
   }
   
-  if (formValues.basePrice !== undefined && formValues.basePrice !== null && formValues.basePrice !== "") {
-    formData.append("BasePrice", Number(formValues.basePrice));
-  }
-  formData.append("IsPercentageDiscount", Boolean(formValues.isPercentageDiscount));
+  const finalDiscountType = formValues.discountType || (formValues.isPercentageDiscount ? "Percentage" : "Flat");
+  formData.append("DiscountType", finalDiscountType);
+  formData.append("IsPercentageDiscount", finalDiscountType === "Percentage");
   
   if (formValues.discountValue !== undefined && formValues.discountValue !== null && formValues.discountValue !== "") {
     formData.append("DiscountValue", Number(formValues.discountValue));
   }
   
-  if (formValues.maxCouponUsage !== undefined && formValues.maxCouponUsage !== null && formValues.maxCouponUsage !== "") {
-    formData.append("MaxCouponUsage", Number(formValues.maxCouponUsage));
+  if (formValues.maxDiscountAmount !== undefined && formValues.maxDiscountAmount !== null && formValues.maxDiscountAmount !== "") {
+    formData.append("MaxDiscountAmount", Number(formValues.maxDiscountAmount));
   }
   
+  if (formValues.maxUsage !== undefined && formValues.maxUsage !== null && formValues.maxUsage !== "") {
+    formData.append("MaxUsage", Number(formValues.maxUsage));
+    formData.append("MaxCouponUsage", Number(formValues.maxUsage));
+  }
+  
+  if (formValues.minBookingAmount !== undefined && formValues.minBookingAmount !== null && formValues.minBookingAmount !== "") {
+    formData.append("MinBookingAmount", Number(formValues.minBookingAmount));
+  }
+  
+  formData.append("UsedCount", 0);
   formData.append("CouponUsedCount", 0);
   
   if (fileInputObject) {
@@ -99,38 +96,9 @@ function buildOfferFormData(formValues, fileInputObject) {
 export default function AdminAddOfferPage({ onBack }) {
   const [formValues, setFormValues] = useState(DEFAULT_FORM);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [couponOptions, setCouponOptions] = useState([]);
-  const [couponLoadError, setCouponLoadError] = useState("");
   const [formError, setFormError] = useState("");
   const [saved, setSaved] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    listBusCoupons()
-      .then((coupons) => {
-        if (isMounted) {
-          setCouponOptions(coupons);
-          setCouponLoadError("");
-        }
-      })
-      .catch((error) => {
-        if (isMounted) {
-          setCouponOptions([]);
-          setCouponLoadError(error.message || "Unable to load coupons.");
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const selectedCoupon = useMemo(
-    () => couponOptions.find((coupon) => String(coupon.id) === String(formValues.couponId)),
-    [couponOptions, formValues.couponId]
-  );
 
   const handleChange = (field) => (event) => {
     const value = field === "isActive" ? event.target.value === "active" : event.target.value;
@@ -145,11 +113,6 @@ export default function AdminAddOfferPage({ onBack }) {
     const title = String(formValues.title || "").trim();
     if (!title) {
       setFormError("Offer name is required.");
-      return;
-    }
-
-    if (!formValues.couponId) {
-      setFormError("Linked coupon is required.");
       return;
     }
 
@@ -181,13 +144,12 @@ export default function AdminAddOfferPage({ onBack }) {
   };
 
   return (
-    <section className="flight-markup-panel offer-add-page">
+    <section className="flight-markup-panel offer-add-page" style={{ padding: "28px 32px" }}>
       <header className="flight-markup-toolbar offer-add-page-toolbar">
         <div className="flight-markup-title">
           <h1>
-            <strong>Add</strong> Offer
+            <strong>Add Offer</strong>
           </h1>
-          <div className="flight-markup-title-underline" aria-hidden="true" />
         </div>
 
         {onBack && (
@@ -218,19 +180,6 @@ export default function AdminAddOfferPage({ onBack }) {
                 value={formValues.title}
                 onChange={handleChange("title")}
                 required
-              />
-            </div>
-
-            <label className="offer-add-label" htmlFor="offer-code">
-              Offer Code
-            </label>
-            <div className="offer-add-control">
-              <input
-                id="offer-code"
-                type="text"
-                placeholder="e.g. BUS2026"
-                value={formValues.offerCode}
-                onChange={handleChange("offerCode")}
               />
             </div>
 
@@ -266,52 +215,6 @@ export default function AdminAddOfferPage({ onBack }) {
               </select>
             </div>
 
-            <label className="offer-add-label" htmlFor="coupon-code">
-              Linked Coupon <span aria-hidden="true">*</span>
-            </label>
-            <div className="offer-add-control">
-              <select
-                id="coupon-code"
-                value={formValues.couponId}
-                onChange={(event) => {
-                  const nextCouponId = event.target.value;
-                  const nextCoupon = couponOptions.find(
-                    (coupon) => String(coupon.id) === String(nextCouponId)
-                  );
-                  setFormValues((previous) => ({
-                    ...previous,
-                    couponId: nextCouponId,
-                    couponCode: nextCoupon?.couponCode || "",
-                  }));
-                }}
-                required
-              >
-                <option value="">Select linked coupon</option>
-                {couponOptions.map((coupon) => (
-                  <option key={coupon.id} value={coupon.id}>
-                    #{coupon.id} - {coupon.couponCode} ({coupon.cpnType})
-                  </option>
-                ))}
-              </select>
-              {selectedCoupon ? (
-                <small className="offer-add-help">Coupon code resolved as {selectedCoupon.couponCode}</small>
-              ) : null}
-            </div>
-
-            <label className="offer-add-label" htmlFor="promotion-id">
-              Promotion ID
-            </label>
-            <div className="offer-add-control">
-              <input
-                id="promotion-id"
-                type="number"
-                min="1"
-                placeholder="e.g. 4"
-                value={formValues.promotionId}
-                onChange={handleChange("promotionId")}
-              />
-            </div>
-
             <label className="offer-add-label" htmlFor="display-order">
               Display Order
             </label>
@@ -323,18 +226,6 @@ export default function AdminAddOfferPage({ onBack }) {
                 placeholder="e.g. 1"
                 value={formValues.displayOrder}
                 onChange={handleChange("displayOrder")}
-              />
-            </div>
-
-            <label className="offer-add-label" htmlFor="coupon-expires">
-              Coupon Expires
-            </label>
-            <div className="offer-add-control">
-              <input
-                id="coupon-expires"
-                type="datetime-local"
-                value={formValues.couponExpiresAtUtc}
-                onChange={handleChange("couponExpiresAtUtc")}
               />
             </div>
 
@@ -362,35 +253,24 @@ export default function AdminAddOfferPage({ onBack }) {
               />
             </div>
 
-            <label className="offer-add-label" htmlFor="base-price">
-              Base Price (INR)
-            </label>
-            <div className="offer-add-control">
-              <input
-                id="base-price"
-                type="number"
-                placeholder="e.g. 1000"
-                value={formValues.basePrice}
-                onChange={handleChange("basePrice")}
-              />
-            </div>
-
             <label className="offer-add-label" htmlFor="discount-type">
               Discount Type
             </label>
             <div className="offer-add-control">
               <select
                 id="discount-type"
-                value={formValues.isPercentageDiscount ? "percentage" : "flat"}
-                onChange={(event) =>
+                value={formValues.discountType}
+                onChange={(event) => {
+                  const val = event.target.value;
                   setFormValues((previous) => ({
                     ...previous,
-                    isPercentageDiscount: event.target.value === "percentage",
-                  }))
-                }
+                    discountType: val,
+                    isPercentageDiscount: val === "Percentage",
+                  }));
+                }}
               >
-                <option value="flat">Flat Discount</option>
-                <option value="percentage">Percentage Discount</option>
+                <option value="Flat">Flat Discount</option>
+                <option value="Percentage">Percentage Discount</option>
               </select>
             </div>
 
@@ -407,16 +287,42 @@ export default function AdminAddOfferPage({ onBack }) {
               />
             </div>
 
+            <label className="offer-add-label" htmlFor="min-booking-amount">
+              Min Booking Amount (INR)
+            </label>
+            <div className="offer-add-control">
+              <input
+                id="min-booking-amount"
+                type="number"
+                placeholder="e.g. 500"
+                value={formValues.minBookingAmount}
+                onChange={handleChange("minBookingAmount")}
+              />
+            </div>
+
+            <label className="offer-add-label" htmlFor="max-discount-amount">
+              Max Discount Amount (INR)
+            </label>
+            <div className="offer-add-control">
+              <input
+                id="max-discount-amount"
+                type="number"
+                placeholder="e.g. 150"
+                value={formValues.maxDiscountAmount}
+                onChange={handleChange("maxDiscountAmount")}
+              />
+            </div>
+
             <label className="offer-add-label" htmlFor="max-coupon-usage">
-              Max Coupon Usage
+              Max Usage
             </label>
             <div className="offer-add-control">
               <input
                 id="max-coupon-usage"
                 type="number"
                 placeholder="e.g. 500"
-                value={formValues.maxCouponUsage}
-                onChange={handleChange("maxCouponUsage")}
+                value={formValues.maxUsage}
+                onChange={handleChange("maxUsage")}
               />
             </div>
 
@@ -438,7 +344,7 @@ export default function AdminAddOfferPage({ onBack }) {
           </div>
 
           <div className="offer-add-section-bar">
-            <span>Short Description</span>
+            <span>Short Description (Subtitle)</span>
           </div>
           <textarea
             className="offer-add-short-textarea"
@@ -447,7 +353,17 @@ export default function AdminAddOfferPage({ onBack }) {
             onChange={handleChange("shortDescription")}
           />
 
-          {couponLoadError && <p className="admin-markup-form-error">{couponLoadError}</p>}
+          <div className="offer-add-section-bar">
+            <span>Long Description (Description)</span>
+          </div>
+          <textarea
+            className="offer-add-short-textarea"
+            placeholder="Write the long description / terms and conditions..."
+            value={formValues.longDescription}
+            onChange={handleChange("longDescription")}
+            style={{ minHeight: "120px" }}
+          />
+
           {formError && <p className="admin-markup-form-error">{formError}</p>}
           {saved && <p className="menu-form-success">Offer saved to backend.</p>}
 

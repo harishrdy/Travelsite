@@ -23,7 +23,6 @@ namespace PickNBook.Api.Services
         {
             return await _context.FeaturedOffers
                 .AsNoTracking()
-                .Include(x => x.Promotion)
                 .Include(x => x.Conditions)
                 .OrderBy(x => x.DisplayOrder)
                 .ToListAsync();
@@ -32,7 +31,6 @@ namespace PickNBook.Api.Services
         public async Task<FeaturedOffer?> GetByIdAsync(int id)
         {
             return await _context.FeaturedOffers
-                .Include(x => x.Promotion)
                 .Include(x => x.Conditions)
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
@@ -40,19 +38,6 @@ namespace PickNBook.Api.Services
         public async Task<FeaturedOffer> CreateAsync(
      AdminFeaturedOfferRequestDto request)
         {
-            if (!request.PromotionId.HasValue)
-            {
-                throw new Exception("PromotionId is required.");
-            }
-
-            var promotion = await _context.BusPromotions
-                .FirstOrDefaultAsync(x => x.Id == request.PromotionId.Value);
-
-            if (promotion == null)
-            {
-                throw new Exception("Invalid promotion selected");
-            }
-
             string imageUrl = string.Empty;
 
             if (request.Image != null)
@@ -67,7 +52,14 @@ namespace PickNBook.Api.Services
                 Subtitle = request.Subtitle,
                 Description = request.Description,
                 IsActive = request.IsActive,
-                PromotionId = request.PromotionId.Value,
+                DiscountType = request.DiscountType,
+                DiscountValue = request.DiscountValue,
+                MaxDiscountAmount = request.MaxDiscountAmount,
+                MinBookingAmount = request.MinBookingAmount,
+                StartDateUtc = request.StartDateUtc,
+                EndDateUtc = request.EndDateUtc,
+                MaxUsage = request.MaxUsage,
+                UsedCount = request.UsedCount,
                 BookingType = request.BookingType,
                 ImageUrl = imageUrl,
                 DisplayOrder = request.DisplayOrder,
@@ -91,24 +83,18 @@ namespace PickNBook.Api.Services
                 return null;
             }
 
-            if (!request.PromotionId.HasValue)
-            {
-                throw new Exception("PromotionId is required.");
-            }
-
-            var promotion = await _context.BusPromotions
-                .FirstOrDefaultAsync(x => x.Id == request.PromotionId.Value);
-
-            if (promotion == null)
-            {
-                throw new Exception("Invalid promotion selected");
-            }
-
             offer.Title = request.Title;
             offer.Subtitle = request.Subtitle;
             offer.Description = request.Description;
             offer.IsActive = request.IsActive;
-            offer.PromotionId = request.PromotionId.Value;
+            offer.DiscountType = request.DiscountType;
+            offer.DiscountValue = request.DiscountValue;
+            offer.MaxDiscountAmount = request.MaxDiscountAmount;
+            offer.MinBookingAmount = request.MinBookingAmount;
+            offer.StartDateUtc = request.StartDateUtc;
+            offer.EndDateUtc = request.EndDateUtc;
+            offer.MaxUsage = request.MaxUsage;
+            offer.UsedCount = request.UsedCount;
             offer.BookingType = request.BookingType;
             offer.DisplayOrder = request.DisplayOrder;
 
@@ -168,4 +154,4 @@ namespace PickNBook.Api.Services
             return $"/offers/{uniqueFileName}";
         }
     }
-}
+    }

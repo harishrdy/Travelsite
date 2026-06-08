@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -32,9 +32,12 @@ builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
 builder.Services.Configure<WhatsAppSettings>(
     builder.Configuration.GetSection("WhatsAppSettings"));
+builder.Services.Configure<SmsSettings>(
+    builder.Configuration.GetSection("SmsSettings"));
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddHttpClient<IWhatsAppService, WhatsAppService>();
+builder.Services.AddHttpClient<ISmsService, SmsService>();
 builder.Services.AddScoped<IExclusiveOfferSubscriptionService, ExclusiveOfferSubscriptionService>();
 builder.Services.AddScoped<ITicketPdfService, TicketPdfService>();
 builder.Services.AddScoped<ITicketEmailService, TicketEmailService>();
@@ -71,24 +74,20 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     ));
 
 
-//----------------CORS CONFIG----------------
+// ---------------- CORS CONFIG ----------------
+
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
-    .Get<string[]>() ?? new[]
-{
-    "http://3.111.182.53:3000"
-};
-
+    .Get<string[]>() ?? Array.Empty<string>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
-        policy =>
-        {
-            policy.WithOrigins(allowedOrigins)
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
 });
 
 // ---------------- JWT AUTH ----------------

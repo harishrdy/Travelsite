@@ -26,27 +26,14 @@ function navItemClassName({ isActive }) {
 }
 
 export default function DashboardSidebar() {
-
-
   return (
     <aside className="dashboard-sidebar">
-      {/* <div className="sidebar-brand">
-        <span className="sidebar-brand-icon">
-          <LayoutDashboard size={16} />
-        </span>
-        <div className="sidebar-brand-copy">
-          <strong>Travel Ops</strong>
-          <small>Admin Console</small>
-        </div>
-      </div> */}
-
       <nav className="sidebar-nav" aria-label="Dashboard navigation">
         <NavLink to="/dashboard" end className={navItemClassName} title="Dashboard">
           <LayoutDashboard size={16} />
           <span>Dashboard</span>
         </NavLink>
 
-      
         {MAIN_LINKS.map((item) => (
           <NavLink key={item.id} to={item.to} className={navItemClassName} title={item.label}>
             <item.icon size={16} />

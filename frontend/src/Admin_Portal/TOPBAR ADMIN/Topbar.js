@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getAdminDashboardSummary, deriveAdminMetrics } from '../../services/adminDashboardService';
+import { clearAuthSession } from '../../services/authSession';
+
 
 function getInitials(name) {
     const words = String(name || '')
@@ -101,14 +103,17 @@ const SEARCHABLE_PAGES = [
     { label: 'Add Testimonial', category: 'Testimonial Management', path: '/admin/testimonial-management/add-testimonial' }
 ];
 
-function Topbar({ searchQuery, setSearchQuery }) {
+function Topbar({ onToggleSidebar, searchQuery, setSearchQuery }) {
     const navigate = useNavigate();
+    const location = useLocation();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isBalanceVisible, setIsBalanceVisible] = useState(true);
     const [showTopupModal, setShowTopupModal] = useState(false);
     const [showSearchDropdown, setShowSearchDropdown] = useState(false);
     const [topupAmount, setTopupAmount] = useState('');
     const [notificationCount, setNotificationCount] = useState(0);
+    const [notifications, setNotifications] = useState([]);
+    const [hasUnread, setHasUnread] = useState(false);
     const [todayDate, setTodayDate] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
@@ -180,17 +185,12 @@ function Topbar({ searchQuery, setSearchQuery }) {
         return () => clearInterval(timer);
     }, []);
 
-    // Dynamic notification count
+    // Auto-close notifications dropdown when route/location changes
     useEffect(() => {
-        const loadNotifications = () => {
-            const stored = parseInt(localStorage.getItem('adminNotificationCount') || '0', 10);
-            setNotificationCount(stored);
-        };
-        loadNotifications();
-        // Re-check every 30 seconds for real-time feel
-        const interval = setInterval(loadNotifications, 30000);
-        return () => clearInterval(interval);
-    }, []);
+        setShowNotifications(false);
+    }, [location.pathname]);
+
+
 
     // Dynamic balance data
     const [balanceData, setBalanceData] = useState({
@@ -199,7 +199,7 @@ function Topbar({ searchQuery, setSearchQuery }) {
     });
 
     useEffect(() => {
-        const fetchBalance = async () => {
+        const fetchBalanceAndNotifications = async () => {
             try {
                 const summary = await getAdminDashboardSummary();
                 const metrics = deriveAdminMetrics(summary);
@@ -209,27 +209,74 @@ function Topbar({ searchQuery, setSearchQuery }) {
                         currency: 'INR'
                     });
                 }
+
+                // Build dynamic notifications from backend summary
+                const list = [];
+                const pending = summary?.pendingActions || {};
+                const bus = summary?.busBookings || {};
+
+                if (pending.cancellations > 0) {
+                    list.push({
+                        id: 'cancellation',
+                        title: 'New Cancellation',
+                        message: `${pending.cancellations} Cancellation Review Required`,
+                        color: '#1e75ff',
+                        path: '/admin/b2c-bus/cancellation-list',
+                    });
+                }
+                if (pending.deposits > 0) {
+                    list.push({
+                        id: 'deposit',
+                        title: 'Payment Pending',
+                        message: `${pending.deposits} Deposits Pending Verification`,
+                        color: '#10b981',
+                        path: '/admin/customer-management/deposit-request-list',
+                    });
+                }
+                if (pending.travelerUpdates > 0) {
+                    list.push({
+                        id: 'updates',
+                        title: 'Pending Updates',
+                        message: `${pending.travelerUpdates} Traveler Modifications Ready`,
+                        color: '#f97316',
+                        path: '/admin/customer-management/customer-list',
+                    });
+                }
+                if (bus.total > 0 && !(pending.cancellations > 0)) {
+                    list.push({
+                        id: 'bookings',
+                        title: 'Total Bookings',
+                        message: `${bus.total} Total Bookings`,
+                        color: '#6366f1',
+                        path: '/admin/b2c-bus/booking-list',
+                    });
+                }
+
+                setNotifications(prev => {
+                    const isDifferent = prev.length !== list.length || 
+                        list.some((item, i) => !prev[i] || prev[i].id !== item.id || prev[i].message !== item.message);
+                    
+                    if (isDifferent && list.length > 0) {
+                        setHasUnread(true);
+                    }
+                    return list;
+                });
+                setNotificationCount(list.length);
             } catch (err) {
-                console.error("Error fetching balance data in Topbar:", err);
+                console.error("Error fetching Topbar dashboard summary data:", err);
             }
         };
-        fetchBalance();
-        const interval = setInterval(fetchBalance, 30000);
+        fetchBalanceAndNotifications();
+        const interval = setInterval(fetchBalanceAndNotifications, 30000);
         return () => clearInterval(interval);
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('adminRole');
-        localStorage.removeItem('adminId');
-        localStorage.removeItem('adminName');
-        localStorage.removeItem('adminEmail');
-        localStorage.removeItem('adminLoginEmail');
-        localStorage.removeItem('adminChallengeId');
-        localStorage.removeItem('challengeId');
+        clearAuthSession();
         setIsDropdownOpen(false);
         navigate('/admin/login', { replace: true });
     };
+
 
     const handleClearCache = () => {
         setIsDropdownOpen(false);
@@ -302,8 +349,6 @@ function Topbar({ searchQuery, setSearchQuery }) {
         setShowPinModal(false);
     };
 
-    const topbarControlHeight = 58;
-
     // Inline Styles with Theme Colors
     const styles = {
         topbar: {
@@ -320,6 +365,7 @@ function Topbar({ searchQuery, setSearchQuery }) {
         topbarLeft: {
             display: 'flex',
             alignItems: 'center',
+            gap: '16px',
             flex: 1,
         },
         menuToggle: {
@@ -339,9 +385,8 @@ function Topbar({ searchQuery, setSearchQuery }) {
         },
         searchBarInput: {
             width: '100%',
-            height: `${topbarControlHeight}px`,
-            padding: '10px 16px 10px 42px',
-            boxSizing: 'border-box',
+            height: '42px',
+            padding: '0 16px 0 42px',
             borderRadius: '12px',
             border: '1px solid #e2e8f0',
             background: '#ffffff',
@@ -351,6 +396,7 @@ function Topbar({ searchQuery, setSearchQuery }) {
             fontFamily: 'inherit',
             boxShadow: '0 4px 12px rgba(15, 23, 42, 0.01)',
             transition: 'all 0.2s ease',
+            boxSizing: 'border-box',
         },
         searchBarIcon: {
             position: 'absolute',
@@ -417,17 +463,15 @@ function Topbar({ searchQuery, setSearchQuery }) {
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            height: `${topbarControlHeight}px`,
-            width: 'clamp(190px, 18vw, 270px)',
-            minWidth: '170px',
-            padding: '8px 16px',
-            boxSizing: 'border-box',
+            height: '42px',
+            padding: '0 16px',
             borderRadius: '12px',
             background: '#ffffff',
             border: '1px solid #eef2f6',
             color: 'var(--text-primary)',
             boxShadow: '0 4px 12px rgba(15, 23, 42, 0.02)',
             transition: 'all 0.2s ease',
+            boxSizing: 'border-box',
         },
         balanceIconWrapper: {
             width: '32px',
@@ -442,20 +486,17 @@ function Topbar({ searchQuery, setSearchQuery }) {
         balanceText: {
             display: 'flex',
             flexDirection: 'column',
-            gap: '2px',
-            minWidth: 0,
-            flex: 1,
+            gap: '1px',
             fontSize: '0.72rem',
             color: '#64748b',
             fontWeight: 500,
+            lineHeight: '1.2',
+            justifyContent: 'center',
         },
         balanceValue: {
             fontSize: '0.9rem',
             color: '#1e75ff',
             fontWeight: 700,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
         },
         eyeToggle: {
             background: 'none',
@@ -473,9 +514,8 @@ function Topbar({ searchQuery, setSearchQuery }) {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            height: `${topbarControlHeight}px`,
-            padding: '8px 16px',
-            boxSizing: 'border-box',
+            height: '42px',
+            padding: '0 16px',
             borderRadius: '12px',
             background: '#ffffff',
             border: '1px solid #eef2f6',
@@ -484,14 +524,14 @@ function Topbar({ searchQuery, setSearchQuery }) {
             fontWeight: 600,
             boxShadow: '0 4px 12px rgba(15, 23, 42, 0.02)',
             cursor: 'pointer',
+            boxSizing: 'border-box',
         },
         exportBtn: {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            height: `${topbarControlHeight}px`,
-            padding: '10px 18px',
-            boxSizing: 'border-box',
+            height: '42px',
+            padding: '0 18px',
             borderRadius: '10px',
             background: '#1e75ff',
             color: '#ffffff',
@@ -502,10 +542,11 @@ function Topbar({ searchQuery, setSearchQuery }) {
             boxShadow: '0 4px 14px rgba(30, 117, 255, 0.2)',
             transition: 'all 0.2s ease',
             fontFamily: 'inherit',
+            boxSizing: 'border-box',
         },
         topupButton: {
-            height: `${topbarControlHeight}px`,
-            width: `${topbarControlHeight}px`,
+            height: '42px',
+            width: '42px',
             borderRadius: '50%',
             border: '1px solid #eef2f6',
             background: '#ffffff',
@@ -517,11 +558,12 @@ function Topbar({ searchQuery, setSearchQuery }) {
             justifyContent: 'center',
             padding: 0,
             boxShadow: '0 4px 12px rgba(15, 23, 42, 0.02)',
+            boxSizing: 'border-box',
         },
         notificationBtn: {
             position: 'relative',
-            height: `${topbarControlHeight}px`,
-            width: `${topbarControlHeight}px`,
+            height: '42px',
+            width: '42px',
             borderRadius: '50%',
             border: '1px solid #eef2f6',
             background: '#ffffff',
@@ -533,6 +575,7 @@ function Topbar({ searchQuery, setSearchQuery }) {
             justifyContent: 'center',
             padding: 0,
             boxShadow: '0 4px 12px rgba(15, 23, 42, 0.02)',
+            boxSizing: 'border-box',
         },
         notificationBadge: {
             position: 'absolute',
@@ -554,8 +597,8 @@ function Topbar({ searchQuery, setSearchQuery }) {
             position: 'relative',
         },
         avatarBtn: {
-            height: `${topbarControlHeight}px`,
-            width: `${topbarControlHeight}px`,
+            height: '42px',
+            width: '42px',
             borderRadius: '50%',
             border: '2px solid #ffffff',
             display: 'grid',
@@ -568,6 +611,7 @@ function Topbar({ searchQuery, setSearchQuery }) {
             padding: 0,
             background: 'linear-gradient(135deg, #1e75ff, #0052d9)',
             boxShadow: '0 4px 12px rgba(30, 117, 255, 0.15)',
+            boxSizing: 'border-box',
         },
         profileDropdownMenu: {
             position: 'absolute',
@@ -747,8 +791,20 @@ function Topbar({ searchQuery, setSearchQuery }) {
     return (
         <>
             <header style={styles.topbar}>
-                {/* Left Section: Search Pill */}
+                {/* Left Section: List icon & Search Pill */}
                 <div style={styles.topbarLeft}>
+                    <button 
+                        style={styles.menuToggle} 
+                        aria-label="Toggle Sidebar"
+                        onClick={onToggleSidebar}
+                    >
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+
                     <div style={styles.searchWrapper} data-search-wrapper>
                         <span style={styles.searchBarIcon}>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -855,6 +911,19 @@ function Topbar({ searchQuery, setSearchQuery }) {
                         </button>
                     </div>
 
+                    {/* Request Top Up Action button (Plus) */}
+                    <button
+                        style={styles.topupButton}
+                        onClick={handleTopupClick}
+                        title="Request Top Up"
+                        aria-label="Request Top Up"
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+
                     {/* Date Selector Dropdown (Mockup match) */}
                     <div style={{ position: 'relative' }}>
                         <div 
@@ -931,19 +1000,6 @@ function Topbar({ searchQuery, setSearchQuery }) {
                         <span>Export Report</span>
                     </button>
 
-                    {/* Request Top Up Action button (Plus) */}
-                    <button
-                        style={styles.topupButton}
-                        onClick={handleTopupClick}
-                        title="Request Top Up"
-                        aria-label="Request Top Up"
-                    >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </button>
-
                     {/* Notification Bell Button */}
                     <div style={{ position: 'relative' }}>
                         <button
@@ -951,15 +1007,19 @@ function Topbar({ searchQuery, setSearchQuery }) {
                             type="button"
                             aria-label="Notifications"
                             onClick={() => {
-                                setShowNotifications(!showNotifications);
+                                const nextShow = !showNotifications;
+                                setShowNotifications(nextShow);
                                 setShowDatePicker(false);
+                                if (nextShow) {
+                                    setHasUnread(false);
+                                }
                             }}
                         >
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                             </svg>
-                            {notificationCount > 0 && (
+                            {hasUnread && notificationCount > 0 && (
                                 <span style={styles.notificationBadge}>
                                     {notificationCount > 99 ? '99+' : notificationCount}
                                 </span>
@@ -991,18 +1051,40 @@ function Topbar({ searchQuery, setSearchQuery }) {
                                     <span style={{ fontSize: '0.62rem', background: '#3b82f6', color: '#fff', padding: '1px 6px', borderRadius: '10px', fontWeight: 'bold' }}>Active</span>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '200px', overflowY: 'auto' }}>
-                                    <div style={{ padding: '10px 14px', borderBottom: '1px solid #f1f5f9', fontSize: '0.74rem', color: '#334155' }}>
-                                        <div style={{ fontWeight: 700, color: '#1e75ff', marginBottom: '1px' }}>New Cancellation</div>
-                                        <span>Ticket #48291 requires review.</span>
-                                    </div>
-                                    <div style={{ padding: '10px 14px', borderBottom: '1px solid #f1f5f9', fontSize: '0.74rem', color: '#334155' }}>
-                                        <div style={{ fontWeight: 700, color: '#10b981', marginBottom: '1px' }}>Payment Verified</div>
-                                        <span>B2C transaction ₹15,400 success.</span>
-                                    </div>
-                                    <div style={{ padding: '10px 14px', fontSize: '0.74rem', color: '#334155' }}>
-                                        <div style={{ fontWeight: 700, color: '#f97316', marginBottom: '1px' }}>Pending Updates</div>
-                                        <span>Traveler modifications ready to check.</span>
-                                    </div>
+                                    {notifications.length > 0 ? (
+                                        notifications.map((notif, idx) => (
+                                            <div 
+                                                key={notif.id || idx} 
+                                                style={{ 
+                                                    padding: '10px 14px', 
+                                                    borderBottom: idx === notifications.length - 1 ? 'none' : '1px solid #f1f5f9', 
+                                                    fontSize: '0.74rem', 
+                                                    color: '#334155',
+                                                    cursor: notif.path ? 'pointer' : 'default',
+                                                    transition: 'background 0.2s ease',
+                                                }}
+                                                onClick={() => {
+                                                    if (notif.path) {
+                                                        navigate(notif.path);
+                                                        setShowNotifications(false);
+                                                    }
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    if (notif.path) e.currentTarget.style.backgroundColor = '#f8fafc';
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    if (notif.path) e.currentTarget.style.backgroundColor = 'transparent';
+                                                }}
+                                            >
+                                                <div style={{ fontWeight: 700, color: notif.color || '#1e75ff', marginBottom: '1px' }}>{notif.title}</div>
+                                                <span>{notif.message}</span>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div style={{ padding: '16px', textAlign: 'center', fontSize: '0.78rem', color: '#64748b' }}>
+                                            No active notifications
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}

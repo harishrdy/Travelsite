@@ -1,6 +1,10 @@
 .flight-markup-panel {
   display: grid;
   gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .flight-markup-toolbar {
@@ -11,14 +15,18 @@
   flex-wrap: wrap;
 }
 
+.admin-markup-modal header h2,
+.admin-markup-coupon-modal header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+
 .flight-markup-title h1 {
   margin: 0;
   font-size: 1.6rem;
-  color: var(--text-primary);
-}
-
-.flight-markup-title strong {
-  color: var(--primary);
+  color: var(--primary) !important;
 }
 
 .flight-markup-title-underline {
@@ -62,17 +70,22 @@
   background: var(--panel);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .flight-markup-table-scroll {
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .flight-markup-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.82rem;
+  font-size: 11px !important;
   table-layout: fixed;
+  min-width: 100% !important;
 }
 
 .flight-markup-table thead {
@@ -84,8 +97,8 @@
 .flight-markup-table td {
   padding: 6px 8px;
   border-bottom: 1px solid var(--border);
-  text-align: left;
-  vertical-align: middle;
+  text-align: center !important;
+  vertical-align: middle !important;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -134,6 +147,22 @@
   text-transform: capitalize;
 }
 
+.admin-markup-modal {
+  background: var(--panel);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.22);
+  width: min(720px, 95vw);
+  padding: 16px;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+}
+
+.admin-markup-coupon-modal {
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+}
+
 .flight-markup-table .action-col {
   text-align: center;
 }
@@ -142,6 +171,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  justify-content: center !important;
 }
 
 .flight-markup-table .markup-action-group button {
@@ -185,4 +215,136 @@
   .flight-markup-table td {
     border-bottom: 0;
   }
+}
+
+.admin-markup-modal.fullscreen {
+  width: min(900px, 95vw);
+}
+
+.admin-markup-modal.small {
+  width: min(480px, 95vw);
+}
+
+.admin-markup-modal header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-markup-modal header button {
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+  color: var(--text-primary);
+  border-radius: 10px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.admin-markup-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.admin-markup-modal-grid span {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.admin-markup-modal-grid strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.admin-markup-form-grid,
+.admin-markup-coupon-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.admin-markup-form-grid label,
+.admin-markup-coupon-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: #000000 !important;
+  font-weight: 600 !important;
+}
+
+.admin-markup-form-grid input,
+.admin-markup-form-grid select,
+.admin-markup-form-grid textarea,
+.admin-markup-coupon-form input,
+.admin-markup-coupon-form select,
+.admin-markup-coupon-form textarea {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  background: var(--panel);
+  color: var(--text-primary);
+}
+
+.admin-markup-form-grid textarea,
+.admin-markup-coupon-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.admin-markup-form-grid .wide,
+.admin-markup-coupon-form .wide {
+  grid-column: 1 / -1;
+}
+
+.admin-markup-form-error {
+  margin: 12px 0 0;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.admin-markup-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.admin-markup-modal-actions button {
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-markup-modal-actions .primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+.admin-markup-modal-actions .secondary {
+  background: var(--surface-soft);
+  color: var(--text-primary);
+}
+
+.admin-markup-modal-actions .danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: rgba(180, 35, 24, 0.35);
+}
+
+.admin-markup-delete-copy {
+  margin: 16px 0 0;
+  color: var(--text-secondary);
 }

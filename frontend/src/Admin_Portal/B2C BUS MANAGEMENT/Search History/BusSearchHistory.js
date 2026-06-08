@@ -847,7 +847,7 @@ function mergeSearchHistory(apiRecords, localRecords) {
       isLocalFallback: Boolean(record?.isLocalFallback),
     };
 
-    const key = buildRecordKey(normalizedRecord) || `${normalizedRecord.id}-${index}`;
+    const key = normalizedRecord.id ? String(normalizedRecord.id) : `search-row-${index + 1}`;
     if (!byKey.has(key)) {
       byKey.set(key, normalizedRecord);
     }

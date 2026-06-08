@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Text.Json.Serialization;
 
 namespace PickNBook.Api.Models
 {
@@ -8,6 +9,7 @@ namespace PickNBook.Api.Models
 
         public int FeaturedOfferId { get; set; }
 
+        [JsonIgnore]
         public FeaturedOffer FeaturedOffer { get; set; } = null!;
 
         public string ConditionType { get; set; } = string.Empty;

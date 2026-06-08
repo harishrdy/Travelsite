@@ -8,14 +8,14 @@ import {
   ShieldCheck,
   TicketCheck,
 } from "lucide-react";
-import goIndigoLogo from "../../assets/images/indigo.png";
-import airIndiaExpressLogo from "../../assets/images/Air-India_express.jpg";
-import spicejetLogo from "../../assets/images/Spicejet.png";
-import akasaAirLogo from "../../assets/images/AkasaAir.png";
-import philippineAirlinesLogo from "../../assets/images/Philip.png";
-import emiratesLogo from "../../assets/images/Emirates.png";
-import qatarAirwaysLogo from "../../assets/images/qatarairways.png";
-import travelBg from "../../assets/images/indian-travel-banner-hd.png";
+import goIndigoLogo from "../../assets/images/airlines/indigo.png";
+import airIndiaExpressLogo from "../../assets/images/airlines/Air-India_express.jpg";
+import spicejetLogo from "../../assets/images/airlines/Spicejet.png";
+import akasaAirLogo from "../../assets/images/airlines/AkasaAir.png";
+import philippineAirlinesLogo from "../../assets/images/airlines/Philip.png";
+import emiratesLogo from "../../assets/images/airlines/Emirates.png";
+import qatarAirwaysLogo from "../../assets/images/airlines/qatarairways.png";
+import travelBg from "../../assets/images/illustrations/indian-travel-banner-hd.png";
 
 const CHECKIN_PROMOS = [
   { id: "window", icon: Clock3, title: "Check-in Window", text: "Usually opens before departure" },
@@ -107,11 +107,11 @@ const WebCheckInPage = () => {
         @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
 
         .web-checkin-page {
-          --web-primary: var(--theme-primary, #f04423);
-          --web-primary-strong: var(--theme-primary-strong, #df3f1f);
+          --web-primary: var(--theme-primary, #009b8f);
+          --web-primary-strong: var(--theme-primary-strong, #006f7a);
           --web-navy: var(--theme-navy, #1f2a44);
           --web-muted: #596985;
-          --web-border: #f1cfc4;
+          --web-border: #cfded8;
           --web-bg-image: url(${travelBg});
           min-height: calc(100vh - 88px);
           padding: 18px 14px 30px;
@@ -120,7 +120,7 @@ const WebCheckInPage = () => {
           background:
             linear-gradient(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.5)),
             var(--web-bg-image) center / cover no-repeat,
-            linear-gradient(180deg, #fff7f2 0%, #ffffff 100%);
+            linear-gradient(180deg, #eef7f4 0%, #ffffff 100%);
         }
 
         .web-checkin-shell {
@@ -139,7 +139,7 @@ const WebCheckInPage = () => {
           gap: 8px;
           overflow: hidden;
           padding: 8px;
-          box-shadow: 0 10px 24px rgba(125, 59, 31, 0.08);
+          box-shadow: 0 10px 24px rgba(13, 74, 83, 0.08);
         }
 
         .web-checkin-marquee article {
@@ -153,7 +153,7 @@ const WebCheckInPage = () => {
           column-gap: 8px;
           padding: 6px 10px;
           background: #ffffff;
-          border: 1px solid #f4d7cd;
+          border: 1px solid #cfded8;
           animation: web-checkin-scroll 24s linear infinite;
         }
 
@@ -183,9 +183,9 @@ const WebCheckInPage = () => {
           border: 1px solid var(--web-border);
           border-radius: 22px;
           background:
-            radial-gradient(circle at 92% 10%, rgba(240, 68, 35, 0.16), transparent 24%),
+            radial-gradient(circle at 92% 10%, rgba(0, 155, 143, 0.16), transparent 24%),
             rgba(255, 255, 255, 0.94);
-          box-shadow: 0 20px 48px rgba(125, 59, 31, 0.15);
+          box-shadow: 0 20px 48px rgba(13, 74, 83, 0.15);
           overflow: hidden;
           display: grid;
           grid-template-columns: 1.08fr 0.92fr;
@@ -207,7 +207,7 @@ const WebCheckInPage = () => {
           align-items: center;
           gap: 8px;
           padding: 0 12px;
-          background: var(--theme-primary-soft, #fff0e9);
+          background: var(--theme-primary-soft, #dff8f3);
           color: var(--web-primary);
           font-size: 0.72rem;
           font-weight: 850;
@@ -240,8 +240,8 @@ const WebCheckInPage = () => {
         .web-checkin-steps article {
           min-height: 34px;
           border-radius: 999px;
-          border: 1px solid #f4d7cd;
-          background: #fffaf7;
+          border: 1px solid #cfded8;
+          background: #f7fbf8;
           display: inline-flex;
           align-items: center;
           gap: 7px;
@@ -261,14 +261,14 @@ const WebCheckInPage = () => {
           align-content: center;
           background:
             radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.84), transparent 28%),
-            linear-gradient(135deg, #fffcf8 0%, #fff0e8 30%, #f04423 100%);
+            linear-gradient(135deg, #fffcf8 0%, #dff8f3 30%, #009b8f 100%);
         }
 
         .web-checkin-pass-card {
           border-radius: 20px;
           background: #ffffff;
           border: 1px solid rgba(244, 201, 187, 0.9);
-          box-shadow: 0 16px 34px rgba(88, 25, 12, 0.16);
+          box-shadow: 0 16px 34px rgba(13, 74, 83, 0.16);
           overflow: hidden;
         }
 
@@ -348,7 +348,7 @@ const WebCheckInPage = () => {
           min-height: 42px;
           border-radius: 12px;
           background: #fff8f4;
-          border: 1px solid #f4d7cd;
+          border: 1px solid #cfded8;
           display: grid;
           place-items: center;
           color: #34415d;
@@ -372,7 +372,7 @@ const WebCheckInPage = () => {
           display: grid;
           align-content: space-between;
           gap: 14px;
-          box-shadow: 0 12px 26px rgba(125, 59, 31, 0.08);
+          box-shadow: 0 12px 26px rgba(13, 74, 83, 0.08);
           transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
           position: relative;
           overflow: hidden;
@@ -389,7 +389,7 @@ const WebCheckInPage = () => {
         .web-checkin-airline-card:hover {
           transform: translateY(-4px);
           border-color: var(--airline-color);
-          box-shadow: 0 18px 34px rgba(125, 59, 31, 0.14);
+          box-shadow: 0 18px 34px rgba(13, 74, 83, 0.14);
         }
 
         .web-checkin-logo-wrap {
@@ -413,10 +413,10 @@ const WebCheckInPage = () => {
         }
 
         .web-checkin-button {
-          border: 1px solid #f4c9bb;
+          border: 1px solid #cfded8;
           border-radius: 12px;
           min-height: 38px;
-          background: #fffaf7;
+          background: #f7fbf8;
           color: var(--web-navy);
           display: inline-flex;
           align-items: center;
@@ -446,7 +446,7 @@ const WebCheckInPage = () => {
           border: 1px solid var(--web-border);
           border-radius: 18px;
           background: rgba(255, 255, 255, 0.94);
-          box-shadow: 0 12px 26px rgba(125, 59, 31, 0.08);
+          box-shadow: 0 12px 26px rgba(13, 74, 83, 0.08);
           padding: 16px;
         }
 

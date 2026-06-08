@@ -5,9 +5,10 @@ import {
   FaEyeSlash,
   FaSyncAlt,
   FaPlaneDeparture,
-  FaCheckCircle, FaBus,
+  FaCheckCircle, FaBus, FaTags, FaShieldAlt, FaCar, FaHeadset, FaUserFriends, FaTicketAlt, FaMapMarkerAlt, FaStar, FaLock
 } from "react-icons/fa";
 import "../../STYLES/Login.css";
+import "../../STYLES/Register.css";
 import { requestAuth } from "../../services/authService";
 import {
   validateLowercaseEmail,
@@ -15,11 +16,12 @@ import {
 } from "../../utils/authValidation";
 import { generateMixedCaptcha, validateCaptcha } from "../../utils/captcha";
 // import flightCarImage from "../../assets/images/flightcar.png";
-import flightCarImage from "../../assets/images/loginimage.png";
+import flightCarImage from "../../assets/images/new-landscape-bg.jpg";
+import brandLogo from "../../assets/images/brand/pick-n-book-logo.svg";
 
 
 function decodeJwtPayload(token) {
-  
+
   if (!token || typeof token !== "string") {
     return {};
   }
@@ -305,25 +307,70 @@ const Login = () => {
       className="travel-auth-page travel-auth-login"
       style={authPageStyle}
     >
-       {/* <div className="travel-bg-text">LOGIN</div> */}
-      <div className="travel-auth-card">
-        <aside className="travel-auth-brand">
-          <p className="travel-auth-kicker">Welcome to</p>
-          <div className="travel-auth-logo">
-            <FaPlaneDeparture />< FaBus/>
+      <div className="travel-auth-left-content">
+        <h1 className="travel-hero-title">Travel More, Worry Less</h1>
+        <p className="travel-hero-subtitle">Join millions of happy travelers and book your next journey with ease.</p>
+
+        <ul className="travel-benefits-list">
+          <li>
+            <span className="travel-benefit-icon"><FaTags /></span>
+            <div className="travel-benefit-text">
+              <strong>Best Prices Guaranteed</strong>
+              <span>Get the best deals on flights, buses and more.</span>
+            </div>
+          </li>
+          <li>
+            <span className="travel-benefit-icon"><FaShieldAlt /></span>
+            <div className="travel-benefit-text">
+              <strong>Safe & Secure Payments</strong>
+              <span>Your payments and personal details are 100% secure.</span>
+            </div>
+          </li>
+          <li>
+            <span className="travel-benefit-icon"><FaCar /></span>
+            <div className="travel-benefit-text">
+              <strong>Wide Choices</strong>
+              <span>Choose from thousands of routes, buses and schedules.</span>
+            </div>
+          </li>
+          <li>
+            <span className="travel-benefit-icon"><FaHeadset /></span>
+            <div className="travel-benefit-text">
+              <strong>24/7 Customer Support</strong>
+              <span>Our support team is always here to help you anytime.</span>
+            </div>
+          </li>
+        </ul>
+
+        <div className="travel-stats-bar">
+          <div className="travel-stat-item">
+            <div className="travel-stat-icon text-orange"><FaUserFriends /></div>
+            <div className="travel-stat-text"><strong>10M+</strong><br /><span>Happy Users</span></div>
           </div>
-          <h1 className="travel-auth-brand-name">Travling</h1>
-          <p className="travel-auth-brand-copy">
-            Plan flights,buses hotels and holiday trips with one secure traveler
-            account.
-          </p>
-          <p className="travel-auth-brand-meta">
-            Travel smarter. Manage bookings faster.
-          </p>
-        </aside>
+          <div className="travel-stat-item">
+            <div className="travel-stat-icon text-blue"><FaTicketAlt /></div>
+            <div className="travel-stat-text"><strong>200K+</strong><br /><span>Daily Bookings</span></div>
+          </div>
+          <div className="travel-stat-item">
+            <div className="travel-stat-icon text-green"><FaMapMarkerAlt /></div>
+            <div className="travel-stat-text"><strong>5000+</strong><br /><span>Routes Covered</span></div>
+          </div>
+          <div className="travel-stat-item">
+            <div className="travel-stat-icon text-purple"><FaStar /></div>
+            <div className="travel-stat-text"><strong>4.8 <FaStar className="small-star" /></strong><br /><span>Average Rating</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="travel-auth-card">
 
         <section className="travel-auth-form-panel">
-          <h2 className="travel-auth-heading">Sign in to your account</h2>
+          <img
+            src={brandLogo}
+            alt="Pick N Book"
+            className="auth-brand-logo auth-brand-logo-form"
+          />
+          <h2 className="travel-auth-heading">Welcome Back!</h2>
           <p className="travel-auth-subheading">
             Access tickets, vouchers and trip updates instantly.
           </p>
@@ -338,7 +385,7 @@ const Login = () => {
 
           <form className="travel-auth-form" onSubmit={handleSubmit} noValidate>
             <div className="travel-field">
-              <label htmlFor="login-email">E-mail Address <span>*</span></label>
+              <label htmlFor="login-email">Email Address <span>*</span></label>
               <div className="travel-field-line">
                 <input
                   id="login-email"

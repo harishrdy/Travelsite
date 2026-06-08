@@ -11,16 +11,14 @@ namespace PickNBook.Api.Models.DTOs
         public string Description { get; set; } = string.Empty;
         public string ImageUrl { get; set; } = string.Empty;
         public string BookingType { get; set; } = string.Empty;
-        public int PromotionId { get; set; }
-        public string PromotionCode { get; set; } = string.Empty;
-
-        // Promotion metadata
-        public string PromotionTitle { get; set; } = string.Empty;
-        public string PromotionType { get; set; } = string.Empty;
         public string DiscountType { get; set; } = string.Empty;
         public decimal DiscountValue { get; set; }
         public decimal? MaxDiscountAmount { get; set; }
         public decimal MinBookingAmount { get; set; }
+        public DateTime? StartDateUtc { get; set; }
+        public DateTime? EndDateUtc { get; set; }
+        public int? MaxUsage { get; set; }
+        public int UsedCount { get; set; }
         public decimal PreviewFinalPrice { get; set; }
 
         // Homepage conditions for search prefilling
@@ -32,28 +30,6 @@ namespace PickNBook.Api.Models.DTOs
         public string ConditionType { get; set; } = string.Empty;
         public string Value1 { get; set; } = string.Empty;
         public string? Value2 { get; set; }
-    }
-
-    public class ApplyOfferCouponRequest
-    {
-        public string OfferId { get; set; } = string.Empty;
-        public string CouponCode { get; set; } = string.Empty;
-        public decimal? CurrentPrice { get; set; }
-    }
-
-    public class ApplyOfferCouponResponse
-    {
-        public bool IsSuccess { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public string OfferId { get; set; } = string.Empty;
-        public string CouponCode { get; set; } = string.Empty;
-        public DateTime CouponExpiresAtUtc { get; set; }
-        public int MaxCouponUsage { get; set; }
-        public int RemainingCouponUsage { get; set; }
-        public decimal OriginalPrice { get; set; }
-        public decimal DiscountAmount { get; set; }
-        public decimal FinalPrice { get; set; }
-        public int CouponUsedCount { get; set; }
     }
 
     public class ExclusiveOfferSubscriptionRequest

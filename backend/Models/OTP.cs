@@ -1,4 +1,4 @@
-﻿namespace PickNBook.Api.Models
+namespace PickNBook.Api.Models
 {
     public class OTP
     {
@@ -22,5 +22,7 @@
         public string Email { get; set; } = string.Empty;
 
         public bool IsVerified { get; set; } = false;
+
+        public string? PhoneNumber { get; set; }
     }
 }

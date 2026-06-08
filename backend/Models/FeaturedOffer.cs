@@ -15,10 +15,19 @@ namespace PickNBook.Api.Models
         public int DisplayOrder { get; set; }
         public bool IsActive { get; set; } = true;
 
-        public int PromotionId { get; set; }
-        public BusPromotion? Promotion { get; set; }
+        public string DiscountType { get; set; } = string.Empty;
+        public decimal DiscountValue { get; set; }
+        public decimal? MaxDiscountAmount { get; set; }
+        public decimal MinBookingAmount { get; set; }
+        public DateTime? StartDateUtc { get; set; }
+        public DateTime? EndDateUtc { get; set; }
+        public int? MaxUsage { get; set; }
+        public int UsedCount { get; set; }
 
-        public ICollection<FeaturedOfferCondition> Conditions { get; set; }
+        public ICollection<FeaturedOfferCondition> Conditions { get; set; } 
             = new List<FeaturedOfferCondition>();
+
+        public ICollection<FeaturedOfferUsage> Usages { get; set; }
+            = new List<FeaturedOfferUsage>();
     }
 }

@@ -1,6 +1,10 @@
 .flight-markup-panel {
   display: grid;
   gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .flight-markup-toolbar {
@@ -14,11 +18,8 @@
 .flight-markup-title h1 {
   margin: 0;
   font-size: 1.6rem;
-  color: var(--text-primary);
-}
-
-.flight-markup-title strong {
-  color: var(--primary);
+  color: var(--primary) !important;
+  font-weight: 700;
 }
 
 .flight-markup-title-underline {
@@ -74,17 +75,22 @@
   background: var(--panel);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .flight-markup-table-scroll {
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .flight-markup-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.82rem;
+  font-size: 11px !important;
   table-layout: fixed;
+  min-width: 100% !important;
 }
 
 .flight-markup-table thead {
@@ -96,8 +102,8 @@
 .flight-markup-table td {
   padding: 6px 8px;
   border-bottom: 1px solid var(--border);
-  text-align: left;
-  vertical-align: middle;
+  text-align: center !important;
+  vertical-align: middle !important;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -127,6 +133,7 @@
 .flight-markup-row-actions {
   display: inline-flex;
   gap: 8px;
+  justify-content: center !important;
 }
 
 .flight-markup-row-actions button {
@@ -166,9 +173,16 @@
   background: var(--panel);
   border-radius: 16px;
   border: 1px solid var(--border);
-  box-shadow: 0 24px 48px rgba(122, 31, 31, 0.25);
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.22);
   width: min(720px, 95vw);
   padding: 16px;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+}
+
+.flight-markup-modal-header h2 {
+  color: #000000 !important;
+  font-weight: 700 !important;
 }
 
 .flight-markup-modal-header {
@@ -203,7 +217,8 @@
   display: grid;
   gap: 6px;
   font-size: 0.82rem;
-  color: var(--text-secondary);
+  color: #000000 !important;
+  font-weight: 600 !important;
 }
 
 .flight-markup-modal-field input,
@@ -261,9 +276,11 @@
   background: var(--panel);
   border-radius: 16px;
   border: 1px solid var(--border);
-  box-shadow: 0 24px 48px rgba(122, 31, 31, 0.25);
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.22);
   width: min(720px, 95vw);
   padding: 16px;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
 }
 
 .admin-markup-modal.fullscreen {
@@ -286,7 +303,8 @@
 .admin-markup-modal header h2 {
   margin: 0;
   font-size: 1.1rem;
-  color: var(--text-primary);
+  color: #000000 !important;
+  font-weight: 700 !important;
 }
 
 .admin-markup-modal header button {
@@ -330,7 +348,8 @@
   display: grid;
   gap: 6px;
   font-size: 0.82rem;
-  color: var(--text-secondary);
+  color: #000000 !important;
+  font-weight: 600 !important;
 }
 
 .admin-markup-form-grid input,

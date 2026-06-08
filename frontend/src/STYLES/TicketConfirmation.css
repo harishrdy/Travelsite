@@ -6,8 +6,8 @@
   --ticket-border: #cfdbea;
   --ticket-text: #1c395f;
   --ticket-muted: #5a7394;
-  --ticket-primary: var(--theme-primary-strong, #df3f1f);
-  --ticket-primary-strong: #0c2f5d;
+  --ticket-primary: var(--theme-primary-strong, #006f7a);
+  --ticket-primary-strong: #006f7a;
   --ticket-success: #265088;
   --ticket-shadow: 0 14px 28px rgba(13, 30, 52, 0.11);
   --ticket-heading-font: var(--app-font-family);
@@ -355,3 +355,46 @@
     box-shadow: none;
   }
 }
+
+/* Final shared Atlas booking theme */
+.ticket-confirmation-page {
+  --ticket-bg: #edf7ff !important;
+  --ticket-surface: #ffffff !important;
+  --ticket-border: #d8e5ee !important;
+  --ticket-text: #050b18 !important;
+  --ticket-muted: #5f6875 !important;
+  --ticket-primary: #009b8f !important;
+  --ticket-primary-strong: #006f7a !important;
+  --ticket-success: #009b8f !important;
+  background: #edf7ff !important;
+}
+
+.ticket-empty,
+.ticket-banner,
+.ticket-card,
+.ticket-section,
+.ticket-detail-card {
+  border-color: #d8e5ee !important;
+  background: #ffffff !important;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.14) !important;
+}
+
+.ticket-empty button,
+.ticket-actions .primary {
+  background: #009b8f !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+@media print {
+  .ticket-confirmation-page {
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .ticket-card {
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+  }
+}
+

@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeftRight,
+  BedDouble,
+  Building2,
   Bus,
   CalendarDays,
   ChevronDown,
@@ -11,6 +13,7 @@ import {
   Clock3,
   MessageSquareText,
   Minus,
+  MapPin,
   Plane,
   Plus,
   RefreshCw,
@@ -20,12 +23,15 @@ import {
   Users,
   X,
 } from "lucide-react";
-import travelServiceRoute from "../../assets/images/travel-service-route.png";
-import travelServiceFares from "../../assets/images/travel-service-fares.png";
-import travelServiceTraveller from "../../assets/images/travel-service-traveller.png";
-import flightServiceRoute from "../../assets/images/flight-service-route.svg";
-import flightServiceFares from "../../assets/images/flight-service-fares.svg";
-import flightServiceTraveller from "../../assets/images/flight-service-traveller.svg";
+import travelServiceRoute from "../../assets/images/illustrations/travel-service-route.png";
+import travelServiceFares from "../../assets/images/illustrations/travel-service-fares.png";
+import travelServiceTraveller from "../../assets/images/illustrations/travel-service-traveller.png";
+import flightServiceRoute from "../../assets/images/illustrations/flight-service-route.svg";
+import flightServiceFares from "../../assets/images/illustrations/flight-service-fares.svg";
+import flightServiceTraveller from "../../assets/images/illustrations/flight-service-traveller.svg";
+import hotelServiceSearch from "../../assets/images/illustrations/hotel-service-search.svg";
+import hotelServiceRooms from "../../assets/images/illustrations/hotel-service-rooms.svg";
+import hotelServiceCheckin from "../../assets/images/illustrations/hotel-service-checkin.svg";
 import airIndiaExpress from "../../assets/images/brands/air-india-express.png";
 import airIndia from "../../assets/images/brands/air-india.png";
 import akasaAir from "../../assets/images/brands/akasa-air.png";
@@ -34,7 +40,7 @@ import emirates from "../../assets/images/brands/emirates.png";
 import indigo from "../../assets/images/brands/indigo.png";
 import lufthansa from "../../assets/images/brands/lufthansa.png";
 import qatarAirways from "../../assets/images/brands/qatar-airways.png";
-import spiceJet from "../../assets/images/Spicejet.png";
+import spiceJet from "../../assets/images/airlines/Spicejet.png";
 import { POPULAR_RTC_OPERATORS } from "../../data/popularBuses";
 import "../../STYLES/HomePage.css";
 import { toDisplayDate } from "../../utils/apiDateFormat";
@@ -451,9 +457,9 @@ const HOME_BUS_FAQS = [
 ];
 
 const HOME_APP_BENEFITS = [
-  "Route alerts for frequently searched corridors",
-  "Quick access to PNR and ticket history",
-  "Offers for repeat travellers and families",
+  "Route alerts",
+  "PNR and ticket history",
+  "Repeat traveller offers",
 ];
 
 const FLIGHT_HIGHLIGHTS = [
@@ -669,6 +675,270 @@ const HOME_FLIGHT_APP_BENEFITS = [
   "Flight offers for domestic and international routes",
 ];
 
+const POPULAR_HOTELS = [
+  {
+    id: "hotel-1",
+    city: "Hyderabad",
+    name: "Atlas Pearl Suites",
+    summary: "Business-friendly stays near HITEC City with breakfast options.",
+    searches: 1420,
+    price: "3,499",
+  },
+  {
+    id: "hotel-2",
+    city: "Bengaluru",
+    name: "Cobalt Garden Hotel",
+    summary: "Calm rooms, workspace corners, and quick airport access.",
+    searches: 1310,
+    price: "4,199",
+  },
+  {
+    id: "hotel-3",
+    city: "Mumbai",
+    name: "Harbour View Residency",
+    summary: "Premium city stays with flexible check-in and sea-facing rooms.",
+    searches: 1260,
+    price: "5,299",
+  },
+  {
+    id: "hotel-4",
+    city: "Goa",
+    name: "Coral Bay Retreat",
+    summary: "Resort-style rooms close to beaches, cafes, and weekend routes.",
+    searches: 1188,
+    price: "4,899",
+  },
+  {
+    id: "hotel-5",
+    city: "Delhi",
+    name: "Metro Nest Hotel",
+    summary: "Clean city-center rooms for short stays and family travel.",
+    searches: 1040,
+    price: "2,999",
+  },
+  {
+    id: "hotel-6",
+    city: "Jaipur",
+    name: "Heritage Courtyard Stay",
+    summary: "Boutique comfort with local breakfast and sightseeing access.",
+    searches: 920,
+    price: "3,199",
+  },
+];
+
+const HOTEL_HIGHLIGHTS = [
+  {
+    id: "hotel-highlight-1",
+    icon: Search,
+    value: "Matched",
+    title: "Find Stays By City",
+    text: "Search hotels by destination, check-in date, room count, and guest mix in one compact flow.",
+  },
+  {
+    id: "hotel-highlight-2",
+    icon: ShieldCheck,
+    value: "Clear",
+    title: "Review Stay Details",
+    text: "Compare price, amenities, cancellation notes, and room highlights before choosing.",
+  },
+  {
+    id: "hotel-highlight-3",
+    icon: BedDouble,
+    value: "Ready",
+    title: "Rooms And Guests Together",
+    text: "Keep rooms, adults, children, and dates visible while planning the stay.",
+  },
+  {
+    id: "hotel-highlight-4",
+    icon: MapPin,
+    value: "Local",
+    title: "City-Friendly Planning",
+    text: "Scan popular city stays for business trips, family travel, weekend breaks, and stopovers.",
+  },
+];
+
+const HOTEL_SERVICE_BLOCKS = [
+  {
+    id: "hotel-search",
+    kicker: "Hotel Desk Services",
+    title: "Search Stays By City, Date, And Guest Plan",
+    text:
+      "Choose the destination, check-in, check-out, rooms, and guests before opening hotel results built for city stays.",
+    points: [
+      "Destination and hotel-area search",
+      "Check-in and check-out date clarity",
+      "Rooms and guests ready before results",
+    ],
+    visual: "route",
+    image: hotelServiceSearch,
+    imageAlt: "Hotel destination search card with stay dates",
+  },
+  {
+    id: "hotel-fares",
+    kicker: "Stay Clarity",
+    title: "Compare Rooms, Amenities, And Nightly Price",
+    text:
+      "Scan budget, business, family, boutique, and premium stays with amenities and cancellation notes close to the price.",
+    points: [
+      "Budget Rooms",
+      "Business Hotels",
+      "Family Stays",
+      "Boutique Hotels",
+      "Breakfast Included",
+      "Flexible Cancellation",
+    ],
+    visual: "fare",
+    image: hotelServiceRooms,
+    imageAlt: "Hotel room comparison cards with prices and amenities",
+  },
+  {
+    id: "hotel-ready",
+    kicker: "Before You Check In",
+    title: "Keep Check-In Details Ready For Arrival",
+    text:
+      "Review city, dates, rooms, guests, amenities, and booking references before the stay begins.",
+    points: [
+      "Check stay dates before selection",
+      "Review room and guest details",
+      "Keep booking reference handy",
+      "Use saved cities for repeat trips",
+    ],
+    visual: "traveller",
+    image: hotelServiceCheckin,
+    imageAlt: "Hotel check-in card with luggage and stay details",
+  },
+];
+
+const HOTEL_BOOKING_STEPS = [
+  {
+    id: "hotel-step-1",
+    title: "Search Stays",
+    text: "Enter destination, check-in, check-out, rooms, and guests to open matching hotel options.",
+  },
+  {
+    id: "hotel-step-2",
+    title: "Compare Comfort",
+    text: "Review amenities, city location, breakfast notes, cancellation terms, and nightly price.",
+  },
+  {
+    id: "hotel-step-3",
+    title: "Confirm The Stay",
+    text: "Keep guest details, stay dates, fare summary, and booking reference ready for check-in.",
+  },
+];
+
+const HOTEL_GUIDE_NOTES = [
+  {
+    id: "hotel-note-1",
+    title: "Better Date Planning",
+    text: "Hotel price and availability can shift quickly around weekends, events, and holidays. Compare nearby dates before locking the stay.",
+  },
+  {
+    id: "hotel-note-2",
+    title: "Choose Beyond Price",
+    text: "Check location, breakfast, cancellation rules, room type, guest policy, and check-in timing so the stay matches the actual trip.",
+  },
+];
+
+const HOTEL_ASSURANCE_POINTS = [
+  {
+    id: "hotel-assurance-1",
+    icon: ShieldCheck,
+    title: "Stay Details",
+    text: "Dates, guests, room count, and city stay visible before results.",
+  },
+  {
+    id: "hotel-assurance-2",
+    icon: BedDouble,
+    title: "Room Ready",
+    text: "Compare comfort, amenities, and nightly prices clearly.",
+  },
+  {
+    id: "hotel-assurance-3",
+    icon: RefreshCw,
+    title: "Change Flexible",
+    text: "Review flexible cancellation and date choices before booking.",
+  },
+];
+
+const HOTEL_REVIEWS = [
+  {
+    id: "hotel-review-1",
+    type: "Hotel Booking",
+    comment: "The room and guest selector made family stay planning simple.",
+    author: "Ishita R.",
+    rating: "4.8/5",
+  },
+  {
+    id: "hotel-review-2",
+    type: "Hotel Booking",
+    comment: "City hotel cards are easy to scan for budget and amenities.",
+    author: "Manoj S.",
+    rating: "4.7/5",
+  },
+  {
+    id: "hotel-review-3",
+    type: "Hotel Booking",
+    comment: "Check-in and check-out dates stayed clear through the search.",
+    author: "Kavya P.",
+    rating: "4.9/5",
+  },
+  {
+    id: "hotel-review-4",
+    type: "Hotel Booking",
+    comment: "Popular stays helped me choose quickly for a weekend trip.",
+    author: "Arjun V.",
+    rating: "4.8/5",
+  },
+  {
+    id: "hotel-review-5",
+    type: "Hotel Booking",
+    comment: "The hotel results page feels consistent with bus and flight.",
+    author: "Naina K.",
+    rating: "4.7/5",
+  },
+  {
+    id: "hotel-review-6",
+    type: "Hotel Booking",
+    comment: "Good flow for comparing city stays without clutter.",
+    author: "Dev M.",
+    rating: "4.8/5",
+  },
+];
+
+const HOME_HOTEL_FAQS = [
+  {
+    id: "hotel-faq-1",
+    question: "How do I search for hotels online?",
+    answer:
+      "Choose a destination, check-in date, check-out date, rooms, and guests. The hotel results page shows matching stays with price and amenity details.",
+  },
+  {
+    id: "hotel-faq-2",
+    question: "Can I search by rooms and guests?",
+    answer:
+      "Yes. The hotel form includes a rooms and guests selector for adults, children, and room count.",
+  },
+  {
+    id: "hotel-faq-3",
+    question: "What should I check before selecting a hotel?",
+    answer:
+      "Review stay dates, guest count, room type, nightly price, amenities, cancellation notes, and check-in timing before confirming.",
+  },
+  {
+    id: "hotel-faq-4",
+    question: "Can I compare popular city stays?",
+    answer:
+      "Yes. The hotel mode includes popular city stays and a hotel results page for quick comparison.",
+  },
+];
+
+const HOME_HOTEL_APP_BENEFITS = [
+  "Saved city stay preferences",
+  "Room and guest presets",
+  "Hotel offers for business and weekend trips",
+];
+
 const HOME_MODE_CONTENT = {
   buses: {
     mode: "buses",
@@ -700,10 +970,10 @@ const HOME_MODE_CONTENT = {
     faqHeading: "Online Bus Booking FAQs",
     faqs: HOME_BUS_FAQS,
     appKicker: "Quick Booking",
-    appTitle: "Book buses faster on your next trip",
+    appTitle: "Book buses faster",
     appText:
-      "Save common routes, compare buses quickly, and keep ticket details ready for city-to-city journeys.",
-    appOffer: "Use code TRAVELFIRST",
+      "Save routes, compare fares, and keep tickets ready for city-to-city journeys.",
+    appOffer: "Code TRAVELFIRST",
     appBenefits: HOME_APP_BENEFITS,
     aboutTitle: "About Travel Desk Bus Booking",
     aboutParagraphs: [
@@ -752,6 +1022,47 @@ const HOME_MODE_CONTENT = {
       "Whether it is a domestic business trip, family vacation, international connection, or multi-city plan, flight mode keeps schedules, passenger details, PNR actions, and booking choices easy to review.",
     ],
   },
+  hotels: {
+    mode: "hotels",
+    Icon: Building2,
+    heroTitle: "Book hotel stays with rooms, guests, and dates aligned",
+    heroTags: ["City stays", "Rooms and guests", "Flexible stay planning"],
+    insightsTitle: "Make every hotel search feel clear before you choose.",
+    insightsText:
+      "Travel Desk hotel mode brings destination, dates, room count, guest details, and stay choices into the same calm booking flow.",
+    highlights: HOTEL_HIGHLIGHTS,
+    services: HOTEL_SERVICE_BLOCKS,
+    serviceHeading: "Plan, compare, and book hotels with clearer choices",
+    guideHeading: "Book Hotels With Less Guesswork",
+    guideIntro:
+      "A good hotel booking flow should help you compare city stays, dates, rooms, guest counts, amenities, and fare notes before you select a stay.",
+    bookingSteps: HOTEL_BOOKING_STEPS,
+    guideNotes: HOTEL_GUIDE_NOTES,
+    assuranceBadge: "Hotel Stay Assured",
+    assuranceEnding: "Book hotel stays with confidence",
+    assuranceMapLabel: "Stay planning view",
+    assurancePoints: HOTEL_ASSURANCE_POINTS,
+    assuranceProofs: [
+      ["Dates checked", "Check-in and check-out stay visible before results."],
+      ["Guests matched", "Rooms, adults, and children are easy to review."],
+      ["Comfort compared", "Amenities and stay notes stay close to the price."],
+      ["Stay ready", "Booking reference and city details stay in one place."],
+    ],
+    reviews: HOTEL_REVIEWS,
+    faqHeading: "Online Hotel Booking FAQs",
+    faqs: HOME_HOTEL_FAQS,
+    appKicker: "Hotel Desk",
+    appTitle: "Plan hotel stays faster",
+    appText:
+      "Save favourite cities, compare stay options, and keep room and guest details ready.",
+    appOffer: "Use code STAYFIRST",
+    appBenefits: HOME_HOTEL_APP_BENEFITS,
+    aboutTitle: "About Travel Desk Hotel Booking",
+    aboutParagraphs: [
+      "Travel Desk hotel mode is built for destination-first stay planning with clear dates, room counts, guest details, popular city stays, and simple results.",
+      "Whether it is a business trip, weekend break, family stay, or stopover, hotel mode keeps room choices, stay dates, amenities, and booking details easy to compare.",
+    ],
+  },
 };
 
 function getDateInputValue(offsetDays = 0) {
@@ -760,6 +1071,10 @@ function getDateInputValue(offsetDays = 0) {
 
   const timezoneOffset = date.getTimezoneOffset() * 60000;
   return new Date(date.getTime() - timezoneOffset).toISOString().slice(0, 10);
+}
+
+function normalizeHomeTab(value) {
+  return ["buses", "hotels"].includes(value) ? value : "flights";
 }
 
 function createMultiCityLeg(from, to, offsetDays) {
@@ -776,17 +1091,26 @@ function formatTravellerSummary(adults, children, infants) {
     return "";
   }
 
-  const parts = [`${adults} Adult${adults > 1 ? "s" : ""}`];
+  const parts = [`${adults} ${adults > 1 ? "ADULTS" : "ADULT"}`];
 
   if (children > 0) {
-    parts.push(`${children} Child${children > 1 ? "ren" : ""}`);
+    parts.push(`${children} ${children > 1 ? "CHILDREN" : "CHILD"}`);
   }
 
   if (infants > 0) {
-    parts.push(`${infants} Infant${infants > 1 ? "s" : ""}`);
+    parts.push(`${infants} ${infants > 1 ? "INFANTS" : "INFANT"}`);
   }
 
   return parts.join(", ");
+}
+
+function formatHotelGuestSummary(rooms, adults, children) {
+  const roomPart = `${rooms} ${rooms > 1 ? "Rooms" : "Room"}`;
+  const adultPart = `${adults} ${adults > 1 ? "Adults" : "Adult"}`;
+  const childPart =
+    children > 0 ? `, ${children} ${children > 1 ? "Children" : "Child"}` : "";
+
+  return `${roomPart}, ${adultPart}${childPart}`;
 }
 
 function getStaticAiReply(message) {
@@ -797,7 +1121,7 @@ function getStaticAiReply(message) {
     normalized.includes("hello") ||
     normalized.includes("hey")
   ) {
-    return "Hello. I can help with flights, buses, fares, and booking flow questions.";
+    return "Hello. I can help with flights, buses, hotels, fares, and booking flow questions.";
   }
 
   if (
@@ -841,7 +1165,7 @@ function getInitialAiChatMessages() {
     {
       id: `ai-welcome-${Date.now()}-${Math.random().toString(16).slice(2)}`,
       role: "assistant",
-      text: "Hi, I am Travel AI. Ask me anything about flights or bus bookings.",
+      text: "Hi, I am Travel AI. Ask me anything about flights, buses, or hotel bookings.",
     },
   ];
 }
@@ -1490,6 +1814,8 @@ function PlaceAutocomplete({
       <div className="control-wrap">
         {tripType === "flight" ? (
           <Plane size={18} />
+        ) : tripType === "hotel" ? (
+          <Building2 size={18} />
         ) : (
           <Bus size={18} />
         )}
@@ -1532,7 +1858,7 @@ function PlaceAutocomplete({
 export default function HomePage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab") === "buses" ? "buses" : "flights";
+  const initialTab = normalizeHomeTab(searchParams.get("tab"));
 
   const { setSelectedOffer } = usePromo();
   const aiChatMessagesRef = useRef(null);
@@ -1554,7 +1880,7 @@ export default function HomePage() {
   const [flightDepartureDate, setFlightDepartureDate] = useState("");
   const [flightReturnDate, setFlightReturnDate] = useState("");
 
-  const [adults, setAdults] = useState(1);
+  const [adults, setAdults] = useState(0);
   const [children, setChildren] = useState(0);
   const [infants, setInfants] = useState(0);
   const [cabinClass, setCabinClass] = useState("Economy");
@@ -1574,6 +1900,16 @@ export default function HomePage() {
   const [busDepartureDate, setBusDepartureDate] = useState("");
   const [busReturnDate, setBusReturnDate] = useState("");
 
+  const [hotelDestination, setHotelDestination] = useState("");
+  const [hotelDestinationError, setHotelDestinationError] = useState("");
+  const [hotelCheckInDate, setHotelCheckInDate] = useState("");
+  const [hotelCheckOutDate, setHotelCheckOutDate] = useState("");
+  const [hotelRooms, setHotelRooms] = useState(1);
+  const [hotelAdults, setHotelAdults] = useState(2);
+  const [hotelChildren, setHotelChildren] = useState(0);
+  const [showHotelGuestsDropdown, setShowHotelGuestsDropdown] = useState(false);
+  const hotelGuestsFieldRef = useRef(null);
+
   const [featuredOffers, setFeaturedOffers] = useState([]);
   const [featuredOffersLoading, setFeaturedOffersLoading] = useState(false);
   const [featuredOffersError, setFeaturedOffersError] = useState("");
@@ -1586,7 +1922,7 @@ export default function HomePage() {
   const [isDealsDialogOpen, setIsDealsDialogOpen] = useState(false);
 
   useEffect(() => {
-    const tab = searchParams.get("tab") === "buses" ? "buses" : "flights";
+    const tab = normalizeHomeTab(searchParams.get("tab"));
     setActiveTab(tab);
   }, [searchParams]);
 
@@ -1598,6 +1934,13 @@ export default function HomePage() {
       ) {
         setShowTravellerDropdown(false);
       }
+
+      if (
+        hotelGuestsFieldRef.current &&
+        !hotelGuestsFieldRef.current.contains(event.target)
+      ) {
+        setShowHotelGuestsDropdown(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -1606,6 +1949,7 @@ export default function HomePage() {
 
   useEffect(() => {
     setShowTravellerDropdown(false);
+    setShowHotelGuestsDropdown(false);
   }, [activeTab, flightTripType]);
 
   useEffect(() => {
@@ -1703,7 +2047,12 @@ export default function HomePage() {
       setFeaturedOffersError("");
 
       try {
-        const bookingType = activeTab === "buses" ? "Bus" : "Flight";
+        const bookingType =
+          activeTab === "buses"
+            ? "Bus"
+            : activeTab === "hotels"
+              ? "Hotel"
+              : "Flight";
         const response = await getActiveOffers(bookingType);
         const activeOffers = getFeaturedOffersPayload(response)
           .map(normalizeFeaturedOffer)
@@ -1817,7 +2166,7 @@ export default function HomePage() {
   };
 
   const handleBookingTabChange = (nextTab) => {
-    const normalizedTab = nextTab === "buses" ? "buses" : "flights";
+    const normalizedTab = normalizeHomeTab(nextTab);
     setActiveTab(normalizedTab);
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set("tab", normalizedTab);
@@ -1868,6 +2217,18 @@ export default function HomePage() {
     });
   };
 
+  const changeHotelRooms = (delta) => {
+    setHotelRooms((previous) => Math.min(8, Math.max(1, previous + delta)));
+  };
+
+  const changeHotelAdults = (delta) => {
+    setHotelAdults((previous) => Math.min(16, Math.max(1, previous + delta)));
+  };
+
+  const changeHotelChildren = (delta) => {
+    setHotelChildren((previous) => Math.min(8, Math.max(0, previous + delta)));
+  };
+
   const updateMultiCityLeg = (legId, field, value) => {
     setMultiCityLegs((previousLegs) =>
       previousLegs.map((leg) =>
@@ -1900,6 +2261,11 @@ export default function HomePage() {
   const isBusTwoWay = busTripType === "twoway";
   const travellerSummary = formatTravellerSummary(adults, children, infants);
   const hasTravellerSelection = Boolean(travellerSummary);
+  const hotelGuestSummary = formatHotelGuestSummary(
+    hotelRooms,
+    hotelAdults,
+    hotelChildren,
+  );
 
   const navigateToFlightSearch = (flightPayload) => {
     const flightParams = new URLSearchParams();
@@ -1930,6 +2296,23 @@ export default function HomePage() {
     navigate(
       `/search/buses${busParams.toString() ? `?${busParams.toString()}` : ""}`,
       { state: busPayload },
+    );
+  };
+
+  const navigateToHotelSearch = (hotelPayload) => {
+    const hotelParams = new URLSearchParams();
+
+    Object.entries(hotelPayload).forEach(([key, value]) => {
+      if (typeof value === "string" && value.trim()) {
+        hotelParams.set(key, value.trim());
+      }
+    });
+
+    navigate(
+      `/search/hotels${
+        hotelParams.toString() ? `?${hotelParams.toString()}` : ""
+      }`,
+      { state: hotelPayload },
     );
   };
 
@@ -1972,6 +2355,19 @@ export default function HomePage() {
       return;
     }
 
+    if (offer.bookingType === "hotel" || offer.bookingType === "Hotel") {
+      navigateToHotelSearch({
+        destination: destination || source || "Hyderabad",
+        checkInDate: travelDate,
+        checkOutDate: getDateInputValue(1),
+        rooms: "1",
+        adults: "2",
+        children: "0",
+        guests: "1 Room, 2 Adults",
+      });
+      return;
+    }
+
     navigateToFlightSearch({
       source,
       destination,
@@ -2006,6 +2402,18 @@ export default function HomePage() {
     });
   };
 
+  const handlePopularHotelBooking = (hotel) => {
+    navigateToHotelSearch({
+      destination: hotel.city,
+      checkInDate: getDateInputValue(0),
+      checkOutDate: getDateInputValue(1),
+      rooms: "1",
+      adults: "2",
+      children: "0",
+      guests: "1 Room, 2 Adults",
+    });
+  };
+
   const handleBusFromChange = (value) => {
     setBusFrom(value);
     if (value.trim()) {
@@ -2034,7 +2442,35 @@ export default function HomePage() {
     }
   };
 
+  const handleHotelDestinationChange = (value) => {
+    setHotelDestination(value);
+    if (value.trim()) {
+      setHotelDestinationError("");
+    }
+  };
+
   const handleSearch = () => {
+    if (activeTab === "hotels") {
+      const destinationVal = hotelDestination.trim();
+
+      if (!destinationVal) {
+        setHotelDestinationError("Destination city is required.");
+        return;
+      }
+
+      setHotelDestinationError("");
+      navigateToHotelSearch({
+        destination: destinationVal,
+        checkInDate: hotelCheckInDate.trim(),
+        checkOutDate: hotelCheckOutDate.trim(),
+        rooms: String(hotelRooms),
+        adults: String(hotelAdults),
+        children: String(hotelChildren),
+        guests: formatHotelGuestSummary(hotelRooms, hotelAdults, hotelChildren),
+      });
+      return;
+    }
+
     if (activeTab === "flights") {
       const isMultiCity = flightTripType === "multicity";
       let hasError = false;
@@ -2280,20 +2716,114 @@ export default function HomePage() {
     </div>
   );
 
+  const hotelGuestField = (
+    <div className="field traveller-field hotel-guests-field" ref={hotelGuestsFieldRef}>
+      <label>Rooms & Guests</label>
+      <button
+        type="button"
+        className={`traveller-trigger ${showHotelGuestsDropdown ? "open" : ""}`}
+        onClick={() => setShowHotelGuestsDropdown((previous) => !previous)}
+      >
+        <span className="traveller-summary">
+          <BedDouble size={16} />
+          <span>{hotelGuestSummary}</span>
+        </span>
+        <ChevronDown
+          size={16}
+          className={`traveller-caret ${showHotelGuestsDropdown ? "open" : ""}`}
+        />
+      </button>
+
+      {showHotelGuestsDropdown && (
+        <div className="traveller-dropdown hotel-guests-dropdown">
+          <div className="counter-row">
+            <div className="counter-copy">
+              <strong>Rooms</strong>
+              <span>Hotel rooms required</span>
+            </div>
+            <div className="counter-box">
+              <button
+                type="button"
+                onClick={() => changeHotelRooms(-1)}
+                disabled={hotelRooms <= 1}
+              >
+                <Minus size={14} />
+              </button>
+              <span>{hotelRooms}</span>
+              <button type="button" onClick={() => changeHotelRooms(1)}>
+                <Plus size={14} />
+              </button>
+            </div>
+          </div>
+
+          <div className="counter-row">
+            <div className="counter-copy">
+              <strong>Adults</strong>
+              <span>12 years and above</span>
+            </div>
+            <div className="counter-box">
+              <button
+                type="button"
+                onClick={() => changeHotelAdults(-1)}
+                disabled={hotelAdults <= 1}
+              >
+                <Minus size={14} />
+              </button>
+              <span>{hotelAdults}</span>
+              <button type="button" onClick={() => changeHotelAdults(1)}>
+                <Plus size={14} />
+              </button>
+            </div>
+          </div>
+
+          <div className="counter-row">
+            <div className="counter-copy">
+              <strong>Children</strong>
+              <span>0 to 11 years</span>
+            </div>
+            <div className="counter-box">
+              <button
+                type="button"
+                onClick={() => changeHotelChildren(-1)}
+                disabled={hotelChildren <= 0}
+              >
+                <Minus size={14} />
+              </button>
+              <span>{hotelChildren}</span>
+              <button type="button" onClick={() => changeHotelChildren(1)}>
+                <Plus size={14} />
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="traveller-done"
+            onClick={() => setShowHotelGuestsDropdown(false)}
+          >
+            Done
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
   const classField = (
     <div className="field class-field">
       <label>Class</label>
-      <select
-        value={cabinClass}
-        onChange={(event) => setCabinClass(event.target.value)}
-        className="field-control"
-      >
-        {CLASS_OPTIONS.map((item) => (
-          <option key={item} value={item}>
-            {item}
-          </option>
-        ))}
-      </select>
+      <div className="control-wrap class-control-wrap">
+        <select
+          value={cabinClass}
+          onChange={(event) => setCabinClass(event.target.value)}
+          className="field-control"
+        >
+          {CLASS_OPTIONS.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 
@@ -2583,6 +3113,15 @@ export default function HomePage() {
                     <Bus size={17} />
                     <span>Buses</span>
                   </button>
+
+                  <button
+                    type="button"
+                    className={`tab ${activeTab === "hotels" ? "active" : ""}`}
+                    onClick={() => handleBookingTabChange("hotels")}
+                  >
+                    <Building2 size={17} />
+                    <span>Hotels</span>
+                  </button>
                 </div>
               </div>
 
@@ -2781,7 +3320,7 @@ export default function HomePage() {
                     </div>
                   )}
                 </div>
-              ) : (
+              ) : activeTab === "buses" ? (
                 <div className="booking-content">
                   <div
                     className="trip-switch"
@@ -2883,6 +3422,69 @@ export default function HomePage() {
                         </div>
                       </div>
                     )}
+                  </div>
+                </div>
+              ) : (
+                <div className="booking-content hotel-booking-content">
+                  <div className="search-grid hotel-standard-grid">
+                    <PlaceAutocomplete
+                      label="Destination"
+                      value={hotelDestination}
+                      onChange={handleHotelDestinationChange}
+                      tripType="hotel"
+                      field="destination"
+                      placeholder="City or hotel area"
+                      error={hotelDestinationError}
+                      className="hotel-destination-field"
+                    />
+
+                    <div className="field field-with-icon checkin-field" style={{ position: "relative" }}>
+                      <label>Check-in</label>
+                      <div className="control-wrap">
+                        <CalendarDays size={18} />
+                        <input
+                          type="text"
+                          readOnly
+                          value={toDisplayDate(hotelCheckInDate)}
+                          placeholder="DD-MM-YYYY"
+                          className="field-control with-leading-icon"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => document.getElementById("hotel-checkin-date").showPicker?.()}
+                        />
+                      </div>
+                      <input
+                        id="hotel-checkin-date"
+                        type="date"
+                        value={hotelCheckInDate}
+                        onChange={(event) => setHotelCheckInDate(event.target.value)}
+                        style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
+                      />
+                    </div>
+
+                    <div className="field field-with-icon checkout-field" style={{ position: "relative" }}>
+                      <label>Check-out</label>
+                      <div className="control-wrap">
+                        <CalendarDays size={18} />
+                        <input
+                          type="text"
+                          readOnly
+                          value={toDisplayDate(hotelCheckOutDate)}
+                          placeholder="DD-MM-YYYY"
+                          className="field-control with-leading-icon"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => document.getElementById("hotel-checkout-date").showPicker?.()}
+                        />
+                      </div>
+                      <input
+                        id="hotel-checkout-date"
+                        type="date"
+                        value={hotelCheckOutDate}
+                        onChange={(event) => setHotelCheckOutDate(event.target.value)}
+                        style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
+                      />
+                    </div>
+
+                    {hotelGuestField}
                   </div>
                 </div>
               )}
@@ -3011,7 +3613,19 @@ export default function HomePage() {
             className="popular-routes-marquee"
             duration={36}
             renderItem={(route) => (
-              <article className="pop-route-card" key={route.id}>
+              <article
+                className="pop-route-card"
+                key={route.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => handlePopularRouteBooking(route)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    handlePopularRouteBooking(route);
+                  }
+                }}
+              >
                 <div className="pop-route-top-row">
                   <span className="pop-route-tag-search">SEARCH</span>
                   <span className="pop-route-tag-searches">{route.searches.toLocaleString()} SEARCHES</span>
@@ -3040,7 +3654,10 @@ export default function HomePage() {
                 <button
                   type="button"
                   className="pop-route-book-btn"
-                  onClick={() => handlePopularRouteBooking(route)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handlePopularRouteBooking(route);
+                  }}
                 >
                   BOOK BUS
                 </button>
@@ -3186,6 +3803,57 @@ export default function HomePage() {
         />
       </section>
       </>
+      )}
+
+      {activeTab === "hotels" && (
+      <section className="popular-section hotel-popular-section section-shell">
+        <div className="section-header">
+          <div>
+            <span className="section-kicker">Popular Stays</span>
+            <h2>Trending Hotel Picks</h2>
+          </div>
+        </div>
+
+        <AutoMarquee
+          items={POPULAR_HOTELS}
+          className="popular-routes-marquee hotel-routes-marquee"
+          duration={38}
+          renderItem={(hotel) => (
+            <article className="pop-route-card pop-hotel-card" key={hotel.id}>
+              <div className="pop-route-top-row">
+                <span className="pop-route-tag-search">STAY</span>
+                <span className="pop-route-tag-searches">
+                  {hotel.searches.toLocaleString()} SEARCHES
+                </span>
+              </div>
+
+              <div className="hotel-card-city-row">
+                <span className="hotel-card-icon">
+                  <Building2 size={15} />
+                </span>
+                <div>
+                  <strong>{hotel.name}</strong>
+                  <span>{hotel.city}</span>
+                </div>
+              </div>
+
+              <p className="hotel-card-summary">{hotel.summary}</p>
+
+              <div className="pop-route-meta-row">
+                <span className="pop-route-meta-left">From INR {hotel.price}</span>
+              </div>
+
+              <button
+                type="button"
+                className="pop-route-book-btn"
+                onClick={() => handlePopularHotelBooking(hotel)}
+              >
+                BOOK HOTEL
+              </button>
+            </article>
+          )}
+        />
+      </section>
       )}
 
       <section className="travel-services-section section-shell">
@@ -3443,10 +4111,10 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="india-app-card">
+          <div className="india-app-card">
           <div className="india-app-mark" aria-hidden="true">
             <HomeModeIcon size={42} />
-            <span>TD</span>
+            <span>APP</span>
           </div>
 
           <div className="india-app-copy">
@@ -3463,24 +4131,41 @@ export default function HomePage() {
               ))}
             </ul>
 
-            <div className="india-app-qr" aria-label="Mobile app QR code placeholder">
+            <div className="india-app-qr" aria-label="App QR code">
               <div className="india-app-qr-code" aria-hidden="true">
-                {[
-                  1, 0, 1, 1, 0, 1, 0,
-                  0, 1, 0, 1, 1, 0, 1,
-                  1, 1, 0, 0, 1, 1, 0,
-                  0, 1, 1, 1, 0, 0, 1,
-                  1, 0, 1, 0, 1, 1, 1,
-                  0, 1, 0, 1, 0, 1, 0,
-                  1, 1, 1, 0, 1, 0, 1,
-                ].map((cell, index) => (
-                  <span key={index} className={cell ? "filled" : ""} />
+                {Array.from({ length: 49 }, (_, index) => (
+                  <span
+                    key={index}
+                    className={
+                      [0, 2, 3, 6, 7, 9, 12, 14, 17, 18, 20, 22, 24, 27, 28, 31, 33, 35, 37, 38, 41, 43, 45, 46, 48].includes(index)
+                        ? "filled"
+                        : undefined
+                    }
+                  />
                 ))}
               </div>
-              <div>
-                <strong>App QR</strong>
-                <span>Mobile app link ready</span>
-              </div>
+              <strong>Scan QR</strong>
+              <span>Get app link</span>
+            </div>
+
+            <div className="india-app-downloads" aria-label="Mobile app download links">
+              <a className="store-badge play-store-badge" href="#google-play" aria-label="Get it on Google Play">
+                <img
+                  className="store-badge-img google-play-badge-img"
+                  src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Google_Play_Store_badge_EN.svg"
+                  alt="Get it on Google Play"
+                  loading="lazy"
+                />
+              </a>
+
+              <a className="store-badge app-store-badge" href="#app-store" aria-label="Download on the App Store">
+                <img
+                  className="store-badge-img app-store-badge-img"
+                  src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Download_on_the_App_Store_Badge_US-UK_RGB_blk.svg"
+                  alt="Download on the App Store"
+                  loading="lazy"
+                />
+              </a>
             </div>
           </div>
         </div>

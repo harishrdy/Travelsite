@@ -200,12 +200,10 @@ export default function AdminFlightMarkupListPage() {
   };
 
   return (
-    <section className="flight-markup-panel">
+    <section className="admin-b2c-page flight-markup-panel">
       <header className="flight-markup-toolbar">
         <div className="flight-markup-title">
-          <h1>
-            <strong>B2C Flight</strong> Markup List
-          </h1>
+          <h1>B2C Flight Markup List</h1>
           <div className="flight-markup-title-underline" aria-hidden="true" />
         </div>
 

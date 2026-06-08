@@ -1,11 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Check, Filter, Pencil, Plus, RefreshCw, Trash2, X, ZoomIn } from "lucide-react";
+import { Check, Filter, Pencil, Plus, RefreshCw, Trash2, X, ZoomIn, Sliders } from "lucide-react";
 import "./OfferList.css";
 import {
   getAdminFeaturedOffers,
   getAdminFeaturedOfferById,
   updateAdminFeaturedOffer,
   deleteAdminFeaturedOffer,
+  getOfferConditions,
+  addOfferCondition,
+  updateOfferCondition,
+  deleteOfferCondition,
 } from "../../../services/adminFeaturedOffersService";
 import { toApiUrl } from "../../../services/apiClient";
 
@@ -24,27 +28,25 @@ const DEFAULT_FILTERS = {
 const DEFAULT_EDIT_FORM = {
   title: "",
   offerCode: "",
-  couponId: "",
-  couponCode: "",
-  promotionId: "",
   displayOrder: "0",
   bookingType: "Bus",
   isActive: true,
-  couponExpiresAtUtc: "",
   startDateUtc: "",
   endDateUtc: "",
   imageUrl: "",
   shortDescription: "",
   longDescription: "",
-  basePrice: "",
+  discountType: "Flat",
   isPercentageDiscount: false,
   discountValue: "",
-  maxCouponUsage: "",
+  maxUsage: "",
+  maxDiscountAmount: "",
+  minBookingAmount: "0",
   couponUsedCount: 0,
 };
 
 const COL_WIDTHS = ["6%", "16%", "10%", "24%", "14%", "12%", "18%"];
-const HEADERS = ["SN", "Expires", "Image", "Name", "Booking Type", "Status", "Action"];
+const HEADERS = ["SN", "Offer Ends", "Image", "Name", "Booking Type", "Status", "Action"];
 
 function getField(source, camelName, pascalName, fallback = "") {
   return source?.[camelName] ?? source?.[pascalName] ?? fallback;
@@ -138,10 +140,13 @@ function normalizeOffer(raw) {
     shortDescription: getField(raw, "subtitle", "Subtitle"),
     longDescription: getField(raw, "description", "Description"),
     basePrice: getField(raw, "basePrice", "BasePrice"),
-    isPercentageDiscount: toBoolean(getField(raw, "isPercentageDiscount", "IsPercentageDiscount", false), false),
+    discountType: getField(raw, "discountType", "DiscountType", "Flat"),
+    isPercentageDiscount: getField(raw, "discountType", "DiscountType", "") === "Percentage" || toBoolean(getField(raw, "isPercentageDiscount", "IsPercentageDiscount", false), false),
     discountValue: getField(raw, "discountValue", "DiscountValue"),
-    maxCouponUsage: getField(raw, "maxCouponUsage", "MaxCouponUsage"),
-    couponUsedCount: getField(raw, "couponUsedCount", "CouponUsedCount", 0),
+    maxDiscountAmount: getField(raw, "maxDiscountAmount", "MaxDiscountAmount", null),
+    minBookingAmount: getField(raw, "minBookingAmount", "MinBookingAmount", null),
+    maxUsage: getField(raw, "maxUsage", "MaxUsage", null) ?? getField(raw, "maxCouponUsage", "MaxCouponUsage", null),
+    couponUsedCount: getField(raw, "usedCount", "UsedCount", 0) ?? getField(raw, "couponUsedCount", "CouponUsedCount", 0),
     createdAtUtc: getField(raw, "createdAtUtc", "CreatedAtUtc", null),
     updatedAtUtc: getField(raw, "updatedAtUtc", "UpdatedAtUtc", null),
   };
@@ -153,15 +158,13 @@ function buildOfferFormData(formValues, fileInputObject) {
   formData.append("BookingType", normalizeBookingType(formValues.bookingType));
   formData.append("IsActive", Boolean(formValues.isActive));
   
-  if (formValues.couponId !== undefined && formValues.couponId !== null && formValues.couponId !== "") {
-    formData.append("CouponId", Number(formValues.couponId));
-  }
-  if (formValues.offerCode !== undefined && formValues.offerCode !== null) {
+  if (formValues.offerCode) {
     formData.append("OfferCode", String(formValues.offerCode).trim());
+  } else {
+    const generatedCode = `OFFER-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    formData.append("OfferCode", generatedCode);
   }
-  if (formValues.promotionId !== undefined && formValues.promotionId !== null && formValues.promotionId !== "") {
-    formData.append("PromotionId", Number(formValues.promotionId));
-  }
+  
   if (formValues.displayOrder !== undefined && formValues.displayOrder !== null && formValues.displayOrder !== "") {
     formData.append("DisplayOrder", Number(formValues.displayOrder));
   }
@@ -172,9 +175,6 @@ function buildOfferFormData(formValues, fileInputObject) {
     formData.append("Description", String(formValues.longDescription).trim());
   }
   
-  if (formValues.couponExpiresAtUtc) {
-    formData.append("CouponExpiresAtUtc", toUtcIso(formValues.couponExpiresAtUtc));
-  }
   if (formValues.startDateUtc) {
     formData.append("StartDateUtc", toUtcIso(formValues.startDateUtc));
   }
@@ -182,24 +182,29 @@ function buildOfferFormData(formValues, fileInputObject) {
     formData.append("EndDateUtc", toUtcIso(formValues.endDateUtc));
   }
   
-  if (formValues.basePrice !== undefined && formValues.basePrice !== null && formValues.basePrice !== "") {
-    formData.append("BasePrice", Number(formValues.basePrice));
-  }
-  formData.append("IsPercentageDiscount", Boolean(formValues.isPercentageDiscount));
+  const finalDiscountType = formValues.discountType || (formValues.isPercentageDiscount ? "Percentage" : "Flat");
+  formData.append("DiscountType", finalDiscountType);
+  formData.append("IsPercentageDiscount", finalDiscountType === "Percentage");
   
   if (formValues.discountValue !== undefined && formValues.discountValue !== null && formValues.discountValue !== "") {
     formData.append("DiscountValue", Number(formValues.discountValue));
   }
   
-  if (formValues.maxCouponUsage !== undefined && formValues.maxCouponUsage !== null && formValues.maxCouponUsage !== "") {
-    formData.append("MaxCouponUsage", Number(formValues.maxCouponUsage));
+  if (formValues.maxDiscountAmount !== undefined && formValues.maxDiscountAmount !== null && formValues.maxDiscountAmount !== "") {
+    formData.append("MaxDiscountAmount", Number(formValues.maxDiscountAmount));
   }
   
-  if (formValues.couponUsedCount !== undefined && formValues.couponUsedCount !== null && formValues.couponUsedCount !== "") {
-    formData.append("CouponUsedCount", Number(formValues.couponUsedCount));
-  } else {
-    formData.append("CouponUsedCount", 0);
+  if (formValues.minBookingAmount !== undefined && formValues.minBookingAmount !== null && formValues.minBookingAmount !== "") {
+    formData.append("MinBookingAmount", Number(formValues.minBookingAmount));
   }
+  
+  if (formValues.maxUsage !== undefined && formValues.maxUsage !== null && formValues.maxUsage !== "") {
+    formData.append("MaxUsage", Number(formValues.maxUsage));
+    formData.append("MaxCouponUsage", Number(formValues.maxUsage));
+  }
+  
+  formData.append("UsedCount", Number(formValues.couponUsedCount) || 0);
+  formData.append("CouponUsedCount", Number(formValues.couponUsedCount) || 0);
   
   if (fileInputObject) {
     formData.append("Image", fileInputObject);
@@ -222,6 +227,19 @@ export default function AdminOfferListPage({ onAddOffer }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [editError, setEditError] = useState("");
   const [deleteOffer, setDeleteOffer] = useState(null);
+
+  // Condition Management State
+  const [conditionsOffer, setConditionsOffer] = useState(null);
+  const [conditions, setConditions] = useState([]);
+  const [isLoadingConditions, setIsLoadingConditions] = useState(false);
+  const [conditionsError, setConditionsError] = useState("");
+  const [editCondition, setEditCondition] = useState(null);
+  const [conditionForm, setConditionForm] = useState({
+    conditionType: "BusType",
+    value1: "",
+    value2: "",
+    isActive: true,
+  });
 
   const loadOffers = useCallback(async () => {
     setLoading(true);
@@ -249,11 +267,7 @@ export default function AdminOfferListPage({ onAddOffer }) {
       const matchesQuery =
         !query ||
         String(offer.title || "").toLowerCase().includes(query) ||
-        String(offer.couponId || "").toLowerCase().includes(query) ||
-        String(offer.couponCode || "").toLowerCase().includes(query) ||
-        String(offer.promotionId || "").toLowerCase().includes(query) ||
-        String(offer.bookingType || "").toLowerCase().includes(query) ||
-        String(offer.couponExpiresAtUtc || "").toLowerCase().includes(query);
+        String(offer.bookingType || "").toLowerCase().includes(query);
       const matchesBookingType =
         filters.bookingType === "all" || offer.bookingType === filters.bookingType;
       const matchesStatus =
@@ -312,22 +326,20 @@ export default function AdminOfferListPage({ onAddOffer }) {
       setEditForm({
         title: normalized.title || "",
         offerCode: normalized.offerCode || "",
-        couponId: normalized.couponId !== null && normalized.couponId !== undefined ? normalized.couponId : "",
-        couponCode: normalized.couponCode || "",
-        promotionId: normalized.promotionId !== null && normalized.promotionId !== undefined ? normalized.promotionId : "",
         displayOrder: normalized.displayOrder !== null && normalized.displayOrder !== undefined ? normalized.displayOrder : "0",
         bookingType: normalizeBookingType(normalized.bookingType),
         isActive: Boolean(normalized.isActive),
-        couponExpiresAtUtc: toDatetimeLocal(normalized.couponExpiresAtUtc),
         startDateUtc: toDatetimeLocal(normalized.startDateUtc),
         endDateUtc: toDatetimeLocal(normalized.endDateUtc),
         imageUrl: normalized.imageUrl || "",
         shortDescription: normalized.shortDescription || "",
         longDescription: normalized.longDescription || "",
-        basePrice: normalized.basePrice !== null && normalized.basePrice !== undefined ? normalized.basePrice : "",
+        discountType: normalized.discountType || (normalized.isPercentageDiscount ? "Percentage" : "Flat"),
         isPercentageDiscount: Boolean(normalized.isPercentageDiscount),
         discountValue: normalized.discountValue !== null && normalized.discountValue !== undefined ? normalized.discountValue : "",
-        maxCouponUsage: normalized.maxCouponUsage !== null && normalized.maxCouponUsage !== undefined ? normalized.maxCouponUsage : "",
+        maxDiscountAmount: normalized.maxDiscountAmount !== null && normalized.maxDiscountAmount !== undefined ? normalized.maxDiscountAmount : "",
+        minBookingAmount: normalized.minBookingAmount !== null && normalized.minBookingAmount !== undefined ? normalized.minBookingAmount : "",
+        maxUsage: normalized.maxUsage !== null && normalized.maxUsage !== undefined ? normalized.maxUsage : "",
         couponUsedCount: normalized.couponUsedCount || 0,
       });
     } catch (requestError) {
@@ -337,17 +349,225 @@ export default function AdminOfferListPage({ onAddOffer }) {
     }
   };
 
+  const loadConditions = useCallback(async (offerId) => {
+    setIsLoadingConditions(true);
+    setConditionsError("");
+    try {
+      const data = await getOfferConditions(offerId);
+      setConditions(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setConditionsError(err.message || "Failed to load conditions.");
+    } finally {
+      setIsLoadingConditions(false);
+    }
+  }, []);
+
+  const handleConditionTypeChange = (type) => {
+    let defaultVal = "";
+    if (type === "BusType" || type === "SeatType") {
+      defaultVal = "Sleeper";
+    } else if (type === "OperatorName") {
+      defaultVal = "APSRTC";
+    } else if (type === "DayOfWeek") {
+      defaultVal = "Monday";
+    } else if (type === "TravelDate") {
+      defaultVal = new Date().toISOString().split("T")[0];
+    } else if (type === "SourceCity") {
+      defaultVal = "Hyderabad";
+    } else if (type === "DestinationCity") {
+      defaultVal = "Bangalore";
+    }
+
+    setConditionForm((prev) => ({
+      ...prev,
+      conditionType: type,
+      value1: defaultVal,
+      value2: "",
+    }));
+  };
+
+  const openConditionsModal = (offer) => {
+    setConditionsOffer(offer);
+    setConditions([]);
+    setEditCondition(null);
+    setConditionForm({
+      conditionType: "SourceCity",
+      value1: "Hyderabad",
+      value2: "",
+      isActive: true,
+    });
+    loadConditions(offer.id);
+  };
+
+  const handleConditionEditClick = (condition) => {
+    setEditCondition(condition);
+    setConditionForm({
+      conditionType: condition.conditionType || "SourceCity",
+      value1: condition.value1 || "",
+      value2: condition.value2 || "",
+      isActive: condition.isActive !== false,
+    });
+  };
+
+  const handleCancelConditionEdit = () => {
+    setEditCondition(null);
+    setConditionForm({
+      conditionType: "SourceCity",
+      value1: "Hyderabad",
+      value2: "",
+      isActive: true,
+    });
+  };
+
+  const handleSaveCondition = async (e) => {
+    if (e) e.preventDefault();
+    if (!conditionForm.value1.trim()) {
+      setConditionsError("Condition value is required.");
+      return;
+    }
+    setConditionsError("");
+    try {
+      if (editCondition) {
+        await updateOfferCondition(conditionsOffer.id, editCondition.id, {
+          conditionType: conditionForm.conditionType,
+          value1: conditionForm.value1.trim(),
+          value2: conditionForm.value2 ? conditionForm.value2.trim() : null,
+          isActive: conditionForm.isActive,
+        });
+      } else {
+        await addOfferCondition(conditionsOffer.id, {
+          conditionType: conditionForm.conditionType,
+          value1: conditionForm.value1.trim(),
+          value2: conditionForm.value2 ? conditionForm.value2.trim() : null,
+          isActive: conditionForm.isActive,
+        });
+      }
+      handleCancelConditionEdit();
+      await loadConditions(conditionsOffer.id);
+    } catch (err) {
+      setConditionsError(err.message || "Failed to save condition.");
+    }
+  };
+
+  const handleDeleteCondition = async (conditionId) => {
+    if (!window.confirm("Are you sure you want to delete this condition?")) {
+      return;
+    }
+    setConditionsError("");
+    try {
+      await deleteOfferCondition(conditionsOffer.id, conditionId);
+      await loadConditions(conditionsOffer.id);
+    } catch (err) {
+      setConditionsError(err.message || "Failed to delete condition.");
+    }
+  };
+
+  const renderConditionValueInput = () => {
+    const { conditionType, value1 } = conditionForm;
+
+    if (conditionType === "BusType") {
+      return (
+        <select
+          value={value1 || "Sleeper"}
+          onChange={(e) => setConditionForm((prev) => ({ ...prev, value1: e.target.value }))}
+          style={{ width: "100%", padding: "10px 12px", borderRadius: "12px", border: "1px solid #cbd5e1" }}
+        >
+          <option value="Sleeper">Sleeper</option>
+          <option value="Seater">Seater</option>
+          <option value="AC">AC</option>
+          <option value="Non-AC">Non-AC</option>
+          <option value="AC Sleeper">AC Sleeper</option>
+          <option value="AC Seater">AC Seater</option>
+        </select>
+      );
+    }
+
+    if (conditionType === "SeatType") {
+      return (
+        <select
+          value={value1 || "Sleeper"}
+          onChange={(e) => setConditionForm((prev) => ({ ...prev, value1: e.target.value }))}
+          style={{ width: "100%", padding: "10px 12px", borderRadius: "12px", border: "1px solid #cbd5e1" }}
+        >
+          <option value="Sleeper">Sleeper</option>
+          <option value="Seater">Seater</option>
+          <option value="Upper Berth">Upper Berth</option>
+          <option value="Lower Berth">Lower Berth</option>
+        </select>
+      );
+    }
+
+    if (conditionType === "OperatorName") {
+      return (
+        <select
+          value={value1 || "APSRTC"}
+          onChange={(e) => setConditionForm((prev) => ({ ...prev, value1: e.target.value }))}
+          style={{ width: "100%", padding: "10px 12px", borderRadius: "12px", border: "1px solid #cbd5e1" }}
+        >
+          <option value="SURESH TRAVELS">SURESH TRAVELS</option>
+          <option value="APSRTC">APSRTC</option>
+          <option value="TGSRTC">TGSRTC</option>
+          <option value="KSRTC">KSRTC</option>
+          <option value="Kerala RTC">Kerala RTC</option>
+          <option value="GSRTC">GSRTC</option>
+        </select>
+      );
+    }
+
+    if (conditionType === "DayOfWeek") {
+      return (
+        <select
+          value={value1 || "Monday"}
+          onChange={(e) => setConditionForm((prev) => ({ ...prev, value1: e.target.value }))}
+          style={{ width: "100%", padding: "10px 12px", borderRadius: "12px", border: "1px solid #cbd5e1" }}
+        >
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Friday">Friday</option>
+          <option value="Saturday">Saturday</option>
+          <option value="Sunday">Sunday</option>
+        </select>
+      );
+    }
+
+    if (conditionType === "TravelDate") {
+      return (
+        <input
+          type="date"
+          value={value1 || ""}
+          onChange={(e) => setConditionForm((prev) => ({ ...prev, value1: e.target.value }))}
+          style={{ width: "100%", padding: "10px 12px", borderRadius: "12px", border: "1px solid #cbd5e1" }}
+          required
+        />
+      );
+    }
+
+    return (
+      <input
+        type="text"
+        placeholder={
+          conditionType === "SourceCity"
+            ? "e.g. Hyderabad"
+            : conditionType === "DestinationCity"
+            ? "e.g. Bangalore"
+            : "Compare value"
+        }
+        value={value1 || ""}
+        onChange={(e) => setConditionForm((prev) => ({ ...prev, value1: e.target.value }))}
+        style={{ width: "100%", padding: "10px 12px", borderRadius: "12px", border: "1px solid #cbd5e1" }}
+        required
+      />
+    );
+  };
+
   const handleEditSave = async () => {
     const title = String(editForm.title || "").trim();
     const bookingType = normalizeBookingType(editForm.bookingType);
 
     if (!title || !bookingType) {
       setEditError("Offer name and booking type are required.");
-      return;
-    }
-
-    if (!editForm.couponId) {
-      setEditError("Linked coupon ID is required.");
       return;
     }
 
@@ -401,13 +621,12 @@ export default function AdminOfferListPage({ onAddOffer }) {
   return (
     <>
       {detailsOffer ? (
-        <section className="flight-markup-panel offer-details-page">
+        <section className="flight-markup-panel offer-details-page" style={{ padding: "28px 32px" }}>
           <header className="flight-markup-toolbar offer-details-toolbar">
             <div className="flight-markup-title">
               <h1>
-                <strong>View Offer</strong> Details
+                <strong>View Offer Details</strong>
               </h1>
-              <div className="flight-markup-title-underline" aria-hidden="true" />
             </div>
 
             <button
@@ -434,39 +653,17 @@ export default function AdminOfferListPage({ onAddOffer }) {
                 <div className="offer-details-label">Offer Name</div>
                 <div className="offer-details-value">{detailsOffer.title || "--"}</div>
 
-                <div className="offer-details-label">Offer Code</div>
-                <div className="offer-details-value">{detailsOffer.offerCode || "--"}</div>
-
                 <div className="offer-details-label">Booking Type</div>
                 <div className="offer-details-value">{formatBookingType(detailsOffer.bookingType)}</div>
 
-                <div className="offer-details-label">Coupon Code</div>
-                <div className="offer-details-value">{detailsOffer.couponCode || "--"}</div>
-
-                <div className="offer-details-label">Coupon ID</div>
-                <div className="offer-details-value">{detailsOffer.couponId || "--"}</div>
-
-                <div className="offer-details-label">Promotion ID</div>
-                <div className="offer-details-value">{detailsOffer.promotionId || "--"}</div>
-
                 <div className="offer-details-label">Display Order</div>
                 <div className="offer-details-value">{detailsOffer.displayOrder ?? "--"}</div>
-
-                <div className="offer-details-label">Coupon Expires</div>
-                <div className="offer-details-value">
-                  {formatDateTime(detailsOffer.couponExpiresAtUtc)}
-                </div>
 
                 <div className="offer-details-label">Offer Starts</div>
                 <div className="offer-details-value">{formatDateTime(detailsOffer.startDateUtc)}</div>
 
                 <div className="offer-details-label">Offer Ends</div>
                 <div className="offer-details-value">{formatDateTime(detailsOffer.endDateUtc)}</div>
-
-                <div className="offer-details-label">Base Price</div>
-                <div className="offer-details-value">
-                  {detailsOffer.basePrice !== null && detailsOffer.basePrice !== undefined ? `${detailsOffer.basePrice} INR` : "--"}
-                </div>
 
                 <div className="offer-details-label">Discount</div>
                 <div className="offer-details-value">
@@ -478,7 +675,12 @@ export default function AdminOfferListPage({ onAddOffer }) {
                 </div>
 
                 <div className="offer-details-label">Max Usage</div>
-                <div className="offer-details-value">{detailsOffer.maxCouponUsage || "--"}</div>
+                <div className="offer-details-value">{detailsOffer.maxUsage || "--"}</div>
+
+                <div className="offer-details-label">Min Booking Amount</div>
+                <div className="offer-details-value">
+                  {detailsOffer.minBookingAmount !== null && detailsOffer.minBookingAmount !== undefined ? `${detailsOffer.minBookingAmount} INR` : "--"}
+                </div>
 
                 <div className="offer-details-label">Used Count</div>
                 <div className="offer-details-value">{detailsOffer.couponUsedCount || 0}</div>
@@ -529,13 +731,12 @@ export default function AdminOfferListPage({ onAddOffer }) {
           </section>
         </section>
       ) : (
-        <section className="flight-markup-panel">
+        <section className="flight-markup-panel" style={{ padding: "28px 32px" }}>
           <header className="flight-markup-toolbar">
             <div className="flight-markup-title">
               <h1>
-                <strong>Offer</strong> List
+                <strong>Offer List</strong>
               </h1>
-              <div className="flight-markup-title-underline" aria-hidden="true" />
             </div>
 
             <div className="admin-markup-coupon-actions">
@@ -634,7 +835,7 @@ export default function AdminOfferListPage({ onAddOffer }) {
                   filteredOffers.map((offer, index) => (
                     <tr key={offer.id}>
                       <td>{index + 1}</td>
-                      <td>{formatDateTime(offer.couponExpiresAtUtc)}</td>
+                      <td>{formatDateTime(offer.endDateUtc)}</td>
                       <td>
                         {offer.imageUrl ? (
                           <div className="offer-list-thumbnail-box">
@@ -675,6 +876,16 @@ export default function AdminOfferListPage({ onAddOffer }) {
                             onClick={() => setDetailsOffer(offer)}
                           >
                             <ZoomIn size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            className="offer-conditions-trigger"
+                            title="Manage Conditions"
+                            aria-label={`Manage conditions for ${offer.title}`}
+                            onClick={() => openConditionsModal(offer)}
+                            style={{ color: "#3b82f6" }}
+                          >
+                            <Sliders size={14} />
                           </button>
                           <button
                             type="button"
@@ -737,6 +948,7 @@ export default function AdminOfferListPage({ onAddOffer }) {
             aria-modal="true"
             aria-label="Edit offer"
             onClick={(event) => event.stopPropagation()}
+            style={{ maxHeight: "90vh", display: "flex", flexDirection: "column" }}
           >
             <header>
               <h2>Edit Offer</h2>
@@ -745,7 +957,8 @@ export default function AdminOfferListPage({ onAddOffer }) {
               </button>
             </header>
 
-            <div className="admin-markup-form-grid">
+            <div style={{ flex: 1, overflowY: "auto", padding: "0 8px" }}>
+              <div className="admin-markup-form-grid">
               <label className="wide">
                 <span>Offer Name (Title) *</span>
                 <input
@@ -753,16 +966,6 @@ export default function AdminOfferListPage({ onAddOffer }) {
                   value={editForm.title}
                   onChange={(event) => setEditForm((previous) => ({ ...previous, title: event.target.value }))}
                   required
-                />
-              </label>
-              
-              <label>
-                <span>Offer Code</span>
-                <input
-                  type="text"
-                  value={editForm.offerCode}
-                  onChange={(event) => setEditForm((previous) => ({ ...previous, offerCode: event.target.value }))}
-                  placeholder="e.g. BUS2026"
                 />
               </label>
 
@@ -800,43 +1003,6 @@ export default function AdminOfferListPage({ onAddOffer }) {
               </label>
 
               <label>
-                <span>Coupon ID *</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={editForm.couponId}
-                  onChange={(event) =>
-                    setEditForm((previous) => ({ ...previous, couponId: event.target.value }))
-                  }
-                  placeholder="Linked coupon ID"
-                  required
-                />
-              </label>
-
-              <label>
-                <span>Coupon Code</span>
-                <input
-                  type="text"
-                  value={editForm.couponCode}
-                  disabled
-                  placeholder="Resolved by backend"
-                />
-              </label>
-
-              <label>
-                <span>Promotion ID</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={editForm.promotionId}
-                  onChange={(event) =>
-                    setEditForm((previous) => ({ ...previous, promotionId: event.target.value }))
-                  }
-                  placeholder="e.g. 4"
-                />
-              </label>
-
-              <label>
                 <span>Display Order</span>
                 <input
                   type="number"
@@ -846,20 +1012,6 @@ export default function AdminOfferListPage({ onAddOffer }) {
                     setEditForm((previous) => ({ ...previous, displayOrder: event.target.value }))
                   }
                   placeholder="e.g. 1"
-                />
-              </label>
-
-              <label>
-                <span>Coupon Expires</span>
-                <input
-                  type="datetime-local"
-                  value={editForm.couponExpiresAtUtc}
-                  onChange={(event) =>
-                    setEditForm((previous) => ({
-                      ...previous,
-                      couponExpiresAtUtc: event.target.value,
-                    }))
-                  }
                 />
               </label>
 
@@ -892,28 +1044,19 @@ export default function AdminOfferListPage({ onAddOffer }) {
               </label>
 
               <label>
-                <span>Base Price (INR)</span>
-                <input
-                  type="number"
-                  value={editForm.basePrice}
-                  onChange={(event) => setEditForm((previous) => ({ ...previous, basePrice: event.target.value }))}
-                  placeholder="e.g. 1000"
-                />
-              </label>
-
-              <label>
                 <span>Discount Type</span>
                 <select
-                  value={editForm.isPercentageDiscount ? "percentage" : "flat"}
+                  value={editForm.discountType}
                   onChange={(event) =>
                     setEditForm((previous) => ({
                       ...previous,
-                      isPercentageDiscount: event.target.value === "percentage",
+                      discountType: event.target.value,
+                      isPercentageDiscount: event.target.value === "Percentage",
                     }))
                   }
                 >
-                  <option value="percentage">Percentage Discount</option>
-                  <option value="flat">Flat Discount</option>
+                  <option value="Flat">Flat Discount</option>
+                  <option value="Percentage">Percentage Discount</option>
                 </select>
               </label>
 
@@ -928,11 +1071,31 @@ export default function AdminOfferListPage({ onAddOffer }) {
               </label>
 
               <label>
-                <span>Max Coupon Usage</span>
+                <span>Min Booking Amount (INR)</span>
                 <input
                   type="number"
-                  value={editForm.maxCouponUsage}
-                  onChange={(event) => setEditForm((previous) => ({ ...previous, maxCouponUsage: event.target.value }))}
+                  value={editForm.minBookingAmount}
+                  onChange={(event) => setEditForm((previous) => ({ ...previous, minBookingAmount: event.target.value }))}
+                  placeholder="e.g. 500"
+                />
+              </label>
+
+              <label>
+                <span>Max Discount Amount (INR)</span>
+                <input
+                  type="number"
+                  value={editForm.maxDiscountAmount}
+                  onChange={(event) => setEditForm((previous) => ({ ...previous, maxDiscountAmount: event.target.value }))}
+                  placeholder="e.g. 150"
+                />
+              </label>
+
+              <label>
+                <span>Max Usage</span>
+                <input
+                  type="number"
+                  value={editForm.maxUsage}
+                  onChange={(event) => setEditForm((previous) => ({ ...previous, maxUsage: event.target.value }))}
                   placeholder="e.g. 500"
                 />
               </label>
@@ -989,6 +1152,7 @@ export default function AdminOfferListPage({ onAddOffer }) {
             </div>
 
             {editError && <p className="admin-markup-form-error">{editError}</p>}
+            </div>
 
             <div className="admin-markup-modal-actions">
               <button type="button" className="secondary" onClick={() => setEditOffer(null)}>
@@ -1028,6 +1192,217 @@ export default function AdminOfferListPage({ onAddOffer }) {
               </button>
               <button type="button" className="danger" onClick={handleDeleteConfirm} disabled={busyId === deleteOffer.id}>
                 Delete
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {conditionsOffer && (
+        <div className="admin-markup-modal-backdrop" onClick={() => setConditionsOffer(null)}>
+          <section
+            className="admin-markup-modal conditions-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Manage conditions"
+            onClick={(event) => event.stopPropagation()}
+            style={{ maxWidth: "960px", width: "95vw", maxHeight: "90vh", display: "flex", flexDirection: "column" }}
+          >
+            <header>
+              <h2>Manage Offer Conditions</h2>
+              <button type="button" onClick={() => setConditionsOffer(null)} aria-label="Close conditions modal">
+                <X size={16} />
+              </button>
+            </header>
+
+            <div className="conditions-offer-info" style={{ padding: "12px 20px", borderBottom: "1px solid #e2e8f0", backgroundColor: "#f8fafc" }}>
+              <h3 style={{ margin: "0 0 4px 0", fontSize: "16px", color: "#1e293b", fontWeight: "700" }}>{conditionsOffer.title}</h3>
+              <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
+                Define constraints under which this offer will be valid.
+              </p>
+            </div>
+
+            <div className="conditions-modal-body" style={{ display: "flex", gap: "24px", padding: "20px", flexWrap: "wrap", overflowY: "auto", flex: 1 }}>
+              {/* Left Column: Form to Add/Edit Condition */}
+              <section className="condition-form-panel" style={{ flex: "1 1 380px", display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div style={{ borderBottom: "1px solid #e2e8f0", paddingBottom: "10px" }}>
+                  <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#334155" }}>
+                    {editCondition ? "Edit Condition" : "Add New Condition"}
+                  </h4>
+                  <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748b" }}>
+                    Define the condition parameters below.
+                  </p>
+                </div>
+
+                <form onSubmit={handleSaveCondition} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                  <label className="field" style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <span style={{ fontSize: "11px", fontWeight: "700", color: "#475569", textTransform: "uppercase", letterSpacing: "0.05em" }}>Condition Type</span>
+                    <select
+                      value={conditionForm.conditionType}
+                      onChange={(e) => handleConditionTypeChange(e.target.value)}
+                      style={{ padding: "10px 12px", borderRadius: "10px", border: "1px solid #cbd5e1", fontSize: "14px" }}
+                    >
+                      <option value="SourceCity">Source City</option>
+                      <option value="DestinationCity">Destination City</option>
+                      <option value="BusType">Bus Type</option>
+                      <option value="SeatType">Seat Type</option>
+                      <option value="OperatorName">Operator Name</option>
+                      <option value="DayOfWeek">Day of Week</option>
+                      <option value="TravelDate">Travel Date</option>
+                    </select>
+                  </label>
+
+                  <label className="field" style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <span style={{ fontSize: "11px", fontWeight: "700", color: "#475569", textTransform: "uppercase", letterSpacing: "0.05em" }}>Status</span>
+                    <select
+                      value={conditionForm.isActive ? "active" : "inactive"}
+                      onChange={(e) => setConditionForm((prev) => ({ ...prev, isActive: e.target.value === "active" }))}
+                      style={{ padding: "10px 12px", borderRadius: "10px", border: "1px solid #cbd5e1", fontSize: "14px" }}
+                    >
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                  </label>
+
+                  <label className="field" style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <span style={{ fontSize: "11px", fontWeight: "700", color: "#475569", textTransform: "uppercase", letterSpacing: "0.05em" }}>Constraint Value (Value 1) *</span>
+                    {renderConditionValueInput()}
+                  </label>
+
+                  <label className="field" style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <span style={{ fontSize: "11px", fontWeight: "700", color: "#475569", textTransform: "uppercase", letterSpacing: "0.05em" }}>Secondary Constraint Value (Value 2 - Optional)</span>
+                    <input
+                      type="text"
+                      placeholder="e.g. End date or secondary value"
+                      value={conditionForm.value2 || ""}
+                      onChange={(e) => setConditionForm((prev) => ({ ...prev, value2: e.target.value }))}
+                      style={{ padding: "10px 12px", borderRadius: "10px", border: "1px solid #cbd5e1", fontSize: "14px" }}
+                    />
+                  </label>
+
+                  {conditionsError && (
+                    <p style={{ color: "#dc2626", fontSize: "13px", margin: "4px 0 0 0", fontWeight: "500" }}>{conditionsError}</p>
+                  )}
+
+                  <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "10px" }}>
+                    {editCondition && (
+                      <button
+                        type="button"
+                        onClick={handleCancelConditionEdit}
+                        style={{
+                          padding: "10px 16px", borderRadius: "10px", border: "1px solid #cbd5e1",
+                          background: "#fff", color: "#475569", cursor: "pointer", fontWeight: "600", fontSize: "13px"
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      style={{
+                        padding: "10px 16px", borderRadius: "10px", border: "none",
+                        background: "var(--admin-primary, #a73434)", color: "#fff", cursor: "pointer", fontWeight: "600", fontSize: "13px"
+                      }}
+                    >
+                      {editCondition ? "Update Condition" : "Add Condition"}
+                    </button>
+                  </div>
+                </form>
+              </section>
+
+              {/* Right Column: List of Active Conditions */}
+              <section className="condition-list-panel" style={{ flex: "1.2 1 450px", display: "flex", flexDirection: "column", gap: "16px", minWidth: "0" }}>
+                <div style={{ borderBottom: "1px solid #e2e8f0", paddingBottom: "10px" }}>
+                  <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#334155" }}>
+                    Active Condition Rules
+                  </h4>
+                  <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748b" }}>
+                    Rules currently applied to this featured offer.
+                  </p>
+                </div>
+
+                {isLoadingConditions ? (
+                  <p style={{ textAlign: "center", padding: "40px", color: "#64748b", fontSize: "14px" }}>Loading conditions...</p>
+                ) : conditions.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "40px 20px", background: "#f8fafc", borderRadius: "12px", border: "2px dashed #e2e8f0" }}>
+                    <p style={{ margin: "0 0 6px 0", color: "#475569", fontWeight: "600", fontSize: "14px" }}>No conditions set yet.</p>
+                    <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
+                      This offer will apply globally to all bookings of the corresponding Booking Type.
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px", paddingRight: "4px" }}>
+                    {conditions.map((cond) => (
+                      <div
+                        key={cond.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "14px 16px",
+                          backgroundColor: "#f8fafc",
+                          borderRadius: "12px",
+                          border: editCondition?.id === cond.id ? "2px solid var(--admin-primary, #a73434)" : "1px solid #e2e8f0",
+                          boxShadow: "0 2px 4px rgba(0,0,0,0.01)"
+                        }}
+                      >
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px", minWidth: 0 }}>
+                          <span style={{ fontSize: "14px", fontWeight: "600", color: "#1e293b", display: "flex", alignItems: "center", gap: "8px" }}>
+                            Condition: <strong style={{ color: "var(--admin-primary, #a73434)" }}>{cond.conditionType}</strong>
+                            <span style={{
+                              padding: "2px 6px", borderRadius: "12px", fontSize: "10px", fontWeight: "700",
+                              background: cond.isActive ? "#dcfce7" : "#fee2e2",
+                              color: cond.isActive ? "#15803d" : "#b91c1c"
+                            }}>
+                              {cond.isActive ? "Active" : "Inactive"}
+                            </span>
+                          </span>
+                          <span style={{ fontSize: "13px", color: "#475569", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            Value: <strong style={{ color: "#0f172a" }}>{cond.value1}</strong>
+                            {cond.value2 && (
+                              <>
+                                {" | "}Secondary: <strong style={{ color: "#0f172a" }}>{cond.value2}</strong>
+                              </>
+                            )}
+                          </span>
+                        </div>
+
+                        <div style={{ display: "flex", gap: "6px", marginLeft: "12px" }}>
+                          <button
+                            type="button"
+                            onClick={() => handleConditionEditClick(cond)}
+                            style={{
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              width: "32px", height: "32px", borderRadius: "8px", border: "1px solid #cbd5e1",
+                              background: "#fff", color: "#475569", cursor: "pointer"
+                            }}
+                            title="Edit"
+                          >
+                            <Pencil size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteCondition(cond.id)}
+                            style={{
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              width: "32px", height: "32px", borderRadius: "8px", border: "1px solid rgba(220,38,38,0.2)",
+                              background: "rgba(220,38,38,0.05)", color: "#dc2626", cursor: "pointer"
+                            }}
+                            title="Delete"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </div>
+
+            <div className="admin-markup-modal-actions" style={{ borderTop: "1px solid #e2e8f0", padding: "15px 20px" }}>
+              <button type="button" className="secondary" onClick={() => setConditionsOffer(null)}>
+                Close
               </button>
             </div>
           </section>

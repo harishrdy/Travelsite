@@ -4,12 +4,12 @@
   --ops-border: #cfdbea;
   --ops-text: #1c395f;
   --ops-muted: #597293;
-  --ops-primary: var(--theme-primary-strong, #df3f1f);
-  --ops-primary-strong: #0c2f5d;
-  --ops-accent: var(--theme-primary, #f04423);
-  --ops-accent-strong: var(--theme-primary-strong, #df3f1f);
-  --ops-danger: var(--theme-primary, #f04423);
-  --ops-success: var(--theme-primary, #f04423);
+  --ops-primary: var(--theme-primary-strong, #006f7a);
+  --ops-primary-strong: #17242d;
+  --ops-accent: var(--theme-primary, #009b8f);
+  --ops-accent-strong: var(--theme-primary-strong, #006f7a);
+  --ops-danger: var(--theme-primary, #009b8f);
+  --ops-success: var(--theme-primary, #009b8f);
   --ops-shadow: 0 12px 26px rgba(13, 30, 52, 0.1);
   --ops-heading-font: var(--app-font-family);
   --ops-body-font: var(--app-font-family);
@@ -20,17 +20,17 @@
   margin: 0 auto;
 }
 
-/* Final orange theme override for flight and bus booking lists */
+/* Final Atlas theme override for flight and bus booking lists */
 .flight-ops-page {
-  --ops-border: var(--theme-border, #f2cbbf);
+  --ops-border: var(--theme-border, #cfded8);
   --ops-text: var(--theme-navy, #1f2a44);
   --ops-muted: var(--theme-muted, #64748b);
-  --ops-primary: var(--theme-primary, #f04423);
-  --ops-primary-strong: var(--theme-primary-strong, #df3f1f);
-  --ops-accent: var(--theme-primary, #f04423);
-  --ops-accent-strong: var(--theme-primary-strong, #df3f1f);
-  --ops-danger: var(--theme-primary-strong, #df3f1f);
-  --ops-success: var(--theme-primary, #f04423);
+  --ops-primary: var(--theme-primary, #009b8f);
+  --ops-primary-strong: var(--theme-primary-strong, #006f7a);
+  --ops-accent: var(--theme-primary, #009b8f);
+  --ops-accent-strong: var(--theme-primary-strong, #006f7a);
+  --ops-danger: var(--theme-primary-strong, #006f7a);
+  --ops-success: var(--theme-primary, #009b8f);
   --ops-shadow: var(--theme-shadow-sm, 0 10px 24px rgba(125, 59, 31, 0.08));
 }
 
@@ -39,7 +39,7 @@
 .flight-ops-table-wrap,
 .ops-modal,
 .ops-modal-grid div {
-  border-color: var(--theme-border, #f2cbbf) !important;
+  border-color: var(--theme-border, #cfded8) !important;
   background: var(--theme-surface, #ffffff) !important;
   box-shadow: var(--theme-shadow-sm, 0 10px 24px rgba(125, 59, 31, 0.08)) !important;
 }
@@ -60,32 +60,32 @@
 .filters-actions .primary,
 .table-actions button {
   border-color: transparent !important;
-  background: linear-gradient(135deg, var(--theme-primary, #f04423), var(--theme-primary-strong, #df3f1f)) !important;
+  background: linear-gradient(135deg, var(--theme-primary, #009b8f), var(--theme-primary-strong, #006f7a)) !important;
   color: #ffffff !important;
-  box-shadow: 0 14px 28px rgba(240, 68, 35, 0.18) !important;
+  box-shadow: 0 14px 28px rgba(0, 155, 143, 0.18) !important;
 }
 
 .filters-actions .secondary {
-  border-color: var(--theme-border, #f2cbbf) !important;
-  background: var(--theme-primary-soft, #fff0e9) !important;
-  color: var(--theme-primary-strong, #df3f1f) !important;
+  border-color: var(--theme-border, #cfded8) !important;
+  background: var(--theme-primary-soft, #dff8f3) !important;
+  color: var(--theme-primary-strong, #006f7a) !important;
 }
 
 .ops-table thead {
-  background: var(--theme-primary-soft, #fff0e9) !important;
+  background: var(--theme-primary-soft, #dff8f3) !important;
 }
 
 .status-badge.success,
 .status-badge.default {
   border-color: #ffd0bf !important;
   background: #fff4ed !important;
-  color: var(--theme-primary-strong, #df3f1f) !important;
+  color: var(--theme-primary-strong, #006f7a) !important;
 }
 
 .flight-ops-filters input:focus,
 .flight-ops-filters select:focus {
   border-color: #ffb29c !important;
-  box-shadow: 0 0 0 4px rgba(240, 68, 35, 0.12) !important;
+  box-shadow: 0 0 0 4px rgba(0, 155, 143, 0.12) !important;
 }
 
 /* Bus booking status table */
@@ -133,7 +133,7 @@
 }
 
 .bus-booking-status-page .ops-table thead {
-  background: #fff0e9 !important;
+  background: #dff8f3 !important;
 }
 
 .bus-booking-status-page .ops-table th {
@@ -380,13 +380,13 @@
 .ops-feedback.error {
   border: 1px solid #dfebfb;
   background: #f6f9fe;
-  color: var(--theme-primary-strong, #df3f1f);
+  color: var(--theme-primary-strong, #006f7a);
 }
 
 .ops-feedback.success {
   border: 1px solid #e4eefc;
   background: #f6f9fe;
-  color: var(--theme-primary, #f04423);
+  color: var(--theme-primary, #009b8f);
 }
 
 .flight-ops-filters {
@@ -479,7 +479,7 @@
 }
 
 .ops-table thead {
-  background: linear-gradient(135deg, var(--theme-primary, #f04423), var(--theme-primary-strong, #df3f1f));
+  background: linear-gradient(135deg, var(--theme-primary, #009b8f), var(--theme-primary-strong, #006f7a));
   color: #ffffff;
 }
 
@@ -502,7 +502,7 @@
 
 .ops-table td strong {
   display: block;
-  color: var(--theme-primary-strong, #df3f1f);
+  color: var(--theme-primary-strong, #006f7a);
 }
 
 .ops-table td small {
@@ -638,7 +638,7 @@
 }
 
 .ops-modal-grid strong {
-  color: var(--theme-primary-strong, #df3f1f);
+  color: var(--theme-primary-strong, #006f7a);
   font-size: 0.765rem;
 }
 
@@ -672,17 +672,17 @@
   }
 }
 
-/* Final orange theme override for flight and bus booking lists */
+/* Final Atlas theme override for flight and bus booking lists */
 .flight-ops-page {
-  --ops-border: var(--theme-border, #f2cbbf);
+  --ops-border: var(--theme-border, #cfded8);
   --ops-text: var(--theme-navy, #1f2a44);
   --ops-muted: var(--theme-muted, #64748b);
-  --ops-primary: var(--theme-primary, #f04423);
-  --ops-primary-strong: var(--theme-primary-strong, #df3f1f);
-  --ops-accent: var(--theme-primary, #f04423);
-  --ops-accent-strong: var(--theme-primary-strong, #df3f1f);
-  --ops-danger: var(--theme-primary-strong, #df3f1f);
-  --ops-success: var(--theme-primary, #f04423);
+  --ops-primary: var(--theme-primary, #009b8f);
+  --ops-primary-strong: var(--theme-primary-strong, #006f7a);
+  --ops-accent: var(--theme-primary, #009b8f);
+  --ops-accent-strong: var(--theme-primary-strong, #006f7a);
+  --ops-danger: var(--theme-primary-strong, #006f7a);
+  --ops-success: var(--theme-primary, #009b8f);
   --ops-shadow: var(--theme-shadow-sm, 0 10px 24px rgba(125, 59, 31, 0.08));
 }
 
@@ -691,7 +691,7 @@
 .flight-ops-table-wrap,
 .ops-modal,
 .ops-modal-grid div {
-  border-color: var(--theme-border, #f2cbbf) !important;
+  border-color: var(--theme-border, #cfded8) !important;
   background: var(--theme-surface, #ffffff) !important;
   box-shadow: var(--theme-shadow-sm, 0 10px 24px rgba(125, 59, 31, 0.08)) !important;
 }
@@ -712,30 +712,30 @@
 .filters-actions .primary,
 .table-actions button {
   border-color: transparent !important;
-  background: linear-gradient(135deg, var(--theme-primary, #f04423), var(--theme-primary-strong, #df3f1f)) !important;
+  background: linear-gradient(135deg, var(--theme-primary, #009b8f), var(--theme-primary-strong, #006f7a)) !important;
   color: #ffffff !important;
-  box-shadow: 0 14px 28px rgba(240, 68, 35, 0.18) !important;
+  box-shadow: 0 14px 28px rgba(0, 155, 143, 0.18) !important;
 }
 
 .filters-actions .secondary {
-  border-color: var(--theme-border, #f2cbbf) !important;
-  background: var(--theme-primary-soft, #fff0e9) !important;
-  color: var(--theme-primary-strong, #df3f1f) !important;
+  border-color: var(--theme-border, #cfded8) !important;
+  background: var(--theme-primary-soft, #dff8f3) !important;
+  color: var(--theme-primary-strong, #006f7a) !important;
 }
 
 .ops-table thead {
-  background: var(--theme-primary-soft, #fff0e9) !important;
+  background: var(--theme-primary-soft, #dff8f3) !important;
 }
 
 .status-badge.success,
 .status-badge.default {
   border-color: #ffd0bf !important;
   background: #fff4ed !important;
-  color: var(--theme-primary-strong, #df3f1f) !important;
+  color: var(--theme-primary-strong, #006f7a) !important;
 }
 
 .flight-ops-filters input:focus,
 .flight-ops-filters select:focus {
   border-color: #ffb29c !important;
-  box-shadow: 0 0 0 4px rgba(240, 68, 35, 0.12) !important;
+  box-shadow: 0 0 0 4px rgba(0, 155, 143, 0.12) !important;
 }

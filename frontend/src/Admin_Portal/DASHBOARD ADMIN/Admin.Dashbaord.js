@@ -194,7 +194,11 @@ const Dashboard = () => {
         
         return (
             <span className={`status-trend ${trendClass}`}>
-                {arrow} {absoluteVal}% vs yesterday
+                {type === 'bookings' ? (
+                    <span className="yesterday-blue">{arrow} {absoluteVal}% vs yesterday</span>
+                ) : (
+                    <>{arrow} {absoluteVal}% vs yesterday</>
+                )}
             </span>
         );
     };
@@ -334,6 +338,9 @@ const Dashboard = () => {
                     <div className="info-body">
                         <div className="info-title">Last Login</div>
                         <div className="info-value">{metrics.lastLogin}</div>
+                        <div className="info-foot" style={{ visibility: 'hidden' }}>
+                            <span>Placeholder</span>
+                        </div>
                     </div>
                 </div>
 

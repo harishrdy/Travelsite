@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
 import { UserProvider } from "./contexts/UserContext";
 import { PromoProvider } from "./contexts/PromoContext";
+import { clearAuthSession, isTokenExpired } from "./services/authSession";
+
 import BookingConfirmationPage from "./pages/booking/BookingConfirmationPage";
 
 import Topbar from "./components/layout/Topbar";
@@ -30,6 +32,7 @@ import AccountStatement from "./pages/account/AccountStatement";
 import EditProfile from "./pages/account/EditProfile";
 import FlightSearchResults from "./pages/booking/FlightSearchResults";
 import BusSearchResults from "./pages/booking/BusSearchResults";
+import HotelSearchResults from "./pages/booking/HotelSearchResults";
 import BusSeatSelectionPage from "./pages/booking/BusSeatSelectionPage";
 import BusPassengerDetailsPage from "./pages/booking/BusPassengerDetailsPage";
 import BusPaymentPage from "./pages/booking/BusPaymentPage";
@@ -40,6 +43,7 @@ import TicketConfirmationPage from "./pages/public/TicketConfirmationPage";
 import MyAccount from "./pages/account/MyAccount";
 import OffersPage from "./pages/public/OffersPage";
 import WebCheckinPage from "./pages/public/WebCheckinPage";
+import LegalPage from "./pages/public/LegalPage";
 
 import AdminLogin from "./Admin_Portal/AUTHENTICATIONS/login admin/login admin";
 import AdminPin from "./Admin_Portal/AUTHENTICATIONS/verifing/adminpin";
@@ -98,6 +102,7 @@ import AdminAddBlogCategory from "./Admin_Portal/BLOG MANAGEMENT/ADD BLOG CATEGO
 import AdminCustomerList from "./Admin_Portal/CUSTOMER MANAGEMENT/CUSTOMER LIST/Admin.Customerlist";
 import AdminAddNewCustomer from "./Admin_Portal/CUSTOMER MANAGEMENT/ADD NEW CUSTOMER/Admin.AddNewCustomer";
 import AdminDepositRequestList from "./Admin_Portal/CUSTOMER MANAGEMENT/DEPOSITE REQUEST LIST/Admin.Depositelist";
+import "./STYLES/AtlasTheme.css";
 
 const ADMIN_PATHS = {
   base: "/admin",
@@ -241,6 +246,39 @@ function AdminOfferCategoryAddRoute() {
 
 function AppContent() {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkSession = () => {
+      const currentPath = (location.pathname || "").toLowerCase();
+      const isAdmin = currentPath.startsWith("/admin");
+      const loginPath = isAdmin ? "/admin/login" : "/login";
+
+      // Skip checking/redirecting if already on the login path
+      if (currentPath === loginPath) {
+        return;
+      }
+
+      if (isAdmin) {
+        const adminToken = localStorage.getItem("adminToken");
+        if (adminToken && isTokenExpired(adminToken)) {
+          clearAuthSession();
+          navigate("/admin/login", { replace: true });
+        }
+      } else {
+        const token = localStorage.getItem("token");
+        if (token && isTokenExpired(token)) {
+          clearAuthSession();
+          navigate("/login", { replace: true });
+        }
+      }
+    };
+
+    checkSession();
+    const intervalId = setInterval(checkSession, 5000);
+    return () => clearInterval(intervalId);
+  }, [location.pathname, navigate]);
+
   const normalizedPath = (location.pathname || "").toLowerCase();
   const isAdminPath = normalizedPath.startsWith("/admin");
   const shouldHideTopbar =
@@ -260,12 +298,14 @@ function AppContent() {
         <Route path="/verify" element={<VerifyOtp />} />
         <Route path="/forgot-password" element={<Forgetpassword />} />
         <Route path="/offers" element={<OffersPage />} />
+        <Route path="/online/:slug" element={<LegalPage />} />
 
         <Route path="/web-checkin" element={<WebCheckinPage />} />
         <Route path="/fetch-ticket" element={<FetchTicket />} />
         <Route path="/print-ticket" element={<PrintTicketPage />} />
         <Route path="/search/flights" element={<FlightSearchResults />} />
         <Route path="/search/buses" element={<BusSearchResults />} />
+        <Route path="/search/hotels" element={<HotelSearchResults />} />
         <Route path="/bus/seats" element={<BusSeatSelectionPage />} />
         <Route path="/bus/passenger-details" element={<BusPassengerDetailsPage />} />
         <Route path="/bus/payment" element={<BusPaymentPage />} />

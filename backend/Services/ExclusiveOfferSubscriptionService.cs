@@ -69,7 +69,6 @@ namespace PickNBook.Api.Services
             await _context.SaveChangesAsync();
 
             var activeOffers = (await _featuredOffersService.GetFeaturedOffersAsync())
-                .Where(x => !string.IsNullOrEmpty(x.PromotionCode))
                 .OrderBy(x => x.OfferId)
                 .Take(15)
                 .ToList();
@@ -127,11 +126,11 @@ namespace PickNBook.Api.Services
             var sb = new StringBuilder();
 
             sb.AppendLine("<h2>Exclusive Offers For You</h2>");
-            sb.AppendLine("<p>Thanks for subscribing. Here are your latest coupons:</p>");
+            sb.AppendLine("<p>Thanks for subscribing. Here are your latest exclusive offers:</p>");
             sb.AppendLine("<table style='border-collapse:collapse;width:100%;font-family:Arial,sans-serif;'>");
             sb.AppendLine("<thead><tr>");
             sb.AppendLine("<th style='border:1px solid #ddd;padding:8px;text-align:left;'>Offer</th>");
-            sb.AppendLine("<th style='border:1px solid #ddd;padding:8px;text-align:left;'>Coupon</th>");
+            sb.AppendLine("<th style='border:1px solid #ddd;padding:8px;text-align:left;'>Description</th>");
             sb.AppendLine("<th style='border:1px solid #ddd;padding:8px;text-align:left;'>Discount</th>");
             sb.AppendLine("</tr></thead><tbody>");
 
@@ -143,8 +142,8 @@ namespace PickNBook.Api.Services
                     : $"INR {offer.DiscountValue} OFF";
 
                 sb.AppendLine("<tr>");
-                sb.AppendLine($"<td style='border:1px solid #ddd;padding:8px;'>{offer.Title}</td>");
-                sb.AppendLine($"<td style='border:1px solid #ddd;padding:8px;'><b>{offer.PromotionCode}</b></td>");
+                sb.AppendLine($"<td style='border:1px solid #ddd;padding:8px;'><b>{offer.Title}</b></td>");
+                sb.AppendLine($"<td style='border:1px solid #ddd;padding:8px;'>{offer.Description}</td>");
                 sb.AppendLine($"<td style='border:1px solid #ddd;padding:8px;'>{discountText}</td>");
                 sb.AppendLine("</tr>");
             }
@@ -175,7 +174,7 @@ namespace PickNBook.Api.Services
                     ? $"{offer.DiscountValue}% OFF"
                     : $"INR {offer.DiscountValue} OFF";
 
-                lines.Add($"- {offer.Title}: {offer.PromotionCode} ({discountText})");
+                lines.Add($"- {offer.Title}: {discountText}");
             }
 
             return string.Join(Environment.NewLine, lines);

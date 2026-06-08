@@ -364,16 +364,16 @@ function DiscountMapping() {
   };
 
   return (
-    <div className="discount-mapping-container">
-      <section className="discount-heading" style={{ marginBottom: '24px' }}>
+    <div className="admin-b2c-page bus-discount-mapping-page-container">
+      <section className="discount-heading">
         <p className="discount-heading-main">B2C Bus Management</p>
         <p className="discount-heading-sub">Discount Mapping / Conditions</p>
       </section>
 
       {/* Select Discount Card */}
-      <section className="mapping-selection-card" style={{ marginBottom: '24px' }}>
+      <section className="mapping-selection-card">
         <label className="field" style={{ width: '100%' }}>
-          <span style={{ fontSize: '13px', fontWeight: '600', color: '#555' }}>Select B2C Discount Master</span>
+          <span style={{ fontSize: '12px', fontWeight: '700', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Select B2C Discount Master</span>
           {loadingDiscounts ? (
             <select disabled style={{ width: '100%' }}>
               <option>Loading discounts...</option>

@@ -10,6 +10,7 @@ import {
   SlidersHorizontal,
   Trash2,
   X,
+  Search,
 } from "lucide-react";
 import "./BusGstSettings.css";
 import { csvCell, formatDateTime, toViewId } from "../../../utils/adminPortalUtils";
@@ -45,12 +46,13 @@ export default function AdminBusGstSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState(DEFAULT_SORT_BY);
   const [sortOrder, setSortOrder] = useState(DEFAULT_SORT_ORDER);
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  
+  const [activeDropdownId, setActiveDropdownId] = useState(null);
+
   const [viewRow, setViewRow] = useState(null);
   const [editRow, setEditRow] = useState(null);
   const [deleteRow, setDeleteRow] = useState(null);
@@ -75,6 +77,16 @@ export default function AdminBusGstSettingsPage() {
     fetchSettings();
   }, []);
 
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (!e.target.closest('.actions-dropdown-container')) {
+        setActiveDropdownId(null);
+      }
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, []);
+
   const availableCategories = useMemo(() => {
     const uniqueCategories = new Set(
       rows.map((row) => String(row.gstCategory || "").trim()).filter(Boolean)
@@ -90,14 +102,21 @@ export default function AdminBusGstSettingsPage() {
   }, [rows]);
 
   const visibleRows = useMemo(() => {
+    const term = searchTerm.toLowerCase();
     const filteredRows = rows.filter((row) => {
       const rowStatus = String(row.status || "").toLowerCase();
       const rowCategory = String(row.gstCategory || "").toLowerCase();
 
       const matchesStatus = statusFilter === "all" || rowStatus === statusFilter.toLowerCase();
       const matchesCategory = categoryFilter === "all" || rowCategory === categoryFilter.toLowerCase();
+      const matchesSearch = !term ||
+        String(row.gstCategory || "").toLowerCase().includes(term) ||
+        String(row.gstPercent || "").toLowerCase().includes(term) ||
+        String(row.updatedBy || "").toLowerCase().includes(term) ||
+        String(row.remark || "").toLowerCase().includes(term) ||
+        String(row.id || "").toLowerCase().includes(term);
 
-      return matchesStatus && matchesCategory;
+      return matchesStatus && matchesCategory && matchesSearch;
     });
 
     const sortedRows = [...filteredRows].sort((leftRow, rightRow) => {
@@ -119,7 +138,7 @@ export default function AdminBusGstSettingsPage() {
     });
 
     return sortedRows;
-  }, [rows, categoryFilter, sortBy, sortOrder, statusFilter]);
+  }, [rows, searchTerm, categoryFilter, sortBy, sortOrder, statusFilter]);
 
   const handleResetFilters = () => {
     setSortBy(DEFAULT_SORT_BY);
@@ -336,124 +355,93 @@ export default function AdminBusGstSettingsPage() {
           </div>
         </section>
       ) : (
-        <>
-          <header className="admin-markup-header">
-            <div className="admin-markup-header-copy">
-              <h1>
-                <strong>B2C Bus</strong> GST Settings
-              </h1>
+        <div className="admin-b2c-page bus-gst-settings-page-container">
+          {/* ── PAGE HEADING ── */}
+          <section className="markup-heading">
+            <p className="markup-heading-main">B2C Bus Management</p>
+            <p className="markup-heading-sub">GST Settings</p>
+          </section>
+
+          {/* ── STATS ROW ── */}
+          <section className="stats-row">
+            <div className="stat-card total">
+              <div className="stat-label">Total GST Settings</div>
+              <div className="stat-value">{rows.length}</div>
+              <div className="stat-meta">Across all bus categories</div>
             </div>
+            <div className="stat-card active">
+              <div className="stat-label">Active</div>
+              <div className="stat-value">{rows.filter(r => r.status === 'Active').length}</div>
+              <div className="stat-meta">Currently applied to bookings</div>
+            </div>
+            <div className="stat-card inactive">
+              <div className="stat-label">Inactive</div>
+              <div className="stat-value">{rows.filter(r => r.status === 'Inactive').length}</div>
+              <div className="stat-meta">Paused GST rules</div>
+            </div>
+          </section>
 
-            <div className="admin-markup-header-actions">
-              <button
-                type="button"
-                className="admin-markup-filter-btn primary"
-                onClick={openAddModal}
-              >
-                <Plus size={15} />
-                <span>Add New</span>
+          {/* ── TOOLBAR ── */}
+          <section className="markup-toolbar">
+            <div className="markup-toolbar-group">
+              <label className="markup-field">
+                <span>Search GST Settings</span>
+                <div className="search-input-wrapper">
+                  <Search size={14} className="search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search by category, percent, updated by..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </label>
+              <label className="markup-field">
+                <span>Category</span>
+                <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+                  <option value="all">All</option>
+                  {availableCategories.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className="markup-toolbar-actions">
+              <label className="markup-field">
+                <span>Status</span>
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                  <option value="all">All</option>
+                  {availableStatuses.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </label>
+              <button type="button" className="markup-primary-btn" onClick={openAddModal}>
+                <Plus size={14} aria-hidden="true" />
+                Add GST Setting
               </button>
-              
-              <button
-                type="button"
-                className={`admin-markup-filter-btn ${isFilterPanelOpen ? "active" : ""}`}
-                onClick={() => setIsFilterPanelOpen((previous) => !previous)}
-                aria-expanded={isFilterPanelOpen}
-                aria-controls="admin-markup-filter-panel"
-              >
-                <SlidersHorizontal size={15} />
-                <span>Filter</span>
-                <ChevronDown
-                  size={15}
-                  className={`filter-chevron ${isFilterPanelOpen ? "open" : ""}`}
-                />
-              </button>
-
-              <button
-                type="button"
-                className="admin-markup-export-btn"
-                onClick={handleExport}
-                disabled={visibleRows.length === 0}
-              >
-                <Download size={15} />
-                <span>Export</span>
+              <button type="button" className="markup-export-btn" onClick={handleExport} disabled={visibleRows.length === 0}>
+                <Download size={14} aria-hidden="true" />
+                Export
               </button>
             </div>
-          </header>
+          </section>
 
-          {isFilterPanelOpen && (
-            <section className="admin-markup-filter-panel" id="admin-markup-filter-panel">
-              <div className="admin-markup-filter-grid">
-                <label>
-                  <span>Sort By</span>
-                  <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
-                    <option value="updateDateUtc">Updated On</option>
-                    <option value="id">ID</option>
-                    <option value="gstPercent">GST Percent</option>
-                    <option value="gstCategory">GST Category</option>
-                    <option value="updatedBy">Updated By</option>
-                    <option value="status">Status</option>
-                  </select>
-                </label>
-
-                <label>
-                  <span>Order</span>
-                  <select value={sortOrder} onChange={(event) => setSortOrder(event.target.value)}>
-                    <option value="desc">Descending</option>
-                    <option value="asc">Ascending</option>
-                  </select>
-                </label>
-
-                <label>
-                  <span>Status</span>
-                  <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-                    <option value="all">All</option>
-                    {availableStatuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label>
-                  <span>GST Category</span>
-                  <select
-                    value={categoryFilter}
-                    onChange={(event) => setCategoryFilter(event.target.value)}
-                  >
-                    <option value="all">All</option>
-                    {availableCategories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-
-              <div className="admin-markup-filter-actions">
-                <button type="button" className="admin-markup-filter-reset" onClick={handleResetFilters}>
-                  Reset Filters
-                </button>
-              </div>
-            </section>
-          )}
-
+          {/* ── TABLE ── */}
           <section className="admin-markup-table-wrap">
             {isLoading ? (
-              <p className="admin-markup-empty">Loading settings...</p>
+              <p className="admin-markup-empty">Loading GST settings...</p>
             ) : error ? (
-              <p className="admin-markup-empty" style={{ color: "red" }}>{error}</p>
+              <p className="admin-markup-empty" style={{ color: 'red' }}>{error}</p>
             ) : (
               <table className="admin-markup-table">
                 <colgroup>
-                  <col style={{ width: "10%" }} />
+                  <col style={{ width: "8%" }} />
                   <col style={{ width: "15%" }} />
+                  <col style={{ width: "12%" }} />
+                  <col style={{ width: "18%" }} />
                   <col style={{ width: "15%" }} />
-                  <col style={{ width: "15%" }} />
-                  <col style={{ width: "15%" }} />
-                  <col style={{ width: "10%" }} />
+                  <col style={{ width: "12%" }} />
                   <col style={{ width: "10%" }} />
                   <col style={{ width: "10%" }} />
                 </colgroup>
@@ -466,7 +454,7 @@ export default function AdminBusGstSettingsPage() {
                     <th>Updated By</th>
                     <th>Remark</th>
                     <th>Status</th>
-                    <th className="action-col">Action</th>
+                    <th className="action-col">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -489,17 +477,17 @@ export default function AdminBusGstSettingsPage() {
                             <span>{row.id}</span>
                           </button>
                         </td>
-                        <td>{row.gstCategory}</td>
+                        <td style={{ fontWeight: 600 }}>{row.gstCategory}</td>
                         <td>{row.gstPercent}%</td>
                         <td>{formatDateTime(row.updateDateUtc)}</td>
-                        <td>{row.updatedBy}</td>
+                        <td>{row.updatedBy || '--'}</td>
                         <td className="markup-remark-cell">
-                          <span className="markup-remark-text">{row.remark || "--"}</span>
+                          <span className="markup-remark-text">{row.remark || '--'}</span>
                         </td>
                         <td>
                           <button
                             type="button"
-                            className={`markup-status-toggle ${String(row.status || "").toLowerCase()}`}
+                            className={`markup-status-toggle ${String(row.status || '').toLowerCase()}`}
                             onClick={() => handleStatusToggle(row.id)}
                             aria-label={`Set ${row.id} status`}
                           >
@@ -508,22 +496,58 @@ export default function AdminBusGstSettingsPage() {
                           </button>
                         </td>
                         <td className="action-col">
-                          <div className="markup-action-group">
-                            <button type="button" title="View" aria-label={`View ${row.id}`} onClick={() => setViewRow(row)}>
-                              <Eye size={14} />
-                            </button>
-                            <button type="button" title="Edit" aria-label={`Edit ${row.id}`} onClick={() => openEditModal(row)}>
-                              <Pencil size={14} />
-                            </button>
+                          <div className="actions-dropdown-container">
                             <button
                               type="button"
-                              title="Delete"
-                              aria-label={`Delete ${row.id}`}
-                              className="danger"
-                              onClick={() => setDeleteRow(row)}
+                              className={`actions-trigger-btn ${activeDropdownId === row.id ? 'active' : ''}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveDropdownId(activeDropdownId === row.id ? null : row.id);
+                              }}
                             >
-                              <Trash2 size={14} />
+                              <span>Actions</span>
+                              <ChevronDown size={12} className="chevron-icon" />
                             </button>
+                            {activeDropdownId === row.id && (
+                              <div className="actions-dropdown-menu">
+                                <button
+                                  type="button"
+                                  className="dropdown-item view"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setViewRow(row);
+                                    setActiveDropdownId(null);
+                                  }}
+                                >
+                                  <Eye size={13} className="item-icon" />
+                                  <span>View Details</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="dropdown-item edit"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openEditModal(row);
+                                    setActiveDropdownId(null);
+                                  }}
+                                >
+                                  <Pencil size={13} className="item-icon" />
+                                  <span>Edit Setting</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="dropdown-item delete"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDeleteRow(row);
+                                    setActiveDropdownId(null);
+                                  }}
+                                >
+                                  <Trash2 size={13} className="item-icon" />
+                                  <span>Delete Setting</span>
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -533,7 +557,7 @@ export default function AdminBusGstSettingsPage() {
               </table>
             )}
           </section>
-        </>
+        </div>
       )}
 
       {editRow && (

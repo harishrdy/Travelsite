@@ -13,7 +13,7 @@ import {
   ShieldCheck,
   TicketCheck,
 } from "lucide-react";
-import logo from "../../assets/images/printticket.png";
+import logo from "../../assets/images/illustrations/printticket.png";
 import "../../STYLES/FetchTicket.css";
 import { fetchTicketByContact } from "../../services/ticketService";
 

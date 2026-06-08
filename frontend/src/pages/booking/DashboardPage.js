@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { listBusBookings } from "../../services/busBookingService";
 import { getDashboardSummary } from "../../services/dashboardService";
+import { listFlightBookings } from "../../services/flightBookingService";
 import { RefreshCw } from "lucide-react";
 
 const RECENT_LIMIT = 10;
@@ -131,11 +132,13 @@ function countBookingStatuses(bookings) {
 
 function buildDynamicDashboardSummary({
   busBookings,
+  flightBookings,
   travelerData,
   depositData,
 }) {
   const allBookings = Array.isArray(busBookings) ? busBookings : [];
   const busStatus = countBookingStatuses(busBookings);
+  const flightStatus = countBookingStatuses(flightBookings);
   const totalBookings = allBookings.length;
   const completedJourneys = busStatus.completed;
   const activeRevenue = allBookings.reduce((sum, booking) => {
@@ -218,6 +221,10 @@ function buildDynamicDashboardSummary({
       ...busStatus,
       total: Array.isArray(busBookings) ? busBookings.length : 0,
     },
+    flightBookings: {
+      ...flightStatus,
+      total: Array.isArray(flightBookings) ? flightBookings.length : 0,
+    },
     recentUpdates,
     recentUpdateCounters: {
       bookingUpdates: totalBookings,
@@ -296,6 +303,7 @@ export default function DashboardPage() {
   const [currentOffer, setCurrentOffer] = useState(0);
   const [summary, setSummary] = useState(null);
   const [busBookings, setBusBookings] = useState([]);
+  const [flightBookings, setFlightBookings] = useState([]);
   const [travelerData, setTravelerData] = useState([]);
   const [depositData, setDepositData] = useState([]);
   const [loadingSummary, setLoadingSummary] = useState(true);
@@ -321,7 +329,7 @@ export default function DashboardPage() {
       setSummaryNotice("");
 
       try {
-        const [summaryResult, busBookings] = await Promise.all([
+        const [summaryResult, busBookings, flightBookings] = await Promise.all([
           getDashboardSummary({
             recentLimit: RECENT_LIMIT,
             travelerPendingDays: TRAVELER_PENDING_DAYS,
@@ -330,12 +338,14 @@ export default function DashboardPage() {
             (error) => ({ ok: false, error })
           ),
           listBusBookings().catch(() => []),
+          listFlightBookings().catch(() => []),
         ]);
         if (ignore) {
           return;
         }
 
         setBusBookings(Array.isArray(busBookings) ? busBookings : []);
+        setFlightBookings(Array.isArray(flightBookings) ? flightBookings : []);
         setTravelerData(readStoredArray(TRAVELER_STORAGE_KEY));
         setDepositData(readStoredArray(DEPOSIT_STORAGE_KEY));
 
@@ -404,10 +414,11 @@ export default function DashboardPage() {
     () =>
       buildDynamicDashboardSummary({
         busBookings,
+        flightBookings,
         travelerData,
         depositData,
       }),
-    [busBookings, depositData, travelerData]
+    [busBookings, depositData, flightBookings, travelerData]
   );
 
   const summaryViewLabel = loadingSummary
@@ -418,6 +429,15 @@ export default function DashboardPage() {
 
   const busBookingStatus = useMemo(() => {
     const source = liveSummary?.busBookings || summary?.busBookings || {};
+    return [
+      { name: "Completed", value: Number(source.completed) || 0 },
+      { name: "Upcoming", value: Number(source.upcoming) || 0 },
+      { name: "Cancelled", value: Number(source.cancelled) || 0 },
+    ];
+  }, [liveSummary, summary]);
+
+  const flightBookingStatus = useMemo(() => {
+    const source = liveSummary?.flightBookings || summary?.flightBookings || {};
     return [
       { name: "Completed", value: Number(source.completed) || 0 },
       { name: "Upcoming", value: Number(source.upcoming) || 0 },
@@ -614,6 +634,11 @@ export default function DashboardPage() {
               title="Bus Bookings"
               subtitle="Completed vs upcoming vs cancelled"
               data={busBookingStatus}
+            />
+            <ChartCard
+              title="Flight Bookings"
+              subtitle="Completed vs upcoming vs cancelled"
+              data={flightBookingStatus}
             />
           </div>
         </div>

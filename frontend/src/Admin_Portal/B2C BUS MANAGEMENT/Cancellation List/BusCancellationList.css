@@ -128,3 +128,84 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Toolbar equal line alignment and custom button colors */
+.admin-cancel-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-cancel-toolbar .admin-chip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-cancel-toolbar .admin-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Make both chips and buttons have exactly the same height and alignment */
+.admin-cancel-toolbar .admin-chip,
+.admin-cancel-toolbar .admin-actions-row button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  box-sizing: border-box;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 999px; /* Make buttons also pills so they align beautifully with chips */
+  padding: 0 16px;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Button colors */
+/* Filter button */
+.admin-cancel-toolbar .admin-actions-row button:first-of-type {
+  background: var(--admin-soft);
+  color: var(--admin-primary);
+  border: 1.5px solid var(--admin-primary) !important;
+  cursor: pointer;
+}
+
+.admin-cancel-toolbar .admin-actions-row button:first-of-type:hover {
+  background: var(--admin-primary);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(30, 117, 255, 0.2);
+}
+
+/* Clear Filter button */
+.admin-cancel-toolbar .admin-cancel-clear-btn {
+  background: #ffffff !important;
+  color: var(--admin-muted) !important;
+  border: 1.5px solid var(--admin-border) !important;
+  cursor: pointer;
+}
+
+.admin-cancel-toolbar .admin-cancel-clear-btn:hover {
+  background: var(--admin-soft) !important;
+  border-color: var(--admin-muted) !important;
+  color: var(--admin-text) !important;
+}
+
+/* Export button */
+.admin-cancel-toolbar .admin-actions-row button:last-of-type {
+  background: var(--admin-success-soft) !important;
+  color: var(--admin-success) !important;
+  border: 1.5px solid var(--admin-success) !important;
+  cursor: pointer;
+}
+
+.admin-cancel-toolbar .admin-actions-row button:last-of-type:hover {
+  background: var(--admin-success) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}

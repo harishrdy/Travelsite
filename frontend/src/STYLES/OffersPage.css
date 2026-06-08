@@ -80,9 +80,9 @@
 }
 
 .filter-chip.active {
-  background: #f97316;
+  background: #009b8f;
   color: white;
-  border-color: #f97316;
+  border-color: #009b8f;
 }
 
 .offers-grid {
@@ -186,7 +186,7 @@
 }
 
 .coupon-box strong {
-  color: #f97316;
+  color: #009b8f;
   font-size: 16px;
 }
 

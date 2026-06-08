@@ -114,11 +114,9 @@ function mergeProfiles(...profiles) {
 
 async function requestProfile(path) {
   const token = getAuthToken();
-  const userId = getAuthUserId();
   const headers = withNgrokSkipWarningHeader(path, {
     Accept: "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(userId ? { "X-User-Id": userId } : {}),
   });
 
   const response = await fetch(toApiUrl(path), { headers });
@@ -166,4 +164,3 @@ export async function getAccountProfile() {
 
   return mergeProfiles(storedProfile, sessionProfile);
 }
-

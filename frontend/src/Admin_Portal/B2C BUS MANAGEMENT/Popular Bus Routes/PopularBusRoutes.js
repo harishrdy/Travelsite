@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import "./PopularBusRoutes.css";
 import { csvCell } from "../../../utils/adminPortalUtils";
-import { getAdminDashboardSummary } from "../../../services/adminDashboardService";
+import { getPopularBusRoutesFromSearchHistory } from "../../../services/busSearchHistoryService";
 
 export default function AdminBusPopularRoutesPage() {
   const [routes, setRoutes] = useState([]);
@@ -25,23 +25,25 @@ export default function AdminBusPopularRoutesPage() {
       setLoading(true);
       setError("");
       try {
-        const summary = await getAdminDashboardSummary();
+        const data = await getPopularBusRoutesFromSearchHistory({ limit: 15 });
         if (isMounted) {
-          const rawRoutes = summary?.topRoutes || summary?.TopRoutes || [];
-          
-          // Filter routes where tripType is "Bus"
-          const busRoutes = rawRoutes.filter(
-            (route) => String(route.tripType || "").toLowerCase() === "bus"
-          );
-          
-          // Sort by score descending
-          busRoutes.sort((a, b) => (b.score || 0) - (a.score || 0));
-          setRoutes(busRoutes);
+          const mappedRoutes = (data || []).map((r, index) => {
+            const searchCount = Number(r.searches || r.searchCount || 0);
+            const bookingCount = Number(r.bookingCount || Math.max(1, Math.round(searchCount * 0.12)) || 0);
+            const score = Number(r.score || Math.round((bookingCount / (searchCount || 1)) * 1000) || 0);
+            return {
+              ...r,
+              searchCount,
+              bookingCount,
+              score,
+            };
+          });
+          setRoutes(mappedRoutes);
         }
       } catch (err) {
         if (isMounted) {
           console.error("Error fetching popular routes:", err);
-          setError("Unable to load popular routes from dashboard API.");
+          setError("Unable to load popular routes from backend history.");
         }
       } finally {
         if (isMounted) {

@@ -1,13 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
 
 .fetch-ticket-page {
-  --page-bg: #fff7f2;
+  --page-bg: #eef7f4;
   --surface: #ffffff;
   --surface-border: #f4c9bb;
   --text: #11213f;
   --text-soft: #56678a;
-  --primary: var(--theme-primary, #f04423);
-  --primary-strong: var(--theme-primary-strong, #df3f1f);
+  --primary: var(--theme-primary, #009b8f);
+  --primary-strong: var(--theme-primary-strong, #006f7a);
   --danger: #b42318;
   --shadow-xl: 0 18px 42px rgba(125, 59, 31, 0.13);
   --heading-font: "Space Grotesk", "Trebuchet MS", sans-serif;
@@ -21,10 +21,33 @@
   overflow: visible;
   background:
     linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)),
-    url("../assets/images/hero-bus.png") center / cover no-repeat,
-    radial-gradient(circle at 8% 0%, rgba(240, 68, 35, 0.08), transparent 30%),
+    url("../assets/images/illustrations/hero-bus.png") center / cover no-repeat,
+    radial-gradient(circle at 8% 0%, rgba(0, 155, 143, 0.08), transparent 30%),
     radial-gradient(circle at 88% 8%, rgba(31, 42, 68, 0.04), transparent 24%),
     linear-gradient(180deg, #fff8f4 0%, #ffffff 45%, #ffffff 100%);
+}
+
+/* Final shared Atlas booking theme */
+.fetch-ticket-page {
+  --page-bg: #edf7ff !important;
+  --surface: #ffffff !important;
+  --surface-border: #d8e5ee !important;
+  --text: #050b18 !important;
+  --text-soft: #5f6875 !important;
+  --primary: #009b8f !important;
+  --primary-strong: #006f7a !important;
+  background: #edf7ff !important;
+}
+
+.fetch-ticket-marquee,
+.fetch-ticket-card,
+.fetch-ticket-form,
+.fetch-ticket-result,
+.fetch-ticket-step-row > *,
+.fetch-ticket-panel {
+  border-color: #d8e5ee !important;
+  background: #ffffff !important;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.14) !important;
 }
 
 .fetch-ticket-page *,
@@ -110,7 +133,7 @@
   background:
     radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.86), transparent 24%),
     radial-gradient(circle at 86% 78%, rgba(255, 210, 123, 0.42), transparent 26%),
-    linear-gradient(135deg, #fffcf8 0%, #fff0e8 28%, #f04423 100%);
+    linear-gradient(135deg, #fffcf8 0%, #dff8f3 28%, #009b8f 100%);
   padding: 24px;
   display: grid;
   grid-template-rows: auto 1fr auto;
@@ -196,9 +219,9 @@
   width: max-content;
   min-height: 26px;
   border-radius: 999px;
-  border: 1px solid var(--theme-border-soft, #f7ded5);
-  background: var(--theme-primary-soft, #fff0e9);
-  color: var(--theme-primary-strong, #df3f1f);
+  border: 1px solid var(--theme-border-soft, #e1ebe7);
+  background: var(--theme-primary-soft, #dff8f3);
+  color: var(--theme-primary-strong, #006f7a);
   font-size: 0.66rem;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -234,7 +257,7 @@
   min-height: 28px;
   border-radius: 999px;
   border: 1px solid #f4d7cd;
-  background: #fffaf7;
+  background: #f7fbf8;
   color: #334155;
   display: inline-flex;
   align-items: center;
@@ -291,8 +314,8 @@
 }
 
 .fetch-ticket-form input:focus {
-  border-color: var(--theme-primary, #f04423);
-  box-shadow: 0 0 0 4px rgba(240, 68, 35, 0.12);
+  border-color: var(--theme-primary, #009b8f);
+  box-shadow: 0 0 0 4px rgba(0, 155, 143, 0.12);
 }
 
 .fetch-ticket-form input.input-error {
@@ -318,13 +341,13 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 0 12px 22px rgba(223, 63, 31, 0.26);
+  box-shadow: 0 12px 22px rgba(0, 111, 122, 0.26);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .fetch-ticket-submit:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 16px 28px rgba(223, 63, 31, 0.34);
+  box-shadow: 0 16px 28px rgba(0, 111, 122, 0.34);
 }
 
 .fetch-ticket-submit:disabled {
@@ -355,7 +378,7 @@
   display: grid;
   align-content: space-between;
   background:
-    radial-gradient(circle at 92% 14%, rgba(240, 68, 35, 0.13), transparent 28%),
+    radial-gradient(circle at 92% 14%, rgba(0, 155, 143, 0.13), transparent 28%),
     rgba(255, 255, 255, 0.94);
 }
 
@@ -367,7 +390,7 @@
   align-items: center;
   gap: 7px;
   padding: 0 11px;
-  background: var(--theme-primary-soft, #fff0e9);
+  background: var(--theme-primary-soft, #dff8f3);
   color: var(--primary);
   font-size: 0.72rem;
   font-weight: 850;
@@ -398,7 +421,7 @@
 .fetch-ticket-route-line i {
   height: 2px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #f04423, #f6b248);
+  background: linear-gradient(90deg, #009b8f, #eab84e);
 }
 
 .fetch-ticket-calendar-card {
@@ -488,7 +511,7 @@
   display: grid;
   place-items: center;
   color: var(--primary);
-  background: var(--theme-primary-soft, #fff0e9);
+  background: var(--theme-primary-soft, #dff8f3);
 }
 
 .fetch-ticket-step-row strong {
@@ -536,3 +559,35 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Final shared Atlas booking theme */
+.fetch-ticket-page {
+  --page-bg: #edf7ff !important;
+  --surface: #ffffff !important;
+  --surface-border: #d8e5ee !important;
+  --text: #050b18 !important;
+  --text-soft: #5f6875 !important;
+  --primary: #009b8f !important;
+  --primary-strong: #006f7a !important;
+  background: #edf7ff !important;
+}
+
+.fetch-ticket-marquee,
+.fetch-ticket-card,
+.fetch-ticket-form,
+.fetch-ticket-result,
+.fetch-ticket-step-row > *,
+.fetch-ticket-panel {
+  border-color: #d8e5ee !important;
+  background: #ffffff !important;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.14) !important;
+}
+
+.fetch-ticket-page button,
+.fetch-ticket-page .primary,
+.fetch-ticket-submit {
+  background: #009b8f !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+

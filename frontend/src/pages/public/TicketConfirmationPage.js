@@ -4,15 +4,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { sendBookingNotifications } from "../../services/bookingNotificationsService";
-import apsrtcLogo from "../../assets/images/apsrtc-logo.svg";
-import gsrtcLogo from "../../assets/images/gsrtc-logo.svg";
-import keralaRtcLogo from "../../assets/images/kerala-rtc-logo.svg";
-import ksrtcLogo from "../../assets/images/ksrtc-logo.svg";
-import tgsrtcLogo from "../../assets/images/tgsrtc-logo.svg";
-import privatePrimeLogo from "../../assets/images/private-prime-logo.svg";
-import privateRoyalLogo from "../../assets/images/private-royal-logo.svg";
-import privateSkylineLogo from "../../assets/images/private-skyline-logo.svg";
-import rtcBusLogo from "../../assets/images/rtc-bus-logo.svg";
+import apsrtcLogo from "../../assets/images/buses/apsrtc-logo.svg";
+import gsrtcLogo from "../../assets/images/buses/gsrtc-logo.svg";
+import keralaRtcLogo from "../../assets/images/buses/kerala-rtc-logo.svg";
+import ksrtcLogo from "../../assets/images/buses/ksrtc-logo.svg";
+import tgsrtcLogo from "../../assets/images/buses/tgsrtc-logo.svg";
+import privatePrimeLogo from "../../assets/images/buses/private-prime-logo.svg";
+import privateRoyalLogo from "../../assets/images/buses/private-royal-logo.svg";
+import privateSkylineLogo from "../../assets/images/buses/private-skyline-logo.svg";
+import rtcBusLogo from "../../assets/images/buses/rtc-bus-logo.svg";
 import {
   readLatestStoredTicket,
   upsertStoredTicket,

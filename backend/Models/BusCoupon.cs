@@ -1,4 +1,4 @@
-﻿namespace PickNBook.Api.Models
+namespace PickNBook.Api.Models
 {
     public class BusCoupon
     {
@@ -16,15 +16,7 @@
         public int MaxUsagePerUser { get; set; } = 1;
         public decimal MinBookingAmount { get; set; } = 0;
         public bool IsExclusive { get; set; } = true;
-
         public bool IsAutoApply { get; set; } = false;
-
         public int Priority { get; set; } = 0;
-
-        public string TriggerType { get; set; }
-            = "ManualCode";
-
-        public string PromotionCategory { get; set; }
-            = "Coupon";
     }
 }

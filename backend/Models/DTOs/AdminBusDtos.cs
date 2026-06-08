@@ -30,10 +30,6 @@ public class BusCouponRequestDto
     public bool IsExclusive { get; set; } = true;
     public bool IsAutoApply { get; set; } = false;
     public int Priority { get; set; }
-    public string? TriggerType { get; set; }
-    public string? PromotionCategory { get; set; }
-
-   
     public string Status { get; set; } = "Active";
     public string? Remark { get; set; }
     public decimal MinBookingAmount { get; set; }

@@ -60,6 +60,8 @@ namespace PickNBook.Api.Data
 
         public DbSet<FeaturedOfferCondition> FeaturedOfferConditions => Set<FeaturedOfferCondition>();
 
+        public DbSet<FeaturedOfferUsage> FeaturedOfferUsages => Set<FeaturedOfferUsage>();
+
         public DbSet<BusDiscountCondition> BusDiscountConditions => Set<BusDiscountCondition>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -144,14 +146,33 @@ namespace PickNBook.Api.Data
             // =============================
             // FeaturedOffer Configuration
             // =============================
-            modelBuilder.Entity<FeaturedOffer>()
-                .HasIndex(x => x.PromotionId);
+            modelBuilder.Entity<FeaturedOffer>(entity =>
+            {
+                entity.Property(x => x.DiscountValue).HasPrecision(10, 2);
+                entity.Property(x => x.MaxDiscountAmount).HasPrecision(10, 2);
+                entity.Property(x => x.MinBookingAmount).HasPrecision(10, 2);
 
-            modelBuilder.Entity<FeaturedOffer>()
-                .HasOne(x => x.Promotion)
-                .WithMany()
-                .HasForeignKey(x => x.PromotionId)
-                .OnDelete(DeleteBehavior.Cascade);
+                entity.HasMany(x => x.Usages)
+                    .WithOne(x => x.FeaturedOffer)
+                    .HasForeignKey(x => x.FeaturedOfferId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // =============================
+            // FeaturedOfferUsage Configuration
+            // =============================
+            modelBuilder.Entity<FeaturedOfferUsage>(entity =>
+            {
+                entity.ToTable("featuredofferusages");
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.UserId).HasMaxLength(50).IsRequired();
+                entity.Property(x => x.DiscountAmount).HasPrecision(10, 2);
+
+                entity.HasOne(x => x.BusReservation)
+                    .WithMany()
+                    .HasForeignKey(x => x.BusReservationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             // =============================
             // FeaturedOfferCondition Configuration

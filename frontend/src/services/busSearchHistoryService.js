@@ -130,14 +130,12 @@ function getSearchHistoryHeaders() {
     getStoredValue("token") ||
     getStoredValue("authToken") ||
     getStoredValue("accessToken");
-  const userId = getStoredValue("userId") || getStoredValue("UserId");
   const adminId = getStoredValue("adminId");
   const adminRole = getStoredValue("adminRole");
 
   return {
     Accept: "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(userId ? { "X-User-Id": userId } : {}),
     ...(adminId ? { "X-Admin-Id": adminId } : {}),
     ...(adminRole ? { "X-Admin-Role": adminRole } : {}),
   };
@@ -438,4 +436,3 @@ export async function getPopularBusRoutesFromSearchHistory({ limit = 12 } = {}) 
 
   return routes;
 }
-

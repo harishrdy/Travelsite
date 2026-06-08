@@ -7,9 +7,9 @@
   --flight-border: #cfdbeb;
   --flight-text: #1b314d;
   --flight-muted: #5a7394;
-  --flight-primary: #0e3a73;
-  --flight-primary-strong: #0c2f5d;
-  --flight-accent: #185fbc;
+  --flight-primary: #17242d;
+  --flight-primary-strong: #17242d;
+  --flight-accent: #3656d4;
   --flight-accent-soft: #e9f1fc;
   --flight-success: #254f85;
   --flight-danger: #4a7cbe;
@@ -26,6 +26,58 @@
     radial-gradient(circle at 4% 8%, rgba(33, 86, 155, 0.1), transparent 32%),
     radial-gradient(circle at 95% 4%, rgba(35, 109, 206, 0.08), transparent 34%),
     var(--flight-bg);
+}
+
+/* Atlas flight checkout theme */
+.flight-flow-page {
+  --flight-bg: var(--theme-page, #eef7f4) !important;
+  --flight-surface: #ffffff !important;
+  --flight-surface-soft: #f7fbf8 !important;
+  --flight-border: #cfded8 !important;
+  --flight-text: var(--theme-navy, #17242d) !important;
+  --flight-muted: var(--theme-muted, #66757b) !important;
+  --flight-primary: var(--theme-primary, #009b8f) !important;
+  --flight-primary-strong: var(--theme-primary-strong, #006f7a) !important;
+  --flight-accent: var(--theme-blue, #3656d4) !important;
+  --flight-accent-soft: #eef1ff !important;
+  --flight-success: var(--theme-primary, #009b8f) !important;
+  --flight-danger: var(--theme-coral, #f36f5f) !important;
+  --flight-shadow-md: 0 18px 42px rgba(12, 46, 51, 0.12) !important;
+  --flight-shadow-sm: 0 10px 24px rgba(12, 46, 51, 0.08) !important;
+  background:
+    linear-gradient(135deg, rgba(0, 155, 143, 0.1) 0%, transparent 34%),
+    linear-gradient(225deg, rgba(54, 86, 212, 0.1) 0%, transparent 32%),
+    var(--flight-bg) !important;
+}
+
+.flight-flow-empty,
+.flight-flow-summary,
+.flight-cabin-card,
+.flight-side-card,
+.flight-passenger-card,
+.flight-payment-card,
+.flight-fare-card {
+  border-color: #cfded8 !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  box-shadow: 0 14px 32px rgba(12, 46, 51, 0.1) !important;
+}
+
+.flight-flow-empty button,
+.flight-continue-btn,
+.flight-pay-btn,
+.flight-action-primary,
+.flight-method-card.active {
+  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.22) !important;
+}
+
+.flight-flow-page input:focus,
+.flight-flow-page select:focus,
+.flight-flow-page textarea:focus {
+  border-color: var(--theme-primary, #009b8f) !important;
+  box-shadow: 0 0 0 3px rgba(0, 155, 143, 0.12) !important;
 }
 
 .flight-flow-page *,
@@ -231,7 +283,7 @@
 }
 
 .flight-seat-legend span.extra::before {
-  border-color: #185fbc;
+  border-color: #3656d4;
   background: #f4f8fd;
 }
 
@@ -307,7 +359,7 @@
 }
 
 .flight-seat.status-extra {
-  border-color: #185fbc;
+  border-color: #3656d4;
   background: #f4f8fd;
   color: #154e99;
 }
@@ -680,4 +732,55 @@
   .flight-action-row button {
     width: 100%;
   }
+}
+
+/* Final atlas flight checkout sweep */
+.flight-flow-page {
+  --flight-bg: var(--theme-page, #eef7f4) !important;
+  --flight-surface: #ffffff !important;
+  --flight-surface-soft: #f7fbf8 !important;
+  --flight-border: #cfded8 !important;
+  --flight-text: var(--theme-navy, #17242d) !important;
+  --flight-muted: var(--theme-muted, #66757b) !important;
+  --flight-primary: var(--theme-primary, #009b8f) !important;
+  --flight-primary-strong: var(--theme-primary-strong, #006f7a) !important;
+  --flight-accent: var(--theme-blue, #3656d4) !important;
+  --flight-accent-soft: #eef1ff !important;
+  --flight-success: var(--theme-primary, #009b8f) !important;
+  --flight-danger: var(--theme-coral, #f36f5f) !important;
+  background:
+    linear-gradient(135deg, rgba(0, 155, 143, 0.1) 0%, transparent 34%),
+    linear-gradient(225deg, rgba(54, 86, 212, 0.1) 0%, transparent 32%),
+    var(--flight-bg) !important;
+}
+
+.flight-flow-empty,
+.flight-flow-summary,
+.flight-cabin-card,
+.flight-side-card,
+.flight-passenger-card,
+.flight-payment-card,
+.flight-fare-card {
+  border-color: #cfded8 !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  box-shadow: 0 14px 32px rgba(12, 46, 51, 0.1) !important;
+}
+
+.flight-flow-empty button,
+.flight-continue-btn,
+.flight-pay-btn,
+.flight-action-primary,
+.flight-payment-methods button.active,
+.flight-method-card.active {
+  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.22) !important;
+}
+
+.flight-flow-page input:focus,
+.flight-flow-page select:focus,
+.flight-flow-page textarea:focus {
+  border-color: var(--theme-primary, #009b8f) !important;
+  box-shadow: 0 0 0 3px rgba(0, 155, 143, 0.12) !important;
 }

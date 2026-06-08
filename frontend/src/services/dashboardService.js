@@ -63,7 +63,8 @@ function shouldUseNgrokBypass(urlOrPath) {
   try {
     const parsed = new URL(toAbsoluteUrl(urlOrPath), window.location.origin);
     return (
-      false
+      parsed.hostname.includes("ngrok-free.dev") ||
+      parsed.hostname.includes("ngrok.io")
     );
   } catch {
     return false;
@@ -147,9 +148,24 @@ function normalizeErrorMessage(payload) {
   return "";
 }
 
+function resolveAuthToken() {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  return (
+    window.localStorage.getItem("token") ||
+    window.localStorage.getItem("authToken") ||
+    window.localStorage.getItem("accessToken") ||
+    ""
+  );
+}
+
 async function requestJson(urlOrPath, options = {}) {
+  const token = resolveAuthToken();
   const headers = {
     Accept: "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers || {}),
   };
 
@@ -187,31 +203,6 @@ async function requestJson(urlOrPath, options = {}) {
   }
 
   return payload;
-}
-
-function resolveCurrentUserId(explicitUserId) {
-  const directValue = String(explicitUserId || "").trim();
-  if (directValue) {
-    return directValue;
-  }
-
-  if (typeof window === "undefined") {
-    return "";
-  }
-
-  const rawUser = window.localStorage.getItem("user");
-  if (!rawUser) {
-    return "";
-  }
-
-  try {
-    const parsed = JSON.parse(rawUser) || {};
-    return String(
-      pickFirst(parsed, ["userId", "UserId", "id", "Id"], "")
-    ).trim();
-  } catch {
-    return "";
-  }
 }
 
 function normalizeRecentUpdate(item, index) {
@@ -329,7 +320,6 @@ function normalizeDashboardSummary(payload) {
 export async function getDashboardSummary({
   recentLimit = 10,
   travelerPendingDays = 7,
-  userId,
 } = {}) {
   const safeRecentLimit = clampNumber(recentLimit, {
     min: 1,
@@ -342,12 +332,6 @@ export async function getDashboardSummary({
     fallback: 7,
   });
 
-  const headers = {};
-  const resolvedUserId = resolveCurrentUserId(userId);
-  if (resolvedUserId) {
-    headers["X-User-Id"] = resolvedUserId;
-  }
-
   const url = buildUrl(`${DASHBOARD_ROOT}/summary`, {
     recentLimit: safeRecentLimit,
     travelerPendingDays: safeTravelerPendingDays,
@@ -355,10 +339,7 @@ export async function getDashboardSummary({
 
   const payload = await requestJson(url, {
     method: "GET",
-    headers,
   });
 
   return normalizeDashboardSummary(payload);
 }
-
-

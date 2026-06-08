@@ -213,7 +213,7 @@ export default function AdminFlightPopularRoutesPage() {
 
   return (
     <>
-      <section className="flight-markup-panel">
+      <section className="admin-b2c-page flight-markup-panel">
         <header className="flight-markup-toolbar">
           <div className="flight-markup-title">
             <h1>

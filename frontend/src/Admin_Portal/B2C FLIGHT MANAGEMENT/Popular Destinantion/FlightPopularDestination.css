@@ -108,7 +108,7 @@
 }
 
 .flight-markup-table-scroll {
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .flight-markup-table {
@@ -116,6 +116,7 @@
   border-collapse: collapse;
   font-size: 0.82rem;
   table-layout: fixed;
+  min-width: 1100px;
 }
 
 .flight-markup-table thead {

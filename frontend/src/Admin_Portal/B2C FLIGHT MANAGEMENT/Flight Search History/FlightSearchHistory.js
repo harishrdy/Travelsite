@@ -736,7 +736,7 @@ function mergeSearchHistory(apiRecords, localRecords) {
       raw: record?.raw || record,
     };
 
-    const key = buildRecordKey(normalizedRecord) || `${normalizedRecord.id}-${index}`;
+    const key = normalizedRecord.id ? String(normalizedRecord.id) : `search-row-${index + 1}`;
     if (!byKey.has(key)) {
       byKey.set(key, normalizedRecord);
     }

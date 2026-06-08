@@ -49,7 +49,7 @@ public class BusPromotionEngineService
             };
 
         decimal subtotal = 0m;
-
+       
 
         foreach (var seat in seats)
         {
@@ -98,17 +98,13 @@ public class BusPromotionEngineService
         if (selectedFeaturedOfferId.HasValue)
         {
             selectedOffer = await _db.FeaturedOffers
-                .Include(x => x.Promotion)
-                .ThenInclude(p => p!.Conditions)
+                .Include(x => x.Conditions)
                 .FirstOrDefaultAsync(x =>
                     x.Id == selectedFeaturedOfferId.Value &&
                     x.IsActive);
 
             if (selectedOffer == null)
                 throw new Exception("Selected offer is invalid or inactive");
-
-            if (selectedOffer.Promotion == null || !selectedOffer.Promotion.IsActive)
-                throw new Exception("The promotion associated with this offer is invalid or inactive");
         }
         // ========================================
         // AUTO APPLY PROMOTIONS
@@ -202,6 +198,9 @@ public class BusPromotionEngineService
         BusPromotion? manualPromotion = null;
         decimal manualDiscount = 0m;
 
+        decimal couponDiscount = 0m;
+        decimal offerDiscount = 0m;
+
         if (selectedOffer != null)
         {
             if (!string.IsNullOrWhiteSpace(couponCode))
@@ -209,12 +208,48 @@ public class BusPromotionEngineService
                 throw new Exception("Featured offers cannot stack with manual coupons");
             }
 
-            if (promotionId.HasValue && promotionId.Value != selectedOffer.PromotionId)
+            if (promotionId.HasValue)
             {
                 throw new Exception("Only one manual promotion/offer can be applied.");
             }
 
-            manualPromotion = selectedOffer.Promotion;
+            // Validate featured offer
+            var nowUtc = DateTime.UtcNow;
+            if (selectedOffer.StartDateUtc.HasValue && selectedOffer.StartDateUtc.Value > nowUtc)
+            {
+                throw new Exception("Featured offer has not started yet.");
+            }
+            if (selectedOffer.EndDateUtc.HasValue && selectedOffer.EndDateUtc.Value < nowUtc)
+            {
+                throw new Exception("Featured offer has expired.");
+            }
+            if (selectedOffer.MaxUsage.HasValue && selectedOffer.UsedCount >= selectedOffer.MaxUsage.Value)
+            {
+                throw new Exception("Featured offer usage limit has been reached.");
+            }
+            if (selectedOffer.MinBookingAmount > 0m && subtotal < selectedOffer.MinBookingAmount)
+            {
+                throw new Exception($"Minimum booking amount of INR {selectedOffer.MinBookingAmount} is required.");
+            }
+            if (!ValidateFeaturedOfferConditions(selectedOffer, bus, seats))
+            {
+                throw new Exception("Featured offer conditions not met.");
+            }
+
+            bool isPercentage = selectedOffer.DiscountType.Equals("Percentage", StringComparison.OrdinalIgnoreCase);
+            offerDiscount = isPercentage
+                ? subtotal * selectedOffer.DiscountValue / 100m
+                : selectedOffer.DiscountValue;
+
+            if (selectedOffer.MaxDiscountAmount.HasValue)
+            {
+                offerDiscount = Math.Min(offerDiscount, selectedOffer.MaxDiscountAmount.Value);
+            }
+
+            response.DiscountSource = "Offer";
+            response.DiscountLabel = selectedOffer.Title;
+            response.AppliedPromotionTitle = selectedOffer.Title;
+            response.AppliedPromotionType = "Offer";
         }
         else if (!skipCouponValidation && !string.IsNullOrWhiteSpace(couponCode))
         {
@@ -255,9 +290,6 @@ public class BusPromotionEngineService
             manualPromotion = promoById;
         }
 
-        decimal couponDiscount = 0m;
-        decimal offerDiscount = 0m;
-
         if (manualPromotion != null)
         {
             bool valid =
@@ -296,11 +328,7 @@ public class BusPromotionEngineService
                 response.DiscountLabel = manualPromotion.Title;
 
                 // SPLIT MANUAL DISCOUNT BY TYPE
-                if (selectedOffer != null)
-                {
-                    offerDiscount = manualDiscount;
-                }
-                else if (manualPromotion.PromotionType.Equals(
+                if (manualPromotion.PromotionType.Equals(
                         "Coupon",
                         StringComparison.OrdinalIgnoreCase))
                 {
@@ -365,7 +393,7 @@ public class BusPromotionEngineService
         response.TotalDiscount =
             totalDiscount;
 
-
+      
 
         // ========================================
         // TAXABLE FARE
@@ -424,7 +452,7 @@ public class BusPromotionEngineService
                 response.GstAmount +
                 convenienceFee,
                 2);
-        response.FinalAmount = response.GrandTotal;
+        response.FinalAmount =response.GrandTotal;
 
         return response;
     }
@@ -570,6 +598,131 @@ public class BusPromotionEngineService
                             break;
                     }
 
+                    break;
+            }
+        }
+
+        return true;
+    }
+
+    private bool ValidateFeaturedOfferConditions(
+        FeaturedOffer offer,
+        BusBooking bus,
+        List<BusSeat> seats)
+    {
+        if (offer.Conditions == null ||
+            offer.Conditions.Count == 0)
+            return true;
+
+        var istDeparture =
+            DateTime.SpecifyKind(
+                bus.DepartureTime,
+                DateTimeKind.Utc)
+            .Add(IndiaOffset);
+
+        foreach (var condition in offer.Conditions)
+        {
+            if (!condition.IsActive)
+                continue;
+
+            switch (condition.ConditionType)
+            {
+                case "DayOfWeek":
+                    if (!istDeparture.DayOfWeek
+                        .ToString()
+                        .Equals(
+                            condition.Value1,
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        return false;
+                    }
+                    break;
+
+                case "SourceCity":
+                    if (!bus.FromCity.Equals(
+                        condition.Value1,
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        return false;
+                    }
+                    break;
+
+                case "DestinationCity":
+                    if (!bus.ToCity.Equals(
+                        condition.Value1,
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        return false;
+                    }
+                    break;
+
+                case "SeatType":
+                    if (!seats.Any(x =>
+                        x.SeatType.Equals(
+                            condition.Value1,
+                            StringComparison.OrdinalIgnoreCase)))
+                    {
+                        return false;
+                    }
+                    break;
+
+                case "BusType":
+                    if (!bus.BusType.Equals(
+                        condition.Value1,
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        return false;
+                    }
+                    break;
+
+                case "OperatorName":
+                    if (!bus.OperatorName.Equals(
+                        condition.Value1,
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        return false;
+                    }
+                    break;
+
+                case "MinimumFare":
+                    decimal currentFare =
+                        seats.Count * bus.PriceInr;
+
+                    decimal value1 =
+                        decimal.Parse(condition.Value1);
+
+                    decimal value2 =
+                        string.IsNullOrWhiteSpace(condition.Value2)
+                        ? 0
+                        : decimal.Parse(condition.Value2);
+
+                    if (string.IsNullOrWhiteSpace(condition.Value2))
+                    {
+                        if (currentFare < value1)
+                            return false;
+                    }
+                    else
+                    {
+                        if (currentFare < value1 || currentFare > value2)
+                            return false;
+                    }
+                    break;
+
+                case "TravelDate":
+                    var depDate = bus.DepartureTime.Date;
+                    if (DateTime.TryParse(condition.Value1, out var date1))
+                    {
+                        if (string.IsNullOrWhiteSpace(condition.Value2))
+                        {
+                            if (depDate != date1.Date)
+                                return false;
+                        }
+                        else if (DateTime.TryParse(condition.Value2, out var date2))
+                        {
+                            if (depDate < date1.Date || depDate > date2.Date)
+                                return false;
+                        }
+                    }
                     break;
             }
         }

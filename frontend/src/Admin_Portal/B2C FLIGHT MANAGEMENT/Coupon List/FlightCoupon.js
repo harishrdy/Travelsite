@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Check, Download, List, Pencil, Trash2, X } from "lucide-react";
 import "./FlightCoupon.css";
+import "../Used Coupon List/FlightUsedCoupon.css";
 import { formatCouponDate, formatCouponDateTime } from "../../../utils/adminPortalUtils";
 import { useAdminList } from "../../../utils/adminPortalStorage";
 import {
@@ -54,7 +55,7 @@ export default function AdminFlightCouponListPage() {
   const [deleteCoupon, setDeleteCoupon] = useState(null);
   const colWidths = [
     "4%",
-    "6%",
+    "4%",
     "8%",
     "7%",
     "12%",
@@ -64,7 +65,7 @@ export default function AdminFlightCouponListPage() {
     "8%",
     "12%",
     "10%",
-    "8%",
+    "10%",
   ];
   const headers = [
     "SN",
@@ -273,12 +274,10 @@ export default function AdminFlightCouponListPage() {
   };
 
   return (
-    <section className="flight-markup-panel">
+    <section className="admin-b2c-page flight-markup-panel">
       <header className="flight-markup-toolbar">
         <div className="flight-markup-title">
-          <h1>
-            <strong>B2C Flight</strong> Coupon List
-          </h1>
+          <h1>B2C Flight Coupon List</h1>
           <div className="flight-markup-title-underline" aria-hidden="true" />
         </div>
 

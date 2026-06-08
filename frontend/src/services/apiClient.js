@@ -193,6 +193,21 @@ export function toApiAssetUrl(urlOrPath) {
 }
 
 export function withNgrokSkipWarningHeader(urlOrPath, headers = {}) {
+  if (typeof window === "undefined") {
+    return headers;
+  }
+ 
+  try {
+    const parsed = new URL(toApiUrl(urlOrPath), window.location.origin);
+    const hostname = String(parsed.hostname || "");
+ 
+    if (hostname.includes("ngrok-free.dev") || hostname.includes("ngrok.io")) {
+      return { ...headers, "x-skip-browser-warning": "true" };
+    }
+  } catch {
+    // Ignore header injection when URL parsing fails.
+  }
+ 
   return headers;
 }
  
@@ -273,4 +288,3 @@ export function normalizeResponseMessage(payload, fallbackMessage = "") {
 }
  
  
-

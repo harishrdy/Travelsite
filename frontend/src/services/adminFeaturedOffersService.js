@@ -2,6 +2,7 @@ import axios from "axios";
 import { toApiUrl, withNgrokSkipWarningHeader } from "./apiClient";
 
 const PUBLIC_FEATURED_OFFERS_PATHS = [
+  "/api/featured-offers",
   "/api/FeaturedOffers",
   "/api/FeaturedOffers/active",
 ];
@@ -11,6 +12,7 @@ function buildActiveOffersPaths(bookingType) {
   const query = encodedBookingType ? `?bookingType=${encodedBookingType}` : "";
 
   return [
+    `/api/featured-offers${query}`,
     `/api/offers/active${query}`,
     `/api/FeaturedOffers/active${query}`,
     "/api/FeaturedOffers",
@@ -73,7 +75,7 @@ export async function getPublicFeaturedOffers() {
     return [];
   }
 
-  const response = await offersApi.get("/api/AdminFeaturedOffers", {
+  const response = await offersApi.get("/api/admin/featured-offers", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -98,17 +100,17 @@ export async function getActiveOffers(bookingType = "Bus") {
 }
 
 export async function getAdminFeaturedOffers() {
-  const response = await offersApi.get("/api/AdminFeaturedOffers");
+  const response = await offersApi.get("/api/admin/featured-offers");
   return response.data;
 }
 
 export async function getAdminFeaturedOfferById(id) {
-  const response = await offersApi.get(`/api/AdminFeaturedOffers/${id}`);
+  const response = await offersApi.get(`/api/admin/featured-offers/${id}`);
   return response.data;
 }
 
 export async function createAdminFeaturedOffer(formData) {
-  const response = await offersApi.post("/api/AdminFeaturedOffers", formData, {
+  const response = await offersApi.post("/api/admin/featured-offers", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -117,7 +119,7 @@ export async function createAdminFeaturedOffer(formData) {
 }
 
 export async function updateAdminFeaturedOffer(id, formData) {
-  const response = await offersApi.put(`/api/AdminFeaturedOffers/${id}`, formData, {
+  const response = await offersApi.put(`/api/admin/featured-offers/${id}`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -126,32 +128,27 @@ export async function updateAdminFeaturedOffer(id, formData) {
 }
 
 export async function deleteAdminFeaturedOffer(id) {
-  const response = await offersApi.delete(`/api/AdminFeaturedOffers/${id}`);
+  const response = await offersApi.delete(`/api/admin/featured-offers/${id}`);
   return response.data;
 }
 
 export async function getOfferConditions(offerId) {
-  const response = await offersApi.get(`/api/AdminFeaturedOffers/${offerId}/conditions`);
+  const response = await offersApi.get(`/api/admin/featured-offers/${offerId}/conditions`);
   return response.data;
 }
 
 export async function addOfferCondition(offerId, data) {
-  const response = await offersApi.post(`/api/AdminFeaturedOffers/${offerId}/conditions`, data);
+  const response = await offersApi.post(`/api/admin/featured-offers/${offerId}/conditions`, data);
   return response.data;
 }
 
 export async function updateOfferCondition(offerId, conditionId, data) {
-  const response = await offersApi.put(
-    `/api/AdminFeaturedOffers/${offerId}/conditions/${conditionId}`,
-    data
-  );
+  const response = await offersApi.put(`/api/admin/featured-offers/${offerId}/conditions/${conditionId}`, data);
   return response.data;
 }
 
 export async function deleteOfferCondition(offerId, conditionId) {
-  const response = await offersApi.delete(
-    `/api/AdminFeaturedOffers/${offerId}/conditions/${conditionId}`
-  );
+  const response = await offersApi.delete(`/api/admin/featured-offers/${offerId}/conditions/${conditionId}`);
   return response.data;
 }
 

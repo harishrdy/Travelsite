@@ -1,5 +1,5 @@
 import { toApiUrl, readResponsePayload } from "./apiClient";
-import { getAuthToken, getAuthUserId } from "./authSession";
+import { getAuthToken } from "./authSession";
 
 function getAdminAuthHeaders(hasBody = false) {
   const sanitize = (val) => {
@@ -11,13 +11,13 @@ function getAdminAuthHeaders(hasBody = false) {
     ? sanitize(window.localStorage.getItem("adminToken")) || sanitize(getAuthToken()) || sanitize(window.localStorage.getItem("token")) 
     : "";
     
-  const userId = typeof window !== "undefined" 
-    ? sanitize(window.localStorage.getItem("adminId")) || sanitize(getAuthUserId()) || sanitize(window.localStorage.getItem("userId")) 
+  const adminId = typeof window !== "undefined" 
+    ? sanitize(window.localStorage.getItem("adminId")) 
     : "";
 
   const headers = {
     Accept: "application/json",
-    "x-skip-browser-warning": "true",
+    "ngrok-skip-browser-warning": "true",
   };
 
   if (hasBody) {
@@ -28,9 +28,8 @@ function getAdminAuthHeaders(hasBody = false) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  if (userId) {
-    headers["X-User-Id"] = userId;
-    headers["X-Admin-Id"] = userId;
+  if (adminId) {
+    headers["X-Admin-Id"] = adminId;
   }
 
   return headers;
@@ -276,6 +275,3 @@ export async function listAdminBusBookings({ passengerPhone, status } = {}) {
   });
   return handleResponse(response);
 }
-
-
-

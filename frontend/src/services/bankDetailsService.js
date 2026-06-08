@@ -65,7 +65,8 @@ function shouldUseNgrokBypass(urlOrPath) {
   try {
     const parsed = new URL(toAbsoluteUrl(urlOrPath), window.location.origin);
     return (
-      false
+      parsed.hostname.includes("ngrok-free.dev") ||
+      parsed.hostname.includes("ngrok.io")
     );
   } catch {
     return false;
@@ -89,56 +90,6 @@ function pickFirst(source, keys, fallback = null) {
 function normalizeText(value, fallback = "") {
   const text = String(value ?? "").trim();
   return text || fallback;
-}
-
-function decodeJwtPayload(token) {
-  const rawToken = normalizeText(token, "");
-  if (!rawToken) {
-    return {};
-  }
-
-  const parts = rawToken.split(".");
-  if (parts.length < 2) {
-    return {};
-  }
-
-  try {
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
-    const payload = atob(padded);
-    return JSON.parse(payload) || {};
-  } catch {
-    return {};
-  }
-}
-
-function resolveUserIdFromTokenPayload(tokenPayload) {
-  return normalizeText(
-    pickFirst(
-      tokenPayload,
-      [
-        "userId",
-        "UserId",
-        "uid",
-        "Uid",
-        "id",
-        "Id",
-        "sub",
-        "nameid",
-        "user_id",
-        "preferred_username",
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid",
-        "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid",
-        "email",
-        "upn",
-        "unique_name",
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
-      ],
-      ""
-    ),
-    ""
-  );
 }
 
 function resolveAuthToken() {
@@ -203,114 +154,6 @@ function normalizeListPayload(payload) {
   return [];
 }
 
-function resolveCurrentUserId(explicitUserId) {
-  const directValue = normalizeText(explicitUserId, "");
-  if (directValue) {
-    return directValue;
-  }
-
-  if (typeof window === "undefined") {
-    return "";
-  }
-
-  let rawUser = "";
-  let rawToken = "";
-  let explicitStoredUserId = "";
-
-  try {
-    rawUser = window.localStorage.getItem("user") || "";
-    rawToken = window.localStorage.getItem("token") || "";
-    explicitStoredUserId =
-      window.localStorage.getItem("userId") ||
-      window.localStorage.getItem("UserId") ||
-      "";
-  } catch {
-    return "";
-  }
-
-  const tokenPayload = decodeJwtPayload(rawToken);
-  const tokenUserId = resolveUserIdFromTokenPayload(tokenPayload);
-
-  if (!rawUser) {
-    return normalizeText(explicitStoredUserId || tokenUserId, "");
-  }
-
-  let parsed = {};
-
-  try {
-    parsed = JSON.parse(rawUser) || {};
-  } catch {
-    return normalizeText(explicitStoredUserId || tokenUserId, "");
-  }
-
-  const nestedUser = pickFirst(parsed, ["user", "User"], {});
-  const profileUserId = normalizeText(
-    pickFirst(
-      parsed,
-      ["userId", "UserId", "id", "Id", "uid", "Uid", "userID", "UserID"],
-      ""
-    ),
-    ""
-  );
-  const nestedProfileUserId = normalizeText(
-    pickFirst(
-      nestedUser,
-      ["userId", "UserId", "id", "Id", "uid", "Uid", "userID", "UserID"],
-      ""
-    ),
-    ""
-  );
-  const emailFallback = normalizeText(
-    pickFirst(parsed, ["email", "Email"], "") ||
-      pickFirst(
-        tokenPayload,
-        ["email", "upn", "unique_name", "preferred_username"],
-        ""
-      ),
-    ""
-  );
-
-  const resolved = normalizeText(
-    profileUserId ||
-      nestedProfileUserId ||
-      explicitStoredUserId ||
-      tokenUserId ||
-      emailFallback,
-    ""
-  );
-
-  if (!resolved) {
-    return "";
-  }
-
-  try {
-    window.localStorage.setItem("userId", resolved);
-
-    if (!profileUserId && parsed && typeof parsed === "object") {
-      window.localStorage.setItem(
-        "user",
-        JSON.stringify({
-          ...parsed,
-          userId: resolved,
-        })
-      );
-    }
-  } catch {
-    // Ignore storage update failures.
-  }
-
-  return resolved;
-}
-
-function resolveRequiredUserId(userId) {
-  const resolved = resolveCurrentUserId(userId);
-  if (!resolved) {
-    throw new Error("X-User-Id header is required. Please sign in again.");
-  }
-
-  return resolved;
-}
-
 async function parseJsonOrText(response) {
   const contentType = response.headers.get("content-type") || "";
 
@@ -322,13 +165,11 @@ async function parseJsonOrText(response) {
 }
 
 async function requestJson(urlOrPath, options = {}) {
-  const resolvedUserId = resolveRequiredUserId(options.userId);
   const resolvedToken = resolveAuthToken();
   const isFormDataBody = typeof FormData !== "undefined" && options.body instanceof FormData;
 
   const headers = {
     Accept: "application/json",
-    "X-User-Id": resolvedUserId,
     ...(resolvedToken && !options?.headers?.Authorization
       ? { Authorization: `Bearer ${resolvedToken}` }
       : {}),
@@ -359,11 +200,9 @@ async function requestJson(urlOrPath, options = {}) {
 }
 
 async function requestBlob(urlOrPath, options = {}) {
-  const resolvedUserId = resolveRequiredUserId(options.userId);
   const resolvedToken = resolveAuthToken();
   const headers = {
     Accept: "image/*,application/octet-stream",
-    "X-User-Id": resolvedUserId,
     ...(resolvedToken && !options?.headers?.Authorization
       ? { Authorization: `Bearer ${resolvedToken}` }
       : {}),
@@ -587,5 +426,3 @@ export async function fetchBankUpiQrBlob(upiNumericId, { userId } = {}) {
     userId,
   });
 }
-
-

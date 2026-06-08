@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FaPlaneDeparture, FaEye, FaEyeSlash,FaBus } from "react-icons/fa";
+import { FaPlaneDeparture, FaEye, FaEyeSlash, FaBus } from "react-icons/fa";
 import "../../STYLES/Login.css";
 import "../../STYLES/Verify.css";
-import "../../STYLES/AuthBackground.css";
 import { readApiMessage, requestAuth } from "../../services/authService";
 import {
   validateLowercaseEmail,
   validateStrongPassword,
 } from "../../utils/authValidation";
-
+// import flightCarImage from "../../assets/images/flightcar.png";
+import flightCarImage from "../../assets/images/new-landscape-bg.jpg";
+import brandLogo from "../../assets/images/brand/pick-n-book-logo.svg";
 
 const VerifyOtp = () => {
   const navigate = useNavigate();
@@ -28,21 +29,19 @@ const VerifyOtp = () => {
   const [otpVerified, setOtpVerified] = useState(false);
   const [apiMessage, setApiMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const authPageStyle = {
+    backgroundImage: `url(${flightCarImage})`
+  };
   const resetEmail = String(
     location.state?.email ||
-      (typeof window !== "undefined"
-        ? window.sessionStorage.getItem("passwordResetEmail")
-        : "") ||
-      ""
+    (typeof window !== "undefined"
+      ? window.sessionStorage.getItem("passwordResetEmail")
+      : "") ||
+    ""
   ).trim();
   const hasOtp = Boolean(form.otp.trim());
   const normalizeOtp = (value) => String(value || "").replace(/\D/g, "").slice(0, 6);
   const resetEmailError = resetEmail ? validateLowercaseEmail(resetEmail) : "";
-
-  useEffect(() => {
-    document.documentElement.classList.add('auth-active');
-    return () => document.documentElement.classList.remove('auth-active');
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -63,10 +62,10 @@ const VerifyOtp = () => {
         name === "otp" && nextValue && nextValue.length !== 6
           ? "OTP must be 6 numbers"
           : name === "password" && nextValue
-          ? validateStrongPassword(nextValue, "New password")
-          : name === "confirmPassword" && /\s/.test(value)
-            ? "Confirm password cannot contain spaces"
-            : ""
+            ? validateStrongPassword(nextValue, "New password")
+            : name === "confirmPassword" && /\s/.test(value)
+              ? "Confirm password cannot contain spaces"
+              : ""
     }));
 
     setApiMessage("");
@@ -232,19 +231,15 @@ const VerifyOtp = () => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-animated-bg">
-        <div className="auth-animated-bg-image" />
-        <div className="auth-animated-bg-overlay" />
-      </div>
-      <div
-        className="travel-auth-page travel-auth-verify"
-      >
-        <div className="travel-auth-card">
+    <div
+      className="travel-auth-page travel-auth-verify"
+      style={authPageStyle}
+    >
+      <div className="travel-auth-card">
         <aside className="travel-auth-brand">
           <p className="travel-auth-kicker">Welcome to</p>
           <div className="travel-auth-logo">
-            <FaPlaneDeparture />< FaBus/>
+            <FaPlaneDeparture />< FaBus />
           </div>
           <h1 className="travel-auth-brand-name">Travling</h1>
           <p className="travel-auth-brand-copy">
@@ -254,6 +249,11 @@ const VerifyOtp = () => {
         </aside>
 
         <section className="travel-auth-form-panel">
+          <img
+            src={brandLogo}
+            alt="Pick N Book"
+            className="auth-brand-logo auth-brand-logo-form"
+          />
           <h2 className="travel-auth-heading">Verify OTP</h2>
           <p className="travel-auth-subheading">
             Enter OTP and set your new account password.
@@ -302,8 +302,8 @@ const VerifyOtp = () => {
                     : otpVerified
                       ? "Verified"
                       : hasOtp
-                      ? "Verify OTP"
-                      : "Resend OTP"}
+                        ? "Verify OTP"
+                        : "Resend OTP"}
                 </button>
               </div>
               <p className="travel-field-error">{errors.otp || "\u00A0"}</p>
@@ -386,10 +386,8 @@ const VerifyOtp = () => {
           </form>
         </section>
       </div>
-      </div>
     </div>
   );
 };
 
 export default VerifyOtp;
-

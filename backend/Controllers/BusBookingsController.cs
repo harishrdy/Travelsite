@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
@@ -178,6 +178,31 @@ namespace PickNBook.Api.Controllers
                     startingFromPrice = prices.Min();
                 }
 
+                var boardingPoint = x.BoardingPoint;
+                var droppingPoint = x.DroppingPoint;
+
+                try
+                {
+                    var jsonOptions = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    if (!string.IsNullOrWhiteSpace(x.BoardingPointsJson))
+                    {
+                        var bps = System.Text.Json.JsonSerializer.Deserialize<List<PickNBook.Api.Models.DTOs.BusPointDto>>(x.BoardingPointsJson, jsonOptions);
+                        if (bps != null && bps.Count > 0)
+                        {
+                            boardingPoint = bps[0].Name;
+                        }
+                    }
+                    if (!string.IsNullOrWhiteSpace(x.DroppingPointsJson))
+                    {
+                        var dps = System.Text.Json.JsonSerializer.Deserialize<List<PickNBook.Api.Models.DTOs.BusPointDto>>(x.DroppingPointsJson, jsonOptions);
+                        if (dps != null && dps.Count > 0)
+                        {
+                            droppingPoint = dps[dps.Count - 1].Name;
+                        }
+                    }
+                }
+                catch { }
+
                 response.Add(new
                 {
                     x.Id,
@@ -186,8 +211,8 @@ namespace PickNBook.Api.Controllers
                     x.BusType,
                     x.FromCity,
                     x.ToCity,
-                    x.BoardingPoint,
-                    x.DroppingPoint,
+                    BoardingPoint = boardingPoint,
+                    DroppingPoint = droppingPoint,
 
 
                     DepartureTimeUtc = x.DepartureTime,
@@ -277,18 +302,18 @@ namespace PickNBook.Api.Controllers
             var booked = seats.Count(x => x.IsBooked);
             // AFTER — layout-aware
             var layout = BusSeatLayoutRegistry.Resolve(bus.BusType);
-
+           
 
             var sections = layout.GetSections(
                          seats.Count,
                          bus.BusType)
                       .Select(s => new SeatSectionDto
                       {
-                          Label = s.Label,
-                          SeatCodes = s.SeatCodes,
-                          ColumnsPerRow = s.ColumnsPerRow,
-                          AisleAfterColumn = s.AisleAfterColumn
-                      }).ToList();
+                                     Label = s.Label,
+                                     SeatCodes = s.SeatCodes,
+                                     ColumnsPerRow = s.ColumnsPerRow,
+                                     AisleAfterColumn = s.AisleAfterColumn
+                                 }).ToList();
 
             var definitions =
    layout.GetSeatDefinitions(
@@ -353,6 +378,64 @@ namespace PickNBook.Api.Controllers
                 });
             }
 
+            List<BusPointDto> boardingPoints = [];
+            if (!string.IsNullOrWhiteSpace(bus.BoardingPointsJson))
+            {
+                try
+                {
+                    boardingPoints = System.Text.Json.JsonSerializer.Deserialize<List<BusPointDto>>(
+                        bus.BoardingPointsJson,
+                        new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+                }
+                catch
+                {
+                    // Ignore or log error
+                }
+            }
+
+            List<BusPointDto> droppingPoints = [];
+            if (!string.IsNullOrWhiteSpace(bus.DroppingPointsJson))
+            {
+                try
+                {
+                    droppingPoints = System.Text.Json.JsonSerializer.Deserialize<List<BusPointDto>>(
+                        bus.DroppingPointsJson,
+                        new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+                }
+                catch
+                {
+                    // Ignore or log error
+                }
+            }
+
+            if (boardingPoints.Count > 0 && droppingPoints.Count > 0)
+            {
+                var boardingNames = boardingPoints.Select(x => x.Name.Trim().ToLowerInvariant()).ToHashSet();
+                var cleanDropping = new List<BusPointDto>();
+
+                foreach (var dp in droppingPoints)
+                {
+                    var dpName = dp.Name.Trim().ToLowerInvariant();
+                    if (boardingNames.Contains(dpName))
+                    {
+                        continue;
+                    }
+                    cleanDropping.Add(dp);
+                }
+
+                if (cleanDropping.Count == 0)
+                {
+                    cleanDropping.Add(droppingPoints[0]);
+                    if (boardingPoints.Count > 1)
+                    {
+                        var firstDroppingName = droppingPoints[0].Name.Trim().ToLowerInvariant();
+                        boardingPoints = boardingPoints.Where(bp => bp.Name.Trim().ToLowerInvariant() != firstDroppingName).ToList();
+                    }
+                }
+
+                droppingPoints = cleanDropping;
+            }
+
             var response = new SeatMapResponseDto
             {
                 TripId = busId,
@@ -387,10 +470,12 @@ namespace PickNBook.Api.Controllers
                  Column = d.Column,
                  IsSleeper = d.IsSleeper,
                  IsUpper = d.IsUpper,
-
+                 
              }).ToList(),
 
-                Sections = sections
+                Sections = sections,
+                BoardingPoints = boardingPoints,
+                DroppingPoints = droppingPoints
             };
 
             return Ok(response);
@@ -509,7 +594,7 @@ namespace PickNBook.Api.Controllers
                         var bus = await dbContext.BusBookings.FirstOrDefaultAsync(x => x.Id == busId);
                         if (bus is null)
                             throw new Exception("Bus not found.");
-
+                       
 
                         if (bus.DepartureTime <= DateTime.UtcNow)
                             throw new Exception("Cannot book a bus that already departed.");
@@ -617,26 +702,20 @@ namespace PickNBook.Api.Controllers
                         if (request.SelectedFeaturedOfferId.HasValue)
                         {
                             selectedFeaturedOffer = await dbContext.FeaturedOffers
-                                .Include(x => x.Promotion)
-                                .ThenInclude(p => p!.Conditions)
+                                .Include(x => x.Conditions)
                                 .FirstOrDefaultAsync(x => x.Id == request.SelectedFeaturedOfferId.Value && x.IsActive);
 
                             if (selectedFeaturedOffer == null)
                                 throw new Exception("Selected offer is invalid or inactive.");
 
-                            if (selectedFeaturedOffer.Promotion == null || !selectedFeaturedOffer.Promotion.IsActive)
-                                throw new Exception("The promotion associated with this offer is invalid or inactive.");
-
                             if (!string.IsNullOrWhiteSpace(request.CouponCode))
                             {
                                 throw new Exception("Featured offers cannot stack with manual coupons.");
                             }
-                            if (request.PromotionId.HasValue && request.PromotionId.Value != selectedFeaturedOffer.PromotionId)
+                            if (request.PromotionId.HasValue)
                             {
                                 throw new Exception("Only one manual promotion/offer can be applied.");
                             }
-
-                            promotionToApply = selectedFeaturedOffer.Promotion;
                         }
                         else if (!string.IsNullOrWhiteSpace(request.CouponCode))
                         {
@@ -671,7 +750,26 @@ namespace PickNBook.Api.Controllers
                             promotionToApply = promoById;
                         }
 
-                        if (promotionToApply != null)
+                        if (selectedFeaturedOffer != null)
+                        {
+                            var nowUtc = DateTime.UtcNow;
+
+                            if (selectedFeaturedOffer.StartDateUtc.HasValue && selectedFeaturedOffer.StartDateUtc.Value > nowUtc)
+                            {
+                                throw new Exception("Featured offer has not started yet.");
+                            }
+
+                            if (selectedFeaturedOffer.EndDateUtc.HasValue && selectedFeaturedOffer.EndDateUtc.Value < nowUtc)
+                            {
+                                throw new Exception("Featured offer has expired.");
+                            }
+
+                            if (selectedFeaturedOffer.MaxUsage.HasValue && selectedFeaturedOffer.UsedCount >= selectedFeaturedOffer.MaxUsage.Value)
+                            {
+                                throw new Exception("Featured offer usage limit reached.");
+                            }
+                        }
+                        else if (promotionToApply != null)
                         {
                             var nowUtc = DateTime.UtcNow;
 
@@ -730,15 +828,15 @@ namespace PickNBook.Api.Controllers
                             TaxableFareInr = pricing.TaxableFare,
                             GstPercent = pricing.GstPercent,
                             GstAmountInr = pricing.GstAmount,
-                            AutoDiscountAmountInr = pricing.AutoDiscountAmount,
-                            CouponDiscountAmountInr = pricing.CouponDiscountAmount,
-                            DiscountAmountInr = pricing.AutoDiscountAmount + pricing.CouponDiscountAmount,
+                            DiscountAmountInr = pricing.AutoDiscountAmount + pricing.CouponDiscountAmount + pricing.ManualDiscountAmount,
                             ConvenienceFeeInr = pricing.ConvenienceFee,
                             CouponCode = string.IsNullOrWhiteSpace(request.CouponCode) ? null : request.CouponCode.Trim().ToUpperInvariant(),
                             AppliedPromotionId = promotionToApply?.Id,
                             AppliedPromotionCode = pricing.AppliedPromotionCode,
                             AppliedPromotionType = pricing.AppliedPromotionType ?? pricing.DiscountSource,
                             AppliedFeaturedOfferId = request.SelectedFeaturedOfferId,
+                            AppliedFeaturedOfferTitle = selectedFeaturedOffer?.Title,
+                            FeaturedOfferDiscountAmount = selectedFeaturedOffer != null ? pricing.ManualDiscountAmount : 0m,
                             AutoPromotionId = pricing.AutoPromotionCode != null ? (await dbContext.BusPromotions.Where(x => x.Code == pricing.AutoPromotionCode).Select(x => (int?)x.Id).FirstOrDefaultAsync()) : null,
                             AutoPromotionCode = pricing.AutoPromotionCode,
                             DiscountSource = pricing.DiscountSource,
@@ -785,16 +883,38 @@ namespace PickNBook.Api.Controllers
                             }
                         }
 
-                        if (promotionToApply != null)
+                        if (selectedFeaturedOffer != null)
                         {
-                            var discountAmt = promotionToApply.PromotionType.Equals("Coupon", StringComparison.OrdinalIgnoreCase) && selectedFeaturedOffer == null
+                            var featuredUsage = new FeaturedOfferUsage
+                            {
+                                FeaturedOfferId = selectedFeaturedOffer.Id,
+                                BusReservationId = reservation.Id,
+                                UserId = userId!,
+                                DiscountAmount = pricing.ManualDiscountAmount,
+                                UsedAtUtc = DateTime.UtcNow
+                            };
+                            dbContext.FeaturedOfferUsages.Add(featuredUsage);
+
+                            var rowsUpdated = await dbContext.Database.ExecuteSqlInterpolatedAsync($@"
+                                UPDATE featuredoffers
+                                SET UsedCount = UsedCount + 1
+                                WHERE Id = {selectedFeaturedOffer.Id}
+                                AND (MaxUsage IS NULL OR UsedCount < MaxUsage)
+                            ");
+                            if (rowsUpdated == 0 && selectedFeaturedOffer.MaxUsage.HasValue)
+                            {
+                                throw new Exception("Featured offer usage limit reached concurrently.");
+                            }
+                        }
+                        else if (promotionToApply != null)
+                        {
+                            var discountAmt = promotionToApply.PromotionType.Equals("Coupon", StringComparison.OrdinalIgnoreCase)
                                 ? pricing.CouponDiscountAmount
                                 : pricing.ManualDiscountAmount;
 
                             var manualUsage = new BusPromotionUsage
                             {
                                 BusPromotionId = promotionToApply.Id,
-                                FeaturedOfferId = request.SelectedFeaturedOfferId,
                                 BusReservationId = reservation.Id,
                                 UserId = userId!,
                                 PromotionCode = promotionToApply.Code,
@@ -856,7 +976,7 @@ namespace PickNBook.Api.Controllers
                     }
                 });
 
-
+               
 
                 try
                 {
@@ -943,7 +1063,7 @@ namespace PickNBook.Api.Controllers
             return Ok(response);
         }
 
-
+        
 
         [HttpGet("bookings/{bookingId:int}")]
         public async Task<IActionResult> GetBusBookingById(int bookingId)
@@ -1095,7 +1215,7 @@ namespace PickNBook.Api.Controllers
                     if (booking.SeatsBooked <= 0)
                         throw new Exception("Invalid seat count in booking");
 
-
+                    
                     // ── Cancellation policy based on hours before departure ──
                     var istNow = DateTime.UtcNow.Add(IndiaOffset);
                     var istDeparture = booking.BusBooking.DepartureTime.Add(IndiaOffset);
@@ -1125,7 +1245,7 @@ namespace PickNBook.Api.Controllers
 
                     booking.CancellationChargeInr = cancellationCharge;
                     booking.RefundAmountInr = refundAmount;
-
+                    
                     // 🔥 ALWAYS SYNC FROM SOURCE OF TRUTH
                     var actualAvailableSeats = await dbContext.BusSeats
                         .CountAsync(x => x.BusBookingId == booking.BusBookingId && !x.IsBooked);
@@ -1189,7 +1309,7 @@ namespace PickNBook.Api.Controllers
                 FullName = x.FullName,
                 Gender = x.Gender,
                 SeatNumber = x.SeatNumber ?? string.Empty,
-                Age = x.Age
+                Age=x.Age
             }).ToList();
 
             var maleCount = passengers.Count(x => x.Gender.Equals("Male", StringComparison.OrdinalIgnoreCase));
@@ -1247,6 +1367,9 @@ namespace PickNBook.Api.Controllers
                 reservation.AppliedPromotionId,
                 reservation.AppliedPromotionCode,
                 reservation.AppliedPromotionType,
+                reservation.AppliedFeaturedOfferId,
+                reservation.AppliedFeaturedOfferTitle,
+                reservation.FeaturedOfferDiscountAmount,
                 reservation.CouponCode,
                 reservation.AutoPromotionCode,
                 baseDto.BookedAtUtc,
@@ -1413,7 +1536,7 @@ namespace PickNBook.Api.Controllers
                     FullName = passenger.FullName.Trim(),
                     Gender = normalizedGender,
                     SeatNumber = normalizedSeat,
-                    Age = passenger.Age
+                    Age=passenger.Age
                 });
             }
 
@@ -1453,7 +1576,7 @@ namespace PickNBook.Api.Controllers
 
             return null;
         }
-
+        
 
         private static (DateTime StartUtc, DateTime EndUtc) GetUtcRangeForIstDate(DateOnly date)
         {
@@ -1486,130 +1609,130 @@ namespace PickNBook.Api.Controllers
             // FIXED
             return markup.Value;
         }
-        //    private async Task<BusPricingPreviewResponseDto> CalculateBusPricingAsync(
-        //int busId,
-        //List<string> seatCodes,
-        //string? couponCode)
-        //    {
-        //        var bus = await dbContext.BusBookings
-        //            .AsNoTracking()
-        //            .FirstOrDefaultAsync(x => x.Id == busId);
+    //    private async Task<BusPricingPreviewResponseDto> CalculateBusPricingAsync(
+    //int busId,
+    //List<string> seatCodes,
+    //string? couponCode)
+    //    {
+    //        var bus = await dbContext.BusBookings
+    //            .AsNoTracking()
+    //            .FirstOrDefaultAsync(x => x.Id == busId);
 
-        //        if (bus is null)
-        //            throw new Exception("Bus not found.");
+    //        if (bus is null)
+    //            throw new Exception("Bus not found.");
 
-        //        var seats = await dbContext.BusSeats
-        //            .AsNoTracking()
-        //            .Where(x =>
-        //                x.BusBookingId == busId &&
-        //                seatCodes.Contains(x.SeatCode))
-        //            .ToListAsync();
+    //        var seats = await dbContext.BusSeats
+    //            .AsNoTracking()
+    //            .Where(x =>
+    //                x.BusBookingId == busId &&
+    //                seatCodes.Contains(x.SeatCode))
+    //            .ToListAsync();
 
-        //        var response = new BusPricingPreviewResponseDto
-        //        {
-        //            BusId = bus.Id,
-        //            GstCategory = bus.GstCategory
-        //        };
+    //        var response = new BusPricingPreviewResponseDto
+    //        {
+    //            BusId = bus.Id,
+    //            GstCategory = bus.GstCategory
+    //        };
 
-        //        decimal subtotal = 0m;
+    //        decimal subtotal = 0m;
 
-        //        foreach (var seat in seats)
-        //        {
-        //            var markup = await GetActiveSeatMarkupAsync(seat.SeatType);
+    //        foreach (var seat in seats)
+    //        {
+    //            var markup = await GetActiveSeatMarkupAsync(seat.SeatType);
 
-        //            var markupAmount = CalculateMarkupAmount(
-        //                bus.PriceInr,
-        //                markup);
+    //            var markupAmount = CalculateMarkupAmount(
+    //                bus.PriceInr,
+    //                markup);
 
-        //            var fareBeforeTax = bus.PriceInr + markupAmount;
+    //            var fareBeforeTax = bus.PriceInr + markupAmount;
 
-        //            subtotal += fareBeforeTax;
+    //            subtotal += fareBeforeTax;
 
-        //            response.Seats.Add(new BusSeatPriceBreakdownDto
-        //            {
-        //                SeatCode = seat.SeatCode,
-        //                SeatType = seat.SeatType,
-        //                BaseFare = bus.PriceInr,
+    //            response.Seats.Add(new BusSeatPriceBreakdownDto
+    //            {
+    //                SeatCode = seat.SeatCode,
+    //                SeatType = seat.SeatType,
+    //                BaseFare = bus.PriceInr,
 
-        //                MarkupAmount = decimal.Round(
-        //                    markupAmount,
-        //                    2,
-        //                    MidpointRounding.AwayFromZero),
+    //                MarkupAmount = decimal.Round(
+    //                    markupAmount,
+    //                    2,
+    //                    MidpointRounding.AwayFromZero),
 
-        //                FareBeforeTax = decimal.Round(
-        //                    fareBeforeTax,
-        //                    2,
-        //                    MidpointRounding.AwayFromZero)
-        //            });
-        //        }
+    //                FareBeforeTax = decimal.Round(
+    //                    fareBeforeTax,
+    //                    2,
+    //                    MidpointRounding.AwayFromZero)
+    //            });
+    //        }
 
-        //        response.SubtotalBeforeCoupon = decimal.Round(
-        //            subtotal,
-        //            2,
-        //            MidpointRounding.AwayFromZero);
+    //        response.SubtotalBeforeCoupon = decimal.Round(
+    //            subtotal,
+    //            2,
+    //            MidpointRounding.AwayFromZero);
 
-        //        decimal couponAmount = 0m;
+    //        decimal couponAmount = 0m;
 
-        //        if (!string.IsNullOrWhiteSpace(couponCode))
-        //        {
-        //            var coupon = await dbContext.BusCoupons
-        //                .FirstOrDefaultAsync(x =>
-        //                    x.CouponCode == couponCode &&
-        //                    x.Status == "Active");
+    //        if (!string.IsNullOrWhiteSpace(couponCode))
+    //        {
+    //            var coupon = await dbContext.BusCoupons
+    //                .FirstOrDefaultAsync(x =>
+    //                    x.CouponCode == couponCode &&
+    //                    x.Status == "Active");
 
-        //            if (coupon is not null)
-        //            {
-        //                couponAmount =
-        //coupon.CouponType.Equals(
-        //    "Percentage",
-        //    StringComparison.OrdinalIgnoreCase)
-        //? subtotal * coupon.Value / 100m
-        //: coupon.Value;
-        //            }
-        //        }
+    //            if (coupon is not null)
+    //            {
+    //                couponAmount =
+    //coupon.CouponType.Equals(
+    //    "Percentage",
+    //    StringComparison.OrdinalIgnoreCase)
+    //? subtotal * coupon.Value / 100m
+    //: coupon.Value;
+    //            }
+    //        }
 
-        //        couponAmount = Math.Min(couponAmount, subtotal);
+    //        couponAmount = Math.Min(couponAmount, subtotal);
 
-        //        response.CouponAmount = decimal.Round(
-        //            couponAmount,
-        //            2,
-        //            MidpointRounding.AwayFromZero);
+    //        response.CouponAmount = decimal.Round(
+    //            couponAmount,
+    //            2,
+    //            MidpointRounding.AwayFromZero);
 
-        //        var taxableFare = subtotal - couponAmount;
+    //        var taxableFare = subtotal - couponAmount;
 
-        //        response.TaxableFare = decimal.Round(
-        //            taxableFare,
-        //            2,
-        //            MidpointRounding.AwayFromZero);
+    //        response.TaxableFare = decimal.Round(
+    //            taxableFare,
+    //            2,
+    //            MidpointRounding.AwayFromZero);
 
-        //        var gstSetting = await GetActiveBusGstAsync(
-        //            bus.GstCategory);
+    //        var gstSetting = await GetActiveBusGstAsync(
+    //            bus.GstCategory);
 
-        //        var gstPercent = gstSetting?.GstPercent ?? 0m;
+    //        var gstPercent = gstSetting?.GstPercent ?? 0m;
 
-        //        response.GstPercent = gstPercent;
+    //        response.GstPercent = gstPercent;
 
-        //        var gstAmount = taxableFare * gstPercent / 100m;
+    //        var gstAmount = taxableFare * gstPercent / 100m;
 
-        //        response.GstAmount = decimal.Round(
-        //            gstAmount,
-        //            2,
-        //            MidpointRounding.AwayFromZero);
+    //        response.GstAmount = decimal.Round(
+    //            gstAmount,
+    //            2,
+    //            MidpointRounding.AwayFromZero);
 
-        //        var convenienceFee =
-        //            await GetActiveBusConvenienceFeeAsync();
+    //        var convenienceFee =
+    //            await GetActiveBusConvenienceFeeAsync();
 
-        //        response.ConvenienceFee = convenienceFee;
+    //        response.ConvenienceFee = convenienceFee;
 
-        //        response.GrandTotal = decimal.Round(
-        //            taxableFare +
-        //            gstAmount +
-        //            convenienceFee,
-        //            2,
-        //            MidpointRounding.AwayFromZero);
+    //        response.GrandTotal = decimal.Round(
+    //            taxableFare +
+    //            gstAmount +
+    //            convenienceFee,
+    //            2,
+    //            MidpointRounding.AwayFromZero);
 
-        //        return response;
-        //    }
+    //        return response;
+    //    }
         private async Task<decimal> GetSeatFinalFareAsync(
             decimal baseFare,
             string seatType)
@@ -1686,6 +1809,8 @@ namespace PickNBook.Api.Controllers
                     ToCity = template.ToCity,
                     BoardingPoint = template.BoardingPoint,
                     DroppingPoint = template.DroppingPoint,
+                    BoardingPointsJson = template.BoardingPointsJson,
+                    DroppingPointsJson = template.DroppingPointsJson,
                     DepartureTime = depUtc,
                     ArrivalTime = depUtc.Add(duration),
                     PriceInr = template.PriceInr,
@@ -1748,7 +1873,7 @@ namespace PickNBook.Api.Controllers
                 }
             }
         }
-
+       
         private Dictionary<string, (int row, int col, int sectionIndex)> BuildSeatGrid(
     List<SeatSection> sections)
         {
@@ -1819,7 +1944,7 @@ namespace PickNBook.Api.Controllers
             errorResult = null;
             return true;
         }
-
+        
         private async Task TrySendBusCancellationNotificationsAsync(int bookingId, string userId)
         {
             var booking = await dbContext.BusReservations
@@ -1851,68 +1976,68 @@ namespace PickNBook.Api.Controllers
                 //}
                 try
                 {
+                    
+    await _ticketEmailService.SendBusCancellationAsync(
+    new SendBusTicketEmailRequest
+    {
+        ToEmail = booking.PassengerEmail,
+        PassengerName = booking.PassengerName,
+        BookingReference = booking.BookingReference,
+        OperatorName = booking.BusBooking.OperatorName,
+        BusType = booking.BusBooking.BusType,
+        Origin = booking.BusBooking.FromCity,
+        Destination = booking.BusBooking.ToCity,
+        DepartureTime = booking.BusBooking.DepartureTime,
+        ArrivalTime = booking.BusBooking.ArrivalTime,
+        IsOvernightArrival = booking.BusBooking.ArrivalTime.Date > booking.BusBooking.DepartureTime.Date,
+        DurationMinutes = (int)(booking.BusBooking.ArrivalTime - booking.BusBooking.DepartureTime).TotalMinutes,
+        BoardingPoint = booking.BusBooking.BoardingPoint,
+        ArrivalPoint = booking.BusBooking.ToCity,
 
-                    await _ticketEmailService.SendBusCancellationAsync(
-                    new SendBusTicketEmailRequest
-                    {
-                        ToEmail = booking.PassengerEmail,
-                        PassengerName = booking.PassengerName,
-                        BookingReference = booking.BookingReference,
-                        OperatorName = booking.BusBooking.OperatorName,
-                        BusType = booking.BusBooking.BusType,
-                        Origin = booking.BusBooking.FromCity,
-                        Destination = booking.BusBooking.ToCity,
-                        DepartureTime = booking.BusBooking.DepartureTime,
-                        ArrivalTime = booking.BusBooking.ArrivalTime,
-                        IsOvernightArrival = booking.BusBooking.ArrivalTime.Date > booking.BusBooking.DepartureTime.Date,
-                        DurationMinutes = (int)(booking.BusBooking.ArrivalTime - booking.BusBooking.DepartureTime).TotalMinutes,
-                        BoardingPoint = booking.BusBooking.BoardingPoint,
-                        ArrivalPoint = booking.BusBooking.ToCity,
+        // Fare breakdown
+        Price = booking.TotalPriceInr,
+        BaseFare = booking.BaseFareInr,
+        ConvenienceFee = booking.ConvenienceFeeInr,
+        Currency = "INR",
 
-                        // Fare breakdown
-                        Price = booking.TotalPriceInr,
-                        BaseFare = booking.BaseFareInr,
-                        ConvenienceFee = booking.ConvenienceFeeInr,
-                        Currency = "INR",
+        NetFare = booking.NetFareInr,
+        GstPercent = booking.GstPercent,
+        GstAmount = booking.GstAmountInr,
 
-                        NetFare = booking.NetFareInr,
-                        GstPercent = booking.GstPercent,
-                        GstAmount = booking.GstAmountInr,
+        AppliedPromotionCode =
+    booking.AppliedPromotionCode,
 
-                        AppliedPromotionCode =
-                    booking.AppliedPromotionCode,
+        AppliedPromotionType =
+    booking.AppliedPromotionType,
 
-                        AppliedPromotionType =
-                    booking.AppliedPromotionType,
+        DiscountSource =
+    booking.DiscountSource,
 
-                        DiscountSource =
-                    booking.DiscountSource,
+        DiscountAmount =
+    booking.DiscountAmountInr > 0
+        ? booking.DiscountAmountInr
+        : null,
 
-                        DiscountAmount =
-                    booking.DiscountAmountInr > 0
-                        ? booking.DiscountAmountInr
-                        : null,
+        // Legacy fallback
+        SeatNumber = seatNumbers,
+        AutoDiscountAmount =
+    booking.AutoDiscountAmountInr,
 
-                        // Legacy fallback
-                        SeatNumber = seatNumbers,
-                        AutoDiscountAmount =
-                    booking.AutoDiscountAmountInr,
+        CouponDiscountAmount =
+    booking.CouponDiscountAmountInr,
 
-                        CouponDiscountAmount =
-                    booking.CouponDiscountAmountInr,
+        // Per-passenger details
+        Passengers = passengers.Select(p => new BusPassengerSeatDto
+        {
+            FullName = p.FullName,
+            Gender = p.Gender,
+            SeatNumber = p.SeatNumber ?? string.Empty
+        }).ToList()
 
-                        // Per-passenger details
-                        Passengers = passengers.Select(p => new BusPassengerSeatDto
-                        {
-                            FullName = p.FullName,
-                            Gender = p.Gender,
-                            SeatNumber = p.SeatNumber ?? string.Empty
-                        }).ToList()
-
-                    },
-                    booking.RefundAmountInr ?? 0m
-                );
-
+    },
+    booking.RefundAmountInr ?? 0m
+);
+                
                 }
                 catch (Exception ex)
                 {
@@ -2049,7 +2174,7 @@ namespace PickNBook.Api.Controllers
             if (!sent)
                 logger.LogWarning("WhatsApp booking failed: {Message}", msg);
         }
-
+       
     }
 
 }

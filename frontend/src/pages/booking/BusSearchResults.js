@@ -21,10 +21,14 @@ import {
   Sun,
   Sunrise,
   Sunset,
+  Wind,
+  Zap,
+  Square,
   XCircle,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { searchBuses } from "../../services/busBookingService";
+import BusSeatSelectionPage from "./BusSeatSelectionPage";
 import "../../STYLES/BusSearchResults.css";
 
 const USE_DIRECT_API_IN_DEV =
@@ -88,6 +92,12 @@ const BUS_TYPE_FILTERS = [
   { key: "sleeper", label: "Sleeper", icon: Bed },
 ];
 
+const AMENITIES = [
+  { key: "blankets", label: "Blankets", icon: Wind },
+  { key: "charging", label: "Charging Point", icon: Zap },
+  { key: "pillow", label: "Pillow", icon: Square },
+];
+
 const BUS_PROMO_ITEMS = [
   {
     id: "route-offers",
@@ -135,6 +145,12 @@ const DEFAULT_TIME_WINDOWS = {
   afternoon: false,
   evening: false,
   night: false,
+};
+
+const DEFAULT_AMENITIES = {
+  blankets: false,
+  charging: false,
+  pillow: false,
 };
 
 function readValue(params, state, key) {
@@ -614,11 +630,13 @@ export default function BusSearchResults() {
   const [actionMessage, setActionMessage] = useState("");
 
   const [sortBy, setSortBy] = useState(() => cachedFilters?.sortBy ?? "departure");
+  const [sortDirection, setSortDirection] = useState(() => cachedFilters?.sortDirection ?? "asc");
   const [priceMin, setPriceMin] = useState(() => cachedFilters?.priceMin ?? 0);
   const [priceMax, setPriceMax] = useState(() => cachedFilters?.priceMax ?? 0);
   const [busTypeFilters, setBusTypeFilters] = useState(() => cachedFilters?.busTypeFilters ?? DEFAULT_BUS_TYPES);
   const [departureWindows, setDepartureWindows] = useState(() => cachedFilters?.departureWindows ?? DEFAULT_TIME_WINDOWS);
   const [arrivalWindows, setArrivalWindows] = useState(() => cachedFilters?.arrivalWindows ?? DEFAULT_TIME_WINDOWS);
+  const [amenitiesFilters, setAmenitiesFilters] = useState(() => cachedFilters?.amenitiesFilters ?? DEFAULT_AMENITIES);
   const [boardingFilters, setBoardingFilters] = useState(() => cachedFilters?.boardingFilters ?? {});
   const [droppingFilters, setDroppingFilters] = useState(() => cachedFilters?.droppingFilters ?? {});
   const [travelFilters, setTravelFilters] = useState(() => cachedFilters?.travelFilters ?? {});
@@ -647,11 +665,13 @@ export default function BusSearchResults() {
       destination: destinationName,
       departureDate: formatDateInput(selectedDate),
       sortBy,
+      sortDirection,
       priceMin,
       priceMax,
       busTypeFilters,
       departureWindows,
       arrivalWindows,
+      amenitiesFilters,
       boardingFilters,
       droppingFilters,
       travelFilters,
@@ -671,11 +691,13 @@ export default function BusSearchResults() {
     destinationName,
     selectedDate,
     sortBy,
+    sortDirection,
     priceMin,
     priceMax,
     busTypeFilters,
     departureWindows,
     arrivalWindows,
+    amenitiesFilters,
     boardingFilters,
     droppingFilters,
     travelFilters,
@@ -893,6 +915,7 @@ export default function BusSearchResults() {
     const activeBoarding = Object.keys(boardingFilters).filter((key) => boardingFilters[key]);
     const activeDropping = Object.keys(droppingFilters).filter((key) => droppingFilters[key]);
     const activeTravels = Object.keys(travelFilters).filter((key) => travelFilters[key]);
+    const activeAmenities = Object.keys(amenitiesFilters).filter((key) => amenitiesFilters[key]);
     const hasActiveDepartureWindow = TIME_WINDOWS.some(
       (window) => departureWindows[window.key]
     );
@@ -959,27 +982,43 @@ export default function BusSearchResults() {
         return false;
       }
 
+      if (activeAmenities.length > 0) {
+        const busAmenities = bus.amenities || {};
+        const hasAllSelectedAmenities = activeAmenities.every((amenity) => {
+          const amenityMap = {
+            blankets: busAmenities.blankets,
+            charging: busAmenities.chargingPoint,
+            pillow: busAmenities.pillow,
+          };
+          return amenityMap[amenity];
+        });
+
+        if (!hasAllSelectedAmenities) {
+          return false;
+        }
+      }
+
       return true;
     });
 
+    const directionMultiplier = sortDirection === "desc" ? -1 : 1;
+
     return [...result].sort((a, b) => {
+      let comparison = 0;
+
       if (sortBy === "duration") {
-        return a.durationMinutes - b.durationMinutes;
+        comparison = a.durationMinutes - b.durationMinutes;
+      } else if (sortBy === "arrival") {
+        comparison = a.arrivalSortValue - b.arrivalSortValue;
+      } else if (sortBy === "fare") {
+        comparison = a.fare - b.fare;
+      } else if (sortBy === "seats") {
+        comparison = a.availableSeats - b.availableSeats;
+      } else {
+        comparison = a.departureSortValue - b.departureSortValue;
       }
 
-      if (sortBy === "arrival") {
-        return a.arrivalSortValue - b.arrivalSortValue;
-      }
-
-      if (sortBy === "fare") {
-        return a.fare - b.fare;
-      }
-
-      if (sortBy === "seats") {
-        return b.availableSeats - a.availableSeats;
-      }
-
-      return a.departureSortValue - b.departureSortValue;
+      return comparison * directionMultiplier;
     });
   }, [
     buses,
@@ -987,11 +1026,13 @@ export default function BusSearchResults() {
     boardingFilters,
     droppingFilters,
     travelFilters,
+    amenitiesFilters,
     priceMin,
     priceMax,
     departureWindows,
     arrivalWindows,
     sortBy,
+    sortDirection,
   ]);
 
   const visibleBoarding = useMemo(() => {
@@ -1118,6 +1159,7 @@ export default function BusSearchResults() {
     setBusTypeFilters(DEFAULT_BUS_TYPES);
     setDepartureWindows(DEFAULT_TIME_WINDOWS);
     setArrivalWindows(DEFAULT_TIME_WINDOWS);
+    setAmenitiesFilters(DEFAULT_AMENITIES);
     setBoardingFilters(createToggleMap(boardingList));
     setDroppingFilters(createToggleMap(droppingList));
     setTravelFilters(createToggleMap(travelList));
@@ -1125,6 +1167,21 @@ export default function BusSearchResults() {
     setDroppingSearchText("");
     setTravelSearchText("");
     setSortBy("departure");
+    setSortDirection("asc");
+  };
+
+  const handleSortSelect = (nextSortBy) => {
+    setSortBy((previousSortBy) => {
+      if (previousSortBy === nextSortBy) {
+        setSortDirection((previousDirection) =>
+          previousDirection === "asc" ? "desc" : "asc"
+        );
+        return previousSortBy;
+      }
+
+      setSortDirection("asc");
+      return nextSortBy;
+    });
   };
 
   const openDetailCard = (busId, panel) => {
@@ -1148,6 +1205,11 @@ export default function BusSearchResults() {
       return;
     }
 
+    if (expandedCard?.busId === bus.id && expandedCard?.panel === "seats") {
+      setExpandedCard(null);
+      return;
+    }
+
     if (seatLoadingTimerRef.current) {
       window.clearTimeout(seatLoadingTimerRef.current);
       seatLoadingTimerRef.current = null;
@@ -1164,11 +1226,10 @@ export default function BusSearchResults() {
     };
 
     seatLoadingTimerRef.current = window.setTimeout(() => {
-      navigate("/bus/seats", {
-        state: {
-          bus,
-          searchContext,
-        },
+      setExpandedCard({
+        busId: bus.id,
+        panel: "seats",
+        searchContext,
       });
 
       setSeatLoadingBusId(null);
@@ -1239,6 +1300,8 @@ export default function BusSearchResults() {
               <Loader2 size={14} className="spin" />
               <span>Loading Seats...</span>
             </>
+          ) : expandedCard?.busId === bus.id && expandedCard?.panel === "seats" ? (
+            "Hide Seat"
           ) : (
             "View Seats"
           )}
@@ -1246,17 +1309,26 @@ export default function BusSearchResults() {
       </div>
 
       {expandedCard?.busId === bus.id && (
-        <div className="bus-expand-panel">
+        <div className={`bus-expand-panel${expandedCard.panel === "seats" ? " bus-seat-dropdown-panel" : ""}`}>
           {expandedCard.panel === "boarding" ? (
             <p>
               Boarding: <strong>{bus.boardingPoint}</strong> | Dropping:{" "}
               <strong>{bus.droppingPoint}</strong>
             </p>
-          ) : (
+          ) : expandedCard.panel === "policy" ? (
             <p>
               Free cancellation available up to 6 hours before departure. Partial refund
               may apply afterwards.
             </p>
+          ) : (
+            <BusSeatSelectionPage
+              embedded
+              embeddedState={{
+                bus,
+                searchContext: expandedCard.searchContext,
+              }}
+              onClose={() => setExpandedCard(null)}
+            />
           )}
         </div>
       )}
@@ -1385,7 +1457,7 @@ export default function BusSearchResults() {
                   <defs>
                     <linearGradient id="skyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="#fef3eb" />
-                      <stop offset="40%" stopColor="#fff7f2" />
+                      <stop offset="40%" stopColor="#eef7f4" />
                       <stop offset="100%" stopColor="#ffeee4" />
                     </linearGradient>
                     <linearGradient id="roadFill" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -1393,9 +1465,9 @@ export default function BusSearchResults() {
                       <stop offset="100%" stopColor="#f9c0ac" />
                     </linearGradient>
                     <linearGradient id="trailGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#f04423" />
+                      <stop offset="0%" stopColor="#009b8f" />
                       <stop offset="50%" stopColor="#ff6b3d" />
-                      <stop offset="100%" stopColor="#df3f1f" />
+                      <stop offset="100%" stopColor="#006f7a" />
                     </linearGradient>
                     <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
                       <stop offset="0%" stopColor="#ffdd57" />
@@ -1403,7 +1475,7 @@ export default function BusSearchResults() {
                       <stop offset="100%" stopColor="#ffaa00" stopOpacity="0" />
                     </radialGradient>
                     <filter id="glow3"><feGaussianBlur stdDeviation="3.5" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
-                    <filter id="pinShadow"><feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#f04423" floodOpacity="0.3" /></filter>
+                    <filter id="pinShadow"><feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#009b8f" floodOpacity="0.3" /></filter>
                   </defs>
 
                   <rect width="1000" height="500" fill="url(#skyGrad)" />
@@ -1473,16 +1545,16 @@ export default function BusSearchResults() {
                   {/* Origin (top-left) */}
                   <g filter="url(#pinShadow)">
                     <g className="bus-landmark bus-landmark-origin">
-                      <rect x="54" y="70" width="52" height="4" rx="2" fill="#f04423" opacity="0.7" />
-                      <rect x="68" y="62" width="24" height="12" rx="2" fill="#f04423" opacity="0.6" />
-                      <polygon points="80,58 87,65 73,65" fill="#f04423" opacity="0.8" />
-                      <rect x="73" y="74" width="3" height="9" fill="#f04423" opacity="0.5" />
-                      <rect x="84" y="74" width="3" height="9" fill="#f04423" opacity="0.5" />
+                      <rect x="54" y="70" width="52" height="4" rx="2" fill="#009b8f" opacity="0.7" />
+                      <rect x="68" y="62" width="24" height="12" rx="2" fill="#009b8f" opacity="0.6" />
+                      <polygon points="80,58 87,65 73,65" fill="#009b8f" opacity="0.8" />
+                      <rect x="73" y="74" width="3" height="9" fill="#009b8f" opacity="0.5" />
+                      <rect x="84" y="74" width="3" height="9" fill="#009b8f" opacity="0.5" />
                     </g>
-                    <circle cx="80" cy="120" r="18" fill="#fff" stroke="#f04423" strokeWidth="3" />
-                    <circle cx="80" cy="120" r="7" fill="#f04423" className="bus-map-pulse" />
+                    <circle cx="80" cy="120" r="18" fill="#fff" stroke="#009b8f" strokeWidth="3" />
+                    <circle cx="80" cy="120" r="7" fill="#009b8f" className="bus-map-pulse" />
                     <text x="80" y="152" textAnchor="middle" fill="#1f2a44" fontSize="13" fontWeight="900" fontFamily="inherit">{sourceName}</text>
-                    <text x="80" y="165" textAnchor="middle" fill="#f04423" fontSize="8" fontWeight="800" letterSpacing="2" fontFamily="inherit">START</text>
+                    <text x="80" y="165" textAnchor="middle" fill="#009b8f" fontSize="8" fontWeight="800" letterSpacing="2" fontFamily="inherit">START</text>
                   </g>
 
                   {/* Milestone 1 - Fort */}
@@ -1490,43 +1562,43 @@ export default function BusSearchResults() {
                     <rect x="210" y="196" width="20" height="24" rx="2" fill="#f9a88c" />
                     <rect x="207" y="193" width="5" height="7" rx="1" fill="#f9a88c" /><rect x="226" y="193" width="5" height="7" rx="1" fill="#f9a88c" />
                     <rect x="217" y="203" width="6" height="7" rx="1" fill="#fff" opacity="0.8" />
-                    <circle cx="220" cy="220" r="5" fill="#fff" stroke="#f04423" strokeWidth="1.5" /><circle cx="220" cy="220" r="2" fill="#f04423" />
+                    <circle cx="220" cy="220" r="5" fill="#fff" stroke="#009b8f" strokeWidth="1.5" /><circle cx="220" cy="220" r="2" fill="#009b8f" />
                   </g>
                   {/* Milestone 2 - Mosque */}
                   <g className="bus-milestone bus-milestone-2">
                     <ellipse cx="180" cy="318" rx="12" ry="7" fill="#f9a88c" />
                     <rect x="171" y="320" width="18" height="14" rx="1" fill="#f9a88c" />
                     <ellipse cx="180" cy="314" rx="4" ry="7" fill="#fbc4af" />
-                    <circle cx="180" cy="309" r="2" fill="#f04423" />
-                    <circle cx="180" cy="340" r="5" fill="#fff" stroke="#f04423" strokeWidth="1.5" /><circle cx="180" cy="340" r="2" fill="#f04423" />
+                    <circle cx="180" cy="309" r="2" fill="#009b8f" />
+                    <circle cx="180" cy="340" r="5" fill="#fff" stroke="#009b8f" strokeWidth="1.5" /><circle cx="180" cy="340" r="2" fill="#009b8f" />
                   </g>
                   {/* Milestone 3 - Gateway */}
                   <g className="bus-milestone bus-milestone-3">
                     <rect x="510" y="286" width="5" height="20" rx="1" fill="#f9a88c" /><rect x="535" y="286" width="5" height="20" rx="1" fill="#f9a88c" />
                     <path d="M 510 288 Q 525 275,540 288" fill="none" stroke="#f9a88c" strokeWidth="3.5" />
-                    <circle cx="525" cy="278" r="3" fill="#f04423" opacity="0.6" />
-                    <circle cx="525" cy="310" r="5" fill="#fff" stroke="#f04423" strokeWidth="1.5" /><circle cx="525" cy="310" r="2" fill="#f04423" />
+                    <circle cx="525" cy="278" r="3" fill="#009b8f" opacity="0.6" />
+                    <circle cx="525" cy="310" r="5" fill="#fff" stroke="#009b8f" strokeWidth="1.5" /><circle cx="525" cy="310" r="2" fill="#009b8f" />
                   </g>
                   {/* Milestone 4 - Tower */}
                   <g className="bus-milestone bus-milestone-4">
                     <rect x="644" y="386" width="14" height="24" rx="2" fill="#f9a88c" />
                     <polygon points="651,381 660,390 642,390" fill="#f9a88c" />
                     <rect x="647" y="394" width="7" height="4" rx="1" fill="#fff" opacity="0.6" />
-                    <circle cx="651" cy="410" r="5" fill="#fff" stroke="#f04423" strokeWidth="1.5" /><circle cx="651" cy="410" r="2" fill="#f04423" />
+                    <circle cx="651" cy="410" r="5" fill="#fff" stroke="#009b8f" strokeWidth="1.5" /><circle cx="651" cy="410" r="2" fill="#009b8f" />
                   </g>
 
                   {/* Destination (bottom-right) */}
                   <g filter="url(#pinShadow)">
                     <g className="bus-landmark bus-landmark-dest">
-                      <rect x="884" y="370" width="52" height="5" rx="2" fill="#df3f1f" opacity="0.7" />
-                      <path d="M 894 370 Q 910 354,926 370" fill="none" stroke="#df3f1f" strokeWidth="3" opacity="0.8" />
-                      <rect x="892" y="370" width="3.5" height="11" fill="#df3f1f" opacity="0.5" />
-                      <rect x="924" y="370" width="3.5" height="11" fill="#df3f1f" opacity="0.5" />
+                      <rect x="884" y="370" width="52" height="5" rx="2" fill="#006f7a" opacity="0.7" />
+                      <path d="M 894 370 Q 910 354,926 370" fill="none" stroke="#006f7a" strokeWidth="3" opacity="0.8" />
+                      <rect x="892" y="370" width="3.5" height="11" fill="#006f7a" opacity="0.5" />
+                      <rect x="924" y="370" width="3.5" height="11" fill="#006f7a" opacity="0.5" />
                     </g>
-                    <circle cx="910" cy="410" r="18" fill="#fff" stroke="#df3f1f" strokeWidth="3" />
-                    <circle cx="910" cy="410" r="7" fill="#df3f1f" className="bus-map-pulse" />
+                    <circle cx="910" cy="410" r="18" fill="#fff" stroke="#006f7a" strokeWidth="3" />
+                    <circle cx="910" cy="410" r="7" fill="#006f7a" className="bus-map-pulse" />
                     <text x="910" y="442" textAnchor="middle" fill="#1f2a44" fontSize="13" fontWeight="900" fontFamily="inherit">{destinationName}</text>
-                    <text x="910" y="455" textAnchor="middle" fill="#df3f1f" fontSize="8" fontWeight="800" letterSpacing="2" fontFamily="inherit">END</text>
+                    <text x="910" y="455" textAnchor="middle" fill="#006f7a" fontSize="8" fontWeight="800" letterSpacing="2" fontFamily="inherit">END</text>
                   </g>
 
                   {/* Opposing Traffic */}
@@ -1561,7 +1633,7 @@ export default function BusSearchResults() {
                     <animateMotion dur="4.5s" repeatCount="indefinite" rotate="auto" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.25 0.1 0.25 1">
                       <mpath href="#snakeRoad" />
                     </animateMotion>
-                    <rect x="-22" y="-11" width="44" height="22" rx="6" fill="#f04423" />
+                    <rect x="-22" y="-11" width="44" height="22" rx="6" fill="#009b8f" />
                     <rect x="-18" y="-8" width="12" height="10" rx="2" fill="#fff" opacity="0.9" />
                     <rect x="-3" y="-8" width="12" height="10" rx="2" fill="#fff" opacity="0.9" />
                     <circle cx="-14" cy="13" r="4" fill="#1f2a44" /><circle cx="12" cy="13" r="4" fill="#1f2a44" />
@@ -1572,7 +1644,7 @@ export default function BusSearchResults() {
                   {/* Route Label */}
                   <g className="bus-route-label">
                     <rect x="400" y="155" width="140" height="30" rx="15" fill="#fff" stroke="#fcd5c8" strokeWidth="1.5" opacity="0.9" />
-                    <text x="470" y="175" textAnchor="middle" fill="#f04423" fontSize="10.5" fontWeight="800" fontFamily="inherit">{sourceName} → {destinationName}</text>
+                    <text x="470" y="175" textAnchor="middle" fill="#009b8f" fontSize="10.5" fontWeight="800" fontFamily="inherit">{sourceName} → {destinationName}</text>
 
                   </g>
                 </svg>
@@ -1715,6 +1787,28 @@ export default function BusSearchResults() {
                 </div>
               </section>
 
+              <section className="bus-filter-card">
+                <h3>Amenities</h3>
+                <div className="amenities-grid">
+                  {AMENITIES.map((amenity) => (
+                    <label
+                      key={amenity.key}
+                      className={`amenity-checkbox ${amenitiesFilters[amenity.key] ? "checked" : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={Boolean(amenitiesFilters[amenity.key])}
+                        onChange={() => toggleSimpleFilter(setAmenitiesFilters, amenity.key)}
+                      />
+                      <span className="checkbox-icon">
+                        <amenity.icon size={18} />
+                      </span>
+                      <span className="checkbox-label">{amenity.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </section>
+
               <section className={`bus-filter-card bus-collapse-card ${openFilterPanel === "travels" ? "open" : ""}`}>
                 <button
                   type="button"
@@ -1846,10 +1940,20 @@ export default function BusSearchResults() {
                         key={option.key}
                         type="button"
                         className={sortBy === option.key ? "active" : ""}
-                        onClick={() => setSortBy(option.key)}
+                        onClick={() => handleSortSelect(option.key)}
+                        aria-label={
+                          sortBy === option.key
+                            ? sortDirection === "asc"
+                              ? `Sort by ${option.label} ascending`
+                              : `Sort by ${option.label} descending`
+                            : `Sort by ${option.label}`
+                        }
                       >
                         <option.icon size={17} />
                         <span>{option.label}</span>
+                        <span className="sort-direction-arrow" aria-hidden="true">
+                          {sortBy === option.key && sortDirection === "desc" ? "\u2193" : "\u2191"}
+                        </span>
                       </button>
                     ))}
                   </div>

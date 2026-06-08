@@ -16,7 +16,7 @@
   --dashboard-shadow-md: 0 12px 26px rgba(13, 30, 52, 0.1);
   --dashboard-shadow-sm: 0 8px 18px rgba(13, 30, 52, 0.08);
   --dashboard-sidebar-expanded-width: 286px;
-  --dashboard-sidebar-collapsed-width: 78px;
+  --dashboard-sidebar-collapsed-width: 88px;
   --dashboard-heading-font: var(--app-font-family);
   --dashboard-body-font: var(--app-font-family);
  
@@ -189,7 +189,7 @@
 @media (min-width: 981px) {
   .dashboard-sidebar {
     width: var(--dashboard-sidebar-collapsed-width);
-    padding: 16px 10px 14px;
+    padding: 20px 12px 14px;
     overflow-x: hidden;
     transition:
       width 0.24s ease,
@@ -198,20 +198,30 @@
  
   .dashboard-sidebar:is(:hover, :focus-within) {
     width: var(--dashboard-sidebar-expanded-width);
-    padding: 16px 12px 14px;
+    padding: 20px 14px 14px;
+  }
+
+  .dashboard-sidebar:not(:hover):not(:focus-within) .sidebar-nav {
+    align-items: center;
+    gap: 18px;
   }
  
   .dashboard-sidebar:not(:hover):not(:focus-within) .sidebar-item {
+    width: 56px;
+    min-height: 56px;
     justify-content: center;
     gap: 0;
-    padding-left: 0;
-    padding-right: 0;
+    padding: 0;
+    border-radius: 16px;
   }
  
   .dashboard-sidebar:not(:hover):not(:focus-within) .sidebar-item span {
-    width: 0;
+    position: absolute;
+    width: 1px;
+    height: 1px;
     opacity: 0;
     overflow: hidden;
+    pointer-events: none;
   }
  
   .dashboard-sidebar:not(:hover):not(:focus-within) .sidebar-toggle svg:last-child {

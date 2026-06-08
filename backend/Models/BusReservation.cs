@@ -1,8 +1,8 @@
-﻿namespace PickNBook.Api.Models
+namespace PickNBook.Api.Models
 {
     public class BusReservation
     {
-        public int Id { get; set; }
+            public int Id { get; set; }
         public string BookingReference { get; set; } = string.Empty;
         public string UserId { get; set; } = string.Empty;
         public int BusBookingId { get; set; }
@@ -41,6 +41,10 @@
         public string? AppliedPromotionType { get; set; }
 
         public int? AppliedFeaturedOfferId { get; set; }
+
+        public string? AppliedFeaturedOfferTitle { get; set; }
+
+        public decimal FeaturedOfferDiscountAmount { get; set; }
 
         public int? AutoPromotionId { get; set; }
 

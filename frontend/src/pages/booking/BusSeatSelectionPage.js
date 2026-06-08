@@ -1,21 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { BusFront, Clock3, Info } from "lucide-react";
+import { Clock3, Info } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../STYLES/HolographicBus.css";
-import apsrtcBg from "../../assets/images/apsrtc-bg.svg";
-import apsrtcLogo from "../../assets/images/apsrtc-logo.svg";
-import gsrtcBg from "../../assets/images/gsrtc-bg.svg";
-import gsrtcLogo from "../../assets/images/gsrtc-logo.svg";
-import keralaRtcBg from "../../assets/images/kerala-rtc-bg.svg";
-import keralaRtcLogo from "../../assets/images/kerala-rtc-logo.svg";
-import ksrtcBg from "../../assets/images/ksrtc-bg.svg";
-import ksrtcLogo from "../../assets/images/ksrtc-logo.svg";
-import privatePrimeLogo from "../../assets/images/private-prime-logo.svg";
-import privateRoyalLogo from "../../assets/images/private-royal-logo.svg";
-import privateSkylineLogo from "../../assets/images/private-skyline-logo.svg";
-import rtcBusLogo from "../../assets/images/rtc-bus-logo.svg";
-import tgsrtcBg from "../../assets/images/tgsrtc-bg.svg";
-import tgsrtcLogo from "../../assets/images/tgsrtc-logo.svg";
 import {
   readBusBookingFlowState,
   writeBusBookingFlowState,
@@ -613,44 +599,22 @@ function getAdjacentBookedGenders(seat, allSeatRows, seatsByLabel) {
     .map((adjacentSeat) => adjacentSeat.bookedGender);
 }
 
-function resolveBusOverviewVisual(bus) {
-  if (!bus) {
-    return { background: "", logo: rtcBusLogo, brand: "Bus", operatorName: "", routeText: "", summaryText: "" };
+function formatTripDateLabel(dateValue) {
+  if (!dateValue) {
+    return "";
   }
 
-  const operator = String(bus.operatorName || "").toLowerCase();
-  const routeText = `${bus.fromCity || ""} → ${bus.toCity || ""}`;
-  const summaryText = `${bus.busType || ""} · ${bus.duration || ""}`;
-
-  const overviewMap = {
-    apsrtc: { background: apsrtcBg, logo: apsrtcLogo, brand: "APSRTC" },
-    gsrtc: { background: gsrtcBg, logo: gsrtcLogo, brand: "GSRTC" },
-    ksrtc: { background: ksrtcBg, logo: ksrtcLogo, brand: "KSRTC" },
-    tgsrtc: { background: tgsrtcBg, logo: tgsrtcLogo, brand: "TGSRTC" },
-    tsrtc: { background: tgsrtcBg, logo: tgsrtcLogo, brand: "TSRTC" },
-    kerala: { background: keralaRtcBg, logo: keralaRtcLogo, brand: "Kerala RTC" },
-  };
-
-  for (const [key, value] of Object.entries(overviewMap)) {
-    if (operator.includes(key)) {
-      return { ...value, operatorName: bus.operatorName, routeText, summaryText };
-    }
+  const parsedDate = new Date(dateValue);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "";
   }
 
-  const privateLogos = [privatePrimeLogo, privateRoyalLogo, privateSkylineLogo];
-  const logoIndex = Math.abs(hashFromText(bus.operatorName || "")) % privateLogos.length;
-
-  return {
-    background: "",
-    logo: privateLogos[logoIndex],
-    brand: bus.operatorName || "Private",
-    operatorName: bus.operatorName,
-    routeText,
-    summaryText,
-  };
+  return parsedDate
+    .toLocaleDateString("en-IN", { day: "2-digit", month: "short" })
+    .toUpperCase();
 }
 
-function SeaterSVG() {
+function Seat({ label }) {
   return (
     <svg
       className="seat-svg seat-svg--seater"
@@ -660,40 +624,47 @@ function SeaterSVG() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect className="seat-shadow" x="8" y="10" width="32" height="32" rx="9" />
-      <rect className="seat-frame" x="8" y="7" width="32" height="32" rx="9" />
-      <path className="seat-back" d="M14 14a6 6 0 0 1 6-6h8a6 6 0 0 1 6 6v7H14v-7Z" />
-      <rect className="seat-cushion" x="14" y="20" width="20" height="13" rx="5" />
-      <path className="seat-arm" d="M9 21h6v11H9zM33 21h6v11h-6z" />
+      <rect className="seat-headrest" x="17" y="5" width="14" height="6" rx="2" />
+      <rect className="seat-handle seat-handle--left" x="6" y="16" width="6" height="17" rx="2" />
+      <rect className="seat-handle seat-handle--right" x="36" y="16" width="6" height="17" rx="2" />
+      <rect className="seat-footrest" x="17" y="37" width="14" height="6" rx="2" />
+      <rect className="seat-body" x="10" y="9" width="28" height="30" rx="4" />
+      <text className="seat-label" x="24" y="27" textAnchor="middle">
+        {label}
+      </text>
     </svg>
   );
 }
 
-function SleeperSVG() {
+function SleeperSeat({ label }) {
   return (
     <svg
       className="seat-svg seat-svg--sleeper"
-      viewBox="0 0 48 88"
+      viewBox="0 0 92 40"
       aria-hidden="true"
       focusable="false"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect className="seat-shadow" x="7" y="9" width="34" height="73" rx="10" />
-      <rect className="seat-frame" x="7" y="6" width="34" height="73" rx="10" />
-      <rect className="sleeper-pillow" x="13" y="13" width="22" height="15" rx="5" />
-      <rect className="seat-cushion" x="13" y="33" width="22" height="37" rx="6" />
-      <path className="sleeper-rail" d="M18 77h12" />
+      <rect className="seat-body" x="4" y="5" width="84" height="30" rx="4" />
+      <rect className="sleeper-pillow" x="73" y="9" width="11" height="22" rx="4" />
+      <text className="seat-label" x="41" y="24" textAnchor="middle">
+        {label}
+      </text>
     </svg>
   );
 }
 
-export default function BusSeatSelectionPage() {
+export default function BusSeatSelectionPage({
+  embedded = false,
+  embeddedState = null,
+  onClose,
+} = {}) {
   const navigate = useNavigate();
   const location = useLocation();
   
   const flowState = readBusBookingFlowState();
-  const stateData = location.state || flowState || {};
+  const stateData = embeddedState || location.state || flowState || {};
   
   const bus = stateData.bus;
   const searchContext = stateData.searchContext;
@@ -869,6 +840,33 @@ export default function BusSeatSelectionPage() {
       return [];
     }
 
+    // Debug: Log what's actually in backendSeatMap
+    if (backendSeatMap) {
+      console.log("📊 Full backendSeatMap structure:", {
+        keys: Object.keys(backendSeatMap),
+        boardingPoints: backendSeatMap.boardingPoints,
+        droppingPoints: backendSeatMap.droppingPoints,
+        full: backendSeatMap,
+      });
+    }
+
+    // Priority 1: Use API data if available
+    if (Array.isArray(backendSeatMap?.boardingPoints) && backendSeatMap.boardingPoints.length > 0) {
+      console.log("✅ Using API boarding points:", backendSeatMap.boardingPoints);
+      return backendSeatMap.boardingPoints.map((point, index) => ({
+        id: `boarding-${index + 1}`,
+        name: point.name,
+        address: point.address,
+        time: formatMinutesToClock(
+          parseClockToMinutes(bus.departureTime) + [-35, -28, -20, -14, -8, -4][index % 6]
+        ),
+      }));
+    }
+
+    console.warn("⚠️ Backend API has NOT been updated yet with boardingPoints field. Backend needs to return boardingPoints array in the /api/BusBookings/{busId}/seats response.");
+    
+    // Fallback to synthetic generation if API data not available
+    console.warn("⚠️ Falling back to synthetic data. This should be removed once backend is updated.");
     return createPointOptions(
       bus.boardingPoint,
       bus.fromCity,
@@ -876,13 +874,30 @@ export default function BusSeatSelectionPage() {
       "boarding",
       [-35, -28, -20, -14, -8, -4]
     );
-  }, [bus]);
+  }, [bus, backendSeatMap]);
 
   const droppingPoints = useMemo(() => {
     if (!bus) {
       return [];
     }
 
+    // Priority 1: Use API data if available
+    if (Array.isArray(backendSeatMap?.droppingPoints) && backendSeatMap.droppingPoints.length > 0) {
+      console.log("✅ Using API dropping points:", backendSeatMap.droppingPoints);
+      return backendSeatMap.droppingPoints.map((point, index) => ({
+        id: `dropping-${index + 1}`,
+        name: point.name,
+        address: point.address,
+        time: formatMinutesToClock(
+          parseClockToMinutes(bus.arrivalTime) + [-6, -2, 4, 10, 16, 22][index % 6]
+        ),
+      }));
+    }
+
+    console.warn("⚠️ Backend API has NOT been updated yet with droppingPoints field. Backend needs to return droppingPoints array in the /api/BusBookings/{busId}/seats response.");
+    
+    // Fallback to synthetic generation if API data not available
+    console.warn("⚠️ Falling back to synthetic data. This should be removed once backend is updated.");
     return createPointOptions(
       bus.droppingPoint,
       bus.toCity,
@@ -890,7 +905,7 @@ export default function BusSeatSelectionPage() {
       "dropping",
       [-6, -2, 4, 10, 16, 22]
     );
-  }, [bus]);
+  }, [bus, backendSeatMap]);
 
   const selectedSeats = useMemo(
     () =>
@@ -912,6 +927,20 @@ export default function BusSeatSelectionPage() {
 
   const selectedBoarding = boardingPoints.find((point) => point.id === selectedBoardingId) || null;
   const selectedDropping = droppingPoints.find((point) => point.id === selectedDroppingId) || null;
+
+  // Auto-select first boarding point if not selected and points are available
+  useEffect(() => {
+    if (!selectedBoardingId && boardingPoints.length > 0) {
+      setSelectedBoardingId(boardingPoints[0].id);
+    }
+  }, [boardingPoints, selectedBoardingId]);
+
+  // Auto-select first dropping point if not selected and points are available
+  useEffect(() => {
+    if (!selectedDroppingId && droppingPoints.length > 0) {
+      setSelectedDroppingId(droppingPoints[0].id);
+    }
+  }, [droppingPoints, selectedDroppingId]);
 
   const mainDeckRows = useMemo(
     () => seatRowsForDeck(seatData.seats, "Main Deck"),
@@ -977,7 +1006,14 @@ export default function BusSeatSelectionPage() {
         : [...mainDeckRows, ...lowerDeckRows, ...upperDeckRows],
     [seatSections, mainDeckRows, lowerDeckRows, upperDeckRows]
   );
-  const busOverview = useMemo(() => resolveBusOverviewVisual(bus), [bus]);
+  const tripDateLabel = formatTripDateLabel(
+    searchContext?.date ||
+      searchContext?.travelDate ||
+      searchContext?.journeyDate ||
+      bus.departureDate ||
+      bus.travelDate ||
+      bus.journeyDate
+  );
 
   if (!bus) {
     return (
@@ -1179,68 +1215,64 @@ export default function BusSeatSelectionPage() {
           seat.fare
         )}`}
       >
-        {seat.kind === "sleeper" ? <SleeperSVG /> : <SeaterSVG />}
-        
-        <div className="seat-details">
-          {seat.status === "booked" && isBookedFemale ? (
-            <span>F</span>
-          ) : seat.status === "booked" && isBookedMale ? (
-            <span>M</span>
-          ) : seat.status === "booked" ? (
-            <span>X</span>
-          ) : (
-            <span>{seat.displayLabel || seat.label}</span>
-          )}
-        </div>
+        {seat.kind === "sleeper" ? (
+          <SleeperSeat label={seat.displayLabel || seat.label} />
+        ) : (
+          <Seat label={seat.displayLabel || seat.label} />
+        )}
       </button>
     );
   };
 
 
-  const renderHorizontalDeck = (deckName, rows, deckClassName, emptyMessage) => {
+  const renderDeckContent = (deckName, rows, deckClassName) => {
+    if (rows.length === 0) {
+      return (
+        <section className={`bus-flow-vertical-deck ${deckClassName}`}>
+          <header className="bus-flow-vertical-deck-header">
+            <span>{deckName.replace(" Deck", "")}</span>
+          </header>
+          <div className="bus-flow-vertical-deck-body">
+            <div className="bus-flow-empty-deck">No {deckName.toLowerCase()} seats</div>
+          </div>
+        </section>
+      );
+    }
+
     const laneCount = Math.max(...rows.map((row) => row.length), 0);
     const lanes = Array.from({ length: laneCount }, (_, laneIndex) =>
       rows.map((row) => row[laneIndex] || null)
     ).reverse();
+    
     const firstSeat = rows.flat().find(Boolean);
     const configuredAisleAfterColumn = Number(firstSeat?.aisleAfterColumn);
     const aisleBeforeLane = Number.isFinite(configuredAisleAfterColumn)
       ? configuredAisleAfterColumn + 1
       : 1;
-
-    // In a reversed list of length L, if the aisle was before original index K,
-    // it will now be before reversed index (L - K).
     const reversedAisleIndex = laneCount > 0 && aisleBeforeLane > 0
       ? laneCount - aisleBeforeLane
       : -1;
 
     return (
-      <section
-        key={deckName}
-        className={`bus-flow-vertical-deck ${deckClassName}`}
-      >
+      <section className={`bus-flow-vertical-deck ${deckClassName}`}>
         <header className="bus-flow-vertical-deck-header">
           <span>{deckName.replace(" Deck", "")}</span>
         </header>
         <div className="bus-flow-vertical-deck-body">
-          {lanes.length > 0 ? (
-            lanes.map((lane, laneIndex) => (
-              <React.Fragment key={`${deckName}-lane-${laneIndex}`}>
-                {reversedAisleIndex > 0 && laneIndex === reversedAisleIndex && (
-                  <div className="bus-flow-vertical-aisle" />
-                )}
-                <div className="bus-flow-vertical-row bus-flow-lane-row">
-                  {lane.map((seat, seatIndex) => (
-                    <React.Fragment key={`${deckName}-${laneIndex}-${seatIndex}`}>
-                      {seat ? renderSeatButton(seat) : <span className="bus-flow-seat-gap" />}
-                    </React.Fragment>
-                  ))}
-                </div>
-              </React.Fragment>
-            ))
-          ) : (
-            <div className="bus-flow-empty-deck">{emptyMessage}</div>
-          )}
+          {lanes.map((lane, laneIndex) => (
+            <React.Fragment key={`${deckName}-lane-${laneIndex}`}>
+              {reversedAisleIndex > 0 && laneIndex === reversedAisleIndex && (
+                <div className="bus-flow-vertical-aisle" />
+              )}
+              <div className="bus-flow-vertical-row bus-flow-lane-row">
+                {lane.map((seat, seatIndex) => (
+                  <React.Fragment key={`${deckName}-${laneIndex}-${seatIndex}`}>
+                    {seat ? renderSeatButton(seat) : <span className="bus-flow-seat-gap" />}
+                  </React.Fragment>
+                ))}
+              </div>
+            </React.Fragment>
+          ))}
         </div>
       </section>
     );
@@ -1284,108 +1316,129 @@ export default function BusSeatSelectionPage() {
     );
   };
 
-  const renderVerticalDeck = (deckName, sections, deckClassName) => (
-    <section
-      key={deckName}
-      className={`bus-flow-vertical-deck ${deckClassName}`}
-    >
-      <header className="bus-flow-vertical-deck-header">
-        <span>{deckName}</span>
-      </header>
-      <div className="bus-flow-vertical-deck-body">
-        {sections.map(renderVerticalSection)}
+  const renderBusShell = (children, showFrontLabel = false) => (
+    <div className="hologram-bus-shell is-top-view">
+      <span className="bus-flow-bus-wheel wheel-front-left" />
+      <span className="bus-flow-bus-wheel wheel-front-right" />
+      <span className="bus-flow-bus-wheel wheel-back-left" />
+      <span className="bus-flow-bus-wheel wheel-back-right" />
+      <div className="bus-flow-coach-front" aria-hidden="true">
+        <div className="bus-flow-windshield">
+          <span />
+          <span />
+        </div>
+        <div className="bus-flow-steering">
+          <svg
+            viewBox="0 0 24 24"
+            width="100%"
+            height="100%"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="12" cy="12" r="9" stroke="#1e293b" strokeWidth="2.2" />
+            <circle cx="12" cy="12" r="2.5" fill="#1e293b" />
+            <path d="M4 12h16" stroke="#1e293b" strokeWidth="1.8" />
+            <path d="M12 12v8" stroke="#1e293b" strokeWidth="1.8" />
+          </svg>
+        </div>
+        <div className="bus-flow-driver-seat driver">
+          <Seat label="" />
+        </div>
+        <div className="bus-flow-driver-seat helper">
+          <Seat label="" />
+        </div>
+        {showFrontLabel && <span className="bus-flow-front-label">FRONT</span>}
       </div>
-    </section>
+      <div className="bus-flow-coach-floor">{children}</div>
+    </div>
   );
 
-  const renderBusShell = (deckContent) => {
-    return (
-      <div className="hologram-bus-shell is-top-view">
-        <span className="bus-flow-bus-wheel wheel-front-left" />
-        <span className="bus-flow-bus-wheel wheel-front-right" />
-        <span className="bus-flow-bus-wheel wheel-back-left" />
-        <span className="bus-flow-bus-wheel wheel-back-right" />
+  const renderBusLayout = () => {
+    if (hasDeckSections) {
+      if (hasBackendSections) {
+        return seatDeckGroups.map((deckGroup) => (
+          <React.Fragment key={deckGroup.name}>
+            {renderBusShell(
+              deckGroup.sections.map((section) => renderVerticalSection(section)),
+              true
+            )}
+          </React.Fragment>
+        ));
+      }
+      
+      return (
+        <>
+          {lowerDeckRows.length > 0 && (
+            renderBusShell(
+              renderDeckContent("Lower Deck", lowerDeckRows, "bus-flow-vertical-deck--lower bus-flow-sleeper-lower-deck")
+            )
+          )}
+          {upperDeckRows.length > 0 && (
+            renderBusShell(
+              renderDeckContent("Upper Deck", upperDeckRows, "bus-flow-vertical-deck--upper")
+            )
+          )}
+        </>
+      );
+    }
 
-        <div className="bus-flow-coach-front" aria-hidden="true">
-          <div className="bus-flow-windshield">
-            <span />
-            <span />
-          </div>
-          <div className="bus-flow-steering">
-            <svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="9" stroke="#1e293b" strokeWidth="2.2" />
-              <circle cx="12" cy="12" r="2.5" fill="#1e293b" />
-              <path d="M4 12h16" stroke="#1e293b" strokeWidth="1.8" />
-              <path d="M12 12v8" stroke="#1e293b" strokeWidth="1.8" />
-            </svg>
-          </div>
-          <div className="bus-flow-driver-seat driver">
-            <SeaterSVG />
-          </div>
-          <div className="bus-flow-driver-seat helper">
-            <SeaterSVG />
-          </div>
-          <span className="bus-flow-front-label">FRONT</span>
+    return renderBusShell(
+      <section className="bus-flow-vertical-deck bus-flow-seater-deck bus-flow-vertical-deck--main">
+        <header className="bus-flow-vertical-deck-header">
+          <span>MAIN</span>
+        </header>
+        <div className="bus-flow-vertical-deck-body">
+          <div className="bus-flow-vertical-row bus-flow-main-seat-grid">
+            {mainDeckRows.map((row, rowIndex) => (
+              <React.Fragment key={`main-${rowIndex}`}>
+                {renderSeatButton(row[0])}
+                {renderSeatButton(row[1])}
+                <span className="bus-flow-vertical-aisle" />
+                {renderSeatButton(row[2])}
+                {renderSeatButton(row[3])}
+              </React.Fragment>
+            ))}
+            </div>
         </div>
-
-        <div className="bus-flow-coach-floor">
-          {deckContent}
-        </div>
-      </div>
+      </section>,
+      true
     );
   };
 
   return (
-    <main className="bus-flow-page">
-      <div className="bus-flow-shell" style={{ marginBottom: '40px' }}>
-        <section className="bus-flow-summary-card" style={{ marginBottom: '40px' }}>
-          <div className="bus-flow-overview-banner">
-            <img
-              src={busOverview.background}
-              alt={`${busOverview.brand} bus`}
-              className="bus-flow-overview-bg"
-            />
-            <div className="bus-flow-overview-overlay" />
-            <div className="bus-flow-overview-content">
-              <div className="bus-flow-overview-logo-wrap">
-                <img
-                  src={busOverview.logo}
-                  alt={`${busOverview.brand} logo`}
-                  className="bus-flow-overview-logo"
-                />
-              </div>
-
-              <div className="bus-flow-overview-copy">
-                <p>{busOverview.routeText}</p>
-                <h3>{busOverview.operatorName}</h3>
-                <span>{busOverview.summaryText}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bus-flow-summary-grid">
-            <article>
-              <h2>{bus.operatorName}</h2>
-              <p>{bus.busType}</p>
+    <main className={`bus-flow-page${embedded ? " bus-flow-page--embedded" : ""}`}>
+      <div className="bus-flow-shell">
+        {!embedded && (
+        <section className="bus-flow-summary-card">
+          <div className="bus-flow-trip-strip">
+            <article className="bus-flow-operator-cell">
+              <strong>{bus.operatorName}</strong>
+              <span>{bus.busType}</span>
             </article>
-            <article>
-              <strong>{bus.departureTime}</strong>
-              <span>{bus.boardingPoint}</span>
+            <article className="bus-flow-time-cell">
+              <strong>
+                {bus.departureTime}
+                {tripDateLabel && <small>{tripDateLabel}</small>}
+              </strong>
+              <span>{bus.fromCity}</span>
             </article>
-            <article className="bus-flow-duration">
-              <BusFront size={18} />
+            <article className="bus-flow-duration-cell">
               <span>{bus.duration}</span>
+              <i />
             </article>
-            <article>
-              <strong>{bus.arrivalTime}</strong>
-              <span>{bus.droppingPoint}</span>
+            <article className="bus-flow-time-cell">
+              <strong>
+                {bus.arrivalTime}
+                {tripDateLabel && <small>{tripDateLabel}</small>}
+              </strong>
+              <span>{bus.toCity}</span>
             </article>
-            <article>
-              <small>Starts from</small>
+            <article className="bus-flow-price-cell">
+              <span>Starts from</span>
               <strong>{formatCurrency(bus.fare)}</strong>
             </article>
-            <article>
-              <small>{bus.availableSeats} Seats Available</small>
+            <article className="bus-flow-seat-count-cell">
+              <strong>{bus.availableSeats} Seats Available</strong>
             </article>
           </div>
           <div className="bus-flow-summary-actions">
@@ -1406,7 +1459,7 @@ export default function BusSeatSelectionPage() {
             <button
               type="button"
               className="active"
-              onClick={() => navigate(-1)}
+              onClick={() => (embedded ? onClose?.() : navigate(-1))}
             >
               {isSeatLayoutLoading ? "VIEW SEATS" : "HIDE SEAT"}
             </button>
@@ -1427,6 +1480,7 @@ export default function BusSeatSelectionPage() {
             </div>
           )}
         </section>
+        )}
 
         {isSeatLayoutLoading || isFetchingSeats ? (
           <section className="bus-flow-seat-loader">
@@ -1435,7 +1489,7 @@ export default function BusSeatSelectionPage() {
               <span />
               <span />
             </div>
-            <p style={{ marginTop: '16px', color: '#5e7694', fontSize: '0.85rem' }}>
+            <p className="bus-flow-loader-text">
               {isFetchingSeats ? "Fetching live seat availability..." : "Loading seat layout..."}
             </p>
           </section>
@@ -1455,7 +1509,7 @@ export default function BusSeatSelectionPage() {
             <div className="bus-flow-seat-zone">
               <header className="bus-flow-seat-top">
                 <div className="bus-flow-fares">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div className="bus-flow-fares-head">
                     <h3>{bus.availableSeats} Seats Available</h3>
                     <button type="button" className="bus-flow-info-btn" title="Seat Information">
                       <Info size={18} />
@@ -1484,11 +1538,9 @@ export default function BusSeatSelectionPage() {
 
                 <div className="bus-flow-seat-legend">
                   <span className="legend available">Available Seats</span>
+                  <span className="legend female">Available for Female</span>
                   <span className="legend booked">Booked Seats</span>
-                  <span className="legend female-booked">Female Booked</span>
-                  <span className="legend female-adjacent">Beside Female</span>
-                  <span className="legend male-booked">Male Booked</span>
-                  <span className="legend male-adjacent">Beside Male</span>
+                  <span className="legend male">Available for Male</span>
                   <span className="legend selected">Selected Seats</span>
                 </div>
               </header>
@@ -1496,61 +1548,7 @@ export default function BusSeatSelectionPage() {
               <div className="hologram-bus-container">
                 <div className="hologram-floor" />
                 <div className="bus-flow-vertical-layout">
-                  {hasDeckSections ? (
-                    hasBackendSections ? (
-                      seatDeckGroups.map((deckGroup) =>
-                        renderBusShell(
-                          renderVerticalDeck(
-                            deckGroup.name,
-                            deckGroup.sections,
-                            `bus-flow-vertical-deck--${deckGroup.name
-                              .toLowerCase()
-                              .replace(/[^a-z0-9]+/g, "-")}`
-                          )
-                        )
-                      )
-                    ) : (
-                      <>
-                        {renderBusShell(
-                          renderHorizontalDeck(
-                            "Lower Deck",
-                            lowerDeckRows,
-                            `bus-flow-vertical-deck--lower bus-flow-${layoutKind}-lower-deck`,
-                            "No lower deck seats available"
-                          )
-                        )}
-                        {renderBusShell(
-                          renderHorizontalDeck(
-                            "Upper Deck",
-                            upperDeckRows,
-                            "bus-flow-vertical-deck--upper",
-                            "No upper deck seats available"
-                          )
-                        )}
-                      </>
-                    )
-                  ) : (
-                    renderBusShell(
-                      <section className="bus-flow-vertical-deck bus-flow-seater-deck bus-flow-vertical-deck--main">
-                        <header className="bus-flow-vertical-deck-header">
-                          <span>MAIN DECK</span>
-                        </header>
-                        <div className="bus-flow-vertical-deck-body">
-                          <div className="bus-flow-vertical-row bus-flow-main-seat-grid">
-                            {mainDeckRows.map((row, rowIndex) => (
-                              <React.Fragment key={`main-${rowIndex}`}>
-                                {renderSeatButton(row[0])}
-                                {renderSeatButton(row[1])}
-                                <span className="bus-flow-vertical-aisle" />
-                                {renderSeatButton(row[2])}
-                                {renderSeatButton(row[3])}
-                              </React.Fragment>
-                            ))}
-                          </div>
-                        </div>
-                      </section>
-                    )
-                  )}
+                  {renderBusLayout()}
                 </div>
               </div>
 
@@ -1647,8 +1645,8 @@ export default function BusSeatSelectionPage() {
               </div>
 
               {selectionError && (
-                <p className="flow-error" style={{ color: '#ff007f', fontSize: '0.9rem', marginTop: '10px' }}>
-                  <Info size={14} style={{ marginRight: '5px' }} />
+                <p className="flow-error">
+                  <Info size={14} />
                   {selectionError}
                 </p>
               )}
@@ -1659,7 +1657,7 @@ export default function BusSeatSelectionPage() {
                 disabled={selectedSeats.length === 0 || !selectedBoarding || !selectedDropping}
                 onClick={handleContinue}
               >
-                Continue to Payment
+                Continue
               </button>
             </aside>
           </section>

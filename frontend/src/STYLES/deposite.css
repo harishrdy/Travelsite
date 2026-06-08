@@ -5,8 +5,8 @@
   --surface-border: #d2ddf1;
   --text: #11213f;
   --text-soft: #56678a;
-  --primary: var(--theme-primary, #f04423);
-  --primary-strong: var(--theme-primary-strong, #df3f1f);
+  --primary: var(--theme-primary, #009b8f);
+  --primary-strong: var(--theme-primary-strong, #006f7a);
   --shadow-md: 0 12px 24px rgba(8, 18, 44, 0.12);
   --shadow-sm: 0 8px 16px rgba(8, 18, 44, 0.08);
   --heading-font: var(--app-font-family);
@@ -27,7 +27,7 @@
 .deposit-card,
 .deposit-table-card,
 .deposit-modal-content {
-  border-color: var(--theme-border, #f2cbbf) !important;
+  border-color: var(--theme-border, #cfded8) !important;
   background: var(--theme-surface, #ffffff) !important;
   box-shadow: var(--theme-shadow-sm, 0 10px 24px rgba(125, 59, 31, 0.08)) !important;
 }
@@ -35,28 +35,28 @@
 .deposit-section-kicker,
 .deposit-page-title span,
 .deposit-amount {
-  color: var(--theme-primary-strong, #df3f1f) !important;
+  color: var(--theme-primary-strong, #006f7a) !important;
 }
 
 .deposit-btn-primary,
 .deposit-icon-blue,
 .deposit-icon-green {
   border-color: transparent !important;
-  background: linear-gradient(135deg, var(--theme-primary, #f04423), var(--theme-primary-strong, #df3f1f)) !important;
+  background: linear-gradient(135deg, var(--theme-primary, #009b8f), var(--theme-primary-strong, #006f7a)) !important;
   color: #ffffff !important;
-  box-shadow: 0 14px 28px rgba(240, 68, 35, 0.2) !important;
+  box-shadow: 0 14px 28px rgba(0, 155, 143, 0.2) !important;
 }
 
 .deposit-btn-secondary,
 .deposit-btn-muted,
 .deposit-icon-btn {
-  border-color: var(--theme-border, #f2cbbf) !important;
-  background: var(--theme-primary-soft, #fff0e9) !important;
-  color: var(--theme-primary-strong, #df3f1f) !important;
+  border-color: var(--theme-border, #cfded8) !important;
+  background: var(--theme-primary-soft, #dff8f3) !important;
+  color: var(--theme-primary-strong, #006f7a) !important;
 }
 
 .deposit-table-head {
-  background: var(--theme-primary-soft, #fff0e9) !important;
+  background: var(--theme-primary-soft, #dff8f3) !important;
 }
 
 .deposit-table-head th,
@@ -66,20 +66,20 @@
 }
 
 .deposit-input:focus {
-  border-color: #ffb29c !important;
-  box-shadow: 0 0 0 4px rgba(240, 68, 35, 0.12) !important;
+  border-color: #d3e1f7 !important;
+  box-shadow: none !important;
 }
 
-/* Unified orange travel theme */
+/* Unified Atlas travel theme */
 .deposit-container {
-  --page-bg: var(--theme-page, #fff7f2);
+  --page-bg: var(--theme-page, #eef7f4);
   --surface: var(--theme-surface, #ffffff);
   --surface-soft: var(--theme-surface-warm, #fffaf6);
-  --surface-border: var(--theme-border, #f2cbbf);
+  --surface-border: var(--theme-border, #cfded8);
   --text: var(--theme-navy, #1f2a44);
   --text-soft: var(--theme-muted, #64748b);
-  --primary: var(--theme-primary, #f04423);
-  --primary-strong: var(--theme-primary-strong, #df3f1f);
+  --primary: var(--theme-primary, #009b8f);
+  --primary-strong: var(--theme-primary-strong, #006f7a);
   --shadow-md: var(--theme-shadow, 0 18px 45px rgba(125, 59, 31, 0.12));
   --shadow-sm: var(--theme-shadow-sm, 0 10px 24px rgba(125, 59, 31, 0.08));
 }
@@ -208,8 +208,8 @@
 }
 
 .deposit-input:focus {
-  border-color: #86a8f0;
-  box-shadow: 0 0 0 4px rgba(17, 66, 173, 0.14);
+  border-color: #d3e1f7 !important;
+  box-shadow: none !important;
 }
 
 .deposit-input[type="textarea"],
@@ -333,7 +333,7 @@ textarea.deposit-input {
 
 .deposit-amount {
   font-weight: 700;
-  color: var(--theme-primary, #f04423);
+  color: var(--theme-primary, #009b8f);
 }
 
 .deposit-action-group {
@@ -463,7 +463,7 @@ textarea.deposit-input {
 .deposit-card,
 .deposit-table-card,
 .deposit-modal-content {
-  border-color: var(--theme-border, #f2cbbf) !important;
+  border-color: var(--theme-border, #cfded8) !important;
   background: var(--theme-surface, #ffffff) !important;
   box-shadow: var(--theme-shadow-sm, 0 10px 24px rgba(125, 59, 31, 0.08)) !important;
 }
@@ -471,28 +471,28 @@ textarea.deposit-input {
 .deposit-section-kicker,
 .deposit-page-title span,
 .deposit-amount {
-  color: var(--theme-primary-strong, #df3f1f) !important;
+  color: var(--theme-primary-strong, #006f7a) !important;
 }
 
 .deposit-btn-primary,
 .deposit-icon-blue,
 .deposit-icon-green {
   border-color: transparent !important;
-  background: linear-gradient(135deg, var(--theme-primary, #f04423), var(--theme-primary-strong, #df3f1f)) !important;
+  background: linear-gradient(135deg, var(--theme-primary, #009b8f), var(--theme-primary-strong, #006f7a)) !important;
   color: #ffffff !important;
-  box-shadow: 0 14px 28px rgba(240, 68, 35, 0.2) !important;
+  box-shadow: 0 14px 28px rgba(0, 155, 143, 0.2) !important;
 }
 
 .deposit-btn-secondary,
 .deposit-btn-muted,
 .deposit-icon-btn {
-  border-color: var(--theme-border, #f2cbbf) !important;
-  background: var(--theme-primary-soft, #fff0e9) !important;
-  color: var(--theme-primary-strong, #df3f1f) !important;
+  border-color: var(--theme-border, #cfded8) !important;
+  background: var(--theme-primary-soft, #dff8f3) !important;
+  color: var(--theme-primary-strong, #006f7a) !important;
 }
 
 .deposit-table-head {
-  background: var(--theme-primary-soft, #fff0e9) !important;
+  background: var(--theme-primary-soft, #dff8f3) !important;
 }
 
 .deposit-table-head th,
@@ -502,6 +502,6 @@ textarea.deposit-input {
 }
 
 .deposit-input:focus {
-  border-color: #ffb29c !important;
-  box-shadow: 0 0 0 4px rgba(240, 68, 35, 0.12) !important;
+  border-color: #d3e1f7 !important;
+  box-shadow: none !important;
 }

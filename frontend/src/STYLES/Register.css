@@ -52,22 +52,316 @@ select:-webkit-autofill {
 /* Shared card dimensions defined in Login.css */
 
 .travel-auth-page {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8%;
   min-height: 100vh;
-  /* ✅ full screen */
-  padding: 12px 0;
+  padding: 20px 40px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: fixed;
 }
 
-/* Card radius inherited from Login.css */
+.travel-auth-left-content {
+  flex: 1;
+  max-width: 500px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  margin-top: 0;
+}
+
+.travel-hero-title {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  color: #1e3a8a;
+  background: rgba(255, 237, 213, 0.85);
+  padding: 4px 10px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.travel-hero-title span {
+  color: #ea580c;
+}
+
+.travel-hero-subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-bottom: 24px;
+  line-height: 1.5;
+  background: rgba(255, 237, 213, 0.85);
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.travel-brand-logo-container {
+  position: absolute;
+  top: 40px;
+  left: 60px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+.travel-brand-icon {
+  background: #c1121f;
+  color: #fff;
+  font-weight: 800;
+  font-size: 20px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.travel-brand-text h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1e3a8a;
+  margin: 0 0 2px 0;
+}
+
+.travel-brand-text p {
+  font-size: 13px;
+  color: #1e3a8a;
+  margin: 0;
+  font-weight: 600;
+}
+
+.travel-benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+  display: inline-block;
+  text-align: left;
+}
+
+.travel-benefits-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 8px;
+  background: transparent;
+  padding: 4px 0;
+  border-radius: 12px;
+}
+
+.travel-benefit-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  color: #ea580c;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.travel-benefit-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.travel-benefit-text strong {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1e3a8a;
+  margin-bottom: 4px;
+  background: rgba(255, 237, 213, 0.85);
+  padding: 2px 6px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+
+.travel-benefit-text span {
+  font-size: 11px;
+  color: #1e3a8a;
+  font-weight: 700;
+  background: rgba(255, 237, 213, 0.85);
+  padding: 2px 6px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+
+.travel-stats-bar {
+  display: flex;
+  gap: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 16px 20px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+  justify-content: center;
+  width: fit-content;
+}
+
+.travel-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.travel-stat-icon {
+  font-size: 24px;
+}
+
+.travel-stat-icon.text-orange {
+  color: #f97316;
+}
+
+.travel-stat-icon.text-blue {
+  color: #3b82f6;
+}
+
+.travel-stat-icon.text-green {
+  color: #22c55e;
+}
+
+.travel-stat-icon.text-purple {
+  color: #a855f7;
+}
+
+.travel-stat-text {
+  font-size: 11px;
+  color: #6b7280;
+  line-height: 1.3;
+}
+
+.travel-stat-text strong {
+  font-size: 16px;
+  color: #111827;
+  font-weight: 800;
+}
+
+.travel-stat-text .small-star {
+  font-size: 12px;
+  vertical-align: middle;
+}
 
 .travel-auth-register .travel-auth-form-panel {
   margin-top: -4px;
-  padding: 9px 12px 7px;
+  padding: 12px 24px;
   display: flex;
   flex-direction: column;
   position: relative;
+  min-height: 430px;
+  justify-content: flex-start;
+}
+
+.travel-auth-register .travel-auth-card {
+  width: 500px;
+  flex: 0 0 500px;
+  height: auto;
+  min-height: 510px;
+  padding-bottom: 24px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 0;
+}
+
+.travel-input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.travel-input-icon-left {
+  position: absolute;
+  left: 14px;
+  color: #9ca3af;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.travel-auth-register .travel-field-line.travel-input-with-icon input,
+.travel-auth-register .travel-field-line.travel-input-with-icon select {
+  padding-left: 36px !important;
+}
+
+.travel-auth-register .travel-field-line {
+  border: 1px solid #e5e7eb !important;
+  background: #ffffff !important;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.travel-auth-register .travel-field-line:focus-within {
+  border-color: #e5e7eb !important;
+}
+
+.travel-social-login {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.travel-social-divider {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.travel-social-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.travel-social-divider span {
+  position: relative;
+  background: #fff;
+  padding: 0 12px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.travel-social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.travel-social-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #374151;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.travel-social-btn:hover {
+  background: #f9fafb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .travel-verified-popup {
@@ -99,13 +393,13 @@ select:-webkit-autofill {
 }
 
 .travel-tagline {
-  margin-top: 2px;
+  margin-top: 0;
   margin-bottom: 4px;
   font-family: "Plus Jakarta Sans", sans-serif;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 800;
   line-height: 1.1;
-  color: #212122;
+  color: #111827;
   text-align: center;
 }
 
@@ -116,10 +410,11 @@ select:-webkit-autofill {
 } */
 
 .travel-auth-register .travel-auth-subheading {
-  margin-top: 2px;
-  margin-bottom: 2px;
-  font-size: 10.5px;
-  line-height: 1.35;
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
 }
 
 .travel-auth-register .travel-auth-status {
@@ -162,15 +457,77 @@ select:-webkit-autofill {
   margin-bottom: 0;
 }
 
-.travel-auth-register .travel-email-field,
-.travel-auth-register .travel-otp-field {
+.travel-auth-register .travel-email-field-full,
+.travel-auth-register .travel-otp-field,
+.travel-auth-register .travel-segmented-field {
   grid-column: 1 / -1;
 }
 
-.travel-auth-register .travel-field label {
-  margin-bottom: 1px;
+.travel-segmented-control {
+  display: flex;
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 2px;
+}
+
+.travel-segment-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
+  color: #6b7280;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.travel-segment-btn:hover {
+  color: #374151;
+}
+
+.travel-segment-btn.is-active {
+  background: #fff3eb;
+  color: #f97316;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.15);
+}
+
+.travel-auth-register .travel-field label {
+  display: block;
+}
+
+.travel-form-section {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  margin-bottom: 2px;
+}
+
+.travel-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.travel-section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff3eb;
+  color: #f97316;
+  font-size: 12px;
 }
 
 .travel-auth-register .travel-required-star {
@@ -185,7 +542,7 @@ select:-webkit-autofill {
 }
 
 .travel-auth-register .travel-field-line {
-  height: 34px;
+  height: 32px;
   display: flex;
   align-items: center;
   border-radius: 11px;
@@ -277,7 +634,7 @@ select:-webkit-autofill {
 }
 
 .travel-custom-dropdown-header.valid-selected {
-  /* Keep white text on orange background */
+  /* Keep dark text on white background */
   background: #ffffff !important;
   color: #4b5563 !important;
   font-weight: 600;
@@ -286,6 +643,21 @@ select:-webkit-autofill {
 .travel-custom-dropdown-container.has-error .travel-custom-dropdown-header {
   border: 1.5px solid #e53935;
   background: #fff5f5;
+}
+
+.travel-custom-dropdown-container.is-disabled {
+  opacity: 0.65;
+  pointer-events: none;
+  background: #f9fafb !important;
+}
+
+.travel-custom-dropdown-container.is-disabled .travel-custom-dropdown-header {
+  color: #9ca3af !important;
+  font-weight: 500;
+}
+
+.travel-custom-dropdown-container.is-disabled .travel-dropdown-arrow {
+  opacity: 0.5;
 }
 
 .travel-custom-dropdown-options {
@@ -316,8 +688,8 @@ select:-webkit-autofill {
 }
 
 .travel-custom-dropdown-option:hover {
-  background: var(--auth-orange) !important;
-  color: #ffffff !important;
+  background: #fff3eb !important;
+  color: #f04423 !important;
 }
 
 .travel-custom-dropdown-option.is-selected {
@@ -403,6 +775,7 @@ select:-webkit-autofill {
   color: var(--auth-orange-strong);
   font-weight: 700;
 }
+
 .travel-otp-channel-select.is-placeholder {
   color: #9ca3af !important;
 }
@@ -427,8 +800,8 @@ select:-webkit-autofill {
 }
 
 .travel-auth-register .travel-field-line {
-  height: 36px;
-  border-radius: 16px !important;
+  height: 40px;
+  border-radius: 8px !important;
   overflow: visible;
 }
 
@@ -524,6 +897,7 @@ select:-webkit-autofill {
     opacity: 0;
     transform: translateY(-4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -536,32 +910,29 @@ select:-webkit-autofill {
   align-items: center;
 }
 
-.travel-send-otp-btn {
-  flex: 0 0 auto;
-  height: 28px;
-  min-width: 96px;
-  border: 0;
-  border-radius: 10px;
-  background: linear-gradient(135deg, var(--auth-orange), var(--auth-orange-strong));
-  color: #fff;
-  cursor: pointer;
+.travel-send-otp-text-btn {
+  position: absolute;
+  right: 14px;
   font-size: 11px;
-  font-weight: 800;
-  line-height: 1;
-  padding: 0 12px;
-  white-space: nowrap;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  font-weight: 700;
+  color: #f97316;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
-.travel-send-otp-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ff6a3d, #c93518);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(240, 68, 35, 0.24);
-}
-
-.travel-send-otp-btn:disabled {
+.travel-send-otp-text-btn:disabled {
+  color: #9ca3af;
   cursor: not-allowed;
-  opacity: 0.72;
+}
+
+.travel-otp-resend-text {
+  position: absolute;
+  right: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #4b5563;
+  margin: 0;
 }
 
 .travel-auth-register .travel-otp-boxes {
@@ -666,6 +1037,18 @@ select:-webkit-autofill {
   font-size: 12px;
   font-weight: 600;
   line-height: 1;
+}
+
+.travel-otp-resend-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: #4b5563;
+  margin-top: 6px;
+}
+
+.travel-otp-timer-highlight {
+  color: #f97316;
+  font-weight: 700;
 }
 
 /* .travel-resend-otp-btn {
@@ -838,8 +1221,8 @@ select:-webkit-autofill {
 }
 
 .travel-auth-register .travel-btn {
-  min-height: 30px;
-  font-size: 11.5px;
+  min-height: 40px;
+  font-size: 14px;
 }
 
 .travel-auth-register .travel-btn-secondary {
@@ -1018,4 +1401,899 @@ select:-webkit-autofill {
     font-size: 9.5px;
     padding-right: 14px;
   }
+}
+
+/* --- Stepper CSS --- */
+.travel-stepper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+  position: relative;
+  padding: 0 24px;
+}
+
+.stepper-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  width: 32px;
+}
+
+.step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px solid #e5e7eb;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  position: relative;
+  z-index: 2;
+}
+
+.stepper-item.active .step-circle {
+  background: #f97316;
+  border-color: #f97316;
+  color: white;
+}
+
+.stepper-line {
+  flex: 1;
+  height: 2px;
+  background: #e5e7eb;
+  margin-top: 15px;
+  margin-left: 0;
+  margin-right: 0;
+  z-index: 1;
+}
+
+.stepper-line.active {
+  background: #f97316;
+}
+
+.step-label {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  text-align: center;
+}
+
+.stepper-item.active .step-label {
+  color: #f97316;
+}
+
+/* --- Step 2 CSS --- */
+.travel-step2-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4px 0;
+}
+
+.travel-step2-icon {
+  font-size: 40px;
+  color: #4ade80;
+  background: #dcfce7;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-bottom: 8px;
+}
+
+.travel-step2-text {
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.travel-otp-boxes {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.travel-otp-boxes input {
+  width: 44px;
+  height: 56px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+}
+
+.travel-otp-boxes input:focus {
+  border-color: #f97316;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.travel-otp-timer-text {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.travel-otp-timer-highlight {
+  color: #f97316;
+  font-weight: 700;
+}
+
+/* --- Step 3 CSS --- */
+.travel-password-strength {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+}
+
+.strength-bars {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.strength-bars .bar {
+  height: 4px;
+  flex: 1;
+  background: #e5e7eb;
+  border-radius: 2px;
+}
+
+.strength-bars .bar.active {
+  background: #4ade80;
+}
+
+.strength-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  width: 45px;
+  text-align: right;
+}
+
+.strength-text.score-1 {
+  color: #ef4444;
+}
+
+.strength-text.score-2 {
+  color: #f59e0b;
+}
+
+.strength-text.score-3 {
+  color: #84cc16;
+}
+
+.strength-text.score-4 {
+  color: #22c55e;
+}
+
+.strength-bars:has(~ .score-1) .bar.active {
+  background: #ef4444;
+}
+
+.strength-bars:has(~ .score-2) .bar.active {
+  background: #f59e0b;
+}
+
+.strength-bars:has(~ .score-3) .bar.active {
+  background: #84cc16;
+}
+
+.strength-bars:has(~ .score-4) .bar.active {
+  background: #22c55e;
+}
+
+.travel-password-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+  margin: 16px 0;
+  background: #fff5eb;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #374151;
+}
+
+.check-icon {
+  color: #f97316;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.travel-label-top {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+/* --- Step 4 CSS --- */
+.travel-step4-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 0;
+}
+
+.travel-step4-icon {
+  font-size: 64px;
+  color: white;
+  background: #4ade80;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(74, 222, 128, 0.4);
+}
+
+.travel-step4-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.travel-step4-text {
+  font-size: 16px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.travel-field-select {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0 16px;
+  font-size: 14px;
+  color: #374151;
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  transition: background-color 0.2s;
+  border-radius: 8px;
+}
+
+.travel-field-select:hover {
+  background-color: #fff7ed;
+}
+
+.travel-field-select option:checked {
+  background-color: #f97316;
+  color: white;
+}
+
+.travel-btn-primary {
+  transition: all 0.2s ease;
+  border-radius: 8px !important;
+  background: linear-gradient(to right, #ff7a00, #ff4d00) !important;
+  box-shadow: 0 4px 14px rgba(255, 77, 0, 0.4) !important;
+  color: white !important;
+  font-weight: 700;
+  border: none;
+}
+
+.travel-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(249, 115, 22, 0.5) !important;
+}
+
+.btn-arrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.travel-btn-primary:hover:not(:disabled) .btn-arrow {
+  transform: translateX(4px);
+}
+
+/* --- Animated Toast and Shake Animations --- */
+
+@keyframes shake-horizontal {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+.shake-animation {
+  animation: shake-horizontal 0.5s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+.travel-otp-toast {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  background: #111827;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  animation: slideInDown 0.3s ease forwards;
+}
+
+.travel-otp-toast-message {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.travel-otp-toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: #f97316;
+  width: 100%;
+  animation: progressShrink 3s linear forwards;
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes progressShrink {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0%;
+  }
+}
+
+/* --- Inline Edit Modal and Box --- */
+
+.travel-inline-edit-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border: 1px solid #f97316;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 24px;
+  transition: all 0.2s ease;
+}
+
+.travel-inline-edit-box:hover {
+  background: #fff3eb;
+}
+
+.travel-inline-edit-icon {
+  color: #f97316;
+  font-size: 12px;
+}
+
+.travel-edit-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(17, 24, 39, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 1000;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.travel-edit-modal {
+  background: white;
+  width: 360px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: slideInDown 0.3s ease forwards;
+}
+
+.travel-edit-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.travel-edit-modal-header h4 {
+  margin: 0;
+  font-size: 18px;
+  color: #111827;
+}
+
+.travel-edit-modal-close {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+}
+
+.travel-edit-modal-body label {
+  margin-bottom: 8px;
+  display: block;
+}
+
+.travel-edit-modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.travel-btn-cancel {
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  border-radius: 8px;
+  flex: 1;
+  font-weight: 600;
+}
+
+.travel-btn-cancel:hover {
+  background: #e5e7eb;
+}
+
+.travel-btn-update {
+  flex: 1;
+}
+
+@media (max-width: 1100px) {
+  .travel-auth-page.travel-auth-register {
+    flex-wrap: wrap;
+    gap: 40px;
+    padding: 20px;
+  }
+
+  .travel-auth-register .travel-auth-left-content {
+    display: block;
+    min-width: 300px;
+    text-align: center;
+  }
+
+  .travel-auth-register .travel-auth-left-content .travel-hero-title,
+  .travel-auth-register .travel-auth-left-content .travel-hero-subtitle {
+    text-align: center;
+  }
+
+  .travel-auth-register .travel-benefits-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .travel-auth-register .travel-stats-bar {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .travel-auth-register .travel-auth-card {
+    width: 100%;
+    max-width: 480px;
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .travel-auth-page.travel-auth-register {
+    flex-direction: column;
+  }
+
+  .travel-auth-register .travel-auth-left-content {
+    display: none;
+  }
+}
+
+
+/* Password popup overrides */
+.travel-auth-register .password-field-wrap {
+  position: relative;
+}
+
+.travel-auth-register .travel-password-checklist-popup {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: #fff9f5;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 8px 16px rgba(234, 88, 12, 0.1);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, transform 0.2s;
+  transform: translateY(5px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.travel-auth-register .password-field-wrap:focus-within .travel-password-checklist-popup {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.travel-auth-register .travel-password-checklist-popup .checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #4b5563;
+}
+
+.travel-auth-register .travel-password-checklist-popup .check-icon {
+  color: #ea580c;
+  font-weight: bold;
+}
+
+
+/* Validation error styling */
+.travel-auth-register .travel-field-line.has-error {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+.travel-auth-register .travel-terms.has-error {
+  color: #ef4444 !important;
+}
+
+.travel-auth-register .travel-terms.has-error .travel-terms-link {
+  color: #dc2626 !important;
+}
+
+.travel-auth-register .travel-terms.has-error input[type="checkbox"] {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+  border-radius: 2px;
+  accent-color: #ef4444;
+}
+
+
+/* Center Step 2 contents */
+.travel-auth-register .travel-step2-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  flex: 1;
+  text-align: left;
+}
+
+.travel-auth-grid-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+  width: 100%;
+}
+
+@media (max-width: 576px) {
+  .travel-auth-grid-2x2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Step 2 heading and subheading centering */
+.travel-auth-register .travel-step2-wrapper .travel-auth-heading {
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.travel-auth-register .travel-step2-wrapper .travel-auth-subheading {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ===== Step 2 field resets =====
+   Strip ALL register-specific overrides so fields inherit
+   the base Login.css / Verify.css look (identical to
+   the Forgot Password → Verify OTP page). */
+
+.travel-auth-register .travel-step2-wrapper .travel-field-line {
+  height: auto !important;
+  min-height: 42px !important;
+  border: none !important;
+  border-radius: var(--auth-control-radius) !important;
+  background: #ffffff !important;
+  padding: 0 12px !important;
+  overflow: visible !important;
+}
+
+.travel-auth-register .travel-step2-wrapper .travel-field-line:focus-within {
+  border-color: transparent !important;
+}
+
+.travel-auth-register .travel-step2-wrapper .travel-field-line input {
+  padding-left: 0 !important;
+  font-size: var(--auth-input-size) !important;
+  font-weight: 400 !important;
+}
+
+.travel-auth-register .travel-step2-wrapper .travel-field label {
+  display: block;
+  font-size: var(--auth-label-size, 13px);
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.travel-auth-register .travel-step2-wrapper .travel-field {
+  margin-bottom: 4px;
+}
+
+.travel-auth-register .travel-step2-wrapper .travel-field-error {
+  min-height: 14px !important;
+  margin-top: 2px !important;
+  font-size: 11px !important;
+}
+
+/* OTP line padding for smaller button */
+.travel-auth-register .travel-step2-wrapper .travel-otp-line {
+  padding-right: 6px !important;
+  gap: 8px;
+}
+
+.travel-auth-register .travel-step2-wrapper .travel-eye-btn {
+  font-size: 14px !important;
+}
+
+.travel-auth-register .travel-step2-wrapper .travel-auth-links {
+  margin-top: 4px;
+}
+
+.travel-auth-register .travel-step2-wrapper .travel-field-line.has-error {
+  border: 1.5px solid #ef4444 !important;
+  background: #fef2f2 !important;
+}
+
+/* ===== Step 2 Match to VerifyOtp Form (Compact & Intact) ===== */
+
+/* Card and panel min-height overrides to allow shrinking */
+.travel-auth-page.travel-auth-register .travel-auth-card {
+  min-height: auto !important;
+}
+
+.travel-auth-page.travel-auth-register .travel-auth-form-panel {
+  min-height: auto !important;
+  padding: 12px 24px 10px !important;
+}
+
+/* Brand logo shrinking */
+.travel-auth-page.travel-auth-register .auth-brand-logo-form {
+  height: 30px !important;
+  margin: 0 auto 4px !important;
+}
+
+/* OTP sent status text styling */
+.travel-auth-page.travel-auth-register .travel-auth-status.is-success {
+  margin: 2px 0 2px !important;
+  font-size: 13px !important;
+}
+
+/* Stepper spacing reduction */
+.travel-auth-page.travel-auth-register .travel-stepper {
+  margin-bottom: 20px !important;
+  margin-top: 4px !important;
+}
+
+.travel-auth-page.travel-auth-register .step-circle {
+  width: 22px !important;
+  height: 22px !important;
+  font-size: 10px !important;
+}
+
+.travel-auth-page.travel-auth-register .stepper-line {
+  margin-top: 10px !important;
+}
+
+.travel-auth-page.travel-auth-register .step-label {
+  top: 26px !important;
+  font-size: 9.5px !important;
+}
+
+/* Specificity override to force step 2 wrapper to stretch, text-align left, and use correct gap */
+.travel-auth-page.travel-auth-register .travel-step2-wrapper {
+  align-items: stretch !important;
+  text-align: left !important;
+  width: 100% !important;
+  gap: 4px !important;
+}
+
+/* Strip theme gradient boxes, white borders, and shadows from step 2 child containers */
+.travel-auth-page.travel-auth-register .travel-step2-wrapper > div {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  color: inherit !important;
+  width: 100% !important;
+}
+
+/* Ensure child fields and labels stretch/align left */
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .travel-field {
+  width: 100% !important;
+  align-items: stretch !important;
+  text-align: left !important;
+  margin-bottom: 2px !important;
+}
+
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .travel-field label {
+  align-self: flex-start !important;
+  text-align: left !important;
+  font-size: 11px !important;
+  margin-bottom: 2px !important;
+  font-weight: 600 !important;
+}
+
+/* Match step 2 field heights (32px) and style */
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .travel-field-line {
+  min-height: 32px !important;
+  height: 32px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 155, 143, 0.26) !important;
+  box-shadow: 0 6px 16px rgba(8, 23, 42, 0.04) !important;
+  border-radius: 8px !important;
+}
+
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .travel-field-line input {
+  font-size: 11.5px !important;
+}
+
+/* Inline resend / verify OTP button compact styling */
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .travel-inline-otp-btn {
+  height: 24px !important;
+  padding: 0 8px !important;
+  font-size: 10px !important;
+  border-radius: 5px !important;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Eye button compact styling */
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .travel-eye-btn {
+  background: transparent !important;
+  border: none !important;
+  color: var(--theme-primary) !important;
+  padding: 0 4px !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+}
+
+/* Password strength indicator compactness */
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .travel-password-strength {
+  margin-top: 2px !important;
+  margin-bottom: 2px !important;
+  gap: 8px !important;
+}
+
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .strength-bars {
+  gap: 2px !important;
+}
+
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .strength-bars .bar {
+  height: 3px !important;
+}
+
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .strength-text {
+  font-size: 9px !important;
+  width: auto !important;
+}
+
+/* Field errors compact height to prevent vertical shifting and layout inflation */
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .travel-field-error {
+  min-height: 10px !important;
+  height: 10px !important;
+  margin-top: 1px !important;
+  margin-bottom: 2px !important;
+  font-size: 9px !important;
+  line-height: 10px !important;
+}
+
+/* Terms checkbox layout */
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .travel-terms-wrap {
+  margin: 4px 0 2px !important;
+}
+
+/* Match links margin */
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .travel-auth-links {
+  margin: 2px 0 2px !important;
+}
+
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .travel-auth-links button {
+  font-size: 10.5px !important;
+}
+
+/* Match actions margin and submit button height */
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .travel-auth-actions {
+  margin-top: 6px !important;
+}
+
+.travel-auth-page.travel-auth-register .travel-step2-wrapper .travel-btn-primary {
+  min-height: 32px !important;
+  height: 32px !important;
+  font-size: 12.5px !important;
 }

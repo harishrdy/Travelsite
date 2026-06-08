@@ -172,12 +172,10 @@ export default function AdminBusUsedCouponListPage() {
   };
 
   return (
-    <section className="admin-markup-used-shell">
+    <section className="admin-b2c-page admin-markup-used-shell">
       <header className="admin-markup-used-header">
         <div className="admin-markup-used-title-wrap">
-          <h1>
-            <strong>B2C Bus Used</strong> Coupon List
-          </h1>
+          <h1>B2C Bus Used Coupon List</h1>
         </div>
 
         <div className="admin-markup-used-actions">
@@ -277,63 +275,65 @@ export default function AdminBusUsedCouponListPage() {
       {usedCouponError && <p className="admin-markup-form-error">{usedCouponError}</p>}
 
       <section className="admin-markup-used-table-wrap">
-        <table className="admin-markup-used-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Booking ID</th>
-              <th>Coupon Code</th>
-              <th>User ID</th>
-              <th>Used Date</th>
-              <th>Total Fare</th>
-              <th>CPN Type</th>
-              <th>CPN Value</th>
-              <th>CPN Amount</th>
-              <th>Booking Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoadingUsedCoupons ? (
+        <div className="admin-markup-used-table-scroll">
+          <table className="admin-markup-used-table">
+            <thead>
               <tr>
-                <td colSpan={10}>
-                  <p className="admin-markup-used-empty">
-                    <Loader2 size={16} className="spin" />
-                    <span>Loading used coupons from backend...</span>
-                  </p>
-                </td>
+                <th>ID</th>
+                <th>Booking ID</th>
+                <th>Coupon Code</th>
+                <th>User ID</th>
+                <th>Used Date</th>
+                <th>Total Fare</th>
+                <th>CPN Type</th>
+                <th>CPN Value</th>
+                <th>CPN Amount</th>
+                <th>Booking Status</th>
               </tr>
-            ) : visibleUsedCoupons.length === 0 ? (
-              <tr>
-                <td colSpan={10}>
-                  <p className="admin-markup-used-empty">No used coupons found.</p>
-                </td>
-              </tr>
-            ) : (
-              visibleUsedCoupons.map((record) => (
-                <tr key={`${record.id}-${record.bookingId}`}>
-                  <td>{record.id}</td>
-                  <td>{record.bookingId}</td>
-                  <td>{record.couponCode}</td>
-                  <td>{record.userId || "--"}</td>
-                  <td>{formatCouponDateTime(record.usedDate)}</td>
-                  <td>{formatCurrency(record.totalFare)}</td>
-                  <td>{record.cpnType}</td>
-                  <td>{formatCurrency(record.cpnValue)}</td>
-                  <td>{formatCurrency(record.cpnAmount)}</td>
-                  <td>
-                    <span
-                      className={`admin-markup-used-status ${String(
-                        record.bookingStatus || ""
-                      ).toLowerCase()}`}
-                    >
-                      {record.bookingStatus || "--"}
-                    </span>
+            </thead>
+            <tbody>
+              {isLoadingUsedCoupons ? (
+                <tr>
+                  <td colSpan={10}>
+                    <p className="admin-markup-used-empty">
+                      <Loader2 size={16} className="spin" />
+                      <span>Loading used coupons from backend...</span>
+                    </p>
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : visibleUsedCoupons.length === 0 ? (
+                <tr>
+                  <td colSpan={10}>
+                    <p className="admin-markup-used-empty">No used coupons found.</p>
+                  </td>
+                </tr>
+              ) : (
+                visibleUsedCoupons.map((record) => (
+                  <tr key={`${record.id}-${record.bookingId}`}>
+                    <td>{record.id}</td>
+                    <td>{record.bookingId}</td>
+                    <td>{record.couponCode}</td>
+                    <td>{record.userId || "--"}</td>
+                    <td>{formatCouponDateTime(record.usedDate)}</td>
+                    <td>{formatCurrency(record.totalFare)}</td>
+                    <td>{record.cpnType}</td>
+                    <td>{formatCurrency(record.cpnValue)}</td>
+                    <td>{formatCurrency(record.cpnAmount)}</td>
+                    <td>
+                      <span
+                        className={`admin-markup-used-status ${String(
+                          record.bookingStatus || ""
+                        ).toLowerCase()}`}
+                      >
+                        {record.bookingStatus || "--"}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </section>
     </section>
   );

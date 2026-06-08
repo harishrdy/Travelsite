@@ -29,25 +29,7 @@ public class FeaturedOffersController : BaseApiController
         });
     }
 
-    [HttpPost("apply-coupon")]
-    public async Task<IActionResult> ApplyCoupon([FromBody] ApplyOfferCouponRequest request)
-    {
-        if (request == null ||
-            string.IsNullOrWhiteSpace(request.OfferId) ||
-            string.IsNullOrWhiteSpace(request.CouponCode))
-        {
-            return BadRequest("OfferId and CouponCode are required.");
-        }
 
-        var result = await _featuredOffersService.ApplyCouponAsync(request);
-
-        if (!result.IsSuccess)
-        {
-            return BadRequest(result);
-        }
-
-        return Ok(result);
-    }
 
     [HttpPost("subscribe")]
     public async Task<IActionResult> SubscribeToExclusiveOffers([FromBody] ExclusiveOfferSubscriptionRequest request)

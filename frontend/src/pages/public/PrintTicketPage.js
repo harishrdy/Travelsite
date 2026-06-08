@@ -301,13 +301,13 @@ const QRCode = ({ text = 'GOB2024ABC', size = 100 }) => {
 };
 
 const HOME_THEME = {
-  primary: '#f04423', primaryStrong: '#df3f1f',
+  primary: '#009b8f', primaryStrong: '#006f7a',
   text: '#1f2a44', textSoft: '#64748b',
 };
 
 const ticketShell = {
   background: '#ffffff', borderRadius: 28, overflow: 'hidden',
-  boxShadow: '0 28px 60px rgba(125, 59, 31, 0.13)', border: '1px solid rgba(241, 217, 206, 0.95)',
+  boxShadow: '0 28px 60px rgba(13, 74, 83, 0.13)', border: '1px solid rgba(241, 217, 206, 0.95)',
   display: 'flex', flexDirection: 'column',
   width: '100%',
   height: 'var(--pb-ticket-height)',
@@ -460,11 +460,11 @@ const BusBackSide = ({ id, ticket }) => {
   const totalFare = Number(ticket?.totalPaid ?? ticket?.totalFare ?? fare.totalFare ?? 0);
   const baseFare = Number(fare.baseFare ?? ticket?.baseFare ?? (totalFare - convenienceFee - tax + discount));
   const gstPercent = Number(fare.gstPercent ?? ticket?.gstPercent ?? 0);
-  const orangeGradient = 'linear-gradient(135deg, #df3f1f 0%, #f04423 100%)';
+  const atlasGradient = 'linear-gradient(135deg, #006f7a 0%, #009b8f 100%)';
 
   return (
     <div id={id} className="pb-ticket-card pb-ticket-back-card" style={ticketShell}>
-      <div style={{ ...hdr, background: orangeGradient }}>
+      <div style={{ ...hdr, background: atlasGradient }}>
         <div style={{ fontSize: 14.5, fontWeight: 900, letterSpacing: 0, color: '#ffffff' }}>Bus Terms & Conditions</div>
       </div>
       <div style={{ display: 'flex', flex: 1, padding: 0 }}>
@@ -486,16 +486,16 @@ const BusBackSide = ({ id, ticket }) => {
 
         {/* Right Column: Fare Breakdown */}
         <div style={{ flex: 0.9, padding: '22px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <div style={{ fontSize: 9.5, fontWeight: 900, color: '#df3f1f', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.8, textAlign: 'right' }}>
+          <div style={{ fontSize: 9.5, fontWeight: 900, color: '#006f7a', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.8, textAlign: 'right' }}>
             DISCOUNTS APPLIED & FARE BREAKDOWN
           </div>
           
           <div style={{ 
             backgroundColor: '#ffffff', 
-            border: '1px solid rgba(240,68,35,0.34)', 
+            border: '1px solid rgba(0,155,143,0.34)', 
             borderRadius: 8, 
             padding: '16px',
-            boxShadow: '0 12px 28px rgba(125, 59, 31, 0.08)'
+            boxShadow: '0 12px 28px rgba(13, 74, 83, 0.08)'
           }}>
             {/* Base Fare */}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10.8, color: '#66758d', marginBottom: 8 }}>
@@ -544,7 +544,7 @@ const BusBackSide = ({ id, ticket }) => {
             {/* Total Fare */}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, fontWeight: 900, color: '#071b3d' }}>
               <span>Total Fare</span>
-              <span style={{ color: '#df3f1f' }}>₹ {totalFare.toFixed(2)}</span>
+              <span style={{ color: '#006f7a' }}>₹ {totalFare.toFixed(2)}</span>
             </div>
           </div>
         </div>

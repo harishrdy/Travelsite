@@ -4,8 +4,23 @@ import {
   FaEye,
   FaEyeSlash,
   FaCheckCircle,
-  FaThumbsUp
+  FaThumbsUp,
+  FaEnvelope,
+  FaMobileAlt,
+  FaShieldAlt,
+  FaCar,
+  FaHeadset,
+  FaTags,
+  FaUserFriends,
+  FaTicketAlt,
+  FaMapMarkerAlt,
+  FaStar,
+  FaApple,
+  FaRegUser,
+  FaTimes,
+  FaFacebook
 } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 import "../../STYLES/Login.css";
 import "../../STYLES/Register.css";
 import { requestAuth } from "../../services/authService";
@@ -13,27 +28,24 @@ import {
   validateLowercaseEmail,
   validateStrongPassword,
 } from "../../utils/authValidation";
-import flightCarImage from "../../assets/images/loginimage.png";
+import landscapeImage from "../../assets/images/new-landscape-bg.jpg";
+import brandLogo from "../../assets/images/brand/pick-n-book-logo.svg";
 
 const REGISTRATION_PENDING_EMAIL_KEY = "registrationPendingEmail";
 const REGISTRATION_VERIFIED_EMAIL_KEY = "registrationVerifiedEmail";
+const REGISTRATION_PENDING_MOBILE_KEY = "registrationPendingMobile";
+const REGISTRATION_VERIFIED_MOBILE_KEY = "registrationVerifiedMobile";
 const REGISTRATION_FORM_KEY = "registrationFormDraft";
 const REGISTRATION_OTP_STATE_KEY = "registrationOtpState";
-const OTP_LENGTH = 6;
 const OTP_TIMER_SECONDS = 60;
 const DEFAULT_OTP_CHANNEL = "";
-const OTP_CHANNEL_OPTIONS = [
-  { value: "", label: "Select one" },
-  { value: "email", label: "Email" },
-  { value: "mobile", label: "Mobile Number" },
-];
 const COUNTRY_CODE_OPTIONS = [
-  { value: "", label: "Select code", mobileLength: null },
+  { value: "", label: "Select Country", mobileLength: null },
   { value: "+91", label: "+91 (India)", mobileLength: 10 },
-  // { value: "+1", label: "+1 (USA/Canada)", mobileLength: 10 },
-  // { value: "+44", label: "+44 (UK)", mobileLength: 10 },
-  // { value: "+61", label: "+61 (Australia)", mobileLength: 9 },
-  // { value: "+971", label: "+971 (UAE)", mobileLength: 9 }
+  { value: "+1", label: "+1 (USA)", mobileLength: 10 },
+  { value: "+44", label: "+44 (UK)", mobileLength: 10 },
+  { value: "+971", label: "+971 (UAE)", mobileLength: 9 },
+  { value: "+65", label: "+65 (Singapore)", mobileLength: 8 }
 ];
 
 const COUNTRY_CODE_MAP = COUNTRY_CODE_OPTIONS.reduce((map, option) => {
@@ -105,17 +117,21 @@ const readRegistrationOtpState = () => {
 const hasAnyEnteredRegisterDetail = (form) => {
   return Boolean(
     form.firstName ||
-      form.lastName ||
-      form.countryCode ||
-      form.mobile ||
-      form.email ||
-      form.password ||
-      form.confirmPassword
+    form.lastName ||
+    form.countryCode ||
+    form.mobile ||
+    form.email ||
+    form.password ||
+    form.confirmPassword
   );
 };
 
-const validateRegisterForm = (form) => {
+const validateRegisterForm = (form, otpChannel) => {
   const nextErrors = {};
+
+  if (!otpChannel) {
+    nextErrors.otpChannel = "Please select Mobile or Email";
+  }
 
   if (!form.firstName) {
     nextErrors.firstName = "First name is required";
@@ -127,42 +143,46 @@ const validateRegisterForm = (form) => {
 
   if (!form.lastName) {
     nextErrors.lastName = "Last name is required";
-  }  else if (form.lastName.length > 18) {
+  } else if (form.lastName.length > 18) {
     nextErrors.lastName = "Last name cannot exceed 18 characters";
   } else if (!NAME_REGEX.test(form.lastName)) {
     nextErrors.lastName = "Only letters are allowed";
   }
 
-  if (!form.countryCode) {
-    nextErrors.countryCode = "Please select a country code";
-  } else if (!COUNTRY_CODE_MAP.has(form.countryCode)) {
-    nextErrors.countryCode = "Invalid country code";
-  }
+  if (otpChannel === "mobile") {
+    if (!form.countryCode) {
+      nextErrors.countryCode = "Please select a country code";
+    } else if (!COUNTRY_CODE_MAP.has(form.countryCode)) {
+      nextErrors.countryCode = "Invalid country code";
+    }
 
-  if (!form.mobile) {
-    nextErrors.mobile = "Mobile number is required";
-  } else if (!/^\d+$/.test(form.mobile)) {
-    nextErrors.mobile = "Only numbers are allowed";
-  } else {
-    const countryConfig = COUNTRY_CODE_MAP.get(form.countryCode);
-    const expectedLength = countryConfig?.mobileLength;
+    if (!form.mobile) {
+      nextErrors.mobile = "Mobile number is required";
+    } else if (!/^\d+$/.test(form.mobile)) {
+      nextErrors.mobile = "Only numbers are allowed";
+    } else {
+      const countryConfig = COUNTRY_CODE_MAP.get(form.countryCode);
+      const expectedLength = countryConfig?.mobileLength;
 
-    if (expectedLength && form.mobile.length !== expectedLength) {
-      nextErrors.mobile = `Mobile number must contain ${expectedLength} digits`;
-    } else if (form.countryCode === "+91" && !/^[6-9]/.test(form.mobile)) {
-      nextErrors.mobile = "Enter a valid mobile number";
-    } else if (!expectedLength && (form.mobile.length < 6 || form.mobile.length > 15)) {
-      nextErrors.mobile = "Enter a valid mobile number";
+      if (expectedLength && form.mobile.length !== expectedLength) {
+        nextErrors.mobile = `Mobile number must contain ${expectedLength} digits`;
+      } else if (form.countryCode === "+91" && !/^[6-9]/.test(form.mobile)) {
+        nextErrors.mobile = "Enter a valid mobile number";
+      } else if (!expectedLength && (form.mobile.length < 6 || form.mobile.length > 15)) {
+        nextErrors.mobile = "Enter a valid mobile number";
+      }
     }
   }
 
-  const emailError = validateLowercaseEmail(
-    form.email,
-    "Email address is required"
-  );
+  if (otpChannel === "email") {
+    const emailError = validateLowercaseEmail(
+      form.email,
+      "Email address is required"
+    );
 
-  if (emailError) {
-    nextErrors.email = emailError;
+    if (emailError) {
+      nextErrors.email = emailError;
+    }
   }
 
   const passwordError = validateStrongPassword(form.password);
@@ -185,26 +205,38 @@ const validateRegisterForm = (form) => {
   return nextErrors;
 };
 
+const getBackgroundImage = (step) => {
+  return landscapeImage;
+};
+
 const Register = () => {
   const navigate = useNavigate();
   const firstNameRef = useRef(null);
-  const otpInputRefs = useRef([]);
-  const countryDropdownRef = useRef(null);
+  const otpInputRef = useRef(null);
+  const otpDropdownRef = useRef(null);
   const draftForm = readRegistrationDraft();
   const draftOtpState = readRegistrationOtpState();
-  const authPageStyle = {
-    backgroundImage: `url(${flightCarImage})`
-  };
   const verifiedEmail =
     typeof window !== "undefined"
       ? window.sessionStorage.getItem(REGISTRATION_VERIFIED_EMAIL_KEY) || ""
       : "";
+  const verifiedMobile =
+    typeof window !== "undefined"
+      ? window.sessionStorage.getItem(REGISTRATION_VERIFIED_MOBILE_KEY) || ""
+      : "";
+
   const initialEmail =
     verifiedEmail ||
     (typeof window !== "undefined"
       ? window.sessionStorage.getItem(REGISTRATION_PENDING_EMAIL_KEY) || ""
       : "");
-  const isOtpVerified = Boolean(verifiedEmail);
+  const initialMobile =
+    verifiedMobile ||
+    (typeof window !== "undefined"
+      ? window.sessionStorage.getItem(REGISTRATION_PENDING_MOBILE_KEY) || ""
+      : "");
+
+  const isOtpVerified = Boolean(verifiedEmail) || Boolean(verifiedMobile);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -214,31 +246,100 @@ const Register = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [serverErrors, setServerErrors] = useState({});
   const [highlightRequiredFields, setHighlightRequiredFields] = useState(false);
+
+  const [currentStep, setCurrentStep] = useState(() => {
+    if (isOtpVerified) return 2;
+    if (draftOtpState?.emailOtpSent || initialEmail || initialMobile) return 2;
+    return 1;
+  });
   const [showVerifiedPopup, setShowVerifiedPopup] = useState(isOtpVerified);
   const [shakeOtp, setShakeOtp] = useState(false);
   const [otpPopupMessage, setOtpPopupMessage] = useState("");
+  const [isEditEmailModalOpen, setIsEditEmailModalOpen] = useState(false);
+  const [draftEditEmail, setDraftEditEmail] = useState("");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const navEntries = window.performance.getEntriesByType("navigation");
+    if (navEntries.length > 0 && navEntries[0].type === "reload") {
+      let count = parseInt(window.sessionStorage.getItem("pageRefreshCount") || "0", 10);
+      count += 1;
+      window.sessionStorage.setItem("pageRefreshCount", count.toString());
+
+      if (count >= 3) {
+        window.sessionStorage.removeItem(REGISTRATION_PENDING_EMAIL_KEY);
+        window.sessionStorage.removeItem(REGISTRATION_VERIFIED_EMAIL_KEY);
+        window.sessionStorage.removeItem(REGISTRATION_PENDING_MOBILE_KEY);
+        window.sessionStorage.removeItem(REGISTRATION_VERIFIED_MOBILE_KEY);
+        window.sessionStorage.removeItem(REGISTRATION_FORM_KEY);
+        window.sessionStorage.removeItem(REGISTRATION_OTP_STATE_KEY);
+        window.sessionStorage.setItem("pageRefreshCount", "0");
+        window.localStorage.removeItem(REGISTRATION_FORM_KEY);
+        window.localStorage.removeItem(REGISTRATION_OTP_STATE_KEY);
+
+        setCurrentStep(1);
+        setForm({
+          firstName: "",
+          lastName: "",
+          countryCode: "",
+          mobile: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          agree: false
+        });
+        setOtpChannel(DEFAULT_OTP_CHANNEL);
+        setEmailOtpSent(false);
+        setEmailOtp("");
+        setOtpSecondsLeft(0);
+
+        setApiMessage("Session reset due to multiple page refreshes. Please start over.");
+        setIsSuccess(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (otpPopupMessage) {
+      const timer = setTimeout(() => {
+        setOtpPopupMessage("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [otpPopupMessage]);
+
+  useEffect(() => {
+    if (apiMessage && !isSuccess) {
+      const timer = setTimeout(() => {
+        setApiMessage("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [apiMessage, isSuccess]);
+
+  const [contactValue, setContactValue] = useState(initialEmail || initialMobile || "");
   const [otpChannel, setOtpChannel] = useState(
     draftOtpState?.otpChannel || DEFAULT_OTP_CHANNEL
   );
   const [emailOtpSent, setEmailOtpSent] = useState(
-    !isOtpVerified && Boolean(draftOtpState?.emailOtpSent || initialEmail)
+    !isOtpVerified && Boolean(draftOtpState?.emailOtpSent || initialEmail || initialMobile)
   );
   const [emailOtp, setEmailOtp] = useState(
     !isOtpVerified ? draftOtpState?.emailOtp || "" : ""
   );
   const [otpSecondsLeft, setOtpSecondsLeft] = useState(
     !isOtpVerified
-      ? Number(draftOtpState?.otpSecondsLeft) || (Boolean(initialEmail) ? OTP_TIMER_SECONDS : 0)
+      ? Number(draftOtpState?.otpSecondsLeft) || (Boolean(initialEmail) || Boolean(initialMobile) ? OTP_TIMER_SECONDS : 0)
       : 0
   );
-  const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
+  const [otpDropdownOpen, setOtpDropdownOpen] = useState(false);
 
   const [form, setForm] = useState({
     firstName: draftForm?.firstName || "",
     lastName: draftForm?.lastName || "",
     countryCode: draftForm?.countryCode || "",
-    mobile: draftForm?.mobile || "",
-    email: initialEmail,
+    mobile: initialMobile || draftForm?.mobile || "",
+    email: initialEmail || draftForm?.email || "",
     password: draftForm?.password || "",
     confirmPassword: draftForm?.confirmPassword || "",
     agree: Boolean(draftForm?.agree)
@@ -248,8 +349,8 @@ const Register = () => {
 
   const normalizedForm = useMemo(() => normalizeForm(form), [form]);
   const validationErrors = useMemo(
-    () => validateRegisterForm(normalizedForm),
-    [normalizedForm]
+    () => validateRegisterForm(normalizedForm, otpChannel),
+    [normalizedForm, otpChannel]
   );
   const selectedCountry = COUNTRY_CODE_MAP.get(form.countryCode);
   const mobileMaxLength = selectedCountry?.mobileLength || 15;
@@ -260,30 +361,42 @@ const Register = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target)) {
-        setCountryDropdownOpen(false);
+      if (otpDropdownRef.current && !otpDropdownRef.current.contains(event.target)) {
+        setOtpDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleCountryCodeSelect = (val) => {
-    setForm((prev) => ({
-      ...prev,
-      countryCode: val
-    }));
-    setTouched((prev) => ({ ...prev, countryCode: true }));
-    setServerErrors((prev) => ({ ...prev, countryCode: "" }));
-    setHighlightRequiredFields(false);
-    setApiMessage("");
-    setCountryDropdownOpen(false);
+  const handleContactChange = (e) => {
+    const val = e.target.value;
+    setContactValue(val);
+
+    // Automatically determine if it's email or mobile
+    if (val.includes("@") || /[a-zA-Z]/.test(val)) {
+      setOtpChannel("email");
+      setForm((prev) => ({ ...prev, email: val, mobile: "", countryCode: "" }));
+    } else {
+      setOtpChannel("mobile");
+      // Clean mobile input (digits only)
+      const mobileVal = val.replace(/\D/g, "");
+      setForm((prev) => ({ ...prev, mobile: mobileVal, email: "", countryCode: "+91" }));
+    }
   };
 
   const handleOtpChannelChange = (event) => {
     const nextChannel = event.target.value;
 
     setOtpChannel(nextChannel);
+
+    if (nextChannel === "mobile") {
+      setForm((prev) => ({
+        ...prev,
+        countryCode: prev.countryCode || "+91"
+      }));
+    }
+
     setEmailOtpSent(false);
     setEmailOtp("");
     setOtpSecondsLeft(0);
@@ -344,18 +457,6 @@ const Register = () => {
     window.sessionStorage.setItem(REGISTRATION_OTP_STATE_KEY, otpPayload);
   }, [otpChannel, emailOtpSent, emailOtp, otpSecondsLeft]);
 
-  useEffect(() => {
-    if (!otpPopupMessage) {
-      return undefined;
-    }
-
-    const timerId = window.setTimeout(() => {
-      setOtpPopupMessage("");
-    }, 3500);
-
-    return () => window.clearTimeout(timerId);
-  }, [otpPopupMessage]);
-
   const getFieldError = (fieldName) => {
     if (serverErrors[fieldName]) {
       return serverErrors[fieldName];
@@ -376,11 +477,15 @@ const Register = () => {
     return getFieldError(fieldName) || "";
   };
 
-  const shouldHighlightRequiredField = (fieldName) =>
-    highlightRequiredFields &&
-    REQUIRED_FIELD_NAMES.has(fieldName) &&
-    ((fieldName === "agree" && !form.agree) ||
-      (fieldName !== "agree" && !String(form[fieldName] || "").trim()));
+  const shouldHighlightRequiredField = (fieldName) => {
+    if (!highlightRequiredFields) return false;
+    if (fieldName === "agree") return !form.agree;
+    if (fieldName === "email" && otpChannel !== "email") return false;
+    if (fieldName === "mobile" && otpChannel !== "mobile") return false;
+    if (fieldName === "countryCode" && otpChannel !== "mobile") return false;
+
+    return REQUIRED_FIELD_NAMES.has(fieldName) && !String(form[fieldName] || "").trim();
+  };
 
   const getFieldHasError = (fieldName) =>
     shouldHighlightRequiredField(fieldName) || Boolean(getFieldError(fieldName));
@@ -394,16 +499,7 @@ const Register = () => {
   };
 
   const statusMessage = getStatusMessage();
-  const showGlobalError =
-    statusMessage &&
-    !isSuccess &&
-    !serverErrors.email &&
-    !serverErrors.emailOtp;
   const otpTimerExpired = emailOtpSent && otpSecondsLeft === 0;
-  const otpInlineMessage = otpTimerExpired ? "OTP expired" : "";
-
-  const showOtpUI = emailOtpSent && !isOtpVerified;
-  // const showExpiredMessage = showOtpUI && otpTimerExpired;
 
   const sanitizeValue = (name, value) => {
     if (name === "firstName" || name === "lastName") {
@@ -455,30 +551,6 @@ const Register = () => {
     return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
   };
 
-  const showEmailSpaceError = () => {
-    setTouched((prev) => ({ ...prev, email: true }));
-    setServerErrors((prev) => ({
-      ...prev,
-      email: "Email cannot contain spaces",
-    }));
-    setHighlightRequiredFields(false);
-    setApiMessage("");
-  };
-
-  const handleEmailKeyDown = (event) => {
-    if (event.key === " ") {
-      event.preventDefault();
-      showEmailSpaceError();
-    }
-  };
-
-  const handleEmailPaste = (event) => {
-    if (/\s/.test(event.clipboardData.getData("text"))) {
-      event.preventDefault();
-      showEmailSpaceError();
-    }
-  };
-
   const markAllTouched = () => {
     setTouched({
       firstName: true,
@@ -498,50 +570,6 @@ const Register = () => {
     setOtpPopupMessage("");
     setApiMessage("");
     setIsSuccess(false);
-  };
-
-  const handleOtpBoxChange = (index, value) => {
-    const digits = value.replace(/\D+/g, "");
-
-    if (!digits) {
-      const otpDigits = emailOtp.split("");
-      otpDigits[index] = "";
-      updateEmailOtp(otpDigits.join("").slice(0, OTP_LENGTH));
-      return;
-    }
-
-    const otpDigits = emailOtp.split("");
-    digits.split("").forEach((digit, offset) => {
-      const nextIndex = index + offset;
-      if (nextIndex < OTP_LENGTH) {
-        otpDigits[nextIndex] = digit;
-      }
-    });
-
-    updateEmailOtp(otpDigits.join("").slice(0, OTP_LENGTH));
-    const focusIndex = Math.min(index + digits.length, OTP_LENGTH - 1);
-    otpInputRefs.current[focusIndex]?.focus();
-  };
-
-  const handleOtpKeyDown = (index, event) => {
-    if (event.key === "Backspace" && !emailOtp[index] && index > 0) {
-      event.preventDefault();
-      otpInputRefs.current[index - 1]?.focus();
-      return;
-    }
-
-    if (event.key === "ArrowLeft" && index > 0) {
-      otpInputRefs.current[index - 1]?.focus();
-    }
-
-    if (event.key === "ArrowRight" && index < OTP_LENGTH - 1) {
-      otpInputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOtpPaste = (index, event) => {
-    event.preventDefault();
-    handleOtpBoxChange(index, event.clipboardData.getData("text"));
   };
 
   const showValidationErrors = (formToCheck) => {
@@ -569,75 +597,33 @@ const Register = () => {
     window.sessionStorage.removeItem(REGISTRATION_OTP_STATE_KEY);
   };
 
-  const getOtpTargetValidation = (cleanedForm) => {
-    if (!otpChannel) {
-      return { field: "otpChannel", message: "Please select one" };
-    }
-
-    if (otpChannel === "mobile") {
-      if (!cleanedForm.countryCode) {
-        return { field: "countryCode", message: "Please select a country code" };
-      }
-
-      const countryConfig = COUNTRY_CODE_MAP.get(cleanedForm.countryCode);
-      const expectedLength = countryConfig?.mobileLength;
-
-      if (!cleanedForm.mobile) {
-        return { field: "mobile", message: "Mobile number is required" };
-      }
-
-      if (!/^\d+$/.test(cleanedForm.mobile)) {
-        return { field: "mobile", message: "Only numbers are allowed" };
-      }
-
-      if (expectedLength && cleanedForm.mobile.length !== expectedLength) {
-        return {
-          field: "mobile",
-          message: `Mobile number must contain ${expectedLength} digits`,
-        };
-      }
-
-      if (cleanedForm.countryCode === "+91" && !/^[6-9]/.test(cleanedForm.mobile)) {
-        return { field: "mobile", message: "Enter a valid mobile number" };
-      }
-
-      return null;
-    }
-
-    const emailError = validateLowercaseEmail(
-      cleanedForm.email,
-      "Email address is required"
-    );
-
-    if (emailError) {
-      return { field: "email", message: emailError };
-    }
-
-    return null;
-  };
-
-  const sendRegistrationOtp = async ({ validateFullForm = false } = {}) => {
+  const sendRegistrationOtp = async ({ validateFullForm = false, overrideForm = null } = {}) => {
     if (loading) return;
 
-    const cleanedForm = normalizeForm(form);
-    setForm(cleanedForm);
-
-    if (validateFullForm) {
-      const nextErrors = validateRegisterForm(cleanedForm);
-      if (Object.keys(nextErrors).length > 0) {
-        showValidationErrors(cleanedForm);
-        return false;
-      }
+    const cleanedForm = normalizeForm(overrideForm || form);
+    if (!overrideForm) {
+      setForm(cleanedForm);
+    } else {
+      setForm(overrideForm);
     }
 
-    const otpTargetError = getOtpTargetValidation(cleanedForm);
+    const nextErrors = validateRegisterForm(cleanedForm, otpChannel);
+    const step1Errors = ['firstName', 'lastName', 'otpChannel', 'email', 'mobile', 'countryCode']
+      .reduce((acc, field) => {
+        if (nextErrors[field]) acc[field] = nextErrors[field];
+        return acc;
+      }, {});
 
-    if (otpTargetError) {
-      setTouched((prev) => ({ ...prev, [otpTargetError.field]: true }));
-      setServerErrors((prev) => ({
+    if (Object.keys(step1Errors).length > 0) {
+      setTouched((prev) => ({
         ...prev,
-        [otpTargetError.field]: otpTargetError.message,
+        firstName: true,
+        lastName: true,
+        email: true,
+        mobile: true,
+        countryCode: true
       }));
+      setServerErrors(step1Errors);
       setApiMessage("");
       setIsSuccess(false);
       return false;
@@ -657,21 +643,20 @@ const Register = () => {
         {
           method: "POST",
           body: JSON.stringify({
-            email,
-            mobile,
-            phoneNumber: mobile,
-            countryCode: cleanedForm.countryCode,
-            otpChannel,
-            deliveryChannel: otpChannel,
-            recipient: otpChannel === "mobile" ? mobile : email,
+            ...(otpChannel === "mobile" ? { phoneNumber: mobile, channel: "Mobile" } : { email, channel: "Email" })
           })
         },
         "Failed to send OTP"
       );
 
       if (typeof window !== "undefined") {
-        window.sessionStorage.setItem(REGISTRATION_PENDING_EMAIL_KEY, email);
-        window.sessionStorage.removeItem(REGISTRATION_VERIFIED_EMAIL_KEY);
+        if (otpChannel === "mobile") {
+          window.sessionStorage.setItem(REGISTRATION_PENDING_MOBILE_KEY, mobile);
+          window.sessionStorage.removeItem(REGISTRATION_VERIFIED_MOBILE_KEY);
+        } else {
+          window.sessionStorage.setItem(REGISTRATION_PENDING_EMAIL_KEY, email);
+          window.sessionStorage.removeItem(REGISTRATION_VERIFIED_EMAIL_KEY);
+        }
       }
 
       setEmailOtpSent(true);
@@ -679,9 +664,10 @@ const Register = () => {
       setEmailOtp("");
       setOtpPopupMessage("");
       setIsSuccess(true);
-      setApiMessage("OTP sent to your email.");
+      setApiMessage("OTP sent.");
+      setCurrentStep(2);
       window.setTimeout(() => {
-        otpInputRefs.current[0]?.focus();
+        otpInputRef.current?.focus();
       }, 0);
       return true;
     } catch (error) {
@@ -691,16 +677,12 @@ const Register = () => {
 
       if (/already/i.test(message)) {
         if (typeof window !== "undefined") {
-          window.sessionStorage.removeItem(REGISTRATION_PENDING_EMAIL_KEY);
+          window.sessionStorage.removeItem(otpChannel === "mobile" ? REGISTRATION_PENDING_MOBILE_KEY : REGISTRATION_PENDING_EMAIL_KEY);
         }
-        setForm((prev) => ({
-          ...prev,
-          email: ""
-        }));
         setServerErrors({
-          email: "Email already registered"
+          [otpChannel === "mobile" ? "mobile" : "email"]: `${otpChannel === "mobile" ? "Mobile" : "Email"} already registered`
         });
-        setTouched((prev) => ({ ...prev, email: true }));
+        setTouched((prev) => ({ ...prev, [otpChannel === "mobile" ? "mobile" : "email"]: true }));
         setApiMessage("");
       } else {
         setApiMessage(message);
@@ -710,39 +692,6 @@ const Register = () => {
       setLoading(false);
       setLoadingAction("");
     }
-  };
-
-  const restartRegistration = () => {
-    if (typeof window !== "undefined") {
-      window.sessionStorage.removeItem(REGISTRATION_PENDING_EMAIL_KEY);
-      window.sessionStorage.removeItem(REGISTRATION_VERIFIED_EMAIL_KEY);
-      window.sessionStorage.removeItem(REGISTRATION_FORM_KEY);
-      window.localStorage.removeItem(REGISTRATION_FORM_KEY);
-      clearOtpSessionState();
-    }
-
-    setForm({
-      firstName: "",
-      lastName: "",
-      countryCode: "",
-      mobile: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      agree: false
-    });
-
-    setTouched({});
-    setServerErrors({});
-    setApiMessage("");
-    setIsSuccess(false);
-    setHighlightRequiredFields(false);
-    setShowVerifiedPopup(false);
-
-    // OTP UI state
-    setEmailOtpSent(false);
-    setEmailOtp("");
-    setOtpSecondsLeft(0);
   };
 
   const resendRegistrationOtp = async () => {
@@ -755,16 +704,17 @@ const Register = () => {
       return;
     }
 
-    // Clear old OTP immediately and restart timer via sendRegistrationOtp
+    // Clear old OTP immediately and restart timer
     setEmailOtp("");
     setServerErrors((prev) => ({ ...prev, emailOtp: "" }));
     setOtpPopupMessage("");
+    setOtpSecondsLeft(OTP_TIMER_SECONDS);
 
     await sendRegistrationOtp();
 
-    // Focus first OTP box after resend
+    // Focus OTP input after resend
     window.setTimeout(() => {
-      otpInputRefs.current[0]?.focus();
+      otpInputRef.current?.focus();
     }, 0);
   };
 
@@ -774,9 +724,11 @@ const Register = () => {
     if (otpTimerExpired) {
       setServerErrors((prev) => ({
         ...prev,
-        emailOtp: "OTP expired"
+        emailOtp: "OTP will expire"
       }));
-      setOtpPopupMessage("");
+      setOtpPopupMessage("OTP will expire");
+      setShakeOtp(true);
+      setTimeout(() => setShakeOtp(false), 500);
       setApiMessage("");
       setIsSuccess(false);
       return false;
@@ -788,6 +740,8 @@ const Register = () => {
         emailOtp: "Invalid OTP"
       }));
       setOtpPopupMessage("Invalid OTP");
+      setShakeOtp(true);
+      setTimeout(() => setShakeOtp(false), 500);
       return false;
     }
 
@@ -806,21 +760,22 @@ const Register = () => {
         {
           method: "POST",
           body: JSON.stringify({
-            email,
-            mobile,
-            phoneNumber: mobile,
-            countryCode: form.countryCode,
+            ...(otpChannel === "mobile" ? { phoneNumber: mobile } : { email }),
+            channel: otpChannel === "mobile" ? "Mobile" : "Email",
             otp: emailOtp,
-            otpChannel,
-            deliveryChannel: otpChannel,
           })
         },
         "OTP verification failed"
       );
 
       if (typeof window !== "undefined") {
-        window.sessionStorage.removeItem(REGISTRATION_PENDING_EMAIL_KEY);
-        window.sessionStorage.setItem(REGISTRATION_VERIFIED_EMAIL_KEY, email);
+        if (otpChannel === "mobile") {
+          window.sessionStorage.removeItem(REGISTRATION_PENDING_MOBILE_KEY);
+          window.sessionStorage.setItem(REGISTRATION_VERIFIED_MOBILE_KEY, mobile);
+        } else {
+          window.sessionStorage.removeItem(REGISTRATION_PENDING_EMAIL_KEY);
+          window.sessionStorage.setItem(REGISTRATION_VERIFIED_EMAIL_KEY, email);
+        }
       }
 
       setEmailOtpSent(false);
@@ -828,6 +783,8 @@ const Register = () => {
       setEmailOtp("");
       clearOtpSessionState();
       setShowVerifiedPopup(true);
+      setShakeOtp(false);
+      setOtpPopupMessage("");
       setIsSuccess(true);
       setApiMessage("OTP verified successfully.");
       // Hide OTP UI after successful verification
@@ -870,13 +827,13 @@ const Register = () => {
     if (loading) return;
 
     if (!isOtpVerified && emailOtpSent) {
-    // Trigger shake animation to highlight OTP input and resend button
-    setShakeOtp(true);
-    // Remove shake after animation completes (~0.5s)
-    setTimeout(() => setShakeOtp(false), 600);
-    await verifyRegistrationOtp();
-    return;
-  }
+      // Trigger shake animation to highlight OTP input and resend button
+      setShakeOtp(true);
+      // Remove shake after animation completes (~0.5s)
+      setTimeout(() => setShakeOtp(false), 600);
+      await verifyRegistrationOtp();
+      return;
+    }
 
     if (!isOtpVerified) {
       await sendRegistrationOtp({ validateFullForm: true });
@@ -886,7 +843,7 @@ const Register = () => {
     const cleanedForm = normalizeForm(form);
     setForm(cleanedForm);
 
-    const nextErrors = validateRegisterForm(cleanedForm);
+    const nextErrors = validateRegisterForm(cleanedForm, otpChannel);
     const formIsValid = Object.keys(nextErrors).length === 0;
     if (!formIsValid) {
       showValidationErrors(cleanedForm);
@@ -907,8 +864,8 @@ const Register = () => {
           body: JSON.stringify({
             firstName: cleanedForm.firstName,
             lastName: cleanedForm.lastName,
-            phoneNumber: cleanedForm.mobile,
-            email: verifiedEmail,
+            phoneNumber: verifiedMobile || cleanedForm.mobile,
+            email: verifiedEmail || cleanedForm.email,
             password: cleanedForm.password
           })
         },
@@ -920,13 +877,13 @@ const Register = () => {
       if (typeof window !== "undefined") {
         window.sessionStorage.removeItem(REGISTRATION_PENDING_EMAIL_KEY);
         window.sessionStorage.removeItem(REGISTRATION_VERIFIED_EMAIL_KEY);
+        window.sessionStorage.removeItem(REGISTRATION_PENDING_MOBILE_KEY);
+        window.sessionStorage.removeItem(REGISTRATION_VERIFIED_MOBILE_KEY);
         window.sessionStorage.removeItem(REGISTRATION_FORM_KEY);
         window.localStorage.removeItem(REGISTRATION_FORM_KEY);
         clearOtpSessionState();
       }
-      setTimeout(() => {
-        navigate("/login");
-      }, 1500);
+      setCurrentStep(3);
     } catch (error) {
       const message = error?.message || "Something went wrong. Please try again.";
 
@@ -935,18 +892,23 @@ const Register = () => {
       if (/otp verification required/i.test(message)) {
         setApiMessage("OTP verification required");
         if (typeof window !== "undefined") {
-          window.sessionStorage.removeItem(REGISTRATION_VERIFIED_EMAIL_KEY);
-          window.sessionStorage.setItem(REGISTRATION_PENDING_EMAIL_KEY, verifiedEmail);
+          if (verifiedMobile) {
+            window.sessionStorage.removeItem(REGISTRATION_VERIFIED_MOBILE_KEY);
+            window.sessionStorage.setItem(REGISTRATION_PENDING_MOBILE_KEY, verifiedMobile);
+          } else {
+            window.sessionStorage.removeItem(REGISTRATION_VERIFIED_EMAIL_KEY);
+            window.sessionStorage.setItem(REGISTRATION_PENDING_EMAIL_KEY, verifiedEmail);
+          }
         }
         navigate("/verify", {
           state: {
             flow: "register",
-            email: verifiedEmail,
+            email: verifiedEmail || verifiedMobile,
           },
         });
       } else if (/already exists|already registered/i.test(message)) {
         setServerErrors({
-          email: "Email already registered"
+          [otpChannel === "mobile" ? "mobile" : "email"]: `${otpChannel === "mobile" ? "Mobile" : "Email"} already registered`
         });
         setApiMessage("");
       } else {
@@ -960,8 +922,87 @@ const Register = () => {
 
   const hasValue = (value) => value.trim().length > 0;
 
+  const getPasswordStrength = (pw) => {
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    return score;
+  };
+  const pwScore = getPasswordStrength(form.password);
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (currentStep === 1) {
+      sendRegistrationOtp({ validateFullForm: false });
+    } else if (currentStep === 2) {
+      handleSubmit(e);
+    }
+  };
+
+  const authPageStyle = {
+    backgroundImage: `url(${getBackgroundImage(currentStep || 1)})`,
+    transition: 'background-image 0.5s ease-in-out'
+  };
+
   return (
     <div className="travel-auth-page travel-auth-register" style={authPageStyle}>
+      <div className="travel-auth-left-content">
+        <h1 className="travel-hero-title">Travel More, Worry Less</h1>
+        <p className="travel-hero-subtitle">Join millions of happy travelers and book your next journey with ease.</p>
+
+        <ul className="travel-benefits-list">
+          <li>
+            <span className="travel-benefit-icon"><FaTags /></span>
+            <div className="travel-benefit-text">
+              <strong>Best Prices Guaranteed</strong>
+              <span>Get the best deals on flights, buses and more.</span>
+            </div>
+          </li>
+          <li>
+            <span className="travel-benefit-icon"><FaShieldAlt /></span>
+            <div className="travel-benefit-text">
+              <strong>Safe & Secure Payments</strong>
+              <span>Your payments and personal details are 100% secure.</span>
+            </div>
+          </li>
+          <li>
+            <span className="travel-benefit-icon"><FaCar /></span>
+            <div className="travel-benefit-text">
+              <strong>Wide Choices</strong>
+              <span>Choose from thousands of routes, buses and schedules.</span>
+            </div>
+          </li>
+          <li>
+            <span className="travel-benefit-icon"><FaHeadset /></span>
+            <div className="travel-benefit-text">
+              <strong>24/7 Customer Support</strong>
+              <span>Our support team is always here to help you anytime.</span>
+            </div>
+          </li>
+        </ul>
+
+        <div className="travel-stats-bar">
+          <div className="travel-stat-item">
+            <div className="travel-stat-icon text-orange"><FaUserFriends /></div>
+            <div className="travel-stat-text"><strong>10M+</strong><br /><span>Happy Users</span></div>
+          </div>
+          <div className="travel-stat-item">
+            <div className="travel-stat-icon text-blue"><FaTicketAlt /></div>
+            <div className="travel-stat-text"><strong>200K+</strong><br /><span>Daily Bookings</span></div>
+          </div>
+          <div className="travel-stat-item">
+            <div className="travel-stat-icon text-green"><FaMapMarkerAlt /></div>
+            <div className="travel-stat-text"><strong>5000+</strong><br /><span>Routes Covered</span></div>
+          </div>
+          <div className="travel-stat-item">
+            <div className="travel-stat-icon text-purple"><FaStar /></div>
+            <div className="travel-stat-text"><strong>4.8 <FaStar className="small-star" /></strong><br /><span>Average Rating</span></div>
+          </div>
+        </div>
+      </div>
+
       <div className="travel-auth-card">
         <section className="travel-auth-form-panel">
           {showVerifiedPopup && (
@@ -973,394 +1014,434 @@ const Register = () => {
             </div>
           )}
 
-          <h3 className="travel-tagline">Create Account</h3>
-          <p className="travel-auth-subheading">
-            {isOtpVerified
-          ? "OTP verified. Complete your details to create the account."
-              : "Sign up to book bus seats, flights and more"}
-          </p>
-
-          {statusMessage && isSuccess && (
-            <p
-              className={`travel-auth-status ${isSuccess ? "is-success" : "is-error"}`}
-            >
-              {statusMessage}
-            </p>
+          {otpPopupMessage && (
+            <div className="travel-otp-toast">
+              <span style={{ color: '#ef4444' }}>⚠️</span>
+              <span className="travel-otp-toast-message">{otpPopupMessage}</span>
+              <div className="travel-otp-toast-progress"></div>
+            </div>
           )}
 
-          <form className="travel-auth-form" onSubmit={handleSubmit} noValidate autoComplete="off">
-            <div className="travel-register-grid">
-              <div className="travel-field">
-                <label className="travel-label" htmlFor="register-first-name">First Name <span className="travel-required-star">*</span></label>
-                <div className={`travel-field-line ${getFieldHasError("firstName") ? "has-error" : ""}`}>
-                  <input
-                    ref={firstNameRef}
-                    id="register-first-name"
-                    name="firstName"
-                    placeholder="First name"
-                    value={form.firstName}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    autoComplete="off"
-                    maxLength={18}
-                    disabled={loading}
-                  />
-                  {hasValue(form.firstName) && !getFieldHasError("firstName") && (
-                    <FaCheckCircle className="travel-field-check" aria-hidden="true" />
-                  )}
-                </div>
-                <p className="travel-field-error">{getFieldDisplayError("firstName") || "\u00A0"}</p>
-              </div>
+          {apiMessage && !isSuccess && (
+            <div className="travel-otp-toast">
+              <span style={{ color: '#ef4444' }}>⚠️</span>
+              <span className="travel-otp-toast-message">{apiMessage}</span>
+              <div className="travel-otp-toast-progress"></div>
+            </div>
+          )}
 
-              <div className="travel-field">
-                <label className="travel-label" htmlFor="register-last-name">Last Name <span className="travel-required-star">*</span></label>
-                <div className={`travel-field-line ${getFieldHasError("lastName") ? "has-error" : ""}`}>
-                  <input
-                    id="register-last-name"
-                    name="lastName"
-                    placeholder="Last name"
-                    value={form.lastName}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    autoComplete="off"
-                    maxLength={18}
-                    disabled={loading}
-                  />
-                  {hasValue(form.lastName) && !getFieldHasError("lastName") && (
-                    <FaCheckCircle className="travel-field-check" aria-hidden="true" />
-                  )}
-                </div>
-                <p className="travel-field-error">{getFieldDisplayError("lastName") || "\u00A0"}</p>
-              </div>
+          <img
+            src={brandLogo}
+            alt="Pick N Book"
+            className="auth-brand-logo auth-brand-logo-form"
+          />
 
-              <div className="travel-field">
-                <label className="travel-label" htmlFor="register-country-code">Country Code <span className="travel-required-star">*</span></label>
-                <div 
-                  ref={countryDropdownRef}
-                  className={`travel-field-line travel-custom-dropdown-container ${getFieldHasError("countryCode") ? "has-error" : ""}`}
-                >
-                  <div 
-                    id="register-country-code"
-                    className={`travel-custom-dropdown-header ${form.countryCode ? "valid-selected" : ""}`}
-                    onClick={() => !loading && setCountryDropdownOpen(!countryDropdownOpen)}
-                  >
-                    <span>
-                      {form.countryCode 
-                        ? COUNTRY_CODE_OPTIONS.find(o => o.value === form.countryCode)?.label 
-                        : "Select code"}
-                    </span>
-                    <span className={`travel-dropdown-arrow ${countryDropdownOpen ? "open" : ""}`}>▼</span>
+          {currentStep === 1 && (
+            <>
+              <h2 className="travel-auth-heading">Create Account</h2>
+              <p className="travel-auth-subheading">
+                {isOtpVerified
+                  ? "OTP verified. Complete your details to create the account."
+                  : "Let's get you started on your next journey"}
+              </p>
+            </>
+          )}
+
+          {statusMessage && isSuccess && (
+            <p className="travel-auth-status is-success">{statusMessage}</p>
+          )}
+
+          {currentStep <= 2 && (
+            <div className="travel-stepper">
+              <div className={`stepper-item ${currentStep >= 1 ? 'active' : ''}`}>
+                <div className="step-circle">{currentStep > 1 ? '✓' : 1}</div>
+                <div className="step-label">Details</div>
+              </div>
+              <div className={`stepper-line ${currentStep >= 2 ? 'active' : ''}`} />
+              <div className={`stepper-item ${currentStep >= 2 ? 'active' : ''}`}>
+                <div className="step-circle">{currentStep > 2 ? '✓' : 2}</div>
+                <div className="step-label">Verify & Create</div>
+              </div>
+            </div>
+          )}
+
+          <form className="travel-auth-form" onSubmit={handleFormSubmit} noValidate autoComplete="off">
+            {currentStep === 1 && (
+              <>
+                <div className="travel-form-section">
+                  <div className="travel-section-title">
+                    Personal Details
                   </div>
-                  {countryDropdownOpen && (
-                    <div className="travel-custom-dropdown-options">
-                      {COUNTRY_CODE_OPTIONS.map((option) => (
-                        <div
-                          key={option.label}
-                          className={`travel-custom-dropdown-option ${form.countryCode === option.value ? "is-selected" : ""}`}
-                          onClick={() => handleCountryCodeSelect(option.value)}
-                        >
-                          {option.label}
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
-                <p className="travel-field-error">{getFieldDisplayError("countryCode") || "\u00A0"}</p>
-              </div>
 
-              <div className="travel-field">
-                <label className="travel-label" htmlFor="register-mobile">Mobile or Email <span className="travel-required-star">*</span></label>
-                  <div
-                    className={`travel-field-line travel-otp-dropdown ${
-                      getFieldHasError("mobile") ? "has-error" : ""
-                    }`}
-                  >
-                  <select
-                    className={`travel-otp-channel-select ${!otpChannel ? "is-placeholder" : ""}`}
-                    value={otpChannel}
-                    onChange={handleOtpChannelChange}
-                    disabled={loading}
-                    aria-label="Select OTP destination"
-                  >
-                    {OTP_CHANNEL_OPTIONS.map((option) => (
-                      <option key={option.value || "placeholder"} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  {/* <input
-                    id="register-mobile"
-                    name="mobile"
-                    placeholder="Enter email or mobile"
-                    value={form.mobile}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    inputMode="numeric"
-                    autoComplete="off"
-                    maxLength={mobileMaxLength}
-                    disabled={loading}
-                  /> 
-                  {/* {hasValue(form.mobile) && !getFieldHasError("mobile") && (
-                    <FaCheckCircle className="travel-field-check" aria-hidden="true" />
-                  )} */}
-                </div>
-                <p className="travel-field-error">{getFieldDisplayError("otpChannel") || getFieldDisplayError("mobile") || "\u00A0"}</p>
-              </div>
-
-              <div className="travel-field">
-                <label className="travel-label" htmlFor="register-password">Password <span className="travel-required-star">*</span></label>
-                <div className={`travel-field-line ${getFieldHasError("password") ? "has-error" : ""}`}>
-                  <input
-                    id="register-password"
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    placeholder="Create password"
-                    value={form.password}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    autoComplete="new-password"
-                    maxLength={64}
-                    disabled={loading}
-                  />
-                  <button
-                    type="button"
-                    className="travel-eye-btn"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                    disabled={loading}
-                  >
-                    {showPassword ? <FaEyeSlash /> : <FaEye />}
-                  </button>
-                </div>
-                <p className="travel-field-error">{getFieldDisplayError("password") || "\u00A0"}</p>
-              </div>
-
-              <div className="travel-field">
-                <label className="travel-label" htmlFor="register-confirm-password">Confirm Password <span className="travel-required-star">*</span></label>
-                <div className={`travel-field-line ${getFieldHasError("confirmPassword") ? "has-error" : ""}`}>
-                  <input
-                    id="register-confirm-password"
-                    type={showConfirm ? "text" : "password"}
-                    name="confirmPassword"
-                    placeholder="Confirm password"
-                    value={form.confirmPassword}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    autoComplete="new-password"
-                    maxLength={64}
-                    disabled={loading}
-                  />
-                  <button
-                    type="button"
-                    className="travel-eye-btn"
-                    onClick={() => setShowConfirm(!showConfirm)}
-                    aria-label={showConfirm ? "Hide password" : "Show password"}
-                    disabled={loading}
-                  >
-                    {showConfirm ? <FaEyeSlash /> : <FaEye />}
-                  </button>
-                </div>
-                <p className="travel-field-error">{getFieldDisplayError("confirmPassword") || "\u00A0"}</p>
-              </div>
-
-              <div className="travel-field travel-email-field">
-                <label className="travel-label" htmlFor="register-email">E-mail Address <span className="travel-required-star">*</span></label>
-                <div className={`travel-field-line travel-email-otp-line ${getFieldHasError("email") ? "has-error" : ""} ${isOtpVerified ? "is-verified" : ""}`}>
-                  <input
-                    id="register-email"
-                    type="email"
-                    name="email"
-                    placeholder="name@example.com"
-                    value={form.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    onKeyDown={handleEmailKeyDown}
-                    onPaste={handleEmailPaste}
-                    autoComplete="new-email"
-                    autoCapitalize="none"
-                    spellCheck={false}
-                    disabled={loading || isOtpVerified}
-                  />
-                  {!isOtpVerified && (
-                    <button
-                      type="button"
-                      className="travel-send-otp-btn"
-                      onClick={
-                        otpTimerExpired
-                          ? resendRegistrationOtp
-                          : emailOtpSent
-                          ? verifyRegistrationOtp
-                          : sendRegistrationOtp
-                      }
-                      disabled={loading}
-                    >
-                      {loadingAction === "otp"
-                        ? "Sending..."
-                        : loadingAction === "verify-otp"
-                        ? "Verifying..."
-                        : otpTimerExpired
-                        ? "Resend OTP"
-                        : emailOtpSent
-                        ? "Verify OTP"
-                        : "Send OTP"}
-                    </button>
-                  )}
-
-                  {isOtpVerified &&
-                    hasValue(form.email) &&
-                    !getFieldHasError("email") && (
-                      <FaCheckCircle
-                        className="travel-field-check"
-                        aria-hidden="true"
-                      />
-                    )}
-                </div>
-                <p className="travel-field-error">{getFieldDisplayError("email") || "\u00A0"}</p>
-              </div>
-
-              {showOtpUI && (
-                <div className={`travel-field travel-otp-field ${shakeOtp ? "shake-animation" : ""}`}>
-                  <label className="travel-label" htmlFor="register-email-otp">Enter OTP <span className="travel-required-star">*</span></label>
-                    {/* {Array.from({ length: OTP_LENGTH }).map((_, index) => (
+                <div className="travel-register-grid">
+                  <div className="travel-field">
+                    <label className="travel-label-top">First Name <span className="travel-required-star" style={getFieldHasError("firstName") ? { color: '#ef4444' } : {}}>*</span></label>
+                    <div className={`travel-field-line travel-input-with-icon ${getFieldHasError("firstName") ? "has-error" : ""}`}>
+                      <span className="travel-input-icon-left"><FaRegUser /></span>
                       <input
-                        key={index}
-                        ref={(element) => {
-                          otpInputRefs.current[index] = element;
-                        }}
-                        id={index === 0 ? "register-email-otp" : undefined}
-                        type="text"
-                        inputMode="numeric"
-                        autoComplete={index === 0 ? "one-time-code" : "off"}
-                        aria-label={`OTP digit ${index + 1}`}
-                        value={emailOtp[index] || ""}
-                        onChange={(event) => handleOtpBoxChange(index, event.target.value)}
-                        onKeyDown={(event) => handleOtpKeyDown(index, event)}
-                        onPaste={(event) => handleOtpPaste(index, event)}
-                        maxLength={1}
+                        ref={firstNameRef}
+                        name="firstName"
+                        placeholder="Enter first name"
+                        value={form.firstName}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        autoComplete="off"
+                        maxLength={18}
                         disabled={loading}
                       />
-                    ))} */}
-                  <div
-                    className={`travel-otp-row ${
-                      otpSecondsLeft <= 6 || otpInlineMessage ? "timer-danger" : ""
-                    }`}
-                  >
-                    <div
-                      className={`travel-otp-boxes ${
-                        otpInlineMessage || otpPopupMessage ? "has-error" : ""
-                      }`}
-                    >
-                      {Array.from({ length: OTP_LENGTH }).map((_, index) => (
-                        <input
-                          key={index}
-                          ref={(element) => {
-                            otpInputRefs.current[index] = element;
-                          }}
-                          id={index === 0 ? "register-email-otp" : undefined}
-                          type="text"
-                          inputMode="numeric"
-                          autoComplete={index === 0 ? "one-time-code" : "off"}
-                          aria-label={`OTP digit ${index + 1}`}
-                          value={emailOtp[index] || ""}
-                          onChange={(event) =>
-                            handleOtpBoxChange(index, event.target.value)
-                          }
-                          onKeyDown={(event) =>
-                            handleOtpKeyDown(index, event)
-                          }
-                          onPaste={(event) =>
-                            handleOtpPaste(index, event)
-                          }
-                          maxLength={1}
-                          disabled={loading}
-                        />
-                      ))}
                     </div>
-
-                    <span
-                      className={`travel-otp-timer ${
-                        otpInlineMessage
-                          ? "is-error"
-                          : otpSecondsLeft <= 6
-                            ? "is-warning"
-                            : ""
-                      }`}
-                    >
-                      {otpInlineMessage || formatOtpTime(otpSecondsLeft)}
-                    </span>
+                    <p className="travel-field-error" style={{ marginBottom: '8px' }}>{getFieldDisplayError("firstName") || "\u00A0"}</p>
                   </div>
 
-                  {otpPopupMessage && (
-                    <div
-                      className="travel-invalid-otp-popup"
-                      role="alert"
-                      aria-live="assertive"
-                    >
-                      <span className="travel-invalid-icon">!</span>
-                      <span className="travel-invalid-text">{otpPopupMessage}</span>
+                  <div className="travel-field">
+                    <label className="travel-label-top">Last Name <span className="travel-required-star" style={getFieldHasError("lastName") ? { color: '#ef4444' } : {}}>*</span></label>
+                    <div className={`travel-field-line travel-input-with-icon ${getFieldHasError("lastName") ? "has-error" : ""}`}>
+                      <span className="travel-input-icon-left"><FaRegUser /></span>
+                      <input
+                        name="lastName"
+                        placeholder="Enter last name"
+                        value={form.lastName}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        autoComplete="off"
+                        maxLength={18}
+                        disabled={loading}
+                      />
                     </div>
-                  )}
+                    <p className="travel-field-error" style={{ marginBottom: '8px' }}>{getFieldDisplayError("lastName") || "\u00A0"}</p>
+                  </div>
+
+                  <div className="travel-field" style={{ gridColumn: "1 / -1", marginBottom: '0' }}>
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                      <div style={{ width: '160px', display: 'flex', flexDirection: 'column' }}>
+                        <label className="travel-label-top">Contact Method <span className="travel-required-star" style={getFieldHasError("otpChannel") ? { color: '#ef4444' } : {}}>*</span></label>
+                        <div className="travel-field-line travel-input-with-icon">
+                          <span className="travel-input-icon-left" style={{ zIndex: 10 }}>
+                            {otpChannel === "email" ? <FaEnvelope /> : <FaMobileAlt />}
+                          </span>
+                          <div
+                            className={`travel-custom-dropdown-container ${loading ? 'is-disabled' : ''}`}
+                            ref={otpDropdownRef}
+                            onClick={() => !loading && setOtpDropdownOpen(!otpDropdownOpen)}
+                            style={{ height: '100%', width: '100%', paddingLeft: '32px' }}
+                          >
+                            <div className="travel-field-select" style={{ display: 'flex', alignItems: 'center', height: '100%', padding: '0 8px 0 4px' }}>
+                              <span style={{ textTransform: 'capitalize' }}>{otpChannel || 'Select'}</span>
+                            </div>
+                            {otpDropdownOpen && (
+                              <div className="travel-custom-dropdown-options" style={{ paddingLeft: 0, marginTop: '8px', border: '1px solid #f97316', zIndex: 9999 }}>
+                                <div
+                                  className={`travel-custom-dropdown-option ${otpChannel === 'email' ? 'is-selected' : ''}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOtpChannelChange({ target: { value: 'email' } });
+                                    setOtpDropdownOpen(false);
+                                  }}
+                                >
+                                  Email
+                                </div>
+                                <div
+                                  className={`travel-custom-dropdown-option ${otpChannel === 'mobile' ? 'is-selected' : ''}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOtpChannelChange({ target: { value: 'mobile' } });
+                                    setOtpDropdownOpen(false);
+                                  }}
+                                >
+                                  Mobile
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <p className="travel-field-error" style={{ marginTop: '4px' }}>{getFieldDisplayError("otpChannel") || "\u00A0"}</p>
+                      </div>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <label className="travel-label-top">{otpChannel === "email" ? "Email Address" : "Mobile Number"} <span className="travel-required-star" style={getFieldHasError(otpChannel === "mobile" ? "mobile" : "email") ? { color: '#ef4444' } : {}}>*</span></label>
+                        <div className={`travel-field-line travel-input-with-icon ${getFieldHasError(otpChannel === "mobile" ? "mobile" : "email") ? "has-error" : ""}`} style={{ position: 'relative' }}>
+                          <span className="travel-input-icon-left">
+                            {otpChannel === "email" ? <FaEnvelope /> : <FaMobileAlt />}
+                          </span>
+                          <input
+                            type="text"
+                            name="contact"
+                            placeholder={otpChannel === "email" ? "Enter your email address" : "Enter mobile number"}
+                            value={contactValue}
+                            onChange={handleContactChange}
+                            onBlur={handleBlur}
+                            autoComplete="off"
+                            disabled={loading}
+                            maxLength={otpChannel === "mobile" ? (mobileMaxLength || 15) : undefined}
+                          />
+                          {hasValue(contactValue) && !getFieldHasError(otpChannel === "mobile" ? "mobile" : "email") && (
+                            <span className="travel-field-check" style={{ position: 'absolute', right: '16px', color: '#10b981', display: 'flex', alignItems: 'center', height: '100%', top: 0 }}>
+                              <FaCheckCircle />
+                            </span>
+                          )}
+                        </div>
+                        <p className="travel-field-error" style={{ marginTop: '4px' }}>{getFieldDisplayError(otpChannel === "mobile" ? "mobile" : "email") || "\u00A0"}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </div>
 
-                <div className="travel-terms-wrap">
-                  <label className={`travel-terms ${getFieldHasError("agree") ? "has-error" : ""}`}>
-                <input
-                  type="checkbox"
-                  name="agree"
-                  checked={form.agree}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  disabled={loading}
-                />
-                <span>
-                  I agree with{" "}
-                  <span className="travel-terms-link">Terms & Conditions</span>
-                  <span className="travel-required-star"> *</span>
-                </span>
-              </label>
-              <p className="travel-field-error">{getFieldDisplayError("agree") || "\u00A0"}</p>
-            </div>
+                <div className="travel-auth-actions" style={{ marginTop: '16px' }}>
+                  <button
+                    type="submit"
+                    className="travel-btn travel-btn-primary"
+                    disabled={loading}
+                    style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}
+                  >
+                    <span>{loadingAction === "otp" ? "Sending..." : "Send OTP"}</span>
+                    {loadingAction !== "otp" && <span className="btn-arrow" style={{ position: 'absolute', right: '24px', fontSize: '18px' }}>→</span>}
+                  </button>
+                </div>
 
-            {showGlobalError && (
-              <p className="form-global-error">{statusMessage}</p>
+                <div className="travel-social-login">
+                  <div className="travel-social-divider">
+                    <span>or sign up with</span>
+                  </div>
+                  <div className="travel-social-icons">
+                    <button type="button" className="travel-social-btn"><FcGoogle size={24} /></button>
+                    <button type="button" className="travel-social-btn"><FaFacebook size={24} color="#1877F2" /></button>
+                    <button type="button" className="travel-social-btn"><FaApple size={24} /></button>
+                  </div>
+                </div>
+
+                <p className="travel-auth-footnote" style={{ marginTop: '16px' }}>
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    className="travel-footnote-link"
+                    onClick={() => navigate("/login")}
+                  >
+                    Sign In
+                  </button>
+                </p>
+              </>
             )}
 
-            <div className="travel-auth-actions">
-              <button
-                type="submit"
-                className="travel-btn travel-btn-primary travel-signup-otp-btn"
-                disabled={loading}
-              >
-                {loadingAction === "register"
-                  ? "Signing Up..."
-                  : loadingAction === "verify-otp"
-                    ? "Verifying OTP..."
-                    : "Sign Up"}
-              </button>
-              {isOtpVerified && (
-                <button
-                  type="button"
-                  className="travel-btn travel-btn-secondary"
-                  onClick={restartRegistration}
-                  disabled={loading}
-                >
-                  Use another email
-                </button>
-              )}
-            </div>
+            {currentStep === 2 && (
+              <div className="travel-step2-wrapper" style={{ width: '100%' }}>
+                <h2 className="travel-auth-heading">Verify OTP</h2>
+                <p className="travel-auth-subheading">
+                  Enter OTP and set your new account password.
+                </p>
 
-            <p className="travel-auth-footnote">
-              Already have account?{" "}
-              <button
-                type="button"
-                className="travel-footnote-link"
-                onClick={() => navigate("/login")}
-              >
-                Sign In
-              </button>
-            </p>
+                <div className={`travel-field ${shakeOtp ? "shake-animation" : ""}`}>
+                  <label htmlFor="register-otp">OTP</label>
+                  <div className="travel-field-line travel-otp-line">
+                    <input
+                      id="register-otp"
+                      ref={otpInputRef}
+                      type="text"
+                      placeholder="Enter OTP"
+                      value={emailOtp}
+                      maxLength={6}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "");
+                        updateEmailOtp(val);
+                      }}
+                      autoComplete="off"
+                      disabled={isOtpVerified || loading}
+                    />
+                    <button
+                      type="button"
+                      className="travel-inline-otp-btn"
+                      onClick={
+                        isOtpVerified
+                          ? undefined
+                          : emailOtp.trim()
+                            ? verifyRegistrationOtp
+                            : resendRegistrationOtp
+                      }
+                      disabled={
+                        loading || 
+                        isOtpVerified || 
+                        (emailOtp.trim() ? emailOtp.length !== 6 : otpSecondsLeft > 0)
+                      }
+                    >
+                      {loading && !isOtpVerified
+                        ? emailOtp.trim()
+                          ? "Verifying..."
+                          : "Resending..."
+                        : isOtpVerified
+                          ? "Verified"
+                          : emailOtp.trim()
+                            ? "Verify OTP"
+                            : "Resend OTP"}
+                    </button>
+                  </div>
+                  <p className="travel-field-error">{serverErrors.emailOtp || "\u00A0"}</p>
+                </div>
+
+                <div className="travel-field password-field-wrap">
+                  <label htmlFor="register-password">New Password <span className="travel-required-star" style={getFieldHasError("password") ? { color: '#ef4444' } : {}}>*</span></label>
+                  <div className={`travel-field-line ${getFieldHasError("password") ? "has-error" : ""}`}>
+                    <input
+                      id="register-password"
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      placeholder="Enter new password"
+                      value={form.password}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      maxLength={64}
+                      disabled={!isOtpVerified || loading}
+                    />
+                    <button
+                      type="button"
+                      className="travel-eye-btn"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={!isOtpVerified || loading}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+
+                  <div className="travel-password-strength">
+                    <div className="strength-bars">
+                      <div className={`bar ${pwScore >= 1 ? 'active' : ''}`} />
+                      <div className={`bar ${pwScore >= 2 ? 'active' : ''}`} />
+                      <div className={`bar ${pwScore >= 3 ? 'active' : ''}`} />
+                      <div className={`bar ${pwScore >= 4 ? 'active' : ''}`} />
+                    </div>
+                    <span className={`strength-text score-${pwScore}`} style={{ fontSize: '10px' }}>
+                      {pwScore === 0 ? '' : pwScore <= 2 ? 'Weak' : pwScore === 3 ? 'Good' : 'Strong'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="travel-field">
+                  <label htmlFor="register-confirm-password">Confirm Password <span className="travel-required-star" style={getFieldHasError("confirmPassword") ? { color: '#ef4444' } : {}}>*</span></label>
+                  <div className={`travel-field-line ${getFieldHasError("confirmPassword") ? "has-error" : ""}`}>
+                    <input
+                      id="register-confirm-password"
+                      type={showConfirm ? "text" : "password"}
+                      name="confirmPassword"
+                      placeholder="Confirm new password"
+                      value={form.confirmPassword}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      maxLength={64}
+                      disabled={!isOtpVerified || loading}
+                    />
+                    <button
+                      type="button"
+                      className="travel-eye-btn"
+                      onClick={() => setShowConfirm(!showConfirm)}
+                      disabled={!isOtpVerified || loading}
+                    >
+                      {showConfirm ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                  <p className="travel-field-error">{getFieldDisplayError("confirmPassword") || "\u00A0"}</p>
+                </div>
+
+                <div className="travel-terms-wrap" style={{ margin: '8px 0 16px' }}>
+                  <label className={`travel-terms ${getFieldHasError("agree") ? "has-error" : ""}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="checkbox"
+                      name="agree"
+                      checked={form.agree}
+                      onChange={handleChange}
+                      disabled={!isOtpVerified || loading}
+                      style={{ margin: 0 }}
+                    />
+                    <span style={{ fontSize: '12px' }}>
+                      I accept the <span className="travel-terms-link" style={{ color: '#009b8f', textDecoration: 'underline' }}>Terms & Conditions</span>
+                    </span>
+                  </label>
+                  <p className="travel-field-error">{getFieldDisplayError("agree") || "\u00A0"}</p>
+                </div>
+
+                <div className="travel-auth-links" style={{ justifyContent: 'space-between', width: '100%' }}>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(1)}
+                  >
+                    Back to Register
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/login")}
+                  >
+                    Back to Login
+                  </button>
+                </div>
+
+                <div className="travel-auth-actions" style={{ width: '100%', marginTop: '16px' }}>
+                  <button
+                    type="submit"
+                    className="travel-btn travel-btn-primary"
+                    disabled={loading}
+                  >
+                    {loadingAction === "register" ? "Submitting..." : "Submit"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 3 && (
+              <div className="travel-step4-wrapper" style={{ width: '100%' }}>
+                <div className="travel-step4-icon">✓</div>
+                <h2 className="travel-step4-title">Account Created<br />Successfully!</h2>
+                <p className="travel-step4-text">
+                  Welcome to Pick N Book 🎉<br />
+                  Your journey begins now.
+                </p>
+                <div className="travel-auth-actions" style={{ marginTop: '32px', width: '100%' }}>
+                  <button
+                    type="button"
+                    className="travel-btn travel-btn-primary"
+                    onClick={() => navigate("/login")}
+                  >
+                    Explore Now
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {isEditEmailModalOpen && (
+              <div className="travel-edit-modal-overlay">
+                <div className="travel-edit-modal">
+                  <div className="travel-edit-modal-header">
+                    <h4>Edit {otpChannel === "mobile" ? "Mobile" : "Email"}</h4>
+                    <button className="travel-edit-modal-close" onClick={() => setIsEditEmailModalOpen(false)}>
+                      <FaTimes />
+                    </button>
+                  </div>
+                  <div className="travel-edit-modal-body">
+                    <label htmlFor="edit-modal-input">{otpChannel === "mobile" ? "Mobile Number" : "Email Address"}</label>
+                    <div className="travel-field-line">
+                      <input
+                        id="edit-modal-input"
+                        type="text"
+                        value={draftEditEmail}
+                        onChange={(e) => setDraftEditEmail(e.target.value)}
+                        style={{ height: '100%', border: 'none', background: 'transparent', outline: 'none', width: '100%', padding: '0 12px' }}
+                      />
+                    </div>
+                  </div>
+                  <div className="travel-edit-modal-footer">
+                    <button className="travel-btn travel-btn-cancel" onClick={() => setIsEditEmailModalOpen(false)}>Cancel</button>
+                    <button className="travel-btn travel-btn-primary travel-btn-update" onClick={() => {
+                      const nextForm = {
+                        ...form,
+                        [otpChannel === "mobile" ? "mobile" : "email"]: draftEditEmail
+                      };
+                      setForm(nextForm);
+                      setContactValue(draftEditEmail);
+                      setIsEditEmailModalOpen(false);
+                      sendRegistrationOtp({ overrideForm: nextForm });
+                    }}>
+                      Send OTP
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </form>
         </section>
       </div>

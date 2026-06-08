@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PickNBook.Api.Data;
@@ -15,16 +15,16 @@ namespace PickNBook.Api.Controllers
         private static readonly TimeSpan IndiaOffset = TimeSpan.FromHours(5.5);
         private static readonly string[] AllowedDiscountTypes = ["Percentage", "Fixed"];
         private static readonly string[] AllowedMarkupTypes = ["Percentage", "Fixed"];
-        private static readonly string[] AllowedGstCategories = ["AC", "Non-AC", "VOLVO"];
+        private static readonly string[] AllowedGstCategories = ["AC", "Non-AC","VOLVO"];
 
-
+      
 
         [HttpGet("bookings")]
         public async Task<IActionResult> GetBookingList(
             [FromQuery] string? status,
             [FromQuery] string? pnr,
             [FromQuery] DateOnly? journeyDate,
-            [FromQuery] int limit = 200)
+            [FromQuery] int limit = 200) 
         {
             if (limit <= 0)
             {
@@ -132,11 +132,11 @@ namespace PickNBook.Api.Controllers
                 x.UpdatedBy,
                 x.Remark,
                 x.Status,
-
+               
                 x.Priority,
                 x.IsExclusive,
                 x.MinBookingAmount,
-
+               
                 x.StartDateUtc,
                 x.EndDateUtc
             });
@@ -430,8 +430,6 @@ namespace PickNBook.Api.Controllers
                 x.MaxUsagePerUser,
                 x.MinBookingAmount,
                 x.Remark,
-                x.TriggerType,
-                x.PromotionCategory,
                 x.Priority,
                 x.IsExclusive
             });
@@ -495,8 +493,6 @@ namespace PickNBook.Api.Controllers
                 // ✅ NEW FIELD (per-user limit)
                 MaxUsagePerUser = request.MaxUsagePerUser,
                 MinBookingAmount = request.MinBookingAmount,
-                PromotionCategory = request.PromotionCategory,
-                TriggerType = request.TriggerType,
                 UsedCount = 0,
                 Status = NormalizeStatus(request.Status),
                 EntryDateUtc = now,
@@ -554,7 +550,7 @@ namespace PickNBook.Api.Controllers
             {
                 return BadRequest($"Coupon code '{normalizedCode}' already exists.");
             }
-
+           
 
             // Step 5: Update fields
             coupon.Value = request.Value;
@@ -568,11 +564,6 @@ namespace PickNBook.Api.Controllers
             coupon.IsAutoApply = request.IsAutoApply;
             coupon.IsExclusive = request.IsExclusive;
             coupon.Priority = request.Priority;
-            coupon.PromotionCategory =
-    request.PromotionCategory;
-            coupon.TriggerType =
-    request.TriggerType;
-
             coupon.Status = NormalizeStatus(request.Status);
             coupon.Remark = string.IsNullOrWhiteSpace(request.Remark) ? null : request.Remark.Trim();
 
@@ -610,15 +601,6 @@ namespace PickNBook.Api.Controllers
             if (linkedPromotion != null)
             {
                 linkedPromotion.IsActive = false;
-            }
-            var linkedPromotionId = linkedPromotion?.Id ?? 0;
-            var linkedOffers = await dbContext.FeaturedOffers
-                .Where(x => x.PromotionId == linkedPromotionId)
-                .ToListAsync();
-
-            foreach (var offer in linkedOffers)
-            {
-                offer.IsActive = false;
             }
 
             dbContext.BusCoupons.Remove(coupon);
@@ -861,7 +843,7 @@ namespace PickNBook.Api.Controllers
                 return "MinBookingAmount must be >= 0.";
             }
 
-
+            
 
             return null;
         }
@@ -917,9 +899,6 @@ namespace PickNBook.Api.Controllers
 
             promo.PromotionType = "Coupon";
 
-            promo.TriggerType =
-     coupon.TriggerType ?? "ManualCode";
-
             promo.DiscountType = coupon.CouponType;
 
             promo.DiscountValue = coupon.Value;
@@ -960,7 +939,7 @@ namespace PickNBook.Api.Controllers
             promo.SourceId =
     coupon.Id;
         }
-        private async Task SyncPromotionFromDiscountAsync(BusDiscount discount)
+        private async Task SyncPromotionFromDiscountAsync( BusDiscount discount)
         {
             var promo =
                 await dbContext.BusPromotions
@@ -989,9 +968,6 @@ namespace PickNBook.Api.Controllers
 
             promo.PromotionType =
                 "Discount";
-
-            promo.TriggerType =
-                "AutoApply";
 
             promo.DiscountType =
                 discount.DiscountType;

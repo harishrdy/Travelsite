@@ -15,13 +15,11 @@ function getTravelerUserId() {
 
 function getAuthHeaders() {
   const token = getAuthToken();
-  const userId = getTravelerUserId();
 
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(userId ? { "X-User-Id": userId } : {}),
   };
 }
 
@@ -183,4 +181,3 @@ export async function deleteTraveler(travelerId) {
     requireUserId: true,
   });
 }
-

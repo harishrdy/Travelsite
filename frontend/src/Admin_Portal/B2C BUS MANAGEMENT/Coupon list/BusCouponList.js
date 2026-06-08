@@ -73,8 +73,6 @@ function createDefaultCouponForm() {
     isAutoApply: false,
     isExclusive: true,
     priority: "0",
-    triggerType: "ManualCode",
-    promotionCategory: "Coupon",
     minBookingAmount: "0",
     status: "Active",
     remark: "",
@@ -186,6 +184,7 @@ export default function AdminBusCouponListPage() {
     setCpnTypeFilter("all");
   };
 
+
   const handleExport = () => {
     if (visibleCoupons.length === 0) {
       return;
@@ -203,8 +202,6 @@ export default function AdminBusCouponListPage() {
       "Auto Apply",
       "Exclusive",
       "Priority",
-      "Trigger Type",
-      "Promotion Category",
       "Min Booking Amount",
       "Status",
       "Entry Date",
@@ -223,8 +220,6 @@ export default function AdminBusCouponListPage() {
       coupon.isAutoApply ? "Yes" : "No",
       coupon.isExclusive ? "Yes" : "No",
       coupon.priority,
-      coupon.triggerType,
-      coupon.promotionCategory,
       coupon.minBookingAmount,
       coupon.status,
       formatCouponDateTime(coupon.entryDate),
@@ -306,8 +301,6 @@ export default function AdminBusCouponListPage() {
       isAutoApply: Boolean(generateForm.isAutoApply),
       isExclusive: Boolean(generateForm.isExclusive),
       priority: Number(generateForm.priority) || 0,
-      triggerType: generateForm.triggerType,
-      promotionCategory: generateForm.promotionCategory,
       minBookingAmount: Number(generateForm.minBookingAmount) || 0,
       status: generateForm.status,
       remark: generateForm.remark.trim(),
@@ -333,8 +326,6 @@ export default function AdminBusCouponListPage() {
       isAutoApply: Boolean(coupon.isAutoApply),
       isExclusive: Boolean(coupon.isExclusive),
       priority: String(coupon.priority || 0),
-      triggerType: coupon.triggerType || "ManualCode",
-      promotionCategory: coupon.promotionCategory || "Coupon",
       minBookingAmount: String(coupon.minBookingAmount || 0),
       startDate: toInputDate(coupon.startDate),
       expiryDate: toInputDate(coupon.expiryDate),
@@ -384,8 +375,6 @@ export default function AdminBusCouponListPage() {
       isAutoApply: Boolean(editCoupon.isAutoApply),
       isExclusive: Boolean(editCoupon.isExclusive),
       priority: Number(editCoupon.priority) || 0,
-      triggerType: editCoupon.triggerType || "ManualCode",
-      promotionCategory: editCoupon.promotionCategory || "Coupon",
       minBookingAmount: Number(editCoupon.minBookingAmount) || 0,
       status: editCoupon.status,
       remark: editCoupon.remark.trim(),
@@ -440,12 +429,10 @@ export default function AdminBusCouponListPage() {
 
   return (
     <>
-      <section className="admin-markup-coupon-shell">
+      <section className="admin-b2c-page admin-markup-coupon-shell">
         <header className="admin-markup-coupon-header">
           <div className="admin-markup-coupon-title-wrap">
-            <h1>
-              <strong>B2C Bus</strong> Coupon List
-            </h1>
+            <h1>B2C Bus Coupon List</h1>
           </div>
 
           <div className="admin-markup-coupon-actions">
@@ -552,103 +539,105 @@ export default function AdminBusCouponListPage() {
         {couponLoadError && <p className="admin-markup-coupon-error">{couponLoadError}</p>}
 
         <section className="admin-markup-coupon-table-wrap">
-          <table className="admin-markup-coupon-table">
-            <colgroup>
-              <col className="col-id" />
-              <col className="col-value" />
-              <col className="col-type" />
-              <col className="col-code" />
-              <col className="col-start" />
-              <col className="col-expiry" />
-              <col className="col-limit" />
-              <col className="col-status" />
-              <col className="col-entry" />
-              <col className="col-remark" />
-              <col className="col-action" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>CPN Value</th>
-                <th>CPN Type</th>
-                <th>Coupon Code</th>
-                <th>Start Date</th>
-                <th>Expiry Date</th>
-                <th>Use Limit</th>
-                <th className="status-col">Status</th>
-                <th>Entry Date</th>
-                <th>Remark</th>
-                <th className="action-col">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoadingCoupons ? (
+          <div className="admin-markup-coupon-table-scroll">
+            <table className="admin-markup-coupon-table">
+              <colgroup>
+                <col className="col-id" />
+                <col className="col-value" />
+                <col className="col-type" />
+                <col className="col-code" />
+                <col className="col-start" />
+                <col className="col-expiry" />
+                <col className="col-limit" />
+                <col className="col-status" />
+                <col className="col-entry" />
+                <col className="col-remark" />
+                <col className="col-action" />
+              </colgroup>
+              <thead>
                 <tr>
-                  <td colSpan={11}>
-                    <p className="admin-markup-coupon-empty">Loading coupons from backend...</p>
-                  </td>
+                  <th>ID</th>
+                  <th>CPN Value</th>
+                  <th>CPN Type</th>
+                  <th>Coupon Code</th>
+                  <th>Start Date</th>
+                  <th>Expiry Date</th>
+                  <th>Use Limit</th>
+                  <th className="status-col">Status</th>
+                  <th>Entry Date</th>
+                  <th>Remark</th>
+                  <th className="action-col">Action</th>
                 </tr>
-              ) : visibleCoupons.length === 0 ? (
-                <tr>
-                  <td colSpan={11}>
-                    <p className="admin-markup-coupon-empty">No coupons found for current filters.</p>
-                  </td>
-                </tr>
-              ) : (
-                visibleCoupons.map((coupon) => (
-                  <tr key={coupon.id}>
-                    <td>{coupon.id}</td>
-                    <td>{`INR ${coupon.value}`}</td>
-                    <td>{coupon.cpnType}</td>
-                    <td>
-                      <span className="admin-markup-coupon-code">{coupon.couponCode}</span>
-                    </td>
-                    <td>{formatCouponDate(coupon.startDate)}</td>
-                    <td>{formatCouponDate(coupon.expiryDate)}</td>
-                    <td>{coupon.useLimit}</td>
-                    <td className="status-col">
-                      <button
-                        type="button"
-                        className={`admin-markup-coupon-status ${coupon.status}`}
-                        onClick={() => handleCouponStatusToggle(coupon.id)}
-                        aria-label={`Set coupon ${coupon.couponCode} to ${
-                          coupon.status === "active" ? "inactive" : "active"
-                        }`}
-                      >
-                        {coupon.status === "active" ? <Check size={14} /> : <X size={14} />}
-                        <span>{coupon.status === "active" ? "Active" : "Inactive"}</span>
-                      </button>
-                    </td>
-                    <td>{formatCouponDateTime(coupon.entryDate)}</td>
-                    <td className="admin-markup-coupon-remark">
-                      <span>{coupon.remark || "--"}</span>
-                    </td>
-                    <td className="action-col">
-                      <div className="admin-markup-coupon-action-group">
-                        <button
-                          type="button"
-                          title="Edit"
-                          aria-label={`Edit coupon ${coupon.id}`}
-                          onClick={() => openEditModal(coupon)}
-                        >
-                          <Pencil size={14} />
-                        </button>
-                        <button
-                          type="button"
-                          title="Delete"
-                          aria-label={`Delete coupon ${coupon.id}`}
-                          className="danger"
-                          onClick={() => setDeleteCoupon(coupon)}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
+              </thead>
+              <tbody>
+                {isLoadingCoupons ? (
+                  <tr>
+                    <td colSpan={11}>
+                      <p className="admin-markup-coupon-empty">Loading coupons from backend...</p>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : visibleCoupons.length === 0 ? (
+                  <tr>
+                    <td colSpan={11}>
+                      <p className="admin-markup-coupon-empty">No coupons found for current filters.</p>
+                    </td>
+                  </tr>
+                ) : (
+                  visibleCoupons.map((coupon) => (
+                    <tr key={coupon.id}>
+                      <td>{coupon.id}</td>
+                      <td>{`INR ${coupon.value}`}</td>
+                      <td>{coupon.cpnType}</td>
+                      <td>
+                        <span className="admin-markup-coupon-code">{coupon.couponCode}</span>
+                      </td>
+                      <td>{formatCouponDate(coupon.startDate)}</td>
+                      <td>{formatCouponDate(coupon.expiryDate)}</td>
+                      <td>{coupon.useLimit}</td>
+                      <td className="status-col">
+                        <button
+                          type="button"
+                          className={`admin-markup-coupon-status ${coupon.status}`}
+                          onClick={() => handleCouponStatusToggle(coupon.id)}
+                          aria-label={`Set coupon ${coupon.couponCode} to ${
+                            coupon.status === "active" ? "inactive" : "active"
+                          }`}
+                        >
+                          {coupon.status === "active" ? <Check size={14} /> : <X size={14} />}
+                          <span>{coupon.status === "active" ? "Active" : "Inactive"}</span>
+                        </button>
+                      </td>
+                      <td>{formatCouponDateTime(coupon.entryDate)}</td>
+                      <td className="admin-markup-coupon-remark">
+                        <span>{coupon.remark || "--"}</span>
+                      </td>
+                      <td className="action-col">
+                        <div className="admin-markup-coupon-action-group">
+                          <button
+                            type="button"
+                            title="Edit"
+                            aria-label={`Edit coupon ${coupon.id}`}
+                            onClick={() => openEditModal(coupon)}
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            title="Delete"
+                            aria-label={`Delete coupon ${coupon.id}`}
+                            className="danger"
+                            onClick={() => setDeleteCoupon(coupon)}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </section>
       </section>
 
@@ -757,30 +746,7 @@ export default function AdminBusCouponListPage() {
                   }
                 />
               </label>
-              <label>
-                <span>Trigger Type:</span>
-                <select
-                  value={generateForm.triggerType}
-                  onChange={(event) =>
-                    setGenerateForm((previous) => ({ ...previous, triggerType: event.target.value }))
-                  }
-                >
-                  <option value="ManualCode">Manual Code</option>
-                  <option value="AutoApply">Auto Apply</option>
-                </select>
-              </label>
-              <label>
-                <span>Promotion Category:</span>
-                <select
-                  value={generateForm.promotionCategory}
-                  onChange={(event) =>
-                    setGenerateForm((previous) => ({ ...previous, promotionCategory: event.target.value }))
-                  }
-                >
-                  <option value="Coupon">Coupon</option>
-                  <option value="Discount">Discount</option>
-                </select>
-              </label>
+
               <label>
                 <span>Auto Apply:</span>
                 <select
@@ -979,30 +945,7 @@ export default function AdminBusCouponListPage() {
                   }
                 />
               </label>
-              <label>
-                <span>Trigger Type</span>
-                <select
-                  value={editCoupon.triggerType}
-                  onChange={(event) =>
-                    setEditCoupon((previous) => ({ ...previous, triggerType: event.target.value }))
-                  }
-                >
-                  <option value="ManualCode">Manual Code</option>
-                  <option value="AutoApply">Auto Apply</option>
-                </select>
-              </label>
-              <label>
-                <span>Promotion Category</span>
-                <select
-                  value={editCoupon.promotionCategory}
-                  onChange={(event) =>
-                    setEditCoupon((previous) => ({ ...previous, promotionCategory: event.target.value }))
-                  }
-                >
-                  <option value="Coupon">Coupon</option>
-                  <option value="Discount">Discount</option>
-                </select>
-              </label>
+
               <label>
                 <span>Auto Apply</span>
                 <select

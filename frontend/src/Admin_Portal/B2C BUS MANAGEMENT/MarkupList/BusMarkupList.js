@@ -7,7 +7,6 @@ import {
   List,
   Pencil,
   Plus,
-  SlidersHorizontal,
   Trash2,
   X,
 } from "lucide-react";
@@ -45,7 +44,6 @@ export default function AdminBusMarkupListPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [sortBy, setSortBy] = useState(DEFAULT_SORT_BY);
   const [sortOrder, setSortOrder] = useState(DEFAULT_SORT_ORDER);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -57,6 +55,19 @@ export default function AdminBusMarkupListPage() {
   const [isAdding, setIsAdding] = useState(false);
   const [editError, setEditError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [activeDropdownId, setActiveDropdownId] = useState(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (!event.target.closest('.actions-dropdown-container')) {
+        setActiveDropdownId(null);
+      }
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+    };
+  }, []);
 
   const fetchSettings = async () => {
     setIsLoading(true);
@@ -272,7 +283,7 @@ export default function AdminBusMarkupListPage() {
   };
 
   return (
-    <>
+    <div className="admin-b2c-page bus-markup-list-page-container">
       {viewRow ? (
         <section className="admin-markup-view-screen">
           <header className="admin-markup-view-top">
@@ -343,109 +354,88 @@ export default function AdminBusMarkupListPage() {
         </section>
       ) : (
         <>
-          <header className="admin-markup-header">
-            <div className="admin-markup-header-copy">
-              <h1>
-                <strong>B2C Bus</strong> Markup List
-              </h1>
+          {/* ── PAGE HEADING ── */}
+          <section className="markup-heading">
+            <p className="markup-heading-main">B2C Bus Management</p>
+            <p className="markup-heading-sub">Markup List</p>
+          </section>
+
+          {/* ── STATS ROW ── */}
+          <section className="stats-row">
+            <div className="stat-card total">
+              <div className="stat-label">Total Markups</div>
+              <div className="stat-value">{rows.length}</div>
+              <div className="stat-meta">All seat type records</div>
             </div>
+            <div className="stat-card active">
+              <div className="stat-label">Active</div>
+              <div className="stat-value">{rows.filter(r => r.status === 'Active').length}</div>
+              <div className="stat-meta">Currently applied</div>
+            </div>
+            <div className="stat-card inactive">
+              <div className="stat-label">Inactive</div>
+              <div className="stat-value">{rows.filter(r => r.status === 'Inactive').length}</div>
+              <div className="stat-meta">Paused markups</div>
+            </div>
+          </section>
 
-            <div className="admin-markup-header-actions">
-              <button
-                type="button"
-                className="admin-markup-filter-btn primary"
-                onClick={openAddModal}
-              >
-                <Plus size={15} />
-                <span>Add New</span>
+          {/* ── TOOLBAR ── */}
+          <section className="markup-toolbar">
+            <div className="markup-toolbar-group">
+              <label className="markup-field">
+                <span>Sort By</span>
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                  <option value="updateDateUtc">Updated On</option>
+                  <option value="id">ID</option>
+                  <option value="value">Value</option>
+                  <option value="markupType">Markup Type</option>
+                  <option value="seatType">Seat Type</option>
+                  <option value="updatedBy">Updated By</option>
+                  <option value="status">Status</option>
+                </select>
+              </label>
+              <label className="markup-field">
+                <span>Order</span>
+                <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+                  <option value="desc">Descending</option>
+                  <option value="asc">Ascending</option>
+                </select>
+              </label>
+              <label className="markup-field">
+                <span>Markup Type</span>
+                <select value={markupTypeFilter} onChange={(e) => setMarkupTypeFilter(e.target.value)}>
+                  <option value="all">All Types</option>
+                  {availableMarkupTypes.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className="markup-toolbar-actions">
+              <label className="markup-field">
+                <span>Status</span>
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                  <option value="all">All</option>
+                  {availableStatuses.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </label>
+              <button type="button" className="markup-primary-btn" onClick={openAddModal}>
+                <Plus size={14} />
+                Add New
               </button>
-              
               <button
                 type="button"
-                className={`admin-markup-filter-btn ${isFilterPanelOpen ? "active" : ""}`}
-                onClick={() => setIsFilterPanelOpen((previous) => !previous)}
-                aria-expanded={isFilterPanelOpen}
-                aria-controls="admin-markup-filter-panel"
-              >
-                <SlidersHorizontal size={15} />
-                <span>Filter</span>
-                <ChevronDown
-                  size={15}
-                  className={`filter-chevron ${isFilterPanelOpen ? "open" : ""}`}
-                />
-              </button>
-
-              <button
-                type="button"
-                className="admin-markup-export-btn"
+                className="markup-export-btn"
                 onClick={handleExport}
                 disabled={visibleRows.length === 0}
               >
-                <Download size={15} />
-                <span>Export</span>
+                <Download size={14} />
+                Export
               </button>
             </div>
-          </header>
-
-          {isFilterPanelOpen && (
-            <section className="admin-markup-filter-panel" id="admin-markup-filter-panel">
-              <div className="admin-markup-filter-grid">
-                <label>
-                  <span>Sort By</span>
-                  <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
-                    <option value="updateDateUtc">Updated On</option>
-                    <option value="id">ID</option>
-                    <option value="value">Value</option>
-                    <option value="markupType">Markup Type</option>
-                    <option value="seatType">Seat Type</option>
-                    <option value="updatedBy">Updated By</option>
-                    <option value="status">Status</option>
-                  </select>
-                </label>
-
-                <label>
-                  <span>Order</span>
-                  <select value={sortOrder} onChange={(event) => setSortOrder(event.target.value)}>
-                    <option value="desc">Descending</option>
-                    <option value="asc">Ascending</option>
-                  </select>
-                </label>
-
-                <label>
-                  <span>Status</span>
-                  <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-                    <option value="all">All</option>
-                    {availableStatuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label>
-                  <span>Markup Type</span>
-                  <select
-                    value={markupTypeFilter}
-                    onChange={(event) => setMarkupTypeFilter(event.target.value)}
-                  >
-                    <option value="all">All</option>
-                    {availableMarkupTypes.map((markupType) => (
-                      <option key={markupType} value={markupType}>
-                        {markupType}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-
-              <div className="admin-markup-filter-actions">
-                <button type="button" className="admin-markup-filter-reset" onClick={handleResetFilters}>
-                  Reset Filters
-                </button>
-              </div>
-            </section>
-          )}
+          </section>
 
           <section className="admin-markup-table-wrap">
             {isLoading ? (
@@ -455,15 +445,15 @@ export default function AdminBusMarkupListPage() {
             ) : (
               <table className="admin-markup-table">
                 <colgroup>
-                  <col style={{ width: "8%" }} />
+                  <col style={{ width: "7%" }} />
                   <col style={{ width: "12%" }} />
+                  <col style={{ width: "9%" }} />
+                  <col style={{ width: "12%" }} />
+                  <col style={{ width: "15%" }} />
+                  <col style={{ width: "11%" }} />
                   <col style={{ width: "10%" }} />
-                  <col style={{ width: "12%" }} />
-                  <col style={{ width: "14%" }} />
-                  <col style={{ width: "12%" }} />
-                  <col style={{ width: "12%" }} />
-                  <col style={{ width: "8%" }} />
-                  <col style={{ width: "12%" }} />
+                  <col style={{ width: "11%" }} />
+                  <col style={{ width: "13%" }} />
                 </colgroup>
                 <thead>
                   <tr>
@@ -518,22 +508,58 @@ export default function AdminBusMarkupListPage() {
                           </button>
                         </td>
                         <td className="action-col">
-                          <div className="markup-action-group">
-                            <button type="button" title="View" aria-label={`View ${row.id}`} onClick={() => setViewRow(row)}>
-                              <Eye size={14} />
-                            </button>
-                            <button type="button" title="Edit" aria-label={`Edit ${row.id}`} onClick={() => openEditModal(row)}>
-                              <Pencil size={14} />
-                            </button>
+                          <div className="actions-dropdown-container">
                             <button
                               type="button"
-                              title="Delete"
-                              aria-label={`Delete ${row.id}`}
-                              className="danger"
-                              onClick={() => setDeleteRow(row)}
+                              className={`actions-trigger-btn ${activeDropdownId === row.id ? 'active' : ''}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveDropdownId(activeDropdownId === row.id ? null : row.id);
+                              }}
                             >
-                              <Trash2 size={14} />
+                              <span>Actions</span>
+                              <ChevronDown size={12} className="chevron-icon" />
                             </button>
+                            {activeDropdownId === row.id && (
+                              <div className="actions-dropdown-menu">
+                                <button
+                                  type="button"
+                                  className="dropdown-item view"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setViewRow(row);
+                                    setActiveDropdownId(null);
+                                  }}
+                                >
+                                  <Eye size={13} className="item-icon" />
+                                  <span>View Details</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="dropdown-item edit"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openEditModal(row);
+                                    setActiveDropdownId(null);
+                                  }}
+                                >
+                                  <Pencil size={13} className="item-icon" />
+                                  <span>Edit Markup</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="dropdown-item delete"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDeleteRow(row);
+                                    setActiveDropdownId(null);
+                                  }}
+                                >
+                                  <Trash2 size={13} className="item-icon" />
+                                  <span>Delete Markup</span>
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -704,6 +730,6 @@ export default function AdminBusMarkupListPage() {
           </section>
         </div>
       )}
-    </>
+    </div>
   );
 }

@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   BusFront,
+  Building2,
   ChevronDown,
   CircleUserRound,
-  Compass,
   LayoutDashboard,
   LogIn,
   LogOut,
@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import '../../STYLES/Topbar.css';
 import { clearAuthSession } from "../../services/authSession";
+import pickNBookLogo from "../../assets/images/brand/pick-n-book-logo.svg";
 
 function decodeJwtPayload(token) {
   if (!token || typeof token !== "string") {
@@ -100,10 +101,10 @@ export default function Topbar() {
   const location = useLocation();
 
   const isDashboard = location.pathname.startsWith("/dashboard");
-  const currentHomeTab =
-    new URLSearchParams(location.search).get("tab") === "buses"
-      ? "buses"
-      : "flights";
+  const tabParam = new URLSearchParams(location.search).get("tab");
+  const currentHomeTab = ["buses", "hotels"].includes(tabParam)
+    ? tabParam
+    : "flights";
   const isHome = location.pathname === "/";
 
   const syncAuthState = () => {
@@ -134,34 +135,6 @@ export default function Topbar() {
   }, []);
 
   const handleLogout = () => {
-    [
-      "user",
-      "token",
-      "authToken",
-      "accessToken",
-      "userId",
-      "UserId",
-      "x-user-id",
-      "role",
-      "challengeId",
-      "my_traveler_data",
-    ].forEach((key) => localStorage.removeItem(key));
-    [
-      "user",
-      "token",
-      "authToken",
-      "accessToken",
-      "userId",
-      "UserId",
-      "x-user-id",
-      "role",
-      "challengeId",
-      "bus_booking_flow_state_v1",
-      "flight_booking_flow_state_v1",
-      "latest_ticket_confirmation_v1",
-      "ticket_confirmation_history_v1",
-      "selectedOffer",
-    ].forEach((key) => sessionStorage.removeItem(key));
     clearAuthSession();
     setAuthProfile({ isLoggedIn: false, displayName: "User", email: "" });
     setOpen(false);
@@ -176,15 +149,7 @@ export default function Topbar() {
   return (
     <header className="topbar">
       <button type="button" className="brand" onClick={() => navigate("/?tab=flights")}>
-        <span className="brand-icon">
-          <Compass size={18} />
-        </span>
-        <span className="brand-copy">
-          <span className="brand-title">
-            Travel<span className="brand-title-accent">....</span>
-          </span>
-          <span className="brand-subtitle">Flights and Buses</span>
-        </span>
+        <img className="brand-logo" src={pickNBookLogo} alt="Pick N Book" />
       </button>
 
       <div className="right-section">
@@ -202,6 +167,13 @@ export default function Topbar() {
           >
             <BusFront size={16} />
             <span>Buses</span>
+          </Link>
+          <Link
+            to="/?tab=hotels"
+            className={`menu-item ${isHome && currentHomeTab === "hotels" ? "active" : ""}`}
+          >
+            <Building2 size={16} />
+            <span>Hotels</span>
           </Link>
           <NavLink
             to="/web-checkin"

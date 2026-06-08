@@ -153,6 +153,7 @@
 .trend-up   { color: #10b981 !important; font-weight: 600 !important; }
 .trend-down { color: #ef4444 !important; font-weight: 600 !important; }
 .trend-warn { color: #f97316 !important; font-weight: 600 !important; }
+.yesterday-blue { color: #3b82f6 !important; }
 
 /* ══════════════════════════════════════
    INFO GRID (Last Login / Revenue Today)

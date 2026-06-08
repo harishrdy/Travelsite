@@ -252,7 +252,7 @@ namespace PickNBook.Api.Controllers
             normalizedType = ResolveAllowedValue(request.Type, AllowedTypes);
             normalizedTitle = ResolveAllowedValue(request.Title, AllowedTitles);
             normalizedGender = ResolveAllowedValue(request.Gender, AllowedGenders);
-
+           
 
 
             if (normalizedType is null)
@@ -326,7 +326,7 @@ namespace PickNBook.Api.Controllers
             return null;
         }
 
-
+        
 
         private static string? ResolveAllowedValue(string? value, string[] allowed)
         {

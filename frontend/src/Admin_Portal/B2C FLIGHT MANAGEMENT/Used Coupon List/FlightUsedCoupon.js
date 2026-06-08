@@ -20,7 +20,7 @@ export default function AdminFlightUsedCouponListPage() {
   const [editRecord, setEditRecord] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [formError, setFormError] = useState("");
-  const colWidths = ["5%", "14%", "13%", "14%", "10%", "9%", "10%", "10%", "10%", "5%"];
+  const colWidths = ["4%", "12%", "13%", "12%", "10%", "9%", "10%", "10%", "10%", "10%"];
   const headers = [
     "SN",
     "Booking ID",
@@ -208,12 +208,10 @@ export default function AdminFlightUsedCouponListPage() {
 
   return (
     <>
-      <section className="flight-markup-panel">
+      <section className="admin-b2c-page flight-markup-panel">
       <header className="flight-markup-toolbar">
         <div className="flight-markup-title">
-          <h1>
-            <strong>B2C Flight</strong> Used Coupon List
-          </h1>
+          <h1>B2C Flight Used Coupon List</h1>
           <div className="flight-markup-title-underline" aria-hidden="true" />
         </div>
 

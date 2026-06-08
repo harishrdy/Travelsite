@@ -56,11 +56,12 @@ input:-webkit-autofill:focus {
   width: min(var(--auth-card-width), 92vw);
   height: var(--auth-card-height);
   max-height: calc(100dvh - 20px);
-  background: rgba(238, 248, 255, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: var(--auth-card-radius);
-  box-shadow: 0 16px 36px rgba(9, 28, 58, 0.18);
-  backdrop-filter: none;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   overflow: hidden;
   display: flex;
   transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
@@ -87,7 +88,7 @@ input:-webkit-autofill:focus {
 
 .travel-auth-heading {
   margin: 0;
-  text-align: center;
+  text-align: left;
   color: var(--auth-text);
   font-size: 17px;
   font-weight: 600;
@@ -95,8 +96,8 @@ input:-webkit-autofill:focus {
 }
 
 .travel-auth-subheading {
-  margin: 4px 0;
-  text-align: center;
+  margin: 4px 0 16px;
+  text-align: left;
   color: var(--auth-muted);
   font-size: 11px;
 }
@@ -152,10 +153,10 @@ input:-webkit-autofill:focus {
 }
 
 .travel-field-line {
-  min-height: 38px;
-  height: 38px;
-  padding: 0 10px;
-  border: 1.5px solid var(--auth-orange-border);
+  min-height: 42px;
+  height: 42px;
+  padding: 0 12px;
+  border: none;
   border-radius: var(--auth-control-radius);
   background: #ffffff;
   display: flex;
@@ -339,16 +340,17 @@ input:-webkit-autofill:focus {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-bottom: 12px;
 }
 
 .travel-field-line:focus-within {
-  border-color: var(--auth-orange);
+  border-color: var(--theme-border, #cfded8) !important;
   background: #fff;
-  box-shadow: none;  
+  box-shadow: none !important;  
 }
 
 .travel-captcha-refresh {
-  background: linear-gradient(180deg, var(--auth-orange) 0%, var(--auth-orange-strong) 100%);
+  background: #6b7280;
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -366,9 +368,9 @@ input:-webkit-autofill:focus {
 }
 
 .travel-captcha-refresh:hover {
-  background: linear-gradient(180deg, #ff6a3d 0%, #c93518 100%);
+  background: #4b5563;
   transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(240, 68, 35, 0.28);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
 }
 
 .travel-captcha-refresh,
@@ -379,7 +381,7 @@ input:-webkit-autofill:focus {
 .travel-auth-links button:hover {
   text-decoration: underline;
   text-decoration-thickness: 1px;
-  color: #2466c8;
+  color: #3b82f6; /* Bright blue for hover */
 }
 
 .travel-auth-links {
@@ -395,7 +397,7 @@ input:-webkit-autofill:focus {
   font-size: var(--auth-helper-size);
   font-weight: 500;
   cursor: pointer;
-  color: var(--auth-link-blue);
+  color: #ffffff; /* Default white */
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
@@ -469,17 +471,20 @@ input:-webkit-autofill:focus {
 /* Sizing is handled uniformly on desktop */
 
 .travel-auth-login .travel-auth-form-panel {
-  padding: 12px 14px 10px;
+  padding: 24px 32px 20px;
 }
 
 .travel-auth-login .travel-auth-heading {
-  font-size: 19px;
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
 }
 
 .travel-auth-login .travel-auth-subheading {
   margin-top: 4px;
-  font-size: 10.5px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  text-align: center;
 }
 
 .travel-auth-login .travel-auth-status {
@@ -539,7 +544,7 @@ input:-webkit-autofill:focus {
 
 .travel-auth-login .travel-captcha-row {
   gap: 8px;
-  margin: 1px 0 2px;
+  margin: 1px 0 12px;
 }
 
 .travel-auth-login .travel-captcha-display {
@@ -557,18 +562,22 @@ input:-webkit-autofill:focus {
 }
 
 .travel-auth-login .travel-auth-links {
-  margin-top: 2px;
+  margin-top: 16px;
 }
 
 .travel-auth-login .travel-auth-links button {
   font-size: var(--auth-helper-size);
   font-weight: 500;
-  color: var(--auth-link-blue);
+  color: #ffffff;
   margin: 4px 0;
 }
 
+.travel-auth-login .travel-auth-links button:hover {
+  color: #3b82f6;
+}
+
 .travel-auth-login .travel-auth-actions {
-  margin-top: 1px;
+  margin-top: 16px;
   gap: 3px;
 }
 
@@ -583,9 +592,10 @@ input:-webkit-autofill:focus {
 }
 
 .travel-auth-login .travel-auth-footnote {
-  margin: 2px 0 0;
+  margin: 16px 0 0;
   padding-top: 0;
   font-size: 10.5px;
+  color: #ffffff;
 }
 
 @media (max-width: 920px) {
@@ -741,4 +751,64 @@ input:-webkit-autofill:focus {
     height: auto;
     max-height: none;
   }
+}
+
+/* ===== Visual Polish: Marketing Side Text Readability (No solid/semi-translucent backgrounds) ===== */
+.travel-auth-page.travel-auth-register .travel-hero-title,
+.travel-auth-page.travel-auth-register .travel-hero-subtitle,
+.travel-auth-page.travel-auth-register .travel-benefit-text strong,
+.travel-auth-page.travel-auth-register .travel-benefit-text span,
+.travel-auth-page.travel-auth-login .travel-hero-title,
+.travel-auth-page.travel-auth-login .travel-hero-subtitle,
+.travel-auth-page.travel-auth-login .travel-benefit-text strong,
+.travel-auth-page.travel-auth-login .travel-benefit-text span,
+.travel-auth-page.travel-auth-forgot .travel-hero-title,
+.travel-auth-page.travel-auth-forgot .travel-hero-subtitle,
+.travel-auth-page.travel-auth-forgot .travel-benefit-text strong,
+.travel-auth-page.travel-auth-forgot .travel-benefit-text span {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  color: #ffffff !important;
+  /* Premium drop-shadow to make text pop on the landscape sunset background */
+  text-shadow: 
+    0 2px 10px rgba(8, 23, 42, 0.95), 
+    0 1px 3px rgba(8, 23, 42, 0.9) !important;
+}
+
+.travel-auth-page.travel-auth-register .travel-benefit-text span,
+.travel-auth-page.travel-auth-login .travel-benefit-text span,
+.travel-auth-page.travel-auth-forgot .travel-benefit-text span {
+  color: #eef7f4 !important; /* Soft premium cream/white shade for descriptions */
+}
+
+/* ===== Form Labels Polish: No White Pill Shades, Premium Readability ===== */
+.travel-auth-page.travel-auth-register .travel-field label,
+.travel-auth-page.travel-auth-register .travel-label-top,
+.travel-auth-page.travel-auth-login .travel-field label,
+.travel-auth-page.travel-auth-forgot .travel-field label,
+.travel-auth-page.travel-auth-verify .travel-field label,
+.dashboard-layout.cp-dashboard-layout .cp-auth-page .cp-field label,
+.cp-auth-page .cp-field label {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-bottom: 4px !important;
+  color: #12222a !important; /* High contrast dark navy */
+  font-weight: 750 !important; /* Semi-bold to stand out on the white card panel */
+  text-shadow: none !important;
+  border: none !important;
+  display: inline-block !important; /* Normal text flow */
+}
+
+/* Star coloring contrast */
+.travel-auth-page.travel-auth-register label span,
+.travel-auth-page.travel-auth-login label span,
+.travel-auth-page.travel-auth-forgot label span,
+.travel-auth-page.travel-auth-verify label span,
+.cp-auth-page label span,
+.travel-required-star {
+  color: #009b8f !important;
+  font-weight: 800 !important;
+  text-shadow: none !important;
 }

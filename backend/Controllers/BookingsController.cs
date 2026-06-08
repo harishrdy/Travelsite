@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using PickNBook.Api.Services;
 
 namespace PickNBook.Api.Controllers
@@ -19,14 +19,16 @@ namespace PickNBook.Api.Controllers
         [HttpGet("history")]
         public async Task<IActionResult> GetHistory()
         {
-            if (!Request.Headers.TryGetValue("X-User-Id", out var userIdHeader))
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value 
+                         ?? User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized(new
                 {
-                    message = "User ID header missing"
+                    message = "User ID not found in token"
                 });
             }
-            var userId = userIdHeader.ToString();
 
             var result = await _bookingHistoryService
                 .GetBookingHistoryAsync(userId);

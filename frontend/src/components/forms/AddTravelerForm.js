@@ -184,7 +184,7 @@ const AddTravelerForm = ({ onBack, onSubmit }) => {
         </div>
 
         <div className="submit-wrap">
-          <button type="submit" className="btn btn-orange">
+          <button type="submit" className="btn btn-atlas">
             Save Traveler
           </button>
         </div>

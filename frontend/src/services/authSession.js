@@ -206,6 +206,63 @@ export function setAdminChallengeId(challengeId) {
 }
  
 export function clearAuthSession() {
+  if (typeof window !== "undefined") {
+    const userKeys = [
+      "user",
+      "token",
+      "authToken",
+      "accessToken",
+      "userId",
+      "UserId",
+      "x-user-id",
+      "role",
+      "challengeId",
+      "my_traveler_data",
+    ];
+    const sessionKeys = [
+      "user",
+      "token",
+      "authToken",
+      "accessToken",
+      "userId",
+      "UserId",
+      "x-user-id",
+      "role",
+      "challengeId",
+      "bus_booking_flow_state_v1",
+      "flight_booking_flow_state_v1",
+      "latest_ticket_confirmation_v1",
+      "ticket_confirmation_history_v1",
+      "selectedOffer",
+    ];
+    const adminKeys = [
+      "adminToken",
+      "adminRole",
+      "adminId",
+      "adminName",
+      "adminEmail",
+      "adminLoginEmail",
+      "adminChallengeId",
+      "challengeId",
+    ];
+
+    userKeys.forEach((key) => {
+      try {
+        window.localStorage.removeItem(key);
+      } catch {}
+    });
+    sessionKeys.forEach((key) => {
+      try {
+        window.sessionStorage.removeItem(key);
+      } catch {}
+    });
+    adminKeys.forEach((key) => {
+      try {
+        window.localStorage.removeItem(key);
+      } catch {}
+    });
+  }
+
   updateSession({
     token: "",
     user: null,
@@ -213,6 +270,18 @@ export function clearAuthSession() {
     adminChallengeId: "",
   });
 }
- 
- 
 
+export function isTokenExpired(token) {
+  if (!token) {
+    return false;
+  }
+  const payload = decodeJwtPayload(token);
+  if (!payload || !payload.exp) {
+    return false;
+  }
+  // exp is in seconds, Date.now() in milliseconds
+  return payload.exp * 1000 < Date.now();
+}
+
+ 
+ 
