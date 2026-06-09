@@ -6,34 +6,34 @@ body,
 
 :root {
   --app-font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
-  --theme-page: #eef7f4;
-  --theme-page-soft: #f7fbf8;
+  --theme-page: #F3F4F6;
+  --theme-page-soft: #F9FAFB;
   --theme-surface: #ffffff;
   --theme-surface-warm: #f9fbf6;
-  --theme-border: #cfded8;
-  --theme-border-soft: #e1ebe7;
+  --theme-border: #E5E7EB;
+  --theme-border-soft: #F3F4F6;
   --theme-text: #162126;
   --theme-muted: #66757b;
-  --theme-primary: #009b8f;
-  --theme-primary-strong: #006f7a;
-  --theme-primary-soft: #dff8f3;
+  --theme-primary: #dc1e26;
+  --theme-primary-strong: #b8141b;
+  --theme-primary-soft: #fef2f2;
   --theme-navy: #17242d;
-  --theme-blue: #3656d4;
-  --theme-pink: #f36f5f;
-  --theme-coral: #f36f5f;
-  --theme-gold: #eab84e;
+  --theme-blue: #b8141b;
+  --theme-pink: #dc1e26;
+  --theme-coral: #dc1e26;
+  --theme-gold: #dc1e26;
   --theme-shadow: 0 22px 55px rgba(12, 46, 51, 0.15);
   --theme-shadow-sm: 0 12px 28px rgba(12, 46, 51, 0.09);
-  --theme-gradient: linear-gradient(135deg, #009b8f 0%, #3656d4 58%, #f36f5f 100%);
-  --theme-gradient-action: linear-gradient(135deg, #009b8f 0%, #006f7a 54%, #3656d4 100%);
+  --theme-gradient: linear-gradient(135deg, #dc1e26 0%, #b8141b 58%, #dc1e26 100%);
+  --theme-gradient-action: linear-gradient(135deg, #dc1e26 0%, #b8141b 54%, #b8141b 100%);
 }
 
 body {
   margin: 0;
   font-family: var(--app-font-family);
   background:
-    linear-gradient(135deg, rgba(0, 155, 143, 0.08) 0%, transparent 30%),
-    linear-gradient(225deg, rgba(243, 111, 95, 0.1) 0%, transparent 34%),
+    linear-gradient(135deg, rgba(220, 30, 38, 0.08) 0%, transparent 30%),
+    linear-gradient(225deg, rgba(220, 30, 38, 0.1) 0%, transparent 34%),
     var(--theme-page);
   color: var(--theme-text);
   -webkit-font-smoothing: antialiased;
@@ -190,8 +190,8 @@ a:focus {
 .account-page,
 .edit-profile-page {
   background:
-    linear-gradient(135deg, rgba(0, 155, 143, 0.1) 0%, transparent 34%),
-    linear-gradient(225deg, rgba(243, 111, 95, 0.1) 0%, transparent 30%),
+    linear-gradient(135deg, rgba(220, 30, 38, 0.1) 0%, transparent 34%),
+    linear-gradient(225deg, rgba(220, 30, 38, 0.1) 0%, transparent 30%),
     var(--theme-page) !important;
 }
 
@@ -233,7 +233,7 @@ a:focus {
   border-color: transparent !important;
   background: var(--theme-gradient-action) !important;
   color: #ffffff !important;
-  box-shadow: 0 14px 28px rgba(0, 111, 122, 0.22) !important;
+  box-shadow: 0 14px 28px rgba(184, 20, 27, 0.22) !important;
 }
 
 /* Atlas theme override layer */
@@ -273,7 +273,7 @@ a:focus {
 .trip-chip.active {
   background: var(--theme-gradient-action) !important;
   color: #ffffff !important;
-  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.22) !important;
+  box-shadow: 0 14px 30px rgba(184, 20, 27, 0.22) !important;
 }
 
 /* Hide browser-default password reveal eye and clear button in Edge/IE/Chrome */

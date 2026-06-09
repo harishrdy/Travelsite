@@ -17,7 +17,7 @@ export default function AdminMenuAddPage({ onBack }) {
   const [formValues, setFormValues] = useState(DEFAULT_FORM);
   const [formError, setFormError] = useState("");
   const [saved, setSaved] = useState(false);
-  const [menuItems, setMenuItems] = useAdminList("menu-items", []);
+  const [, setMenuItems] = useAdminList("menu-items", []);
 
   const handleChange = (field) => (event) => {
     setFormValues((previous) => ({ ...previous, [field]: event.target.value }));

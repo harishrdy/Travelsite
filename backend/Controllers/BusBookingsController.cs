@@ -154,6 +154,8 @@ namespace PickNBook.Api.Controllers
 
             foreach (var x in buses)
             {
+                await EnsureBusSeatsGeneratedAsync(x.Id);
+
                 var seatTypes = await dbContext.BusSeats
                     .AsNoTracking()
                     .Where(s => s.BusBookingId == x.Id)
@@ -281,6 +283,8 @@ namespace PickNBook.Api.Controllers
             {
                 return NotFound("Bus not found.");
             }
+
+            await EnsureBusSeatsGeneratedAsync(busId);
 
             var seats = await dbContext.BusSeats
                 .AsNoTracking()
@@ -594,7 +598,8 @@ namespace PickNBook.Api.Controllers
                         var bus = await dbContext.BusBookings.FirstOrDefaultAsync(x => x.Id == busId);
                         if (bus is null)
                             throw new Exception("Bus not found.");
-                       
+
+                        await EnsureBusSeatsGeneratedAsync(busId);
 
                         if (bus.DepartureTime <= DateTime.UtcNow)
                             throw new Exception("Cannot book a bus that already departed.");
@@ -1841,36 +1846,44 @@ namespace PickNBook.Api.Controllers
                 if (finalInsertList.Count > 0)
                 {
                     await dbContext.BusBookings.AddRangeAsync(finalInsertList);
-
-                    // SAVE FIRST TO GET GENERATED IDS
-                    await dbContext.SaveChangesAsync();
-
-                    // CREATE SEATS FOR EACH GENERATED BUS
-                    foreach (var bus in finalInsertList)
-                    {
-                        var seatCodes = BusSeatLayoutRegistry.BuildSeatCodes(
-                            Math.Max(1, bus.TotalSeats),
-                            bus.BusType);
-
-                        foreach (var seatCode in seatCodes)
-                        {
-                            dbContext.BusSeats.Add(new BusSeat
-                            {
-                                BusBookingId = bus.Id,
-                                SeatCode = seatCode,
-
-                                SeatType = BusSeatLayoutRegistry.GetSeatType(
-                                    bus.BusType,
-                                    seatCode,
-                                    bus.TotalSeats),
-
-                                IsBooked = false
-                            });
-                        }
-                    }
-
                     await dbContext.SaveChangesAsync();
                 }
+            }
+        }
+
+        private async Task EnsureBusSeatsGeneratedAsync(int busId)
+        {
+            var exists = await dbContext.BusSeats.AnyAsync(x => x.BusBookingId == busId);
+            if (exists) return;
+
+            var bus = await dbContext.BusBookings
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == busId);
+            if (bus is null) return;
+
+            var seatCodes = BusSeatLayoutRegistry.BuildSeatCodes(
+                Math.Max(1, bus.TotalSeats),
+                bus.BusType);
+
+            var seatsToInsert = seatCodes.Select(seatCode => new BusSeat
+            {
+                BusBookingId = busId,
+                SeatCode = seatCode,
+                SeatType = BusSeatLayoutRegistry.GetSeatType(
+                    bus.BusType,
+                    seatCode,
+                    bus.TotalSeats),
+                IsBooked = false
+            }).ToList();
+
+            try
+            {
+                await dbContext.BusSeats.AddRangeAsync(seatsToInsert);
+                await dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("Duplicate entry") == true || ex.Message.Contains("Duplicate entry"))
+            {
+                dbContext.ChangeTracker.Clear();
             }
         }
        

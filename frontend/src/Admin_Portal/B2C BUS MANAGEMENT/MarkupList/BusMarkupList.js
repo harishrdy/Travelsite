@@ -132,13 +132,6 @@ export default function AdminBusMarkupListPage() {
     return sortedRows;
   }, [rows, markupTypeFilter, sortBy, sortOrder, statusFilter]);
 
-  const handleResetFilters = () => {
-    setSortBy(DEFAULT_SORT_BY);
-    setSortOrder(DEFAULT_SORT_ORDER);
-    setStatusFilter("all");
-    setMarkupTypeFilter("all");
-  };
-
   const handleExport = () => {
     if (visibleRows.length === 0) {
       return;

@@ -14,12 +14,16 @@ const Header = ({ onFilter, onForm }) => {
         </p>
       </div>
       <div className="deposit-header-actions">
-        <button onClick={onFilter} className="deposit-btn deposit-btn-secondary">
-          Filter
-        </button>
-        <button onClick={onForm} className="deposit-btn deposit-btn-primary">
-          Deposit Request
-        </button>
+        {onFilter && (
+          <button onClick={onFilter} className="deposit-btn deposit-btn-secondary">
+            Filter
+          </button>
+        )}
+        {onForm && (
+          <button onClick={onForm} className="deposit-btn deposit-btn-primary">
+            Deposit Request
+          </button>
+        )}
       </div>
     </div>
   );

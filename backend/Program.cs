@@ -20,6 +20,7 @@ builder.Services.AddHttpClient("TicketEmailApi", client =>
     client.Timeout = TimeSpan.FromSeconds(20);
 });
 // ✅ ADD HERE
+builder.Services.AddHttpClient<IAmadeusHotelService, AmadeusHotelService>();
 
 builder.Services.AddScoped<IBookingNotificationService, BookingNotificationService>();
 
@@ -59,10 +60,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // Serverless Postgres can close idle sockets; keepalive + retries prevents transient failures.
 
 
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 35));
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
         connectionString,
-        ServerVersion.AutoDetect(connectionString),
+        serverVersion,
         mysqlOptions =>
         {
             // ✅ Equivalent of EnableRetryOnFailure
@@ -158,20 +160,24 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-using (var scope = app.Services.CreateScope())
+var shouldSeed = builder.Configuration.GetValue<bool>("SeedDatabase", false);
+if (shouldSeed)
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    const int maxSeedAttempts = 3;
-    for (var attempt = 1; attempt <= maxSeedAttempts; attempt++)
+    using (var scope = app.Services.CreateScope())
     {
-        try
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        const int maxSeedAttempts = 3;
+        for (var attempt = 1; attempt <= maxSeedAttempts; attempt++)
         {
-            await DbSeeder.SeedAsync(dbContext);
-            break;
-        }
-        catch (Exception) when (attempt < maxSeedAttempts)
-        {
-            await Task.Delay(TimeSpan.FromSeconds(2 * attempt));
+            try
+            {
+                await DbSeeder.SeedAsync(dbContext);
+                break;
+            }
+            catch (Exception) when (attempt < maxSeedAttempts)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(2 * attempt));
+            }
         }
     }
 }

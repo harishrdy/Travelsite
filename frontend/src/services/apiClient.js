@@ -1,5 +1,5 @@
 const FALLBACK_API_BASE_URL =
-  "http://3.111.182.53:8080";
+  "https://undogmatically-knotlike-evita.ngrok-free.dev";
  
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "0.0.0.0"]);
  
@@ -202,7 +202,7 @@ export function withNgrokSkipWarningHeader(urlOrPath, headers = {}) {
     const hostname = String(parsed.hostname || "");
  
     if (hostname.includes("ngrok-free.dev") || hostname.includes("ngrok.io")) {
-      return { ...headers, "x-skip-browser-warning": "true" };
+      return { ...headers, "ngrok-skip-browser-warning": "true" };
     }
   } catch {
     // Ignore header injection when URL parsing fails.
@@ -248,9 +248,9 @@ export function normalizeResponseMessage(payload, fallbackMessage = "") {
   if (ngrokEndpointMatch?.[1] || lower.includes("err_ngrok_3200")) {
     const endpoint = String(ngrokEndpointMatch?.[1] || "").trim();
     return [
-      "Backend proxy tunnel is offline (ERR_NGROK_3200).",
+      "Ngrok tunnel is offline (ERR_NGROK_3200).",
       endpoint ? `Endpoint: ${endpoint}.` : "",
-      "If your backend is running, update your proxy target and restart the frontend dev server.",
+      "If your backend is running, update your ngrok URL / proxy target and restart the frontend dev server.",
     ]
       .filter(Boolean)
       .join(" ");
@@ -267,9 +267,9 @@ export function normalizeResponseMessage(payload, fallbackMessage = "") {
       if (code === "3200") {
         const message = String(parsed.message || "").trim();
         return [
-          "Backend proxy tunnel is offline (code 3200).",
+          "Ngrok tunnel is offline (code 3200).",
           message ? `${message}` : "",
-          "If your backend is running, update your proxy target and restart the frontend dev server.",
+          "If your backend is running, update your ngrok URL / proxy target and restart the frontend dev server.",
         ]
           .filter(Boolean)
           .join(" ");

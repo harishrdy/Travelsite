@@ -668,17 +668,6 @@ const formatDepartDateParts = (value) => {
   };
 };
 
-function buildRecordKey(record) {
-  return [
-    normalizeText(record?.searchDateUtc, ""),
-    normalizeText(record?.departDate, ""),
-    normalizeText(record?.fromCity, ""),
-    normalizeText(record?.toCity, ""),
-    normalizeText(record?.customerId, ""),
-    normalizeText(record?.travelType, ""),
-  ].join("|");
-}
-
 function mapLocalSearchRecord(record, index = 0) {
   return {
     id: record?.id || `local-flight-search-${index + 1}`,

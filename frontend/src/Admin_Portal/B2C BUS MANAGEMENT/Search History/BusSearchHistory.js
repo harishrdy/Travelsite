@@ -768,45 +768,6 @@ const formatDepartDate = (value) => {
   });
 };
 
-function normalizeKeyText(value) {
-  return normalizeText(value, "")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function normalizeSearchDateKey(value) {
-  const parsed = parseUtcDateValue(value);
-  if (!parsed) {
-    return normalizeKeyText(value);
-  }
-
-  return String(Math.floor(parsed.getTime() / 1000));
-}
-
-function normalizeDepartDateKey(value) {
-  const parsed = parseDateValue(value);
-  if (!parsed) {
-    return normalizeKeyText(value);
-  }
-
-  return [
-    parsed.getFullYear(),
-    String(parsed.getMonth() + 1).padStart(2, "0"),
-    String(parsed.getDate()).padStart(2, "0"),
-  ].join("-");
-}
-
-function buildRecordKey(record) {
-  return [
-    normalizeSearchDateKey(record?.searchDateUtc),
-    normalizeDepartDateKey(record?.departDate),
-    normalizeKeyText(record?.fromCityCode || record?.fromCity),
-    normalizeKeyText(record?.toCityCode || record?.toCity),
-    normalizeKeyText(record?.customerId || record?.customerName || "no-login"),
-  ].join("|");
-}
-
 function mapLocalSearchRecord(record, index = 0) {
   return {
     id: record?.id || `local-search-${index + 1}`,

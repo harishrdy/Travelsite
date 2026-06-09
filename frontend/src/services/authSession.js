@@ -271,6 +271,50 @@ export function clearAuthSession() {
   });
 }
 
+export function clearExpiredUserCredentials() {
+  if (typeof window !== "undefined") {
+    const localKeys = [
+      "user",
+      "token",
+      "authToken",
+      "accessToken",
+      "userId",
+      "UserId",
+      "x-user-id",
+      "role",
+      "challengeId",
+      "my_traveler_data",
+    ];
+    const sessionKeys = [
+      "user",
+      "token",
+      "authToken",
+      "accessToken",
+      "userId",
+      "UserId",
+      "x-user-id",
+      "role",
+      "challengeId",
+    ];
+
+    localKeys.forEach((key) => {
+      try {
+        window.localStorage.removeItem(key);
+      } catch {}
+    });
+    sessionKeys.forEach((key) => {
+      try {
+        window.sessionStorage.removeItem(key);
+      } catch {}
+    });
+  }
+
+  updateSession({
+    token: "",
+    user: null,
+  });
+}
+
 export function isTokenExpired(token) {
   if (!token) {
     return false;

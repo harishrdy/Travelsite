@@ -22,6 +22,8 @@ import {
   Trash2,
   Users,
   X,
+  Clock,
+  IndianRupee,
 } from "lucide-react";
 import travelServiceRoute from "../../assets/images/illustrations/travel-service-route.png";
 import travelServiceFares from "../../assets/images/illustrations/travel-service-fares.png";
@@ -943,8 +945,17 @@ const HOME_MODE_CONTENT = {
   buses: {
     mode: "buses",
     Icon: Bus,
-    heroTitle: "Book bus journeys with clearer routes and fares",
-    heroTags: ["Live bus fares", "Seat selection ready", "Boarding point clarity"],
+    heroTitleStart: "Travel Beyond ",
+    heroTitleEnd: "Where Roads Lead",
+    heroSubtitle: "Book your bus tickets easily with lowest fares, live tracking, easy cancellation, and secure booking.",
+    heroTags: ["Live Bus Tracking", "Seat Selection", "Boarding Clarity"],
+    valueProps: [
+      { icon: Bus, title: "Comfortable Journey", desc: "Spacious seats and premium comfort" },
+      { icon: ShieldCheck, title: "Safe & Secure", desc: "Your safety is our top priority" },
+      { icon: Clock, title: "On Time Performance", desc: "Punctual buses, always on time" },
+      { icon: IndianRupee, title: "Best Price Guarantee", desc: "Get the best deals for your journey" }
+    ],
+    features: [],
     insightsTitle: "Make every bus booking feel clear before you pay.",
     insightsText:
       "Travel Desk helps users compare the full bus journey, not just the price, so the final booking feels easier to trust.",
@@ -977,15 +988,24 @@ const HOME_MODE_CONTENT = {
     appBenefits: HOME_APP_BENEFITS,
     aboutTitle: "About Travel Desk Bus Booking",
     aboutParagraphs: [
-      "Travel Desk keeps bus booking simple for city-to-city journeys. The platform focuses on route search, practical filters, transparent fare checks, and ticket workflows that work for everyday intercity travel.",
-      "Whether it is a weekend visit home, a pilgrimage route, a business trip, or a family holiday, bus mode helps compare operators, pickup points, timings, and ticket details in one place.",
+      "Travel Desk bus booking mode helps you compare routes, fares, travel duration, and seat availability from top private operators and state transport corporations.",
+      "With direct operator mappings, clear cancellation terms, boarding clarity, and secure payments, we make city-to-city road travel easy and reliable."
     ],
   },
   flights: {
     mode: "flights",
     Icon: Plane,
-    heroTitle: "Search flights with fares, travellers, and cabin choices",
-    heroTags: ["Live flight fares", "One-way and round-trip", "Web check-in ready"],
+    heroTitleStart: "Travel Beyond ",
+    heroTitleEnd: "The Ordinary",
+    heroSubtitle: "Book your flight tickets with lowest fares, live flight tracking, easy cancellation, and secure booking.",
+    heroTags: ["Live Flight Tracking", "Seat Selection", "Boarding Clarity"],
+    valueProps: [
+      { icon: Plane, title: "Comfortable Journey", desc: "Spacious seats and premium comfort" },
+      { icon: ShieldCheck, title: "Safe & Secure", desc: "Your safety is our top priority" },
+      { icon: Clock, title: "On Time Performance", desc: "Punctual flights, always on time" },
+      { icon: IndianRupee, title: "Best Price Guarantee", desc: "Get the best deals for your journey" }
+    ],
+    features: [],
     insightsTitle: "Make every flight search feel organized before you book.",
     insightsText:
       "Travel Desk brings fare comparison, traveller details, cabin choices, and airline actions into a calmer flight booking flow.",
@@ -1018,15 +1038,24 @@ const HOME_MODE_CONTENT = {
     appBenefits: HOME_FLIGHT_APP_BENEFITS,
     aboutTitle: "About Travel Desk Flight Booking",
     aboutParagraphs: [
-      "Travel Desk flight mode is built for fast route search, clearer fare comparison, traveller selection, cabin choices, and web check-in readiness across popular airline routes.",
-      "Whether it is a domestic business trip, family vacation, international connection, or multi-city plan, flight mode keeps schedules, passenger details, PNR actions, and booking choices easy to review.",
+      "Travel Desk flight mode provides a clean search and comparison flow for domestic and international flights, helping you compare carriers, dates, and fare options.",
+      "Manage booking passenger details, select your seats, view cabin class conditions, and complete check-in procedures directly from your personalized portal."
     ],
   },
   hotels: {
     mode: "hotels",
     Icon: Building2,
-    heroTitle: "Book hotel stays with rooms, guests, and dates aligned",
-    heroTags: ["City stays", "Rooms and guests", "Flexible stay planning"],
+    heroTitleStart: "Stay Beyond ",
+    heroTitleEnd: "The Ordinary.",
+    heroSubtitle: "Book premium hotel rooms with best prices, verified stays, easy cancellation, and secure booking.",
+    heroTags: ["Premium Stays", "Verified Rooms", "Boarding Clarity"],
+    valueProps: [
+      { icon: BedDouble, title: "Comfortable Stay", desc: "Premium rooms and premium comfort" },
+      { icon: ShieldCheck, title: "Safe & Secure", desc: "Your safety is our top priority" },
+      { icon: Clock, title: "Flexible Timings", desc: "Easy check-in, check-out" },
+      { icon: IndianRupee, title: "Best Price Guarantee", desc: "Get the best deals for your stay" }
+    ],
+    features: [],
     insightsTitle: "Make every hotel search feel clear before you choose.",
     insightsText:
       "Travel Desk hotel mode brings destination, dates, room count, guest details, and stay choices into the same calm booking flow.",
@@ -1105,6 +1134,7 @@ function formatTravellerSummary(adults, children, infants) {
 }
 
 function formatHotelGuestSummary(rooms, adults, children) {
+  if (!rooms || !adults) return "";
   const roomPart = `${rooms} ${rooms > 1 ? "Rooms" : "Room"}`;
   const adultPart = `${adults} ${adults > 1 ? "Adults" : "Adult"}`;
   const childPart =
@@ -1883,9 +1913,11 @@ export default function HomePage() {
   const [adults, setAdults] = useState(0);
   const [children, setChildren] = useState(0);
   const [infants, setInfants] = useState(0);
-  const [cabinClass, setCabinClass] = useState("Economy");
+  const [cabinClass, setCabinClass] = useState("");
   const [showTravellerDropdown, setShowTravellerDropdown] = useState(false);
+  const [showClassDropdown, setShowClassDropdown] = useState(false);
   const travellerFieldRef = useRef(null);
+  const classFieldRef = useRef(null);
 
   const [multiCityLegs, setMultiCityLegs] = useState(() => [
     createMultiCityLeg("", "", 0),
@@ -1904,8 +1936,8 @@ export default function HomePage() {
   const [hotelDestinationError, setHotelDestinationError] = useState("");
   const [hotelCheckInDate, setHotelCheckInDate] = useState("");
   const [hotelCheckOutDate, setHotelCheckOutDate] = useState("");
-  const [hotelRooms, setHotelRooms] = useState(1);
-  const [hotelAdults, setHotelAdults] = useState(2);
+  const [hotelRooms, setHotelRooms] = useState(0);
+  const [hotelAdults, setHotelAdults] = useState(0);
   const [hotelChildren, setHotelChildren] = useState(0);
   const [showHotelGuestsDropdown, setShowHotelGuestsDropdown] = useState(false);
   const hotelGuestsFieldRef = useRef(null);
@@ -1920,6 +1952,57 @@ export default function HomePage() {
   const [popularFlightsLoading, setPopularFlightsLoading] = useState(false);
   const [popularFlightsError, setPopularFlightsError] = useState("");
   const [isDealsDialogOpen, setIsDealsDialogOpen] = useState(false);
+  const [offerForDetailPopup, setOfferForDetailPopup] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyCode = (code) => {
+    if (!code) return;
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      // Fallback
+      const el = document.createElement("textarea");
+      el.value = code;
+      document.body.appendChild(el);
+      el.select();
+      try {
+        document.execCommand("copy");
+        setCopied(true);
+      } catch (err) {
+        console.error("Failed to copy", err);
+      }
+      document.body.removeChild(el);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const renderOfferConditions = (offer) => {
+    if (!offer.conditions || offer.conditions.length === 0) {
+      return <li>Valid on all bookings of this category.</li>;
+    }
+    const mapped = offer.conditions.map((cond, idx) => {
+      if (!cond.isActive) return null;
+      if (cond.conditionType === "SourceCity" && cond.value1) {
+        return <li key={idx}>Only valid for travel originating from <strong>{cond.value1}</strong>.</li>;
+      }
+      if (cond.conditionType === "DestinationCity" && cond.value1) {
+        return <li key={idx}>Only valid for travel to <strong>{cond.value1}</strong>.</li>;
+      }
+      if (cond.conditionType === "TravelDate" && cond.value1) {
+        return <li key={idx}>Valid for travel on or before <strong>{cond.value1}</strong>.</li>;
+      }
+      if (cond.conditionType === "BusType" && cond.value1) {
+        return <li key={idx}>Valid on <strong>{cond.value1}</strong> bus types.</li>;
+      }
+      return null;
+    }).filter(Boolean);
+
+    if (mapped.length === 0) {
+      return <li>Valid on all bookings of this category.</li>;
+    }
+    return mapped;
+  };
 
   useEffect(() => {
     const tab = normalizeHomeTab(searchParams.get("tab"));
@@ -1941,6 +2024,13 @@ export default function HomePage() {
       ) {
         setShowHotelGuestsDropdown(false);
       }
+
+      if (
+        classFieldRef.current &&
+        !classFieldRef.current.contains(event.target)
+      ) {
+        setShowClassDropdown(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -1950,10 +2040,11 @@ export default function HomePage() {
   useEffect(() => {
     setShowTravellerDropdown(false);
     setShowHotelGuestsDropdown(false);
+    setShowClassDropdown(false);
   }, [activeTab, flightTripType]);
 
   useEffect(() => {
-    if (!isDealsDialogOpen || typeof document === "undefined") {
+    if (!isDealsDialogOpen && !offerForDetailPopup || typeof document === "undefined") {
       return undefined;
     }
 
@@ -1963,7 +2054,7 @@ export default function HomePage() {
     return () => {
       document.body.style.overflow = previousOverflow;
     };
-  }, [isDealsDialogOpen]);
+  }, [isDealsDialogOpen, offerForDetailPopup]);
 
   const dealsDialog =
     isDealsDialogOpen && typeof document !== "undefined"
@@ -1997,23 +2088,149 @@ export default function HomePage() {
               </header>
               <div className="deals-dialog-grid">
                 {featuredOffers.map((offer) => (
-                  <article className="offer-card deals-dialog-card" key={offer.id}>
-                    <FeaturedOfferImage offer={offer} />
-                    <div className="offer-content">
-                      <h3>{offer.title}</h3>
-                      <p>{offer.description || offer.subtitle}</p>
+                  <article
+                    className="offer-card voucher-card"
+                    key={offer.id}
+                    onClick={() => {
+                      setIsDealsDialogOpen(false);
+                      setOfferForDetailPopup(offer);
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <div className="voucher-left">
+                      <div className="voucher-img-container">
+                        <FeaturedOfferImage offer={offer} />
+                      </div>
+                      <div className="voucher-details">
+                        <span className="voucher-category">{offer.bookingType || "Offer"}</span>
+                        <h3>{offer.title}</h3>
+                        <p>{offer.description || offer.subtitle}</p>
+                      </div>
+                    </div>
+                    <div className="voucher-divider">
+                      <span className="voucher-cutout top"></span>
+                      <span className="voucher-dashed-line"></span>
+                      <span className="voucher-cutout bottom"></span>
+                    </div>
+                    <div className="voucher-right">
                       {offer.couponCode ? (
-                        <span className="offer-code">Code: {offer.couponCode}</span>
-                      ) : null}
+                        <div className="voucher-code-badge">
+                          <span className="badge-title">CODE</span>
+                          <span className="badge-value">{offer.couponCode}</span>
+                        </div>
+                      ) : (
+                        <div className="voucher-code-badge promo">
+                          <span className="badge-title">OFFER</span>
+                          <span className="badge-value">ACTIVE</span>
+                        </div>
+                      )}
                       <button
                         type="button"
-                        onClick={() => handleOfferBooking(offer)}
+                        className="voucher-details-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsDealsDialogOpen(false);
+                          setOfferForDetailPopup(offer);
+                        }}
                       >
-                        Book now
+                        Details
                       </button>
                     </div>
                   </article>
                 ))}
+              </div>
+            </section>
+          </div>,
+          document.body,
+        )
+      : null;
+
+  const offerDetailDialog =
+    offerForDetailPopup && typeof document !== "undefined"
+      ? createPortal(
+          <div
+            className="offer-detail-backdrop"
+            role="presentation"
+            onClick={() => setOfferForDetailPopup(null)}
+          >
+            <section
+              className="offer-detail-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="offer-detail-title"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <header className="offer-detail-header">
+                <div>
+                  <span className="offer-detail-kicker">
+                    {offerForDetailPopup.bookingType ? `${offerForDetailPopup.bookingType.toUpperCase()} DEAL` : "OFFER DETAIL"}
+                  </span>
+                  <h2 id="offer-detail-title">{offerForDetailPopup.title}</h2>
+                </div>
+                <button
+                  type="button"
+                  className="offer-detail-close"
+                  onClick={() => setOfferForDetailPopup(null)}
+                  aria-label="Close details"
+                >
+                  <X size={18} />
+                </button>
+              </header>
+
+              <div className="offer-detail-body">
+                <p className="offer-detail-desc">
+                  {offerForDetailPopup.description || offerForDetailPopup.subtitle}
+                </p>
+
+                {offerForDetailPopup.couponCode ? (
+                  <div className="offer-coupon-section">
+                    <span className="section-subtitle">Coupon Code</span>
+                    <div 
+                      className="offer-coupon-card" 
+                      onClick={() => handleCopyCode(offerForDetailPopup.couponCode)}
+                      title="Click to copy code"
+                    >
+                      <div className="coupon-code-val">
+                        <code>{offerForDetailPopup.couponCode}</code>
+                      </div>
+                      <button type="button" className="coupon-copy-btn">
+                        {copied ? "Copied!" : "Copy Code"}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="offer-coupon-section">
+                    <div className="offer-coupon-card promo-auto">
+                      <span>Automatic promo discount applied at checkout. No code required!</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="offer-terms-section">
+                  <span className="section-subtitle">Terms & Conditions</span>
+                  <ul className="terms-list">
+                    {renderOfferConditions(offerForDetailPopup)}
+                    <li>This offer cannot be clubbed with any other ongoing promotions.</li>
+                    <li>Standard booking terms and cancellation policies apply.</li>
+                    {offerForDetailPopup.couponExpiresAtUtc && (
+                      <li>Valid for bookings made before {new Date(offerForDetailPopup.couponExpiresAtUtc).toLocaleDateString()}.</li>
+                    )}
+                  </ul>
+                </div>
+
+                <div className="offer-detail-actions">
+                  <button
+                    type="button"
+                    className="offer-proceed-btn"
+                    onClick={() => {
+                      const offer = offerForDetailPopup;
+                      setOfferForDetailPopup(null);
+                      handleOfferBooking(offer);
+                    }}
+                  >
+                    Proceed to Booking
+                  </button>
+                </div>
               </div>
             </section>
           </div>,
@@ -2266,6 +2483,7 @@ export default function HomePage() {
     hotelAdults,
     hotelChildren,
   );
+  const hasHotelGuestSelection = Boolean(hotelGuestSummary);
 
   const navigateToFlightSearch = (flightPayload) => {
     const flightParams = new URLSearchParams();
@@ -2458,6 +2676,11 @@ export default function HomePage() {
         return;
       }
 
+      if (hotelRooms === 0 || hotelAdults === 0) {
+        alert("Please select at least 1 room and 1 adult.");
+        return;
+      }
+
       setHotelDestinationError("");
       navigateToHotelSearch({
         destination: destinationVal,
@@ -2515,6 +2738,11 @@ export default function HomePage() {
       const departureDate = isMultiCity
         ? multiCityLegs[0]?.departureDate || ""
         : flightDepartureDate;
+
+      if (!cabinClass) {
+        alert("Please select a cabin class.");
+        return;
+      }
 
       const flightPayload = {
         source: source.trim(),
@@ -2724,9 +2952,13 @@ export default function HomePage() {
         className={`traveller-trigger ${showHotelGuestsDropdown ? "open" : ""}`}
         onClick={() => setShowHotelGuestsDropdown((previous) => !previous)}
       >
-        <span className="traveller-summary">
+        <span
+          className={`traveller-summary ${
+            !hasHotelGuestSelection ? "placeholder" : ""
+          }`}
+        >
           <BedDouble size={16} />
-          <span>{hotelGuestSummary}</span>
+          <span>{hotelGuestSummary || "SELECT ROOMS & GUESTS..."}</span>
         </span>
         <ChevronDown
           size={16}
@@ -2809,21 +3041,49 @@ export default function HomePage() {
   );
 
   const classField = (
-    <div className="field class-field">
+    <div className="field class-field" ref={classFieldRef}>
       <label>Class</label>
-      <div className="control-wrap class-control-wrap">
-        <select
-          value={cabinClass}
-          onChange={(event) => setCabinClass(event.target.value)}
-          className="field-control"
+      <button
+        type="button"
+        className={`traveller-trigger ${showClassDropdown ? "open" : ""}`}
+        onClick={() => setShowClassDropdown((prev) => !prev)}
+      >
+        <span
+          className={`traveller-summary ${
+            cabinClass ? "" : "placeholder"
+          }`}
         >
-          {CLASS_OPTIONS.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-      </div>
+          <Plane size={16} />
+          <span>
+            {cabinClass || "Select class"}
+          </span>
+        </span>
+        <ChevronDown
+          size={16}
+          className={`traveller-caret ${showClassDropdown ? "open" : ""}`}
+        />
+      </button>
+
+      {showClassDropdown && (
+        <div className="traveller-dropdown class-dropdown">
+          <ul className="class-options-list">
+            {CLASS_OPTIONS.map((item) => (
+              <li key={item}>
+                <button
+                  type="button"
+                  className={`class-option-btn ${cabinClass === item ? "selected" : ""}`}
+                  onClick={() => {
+                    setCabinClass(item);
+                    setShowClassDropdown(false);
+                  }}
+                >
+                  {item}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 
@@ -3069,30 +3329,468 @@ export default function HomePage() {
            border-radius: 8px;
            margin-top: auto;
          }
-         @keyframes skeleton-loading {
-           0% {
-             background-position: 100% 50%;
-           }
-           100% {
-             background-position: 0% 50%;
-           }
-         }
-      `}</style>
+          @keyframes skeleton-loading {
+            0% {
+              background-position: 100% 50%;
+            }
+            100% {
+              background-position: 0% 50%;
+            }
+          }
+
+          /* Voucher Card Design Styles */
+          .offer-card.voucher-card {
+            min-width: 440px;
+            max-width: 440px;
+            height: 160px;
+            min-height: 160px !important;
+            gap: 0 !important;
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            background: #ffffff !important;
+            border: 1px solid #cedcee !important;
+            border-radius: 16px !important;
+            padding: 0 !important;
+            overflow: visible !important;
+            box-shadow: 0 10px 25px rgba(13, 74, 83, 0.04) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          }
+
+          .offer-card.voucher-card:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 15px 35px rgba(13, 74, 83, 0.08) !important;
+            border-color: #c0d1e5 !important;
+          }
+
+          .deals-dialog-grid .offer-card.voucher-card {
+            min-width: 100%;
+            max-width: 100%;
+          }
+
+          .voucher-left {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            overflow: hidden;
+            text-align: left;
+          }
+
+          .voucher-img-container {
+            width: 84px;
+            height: 84px;
+            border-radius: 10px;
+            overflow: hidden;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            background: #f3f4f6;
+          }
+
+          .voucher-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          .voucher-details {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+
+          .voucher-category {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--primary, #dc1e26);
+          }
+
+          .voucher-details h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1a2b49;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .voucher-details p {
+            font-size: 0.8rem;
+            color: #597191;
+            margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+          }
+
+          .voucher-divider {
+            width: 20px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: visible;
+          }
+
+          .voucher-dashed-line {
+            width: 0;
+            height: calc(100% - 24px);
+            border-left: 1.5px dashed #cddcee;
+          }
+
+          .voucher-cutout {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid #cedcee;
+            z-index: 5;
+            box-sizing: border-box;
+          }
+
+          /* Cutouts on homepage section need to match page background */
+          .voucher-cutout.top {
+            top: -11px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #f5f8fd; /* matches page gradient */
+            border-top-color: transparent !important;
+          }
+
+          .voucher-cutout.bottom {
+            bottom: -11px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #f5f8fd; /* matches page gradient */
+            border-bottom-color: transparent !important;
+          }
+
+          /* Cutouts in all deals dialog need to match dialog background (white) */
+          .deals-dialog-grid .voucher-cutout.top {
+            background: #ffffff !important;
+            border-top-color: transparent !important;
+          }
+          .deals-dialog-grid .voucher-cutout.bottom {
+            background: #ffffff !important;
+            border-bottom-color: transparent !important;
+          }
+
+          .voucher-right {
+            width: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px;
+            flex-shrink: 0;
+            border-top-right-radius: 16px;
+            border-bottom-right-radius: 16px;
+            background: #fafbfe;
+            border-left: 1px solid rgba(205, 220, 238, 0.3);
+          }
+
+          .voucher-code-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #edf3fc;
+            border: 1px dashed #b9cfe8;
+            border-radius: 8px;
+            padding: 6px 10px;
+            width: 100%;
+          }
+
+          .voucher-code-badge.promo {
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+          }
+
+          .voucher-code-badge.promo .badge-title {
+            color: #047857;
+          }
+
+          .voucher-code-badge.promo .badge-value {
+            color: #065f46;
+          }
+
+          .badge-title {
+            font-size: 0.55rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            color: #597191;
+          }
+
+          .badge-value {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #1a2b49;
+            margin-top: 1px;
+          }
+
+          .voucher-details-btn {
+            width: 100%;
+            background: #edf2f9 !important;
+            border: 1px solid #cedcee !important;
+            color: #2c486c !important;
+            font-weight: 700 !important;
+            font-size: 0.75rem !important;
+            padding: 6px 0 !important;
+            border-radius: 8px !important;
+            cursor: pointer;
+            transition: all 0.2s ease !important;
+          }
+
+          .voucher-details-btn:hover {
+            background: var(--primary, #dc1e26) !important;
+            border-color: var(--primary, #dc1e26) !important;
+            color: #ffffff !important;
+          }
+
+          /* Details Modal Backdrop */
+          .offer-detail-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+            animation: fade-in-backdrop 0.25s ease both;
+          }
+
+          @keyframes fade-in-backdrop {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+
+          /* Details Modal Sheet */
+          .offer-detail-modal {
+            background: #ffffff;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            animation: slide-up-modal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+            display: flex;
+            flex-direction: column;
+          }
+
+          @keyframes slide-up-modal {
+            from {
+              opacity: 0;
+              transform: translateY(30px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+
+          .offer-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            position: relative;
+          }
+
+          .offer-detail-kicker {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--primary, #dc1e26);
+            margin-bottom: 4px;
+            display: block;
+          }
+
+          .offer-detail-header h2 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+            line-height: 1.2;
+          }
+
+          .offer-detail-close {
+            background: #f1f5f9 !important;
+            border: none !important;
+            color: #64748b !important;
+            width: 32px;
+            height: 32px;
+            border-radius: 50% !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease !important;
+          }
+
+          .offer-detail-close:hover {
+            background: #e2e8f0 !important;
+            color: #0f172a !important;
+          }
+
+          .offer-detail-body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            max-height: 70vh;
+          }
+
+          .offer-detail-desc {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #475569;
+            margin: 0;
+          }
+
+          .offer-coupon-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .section-subtitle {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+          }
+
+          .offer-coupon-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+          }
+
+          .offer-coupon-card:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+          }
+
+          .offer-coupon-card.promo-auto {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            cursor: default;
+            color: #065f46;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            justify-content: center;
+            padding: 14px;
+          }
+
+          .coupon-code-val code {
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            color: #0f172a;
+          }
+
+          .coupon-copy-btn {
+            background: var(--primary, #dc1e26) !important;
+            border: none !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            font-size: 0.75rem !important;
+            padding: 6px 14px !important;
+            border-radius: 8px !important;
+            transition: all 0.2s ease !important;
+          }
+
+          .coupon-copy-btn:hover {
+            background: #b8141b !important;
+          }
+
+          .offer-terms-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .terms-list {
+            margin: 0;
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+          }
+
+          .terms-list li {
+            font-size: 0.82rem;
+            color: #475569;
+            line-height: 1.4;
+          }
+
+          .offer-detail-actions {
+            margin-top: 8px;
+          }
+
+          .offer-proceed-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary, #dc1e26), #b8141b) !important;
+            border: none !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            font-size: 0.95rem !important;
+            padding: 14px 0 !important;
+            border-radius: 12px !important;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(220, 30, 38, 0.15);
+            transition: all 0.25s ease !important;
+          }
+
+          .offer-proceed-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(220, 30, 38, 0.22);
+          }
+
+          .offer-proceed-btn:active {
+            transform: translateY(0);
+          }
+       `}</style>
       <section className="hero-section">
         <div className="hero-content">
-          {/* Left-aligned Heading and Point Tags */}
+          {/* Left-aligned Heading and Subtitle */}
           <div className="hero-header-left">
-            <h1 className="hero-title-left">{homeContent.heroTitle}</h1>
-            <div className="hero-tag-row-left">
-              {homeContent.heroTags.map((tag) => (
-                <span className="hero-tag-left" key={tag}>
-                  {tag}
-                </span>
-              ))}
-            </div>
+            <h1 className="hero-title-left">
+              {homeContent.heroTitleStart}
+              <span className="hero-title-highlight">{homeContent.heroTitleEnd}</span>
+            </h1>
+            {homeContent.heroSubtitle && (
+              <p className="hero-subtitle-left">{homeContent.heroSubtitle}</p>
+            )}
+
           </div>
 
-          <div className="hero-grid">
+          <div className={`hero-grid ${activeTab === "flights" && flightTripType === "multicity" ? "multicity-active" : ""}`}>
             <div className="search-panel">
               <div className="tabs-wrap">
                 <div className="tabs" role="tablist" aria-label="Booking type">
@@ -3499,6 +4197,8 @@ export default function HomePage() {
               </button>
             </div>
           </div>
+
+
         </div>
       </section>
 
@@ -3535,30 +4235,51 @@ export default function HomePage() {
         ) : (
           <div className="offers-scroll-row">
             {featuredOffers.map((offer) => (
-                <article
-                  className="offer-card"
-                  key={offer.id}
-                >
-                  {false && (
-                    <span className="offer-badge-applied">
-                      Applied ✓
-                    </span>
-                  )}
-                  <FeaturedOfferImage offer={offer} />
-                  <div className="offer-content">
-                    <h3>{offer.title}</h3>
-                    <p>{offer.description || offer.subtitle}</p>
-                    {offer.couponCode ? (
-                      <span className="offer-code">Code: {offer.couponCode}</span>
-                    ) : null}
-                    <button
-                      type="button"
-                      onClick={() => handleOfferBooking(offer)}
-                    >
-                      Book now
-                    </button>
-                  </div>
-                </article>
+                  <article
+                    className="offer-card voucher-card"
+                    key={offer.id}
+                    onClick={() => setOfferForDetailPopup(offer)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <div className="voucher-left">
+                      <div className="voucher-img-container">
+                        <FeaturedOfferImage offer={offer} />
+                      </div>
+                      <div className="voucher-details">
+                        <span className="voucher-category">{offer.bookingType || "Offer"}</span>
+                        <h3>{offer.title}</h3>
+                        <p>{offer.description || offer.subtitle}</p>
+                      </div>
+                    </div>
+                    <div className="voucher-divider">
+                      <span className="voucher-cutout top"></span>
+                      <span className="voucher-dashed-line"></span>
+                      <span className="voucher-cutout bottom"></span>
+                    </div>
+                    <div className="voucher-right">
+                      {offer.couponCode ? (
+                        <div className="voucher-code-badge">
+                          <span className="badge-title">CODE</span>
+                          <span className="badge-value">{offer.couponCode}</span>
+                        </div>
+                      ) : (
+                        <div className="voucher-code-badge promo">
+                          <span className="badge-title">OFFER</span>
+                          <span className="badge-value">ACTIVE</span>
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        className="voucher-details-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOfferForDetailPopup(offer);
+                        }}
+                      >
+                        Details
+                      </button>
+                    </div>
+                  </article>
             ))}
           </div>
         )}
@@ -3669,6 +4390,7 @@ export default function HomePage() {
       )}
 
       {dealsDialog}
+      {offerDetailDialog}
 
       {activeTab === "buses" && (
       <section
@@ -4172,7 +4894,7 @@ export default function HomePage() {
 
         <div className="india-about-block">
           <h2>{homeContent.aboutTitle}</h2>
-          {homeContent.aboutParagraphs.map((paragraph) => (
+          {homeContent.aboutParagraphs && homeContent.aboutParagraphs.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
         </div>

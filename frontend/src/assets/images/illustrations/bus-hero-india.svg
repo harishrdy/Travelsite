@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Bus travel across India landmarks">
   <defs>
     <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0" stop-color="#dff8f3"/>
-      <stop offset="0.56" stop-color="#f7fbf8"/>
+      <stop offset="0" stop-color="#fef2f2"/>
+      <stop offset="0.56" stop-color="#F9FAFB"/>
       <stop offset="1" stop-color="#eaf0ff"/>
     </linearGradient>
     <linearGradient id="gold" x1="0" x2="1" y1="0" y2="1">
@@ -52,8 +52,8 @@
   </g>
 
   <g opacity="0.92">
-    <path d="M0 515c150-95 248-76 370-78 170-2 294-79 510-30 162 37 263 32 420-13 136-39 208-10 300 42v464H0Z" fill="#009b8f"/>
-    <path d="M0 570c180-82 330-60 520-80 178-19 284-12 430 39 186 65 332-31 650-19v390H0Z" fill="#006f7a"/>
+    <path d="M0 515c150-95 248-76 370-78 170-2 294-79 510-30 162 37 263 32 420-13 136-39 208-10 300 42v464H0Z" fill="#dc1e26"/>
+    <path d="M0 570c180-82 330-60 520-80 178-19 284-12 430 39 186 65 332-31 650-19v390H0Z" fill="#b8141b"/>
   </g>
 
   <g transform="translate(624 260)" filter="url(#softShadow)">
@@ -136,7 +136,7 @@
     <path d="M110 54h330c50 0 88 36 96 86H92V72c0-10 8-18 18-18Z" fill="#0c2c3b"/>
     <path d="M548 70c44 18 70 54 70 102v46h-88V92c0-17 6-27 18-22Z" fill="#0b2835"/>
     <path d="M72 174h430" stroke="#f06423" stroke-width="12" stroke-linecap="round"/>
-    <path d="M82 198h412" stroke="#009b8f" stroke-width="7" stroke-linecap="round"/>
+    <path d="M82 198h412" stroke="#dc1e26" stroke-width="7" stroke-linecap="round"/>
     <rect x="90" y="204" width="238" height="38" rx="10" fill="#fff2d6"/>
     <text x="208" y="229" text-anchor="middle" font-family="Georgia, serif" font-size="34" fill="#13243a">Incredible India</text>
     <g fill="#15313f" opacity="0.95">

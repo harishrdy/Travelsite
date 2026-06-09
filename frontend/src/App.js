@@ -3,20 +3,21 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from
 
 import { UserProvider } from "./contexts/UserContext";
 import { PromoProvider } from "./contexts/PromoContext";
-import { clearAuthSession, isTokenExpired } from "./services/authSession";
+import {
+  clearAuthSession,
+  clearExpiredUserCredentials,
+  isTokenExpired,
+} from "./services/authSession";
 
 import BookingConfirmationPage from "./pages/booking/BookingConfirmationPage";
 
 import Topbar from "./components/layout/Topbar";
 import SiteFooter from "./components/layout/SiteFooter";
+import AuthModal from "./components/auth/AuthModal";
 import HomePage from "./pages/public/HomePage";
 import PrintTicketPage from "./pages/public/PrintTicketPage";
 import FetchTicket from "./pages/public/FetchTicket";
-import Login from "./pages/auth/Login";
-import Register from "./pages/auth/Register";
-import VerifyOtp from "./pages/auth/VerifyOtp";
 import ChangePassword from "./pages/auth/ChangePassword";
-import Forgetpassword from "./pages/auth/RESETPASSWORD";
 import DashboardLayout from "./components/layout/DashbaordLayout";
 import DashboardPage from "./pages/booking/DashboardPage";
 
@@ -92,6 +93,7 @@ import AdminOfferListPage from "./Admin_Portal/OFFER MANAGEMENT/OFFER LIST/Offer
 import AdminAddOfferPage from "./Admin_Portal/OFFER MANAGEMENT/ADD NEW OFFER/AddOffer";
 import AdminOfferCategoryListPage from "./Admin_Portal/OFFER MANAGEMENT/OFFER CATEGORY LIST/OfferCategoryList";
 import AdminAddOfferCategoryPage from "./Admin_Portal/OFFER MANAGEMENT/ADD OFFER CATEGORY/AddOfferCategory";
+import { openAuthModal } from "./utils/authModalEvents";
 import PaymentSettings from "./Admin_Portal/PAYMENT MANAGEMENT/Payment Settings/payment Settings";
 import AdminBlogList from "./Admin_Portal/BLOG MANAGEMENT/Blog List/Admin.Bloglist";
 import AdminAddBlog from "./Admin_Portal/BLOG MANAGEMENT/ADD BLOG/Admin.Addblog";
@@ -109,6 +111,26 @@ const ADMIN_PATHS = {
   login: "/admin/login",
   pin: "/admin/pin",
 };
+
+const USER_PROTECTED_PATH_PREFIXES = [
+  "/bus/payment",
+  "/flight/payment",
+  "/dashboard",
+  "/change-password",
+  "/edit-profile",
+  "/booking-confirmation",
+];
+
+function isUserProtectedPath(pathname) {
+  const normalizedPath = String(pathname || "").toLowerCase();
+  return USER_PROTECTED_PATH_PREFIXES.some((prefix) =>
+    normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`)
+  );
+}
+
+function buildReturnTo(location) {
+  return `${location.pathname || "/"}${location.search || ""}${location.hash || ""}`;
+}
 
 const ADMIN_MENU_ROUTES = {
   list: "menu-management/menus",
@@ -161,7 +183,7 @@ const LEGACY_REDIRECTS = [
   { from: "/resetpassword", to: "/forgot-password" },
   { from: "/Admin_login", to: ADMIN_PATHS.login },
   { from: "/Admin_Pin", to: ADMIN_PATHS.pin },
-  { from: "/DataTable", to: "/dashboard" },
+  { from: "/DataTable", to: "/" },
 ];
 
 const ADMIN_PLACEHOLDER_DESCRIPTION = "This module is getting configured.";
@@ -244,6 +266,14 @@ function AdminOfferCategoryAddRoute() {
   return <AdminAddOfferCategoryPage onBack={() => navigate(ADMIN_OFFER_PATHS.categories)} />;
 }
 
+function AuthPopupRedirect({ mode }) {
+  useEffect(() => {
+    openAuthModal(mode);
+  }, [mode]);
+
+  return <Navigate to="/" replace />;
+}
+
 function AppContent() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -252,10 +282,10 @@ function AppContent() {
     const checkSession = () => {
       const currentPath = (location.pathname || "").toLowerCase();
       const isAdmin = currentPath.startsWith("/admin");
-      const loginPath = isAdmin ? "/admin/login" : "/login";
+      const loginPath = isAdmin ? "/admin/login" : "";
 
       // Skip checking/redirecting if already on the login path
-      if (currentPath === loginPath) {
+      if (loginPath && currentPath === loginPath) {
         return;
       }
 
@@ -267,9 +297,18 @@ function AppContent() {
         }
       } else {
         const token = localStorage.getItem("token");
+        if (!token && isUserProtectedPath(currentPath)) {
+          openAuthModal("login", { returnTo: buildReturnTo(location) });
+          navigate("/", { replace: true });
+          return;
+        }
+
         if (token && isTokenExpired(token)) {
-          clearAuthSession();
-          navigate("/login", { replace: true });
+          clearExpiredUserCredentials();
+          if (isUserProtectedPath(currentPath)) {
+            openAuthModal("login", { returnTo: buildReturnTo(location) });
+            navigate("/", { replace: true });
+          }
         }
       }
     };
@@ -277,7 +316,16 @@ function AppContent() {
     checkSession();
     const intervalId = setInterval(checkSession, 5000);
     return () => clearInterval(intervalId);
-  }, [location.pathname, navigate]);
+  }, [location, navigate]);
+
+  // Scroll to top of page on route or search parameter updates
+  useEffect(() => {
+    const rootEl = document.getElementById("root");
+    if (rootEl) {
+      rootEl.scrollTop = 0;
+    }
+    window.scrollTo(0, 0);
+  }, [location.pathname, location.search]);
 
   const normalizedPath = (location.pathname || "").toLowerCase();
   const isAdminPath = normalizedPath.startsWith("/admin");
@@ -293,10 +341,10 @@ function AppContent() {
 
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/verify" element={<VerifyOtp />} />
-        <Route path="/forgot-password" element={<Forgetpassword />} />
+        <Route path="/login" element={<AuthPopupRedirect mode="login" />} />
+        <Route path="/register" element={<AuthPopupRedirect mode="login" />} />
+        <Route path="/verify" element={<AuthPopupRedirect mode="login" />} />
+        <Route path="/forgot-password" element={<AuthPopupRedirect mode="login" />} />
         <Route path="/offers" element={<OffersPage />} />
         <Route path="/online/:slug" element={<LegalPage />} />
 
@@ -442,7 +490,7 @@ function AppContent() {
           <Route path="*" element={<Navigate to={ADMIN_PATHS.base} replace />} />
         </Route>
 
-        <Route path="/data-table" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/data-table" element={<Navigate to="/" replace />} />
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="bank-list" element={<BankList />} />
@@ -471,6 +519,7 @@ function AppContent() {
       </Routes>
 
       {shouldShowFooter && <SiteFooter />}
+      <AuthModal />
     </>
   );
 }

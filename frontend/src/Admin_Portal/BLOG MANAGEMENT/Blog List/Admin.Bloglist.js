@@ -13,7 +13,6 @@ import {
     User,
     Tag,
     FileText,
-    Image as ImageIcon,
     Check,
     AlertCircle,
 } from 'lucide-react';
@@ -419,7 +418,6 @@ function BlogList() {
             whiteSpace: 'nowrap',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
-            fontWeight: 800,
         },
         statusBadge: {
             display: 'inline-flex',

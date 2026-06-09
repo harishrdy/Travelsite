@@ -212,8 +212,9 @@ public static class DbSeeder
     
     private static async Task EnsureSeatMapsAsync(AppDbContext dbContext, CancellationToken cancellationToken)
     {
-        await EnsureFlightSeatMapsAsync(dbContext, cancellationToken);
-        await EnsureBusSeatMapsAsync(dbContext, cancellationToken);
+        // Seats are generated on-demand when accessed via APIs to preserve DB connections
+        // await EnsureFlightSeatMapsAsync(dbContext, cancellationToken);
+        // await EnsureBusSeatMapsAsync(dbContext, cancellationToken);
     }
 
     private static async Task EnsureFlightSeatMapsAsync(AppDbContext dbContext, CancellationToken cancellationToken)

@@ -2,10 +2,10 @@
   <title id="title">Pick N Book</title>
   <desc id="desc">Pick N Book brand logo</desc>
   <rect width="222" height="82" fill="none"/>
-  <text x="0" y="52" fill="#006f7a" font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif" font-size="35" font-weight="800" letter-spacing="-1.1">Pick</text>
-  <path d="M76 68 C80 49 84 29 89 10" fill="none" stroke="#3656d4" stroke-width="10" stroke-linecap="round"/>
-  <path d="M89 10 C98 31 107 50 116 68" fill="none" stroke="#3656d4" stroke-width="9" stroke-linecap="round"/>
-  <path d="M116 68 C120 49 124 29 129 10" fill="none" stroke="#3656d4" stroke-width="10" stroke-linecap="round"/>
-  <path d="M84 58 C94 45 103 32 120 15" fill="none" stroke="#7e96ff" stroke-width="2.6" stroke-linecap="round" opacity="0.9"/>
-  <text x="132" y="52" fill="#009b8f" font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif" font-size="35" font-weight="800" letter-spacing="-1.1">Book</text>
+  <text x="0" y="52" fill="#111827" font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif" font-size="35" font-weight="800" letter-spacing="-1.1">Pick</text>
+  <path d="M76 68 C80 49 84 29 89 10" fill="none" stroke="#dc1e26" stroke-width="10" stroke-linecap="round"/>
+  <path d="M89 10 C98 31 107 50 116 68" fill="none" stroke="#dc1e26" stroke-width="9" stroke-linecap="round"/>
+  <path d="M116 68 C120 49 124 29 129 10" fill="none" stroke="#dc1e26" stroke-width="10" stroke-linecap="round"/>
+  <path d="M84 58 C94 45 103 32 120 15" fill="none" stroke="#fef2f2" stroke-width="2.6" stroke-linecap="round" opacity="0.9"/>
+  <text x="132" y="52" fill="#111827" font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif" font-size="35" font-weight="800" letter-spacing="-1.1">Book</text>
 </svg>

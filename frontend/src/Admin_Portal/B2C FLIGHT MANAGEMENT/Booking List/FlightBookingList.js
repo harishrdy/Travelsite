@@ -609,7 +609,7 @@ export default function AdminFlightBookingListPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [setBookings]);
 
   useEffect(() => {
     loadAdminBookings(filters);

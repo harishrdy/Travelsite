@@ -25,11 +25,11 @@
   --surface-border: #c9d7ea;
   --text: #193356;
   --text-soft: #597191;
-  --primary: var(--theme-primary-strong, #006f7a);
-  --primary-strong: #006f7a;
-  --accent: var(--theme-primary, #009b8f);
+  --primary: var(--theme-primary-strong, #b8141b);
+  --primary-strong: #b8141b;
+  --accent: var(--theme-primary, #dc1e26);
   --success: #234777;
-  --danger: var(--theme-primary-strong, #006f7a);
+  --danger: var(--theme-primary-strong, #b8141b);
   --shadow-xl: 0 28px 60px rgba(10, 28, 52, 0.2);
   --shadow-lg: 0 18px 38px rgba(10, 27, 48, 0.14);
   --shadow-md: 0 12px 24px rgba(10, 27, 48, 0.1);
@@ -84,7 +84,7 @@
   min-height: calc(100svh - 70px);
   display: flex;
   align-items: center;
-  background: url("../assets/images/illustrations/hero-bus.png") center / cover no-repeat;
+  background: url("../assets/images/illustrations/bus-hero-theme.jpg") center / cover no-repeat;
   padding: clamp(34px, 5vh, 58px) 20px 120px;
 }
 
@@ -607,7 +607,7 @@
 }
 
 .place-option:hover {
-  background: #eef7f4;
+  background: #F3F4F6;
 }
 
 .place-meta {
@@ -940,7 +940,7 @@ select.field-control option {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #ffffff;
-  background: linear-gradient(135deg, var(--accent), var(--theme-primary, #009b8f));
+  background: linear-gradient(135deg, var(--accent), var(--theme-primary, #dc1e26));
   box-shadow: 0 14px 26px rgba(35, 100, 186, 0.35);
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -1302,7 +1302,7 @@ select.field-control option {
   height: 6px;
   border-radius: 999px;
   background:
-    linear-gradient(90deg, #009b8f 0 48%, #ffffff 48% 53%, #3656d4 53% 100%);
+    linear-gradient(90deg, #dc1e26 0 48%, #ffffff 48% 53%, #b8141b 53% 100%);
 }
 
 .map-bus {
@@ -1317,8 +1317,8 @@ select.field-control option {
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  background: linear-gradient(145deg, #009b8f, #006f7a);
-  box-shadow: 0 15px 22px rgba(0, 155, 143, 0.22);
+  background: linear-gradient(145deg, #dc1e26, #b8141b);
+  box-shadow: 0 15px 22px rgba(220, 30, 38, 0.22);
 }
 
 .assurance-map-grid {
@@ -1384,7 +1384,7 @@ select.field-control option {
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  color: #009b8f;
+  color: #dc1e26;
   background: #fff1ec;
 }
 
@@ -1644,8 +1644,8 @@ select.field-control option {
   display: grid;
   place-items: center;
   color: #7c3f2b;
-  background: linear-gradient(135deg, #eef7f4, #dff8f3);
-  border: 1px dashed #cfded8;
+  background: linear-gradient(135deg, #F3F4F6, #fef2f2);
+  border: 1px dashed #E5E7EB;
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
@@ -1657,7 +1657,7 @@ select.field-control option {
   min-height: 120px;
   display: grid;
   place-items: center;
-  border: 1px solid var(--theme-border, #cfded8);
+  border: 1px solid var(--theme-border, #E5E7EB);
   border-radius: 16px;
   background: #ffffff;
   color: var(--theme-muted, #64748b);
@@ -1807,9 +1807,9 @@ select.field-control option {
   width: 100%;
   height: 2.5px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #eab84e 0%, #009b8f 100%);
+  background: linear-gradient(90deg, #dc1e26 0%, #dc1e26 100%);
   position: relative;
-  box-shadow: 0 1px 3px rgba(0, 155, 143, 0.2);
+  box-shadow: 0 1px 3px rgba(220, 30, 38, 0.2);
 }
 
 .popular-route-arrow span::after {
@@ -1819,8 +1819,8 @@ select.field-control option {
   right: -2px;
   width: 8px;
   height: 8px;
-  border-top: 2.5px solid #009b8f;
-  border-right: 2.5px solid #009b8f;
+  border-top: 2.5px solid #dc1e26;
+  border-right: 2.5px solid #dc1e26;
   transform: translateY(-50%) rotate(45deg);
 }
 
@@ -1875,30 +1875,30 @@ select.field-control option {
   border: 0;
   border-radius: 10px;
   padding: 0 16px;
-  background: linear-gradient(135deg, #009b8f 0%, #006f7a 100%);
+  background: linear-gradient(135deg, #dc1e26 0%, #b8141b 100%);
   color: #ffffff;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 155, 143, 0.25), 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 14px rgba(220, 30, 38, 0.25), 0 2px 6px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .popular-route-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 155, 143, 0.35), 0 4px 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 20px rgba(220, 30, 38, 0.35), 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .popular-route-button:active {
   transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(0, 155, 143, 0.2);
+  box-shadow: 0 2px 6px rgba(220, 30, 38, 0.2);
 }
 
 .popular-route-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 15px 26px rgba(0, 155, 143, 0.24);
+  box-shadow: 0 15px 26px rgba(220, 30, 38, 0.24);
 }
 
 .popular-routes-loading,
@@ -1907,7 +1907,7 @@ select.field-control option {
   min-height: 118px;
   display: grid;
   place-items: center;
-  border: 1px solid var(--theme-border, #cfded8);
+  border: 1px solid var(--theme-border, #E5E7EB);
   border-radius: 16px;
   background: #ffffff;
   color: var(--theme-muted, #64748b);
@@ -2134,9 +2134,9 @@ select.field-control option {
   border: 1px solid rgba(191, 213, 238, 0.82);
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.88) 42%, rgba(255, 255, 255, 0.14) 72%),
-    linear-gradient(135deg, rgba(0, 155, 143, 0.12), transparent 27%),
+    linear-gradient(135deg, rgba(220, 30, 38, 0.12), transparent 27%),
     repeating-linear-gradient(118deg, rgba(255, 255, 255, 0.16) 0 3px, transparent 3px 25px),
-    url("../assets/images/illustrations/bus-hero-theme.png") right center / auto 118% no-repeat,
+    url("../assets/images/illustrations/bus-hero-theme.jpg") right center / auto 118% no-repeat,
     linear-gradient(135deg, #eaf5ff 0%, #a9d7f3 47%, #f7fbff 100%);
   box-shadow: 0 18px 34px rgba(31, 76, 121, 0.12);
   display: grid;
@@ -2220,9 +2220,9 @@ select.field-control option {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #009b8f;
+  color: #dc1e26;
   background: #fff1ec;
-  box-shadow: 0 12px 22px rgba(0, 155, 143, 0.12);
+  box-shadow: 0 12px 22px rgba(220, 30, 38, 0.12);
 }
 
 .insight-card p {
@@ -2234,7 +2234,7 @@ select.field-control option {
 
 .insight-card strong {
   display: block;
-  color: #009b8f;
+  color: #dc1e26;
   font-size: clamp(20px, 2vw, 30px);
   line-height: 1;
   font-weight: 900;
@@ -2273,7 +2273,7 @@ select.field-control option {
   gap: 24px;
   padding: 24px;
   background:
-    radial-gradient(circle at 88% 16%, rgba(0, 155, 143, 0.11), transparent 24%),
+    radial-gradient(circle at 88% 16%, rgba(220, 30, 38, 0.11), transparent 24%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 251, 255, 0.9));
   box-shadow: 0 18px 38px rgba(22, 43, 77, 0.08);
 }
@@ -2346,7 +2346,7 @@ select.field-control option {
   height: 7px;
   margin-top: 6px;
   border-radius: 50%;
-  background: #009b8f;
+  background: #dc1e26;
   box-shadow: 0 0 0 4px #fff0ea;
 }
 
@@ -2357,7 +2357,7 @@ select.field-control option {
 }
 
 .service-pill-list li {
-  border: 1px solid #cfded8;
+  border: 1px solid #E5E7EB;
   border-radius: 999px;
   min-height: 30px;
   padding: 0 12px;
@@ -2378,7 +2378,7 @@ select.field-control option {
   place-items: center;
   padding: 10px;
   background:
-    radial-gradient(circle at 24% 28%, rgba(0, 155, 143, 0.1), transparent 18%),
+    radial-gradient(circle at 24% 28%, rgba(220, 30, 38, 0.1), transparent 18%),
     radial-gradient(circle at 78% 72%, rgba(37, 106, 198, 0.1), transparent 24%),
     linear-gradient(145deg, #f7fbff, #eef5fd);
   box-shadow: inset 0 0 0 1px rgba(215, 225, 238, 0.82);
@@ -2407,7 +2407,7 @@ select.field-control option {
 .service-spark::after {
   content: "";
   position: absolute;
-  background: #009b8f;
+  background: #dc1e26;
   border-radius: 999px;
 }
 
@@ -2471,8 +2471,8 @@ select.field-control option {
   display: grid;
   place-items: center;
   color: #ffffff;
-  background: linear-gradient(145deg, #009b8f, #006f7a);
-  box-shadow: 0 18px 28px rgba(0, 155, 143, 0.24);
+  background: linear-gradient(145deg, #dc1e26, #b8141b);
+  box-shadow: 0 18px 28px rgba(220, 30, 38, 0.24);
 }
 
 .service-ticket-stack {
@@ -2508,8 +2508,8 @@ select.field-control option {
   display: grid;
   place-items: center;
   color: #ffffff;
-  background: linear-gradient(145deg, #009b8f, #c85048);
-  box-shadow: 0 16px 28px rgba(0, 155, 143, 0.22);
+  background: linear-gradient(145deg, #dc1e26, #c85048);
+  box-shadow: 0 16px 28px rgba(220, 30, 38, 0.22);
 }
 
 .service-price-circle span {
@@ -2599,7 +2599,7 @@ select.field-control option {
   width: 42px;
   height: 76px;
   border-radius: 20px 20px 12px 12px;
-  background: #009b8f;
+  background: #dc1e26;
 }
 
 .service-person .bag {
@@ -2661,7 +2661,7 @@ select.field-control option {
   gap: 24px;
   padding: 26px;
   background:
-    radial-gradient(circle at 20% 22%, rgba(0, 155, 143, 0.13), transparent 18%),
+    radial-gradient(circle at 20% 22%, rgba(220, 30, 38, 0.13), transparent 18%),
     radial-gradient(circle at 84% 74%, rgba(35, 103, 187, 0.11), transparent 24%),
     linear-gradient(145deg, #f7fbff, #eef5fd);
   box-shadow: inset 0 0 0 1px rgba(215, 225, 238, 0.8);
@@ -2690,7 +2690,7 @@ select.field-control option {
 .route-line {
   height: 4px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #a8e4dc, #009b8f, #a8e4dc);
+  background: linear-gradient(90deg, #a8e4dc, #dc1e26, #a8e4dc);
   background-size: 200% 100%;
   animation: booking-route-flow 2.8s ease-in-out infinite;
 }
@@ -2706,7 +2706,7 @@ select.field-control option {
   display: grid;
   place-items: center;
   color: #ffffff;
-  background: linear-gradient(145deg, #009b8f, #006f7a);
+  background: linear-gradient(145deg, #dc1e26, #b8141b);
   box-shadow: 0 14px 24px rgba(201, 30, 22, 0.2);
   animation: booking-bus-drive 4.2s ease-in-out infinite;
 }
@@ -2751,7 +2751,7 @@ select.field-control option {
 }
 
 .booking-step-card span {
-  color: #009b8f;
+  color: #dc1e26;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -2794,7 +2794,7 @@ select.field-control option {
   position: absolute;
   inset: 0 auto 0 0;
   width: 5px;
-  background: linear-gradient(180deg, #009b8f, #a8e4dc);
+  background: linear-gradient(180deg, #dc1e26, #a8e4dc);
 }
 
 /* Booking info static content */
@@ -2885,7 +2885,7 @@ select.field-control option {
   border: 1px solid #e3e8f1;
   border-radius: 20px;
   background:
-    radial-gradient(circle at 98% 100%, rgba(0, 155, 143, 0.14), transparent 22%),
+    radial-gradient(circle at 98% 100%, rgba(220, 30, 38, 0.14), transparent 22%),
     linear-gradient(180deg, #ffffff, #f7fbff);
   box-shadow: 0 18px 40px rgba(22, 43, 77, 0.08);
   padding: 18px 24px;
@@ -2900,8 +2900,8 @@ select.field-control option {
   color: #ffffff;
   background:
     radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.28), transparent 24%),
-    linear-gradient(145deg, #009b8f, #009b8f 54%, #006f7a 100%);
-  box-shadow: 0 14px 24px rgba(0, 155, 143, 0.22);
+    linear-gradient(145deg, #dc1e26, #dc1e26 54%, #b8141b 100%);
+  box-shadow: 0 14px 24px rgba(220, 30, 38, 0.22);
   position: relative;
   overflow: hidden;
 }
@@ -2947,7 +2947,7 @@ select.field-control option {
   margin-top: 10px;
   width: fit-content;
   border-radius: 10px;
-  background: #009b8f;
+  background: #dc1e26;
   color: #ffffff;
   padding: 7px 11px;
   font-size: 11.5px;
@@ -2986,8 +2986,8 @@ select.field-control option {
   height: 8px;
   margin-top: 6px;
   border-radius: 50%;
-  background: #009b8f;
-  box-shadow: 0 0 0 4px #dff8f3;
+  background: #dc1e26;
+  box-shadow: 0 0 0 4px #fef2f2;
 }
 
 .india-app-qr {
@@ -3334,7 +3334,7 @@ select.field-control option {
 
 .home-ai-chat-message.user {
   align-self: flex-end;
-  background: linear-gradient(145deg, #3656d4, #273fb0);
+  background: linear-gradient(145deg, #b8141b, #273fb0);
   color: #ffffff;
 }
 
@@ -3616,7 +3616,7 @@ select.field-control option {
   .hero-section {
     min-height: auto;
     padding: 34px 14px 100px;
-    background: url("../assets/images/illustrations/hero-bus.png") center / cover no-repeat !important;
+    background: url("../assets/images/illustrations/bus-hero-theme.jpg") center / cover no-repeat !important;
     overflow: visible;
   }
   .search-panel {
@@ -3742,7 +3742,7 @@ select.field-control option {
   .popular-route-arrow span {
     width: 2px;
     height: 100%;
-    background: linear-gradient(180deg, #a8e4dc, #009b8f);
+    background: linear-gradient(180deg, #a8e4dc, #dc1e26);
   }
   .popular-route-arrow span::after {
     top: auto;
@@ -3788,17 +3788,17 @@ select.field-control option {
 
 /* Unified Atlas travel theme & Compact Layout Refresh */
 .homepage {
-  --page-bg: var(--theme-page, #eef7f4);
+  --page-bg: var(--theme-page, #F3F4F6);
   --surface: var(--theme-surface, #ffffff);
   --surface-soft: var(--theme-surface-warm, #fffaf6);
-  --surface-border: var(--theme-border, #cfded8);
+  --surface-border: var(--theme-border, #E5E7EB);
   --text: var(--theme-navy, #1f2a44);
   --text-soft: var(--theme-muted, #64748b);
-  --primary: var(--theme-primary, #009b8f);
-  --primary-strong: var(--theme-primary-strong, #006f7a);
-  --accent: var(--theme-primary, #009b8f);
-  --success: var(--theme-primary, #009b8f);
-  --danger: var(--theme-primary-strong, #006f7a);
+  --primary: var(--theme-primary, #dc1e26);
+  --primary-strong: var(--theme-primary-strong, #b8141b);
+  --accent: var(--theme-primary, #dc1e26);
+  --success: var(--theme-primary, #dc1e26);
+  --danger: var(--theme-primary-strong, #b8141b);
   --shadow-xl: 0 20px 40px rgba(13, 74, 83, 0.12);
   --shadow-lg: 0 12px 24px rgba(13, 74, 83, 0.08);
   --shadow-md: 0 6px 12px rgba(13, 74, 83, 0.04);
@@ -3809,7 +3809,7 @@ select.field-control option {
 .hero-section {
   min-height: auto !important;
   padding: 30px 20px 120px !important;
-  background: url("../assets/images/illustrations/hero-bus.png") center / cover no-repeat !important;
+  background: url("../assets/images/illustrations/bus-hero-theme.jpg") center / cover no-repeat !important;
   overflow: visible !important;
 }
 
@@ -3918,10 +3918,10 @@ select.field-control option {
 
 /* Premium Navigation Tabs */
 .search-panel .tabs {
-  background: #dff8f3 !important;
+  background: #fef2f2 !important;
   border-radius: 99px !important;
   padding: 4px !important;
-  border: 1px solid #cfded8 !important;
+  border: 1px solid #E5E7EB !important;
   display: inline-flex !important;
   gap: 4px !important;
   margin-bottom: 16px !important;
@@ -3941,7 +3941,7 @@ select.field-control option {
 .search-panel .tab.active {
   background: linear-gradient(135deg, var(--primary), var(--primary-strong)) !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 10px rgba(0, 155, 143, 0.2) !important;
+  box-shadow: 0 4px 10px rgba(220, 30, 38, 0.2) !important;
 }
 
 .trip-switch {
@@ -3974,7 +3974,7 @@ select.field-control option {
 .search-panel .class-field:hover,
 .bus-standard-grid .field:hover,
 .bus-standard-grid .place-autocomplete:hover {
-  background: #f7fbf8 !important;
+  background: #F9FAFB !important;
 }
 
 .search-panel .field:focus-within,
@@ -3984,7 +3984,7 @@ select.field-control option {
 .bus-standard-grid .field:focus-within,
 .bus-standard-grid .place-autocomplete:focus-within {
   background: #ffffff !important;
-  box-shadow: inset 0 0 0 2px rgba(0, 155, 143, 0.15) !important;
+  box-shadow: inset 0 0 0 2px rgba(220, 30, 38, 0.15) !important;
 }
 
 /* Card Cell Sub-labels and Inputs Styling */
@@ -4049,26 +4049,26 @@ select.field-control option {
 
 /* Premium Search Button */
 .search-panel .search-btn {
-  background: linear-gradient(135deg, #009b8f 0%, #006f7a 100%) !important;
+  background: linear-gradient(135deg, #dc1e26 0%, #b8141b 100%) !important;
   border-radius: 99px !important;
   font-size: 14px !important;
   font-weight: 800 !important;
   letter-spacing: 0.05em !important;
   height: 46px !important;
   padding: 0 42px !important;
-  box-shadow: 0 6px 18px rgba(0, 155, 143, 0.25) !important;
+  box-shadow: 0 6px 18px rgba(220, 30, 38, 0.25) !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   margin-top: 16px !important;
 }
 
 .search-panel .search-btn:hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 10px 24px rgba(0, 155, 143, 0.35) !important;
+  box-shadow: 0 10px 24px rgba(220, 30, 38, 0.35) !important;
 }
 
 /* Premium Cards elevations & Hover Effects */
 .offer-card {
-  border: 1px solid #e1ebe7 !important;
+  border: 1px solid #F3F4F6 !important;
   border-radius: 20px !important;
   background: #ffffff !important;
   box-shadow: 0 10px 30px rgba(13, 74, 83, 0.03) !important;
@@ -4078,11 +4078,11 @@ select.field-control option {
 .offer-card:hover {
   transform: translateY(-4px) !important;
   box-shadow: 0 15px 35px rgba(13, 74, 83, 0.08) !important;
-  border-color: #cfded8 !important;
+  border-color: #E5E7EB !important;
 }
 
 .offer-card button {
-  background: #dff8f3 !important;
+  background: #fef2f2 !important;
   border: 1px solid #fcdad0 !important;
   color: var(--primary) !important;
   font-weight: 800 !important;
@@ -4096,7 +4096,7 @@ select.field-control option {
 }
 
 .pop-route-card {
-  border: 1px solid #e1ebe7 !important;
+  border: 1px solid #F3F4F6 !important;
   border-radius: 20px !important;
   box-shadow: 0 10px 30px rgba(13, 74, 83, 0.03) !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -4105,17 +4105,17 @@ select.field-control option {
 .pop-route-card:hover {
   transform: translateY(-4px) !important;
   box-shadow: 0 15px 35px rgba(13, 74, 83, 0.08) !important;
-  border-color: #cfded8 !important;
+  border-color: #E5E7EB !important;
 }
 
 .pop-route-book-btn {
-  background: linear-gradient(135deg, #009b8f 0%, #006f7a 100%) !important;
+  background: linear-gradient(135deg, #dc1e26 0%, #b8141b 100%) !important;
   border-radius: 12px !important;
   transition: all 0.2s ease !important;
 }
 
 .pop-route-book-btn:hover {
-  background: linear-gradient(135deg, #009b8f 0%, #009b8f 100%) !important;
+  background: linear-gradient(135deg, #dc1e26 0%, #dc1e26 100%) !important;
 }
 
 
@@ -4127,7 +4127,7 @@ select.field-control option {
     display: grid !important;
     grid-template-rows: auto !important;
     gap: 0px !important;
-    border: 1px solid #cfded8 !important;
+    border: 1px solid #E5E7EB !important;
     border-radius: 16px !important;
     overflow: hidden !important;
     box-shadow: 0 4px 16px rgba(13, 74, 83, 0.03) !important;
@@ -4145,7 +4145,7 @@ select.field-control option {
     display: grid !important;
     grid-template-rows: auto !important;
     gap: 0px !important;
-    border: 1px solid #cfded8 !important;
+    border: 1px solid #E5E7EB !important;
     border-radius: 16px !important;
     overflow: hidden !important;
     box-shadow: 0 4px 16px rgba(13, 74, 83, 0.03) !important;
@@ -4185,7 +4185,7 @@ select.field-control option {
   .search-panel .class-field,
   .bus-standard-grid .field,
   .bus-standard-grid .place-autocomplete {
-    border-right: 1px solid #cfded8 !important;
+    border-right: 1px solid #E5E7EB !important;
     border-bottom: none !important;
   }
 
@@ -4219,7 +4219,7 @@ select.field-control option {
     width: 32px !important;
     height: 32px !important;
     border-radius: 50% !important;
-    border: 1px solid #cfded8 !important;
+    border: 1px solid #E5E7EB !important;
     background: #ffffff !important;
     color: var(--primary) !important;
     display: flex !important;
@@ -4234,7 +4234,7 @@ select.field-control option {
   .bus-standard-grid .swap-btn:hover {
     transform: translate(-50%, -50%) rotate(180deg) scale(1.08) !important;
     border-color: var(--primary) !important;
-    box-shadow: 0 4px 12px rgba(0, 155, 143, 0.2) !important;
+    box-shadow: 0 4px 12px rgba(220, 30, 38, 0.2) !important;
   }
 }
 
@@ -4245,7 +4245,7 @@ select.field-control option {
     display: grid !important;
     grid-template-rows: auto auto !important;
     gap: 0px !important;
-    border: 1px solid #cfded8 !important;
+    border: 1px solid #E5E7EB !important;
     border-radius: 16px !important;
     overflow: hidden !important;
     box-shadow: 0 4px 16px rgba(13, 74, 83, 0.03) !important;
@@ -4277,7 +4277,7 @@ select.field-control option {
     display: grid !important;
     grid-template-rows: auto !important;
     gap: 0px !important;
-    border: 1px solid #cfded8 !important;
+    border: 1px solid #E5E7EB !important;
     border-radius: 16px !important;
     overflow: hidden !important;
     box-shadow: 0 4px 16px rgba(13, 74, 83, 0.03) !important;
@@ -4302,8 +4302,8 @@ select.field-control option {
   .standard-grid .place-autocomplete,
   .standard-grid .traveller-field,
   .standard-grid .class-field {
-    border-right: 1px solid #cfded8 !important;
-    border-bottom: 1px solid #cfded8 !important;
+    border-right: 1px solid #E5E7EB !important;
+    border-bottom: 1px solid #E5E7EB !important;
   }
 
   /* Turn off right borders on edge columns */
@@ -4322,7 +4322,7 @@ select.field-control option {
   /* Cell borders for Buses (1-row grid) */
   .bus-standard-grid .field,
   .bus-standard-grid .place-autocomplete {
-    border-right: 1px solid #cfded8 !important;
+    border-right: 1px solid #E5E7EB !important;
     border-bottom: none !important;
   }
 
@@ -4355,7 +4355,7 @@ select.field-control option {
     width: 32px !important;
     height: 32px !important;
     border-radius: 50% !important;
-    border: 1px solid #cfded8 !important;
+    border: 1px solid #E5E7EB !important;
     background: #ffffff !important;
     color: var(--primary) !important;
     display: flex !important;
@@ -4370,7 +4370,7 @@ select.field-control option {
   .bus-standard-grid .swap-btn:hover {
     transform: translate(-50%, -50%) rotate(180deg) scale(1.08) !important;
     border-color: var(--primary) !important;
-    box-shadow: 0 4px 12px rgba(0, 155, 143, 0.2) !important;
+    box-shadow: 0 4px 12px rgba(220, 30, 38, 0.2) !important;
   }
 }
 
@@ -4383,7 +4383,7 @@ select.field-control option {
     grid-template-columns: 1fr !important;
     grid-template-rows: auto !important;
     gap: 0px !important;
-    border: 1px solid #cfded8 !important;
+    border: 1px solid #E5E7EB !important;
     border-radius: 16px !important;
     overflow: hidden !important;
     box-shadow: 0 4px 16px rgba(13, 74, 83, 0.03) !important;
@@ -4414,7 +4414,7 @@ select.field-control option {
   .bus-standard-grid .field,
   .bus-standard-grid .place-autocomplete {
     border-right: none !important;
-    border-bottom: 1px solid #cfded8 !important;
+    border-bottom: 1px solid #E5E7EB !important;
     border-radius: 0px !important;
     padding: 8px 14px 6px 14px !important;
   }
@@ -4453,7 +4453,7 @@ select.field-control option {
     width: 32px !important;
     height: 32px !important;
     border-radius: 50% !important;
-    border: 1px solid #cfded8 !important;
+    border: 1px solid #E5E7EB !important;
     background: #ffffff !important;
     color: var(--primary) !important;
     display: flex !important;
@@ -4468,7 +4468,7 @@ select.field-control option {
   .bus-standard-grid .swap-btn:hover {
     transform: translate(-50%, -50%) rotate(270deg) scale(1.08) !important;
     border-color: var(--primary) !important;
-    box-shadow: 0 4px 12px rgba(0, 155, 143, 0.2) !important;
+    box-shadow: 0 4px 12px rgba(220, 30, 38, 0.2) !important;
   }
 }
 
@@ -4499,8 +4499,8 @@ select.field-control option {
 /* ─── Left-aligned Animated Hero Section overrides ─── */
 .hero-section {
   position: relative !important;
-  overflow: hidden !important;
-  isolation: isolate !important;
+  overflow: visible !important;
+  z-index: 10 !important;
   min-height: 520px !important;
   height: auto !important;
   display: flex !important;
@@ -4588,10 +4588,11 @@ select.field-control option {
 
 .search-panel {
   margin-bottom: 0 !important;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15) !important;
-  backdrop-filter: blur(12px) !important;
-  border-color: rgba(255, 255, 255, 0.6) !important;
-  background: linear-gradient(156deg, rgba(255, 255, 255, 0.96), rgba(255, 250, 246, 0.92)) !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.16) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  background: rgba(255, 255, 255, 0.55) !important;
 }
 
 .offers-section {
@@ -4719,7 +4720,7 @@ select.field-control option {
 .bus-standard-grid .swap-btn {
   width: 24px !important; /* Compact button size, fits 40px container */
   height: 24px !important;
-  border-color: #cfded8 !important;
+  border-color: #E5E7EB !important;
   box-shadow: 0 2px 6px rgba(13, 74, 83, 0.08) !important;
 }
 
@@ -4756,7 +4757,7 @@ select.field-control option {
 .search-panel .class-field,
 .search-panel .bus-standard-grid .field,
 .search-panel .bus-standard-grid .place-autocomplete {
-  border: 1px solid #cfded8 !important;
+  border: 1px solid #E5E7EB !important;
   border-radius: 14px !important;
   background: #ffffff !important;
   box-shadow: 0 5px 14px rgba(13, 74, 83, 0.04) !important;
@@ -4770,7 +4771,7 @@ select.field-control option {
 .search-panel .bus-standard-grid .field:hover,
 .search-panel .bus-standard-grid .place-autocomplete:hover {
   border-color: #8fcfc7 !important;
-  background: #f7fbf8 !important;
+  background: #F9FAFB !important;
 }
 
 .search-panel .field:focus-within,
@@ -4780,7 +4781,7 @@ select.field-control option {
 .search-panel .bus-standard-grid .field:focus-within,
 .search-panel .bus-standard-grid .place-autocomplete:focus-within {
   border-color: var(--primary) !important;
-  box-shadow: 0 0 0 3px rgba(0, 155, 143, 0.12) !important;
+  box-shadow: 0 0 0 3px rgba(220, 30, 38, 0.12) !important;
 }
 
 .search-panel .swap-field,
@@ -5192,7 +5193,7 @@ select.field-control option {
   .map-line {
     width: 5px;
     height: 48px;
-    background: linear-gradient(180deg, #009b8f 0 45%, transparent 45% 55%, #3656d4 55% 100%);
+    background: linear-gradient(180deg, #dc1e26 0 45%, transparent 45% 55%, #b8141b 55% 100%);
   }
 
   .map-bus {
@@ -5429,11 +5430,11 @@ select.field-control option {
   --surface-border: #d8e5ee !important;
   --text: #050b18 !important;
   --text-soft: #5f6875 !important;
-  --primary: #009b8f !important;
-  --primary-strong: #006f7a !important;
-  --accent: #009b8f !important;
-  --success: #009b8f !important;
-  --danger: #006f7a !important;
+  --primary: #dc1e26 !important;
+  --primary-strong: #b8141b !important;
+  --accent: #dc1e26 !important;
+  --success: #dc1e26 !important;
+  --danger: #b8141b !important;
   --shadow-xl: 0 16px 36px rgba(15, 23, 42, 0.14) !important;
   --shadow-lg: 0 10px 24px rgba(15, 23, 42, 0.12) !important;
   --shadow-md: 0 3px 12px rgba(15, 23, 42, 0.12) !important;
@@ -5455,15 +5456,15 @@ select.field-control option {
 .homepage .search-panel .search-btn,
 .homepage .search-btn,
 .homepage button.search-btn {
-  background: #009b8f !important;
+  background: #dc1e26 !important;
   color: #ffffff !important;
-  box-shadow: 0 10px 22px rgba(0, 155, 143, 0.22) !important;
+  box-shadow: 0 10px 22px rgba(220, 30, 38, 0.22) !important;
 }
 
 .homepage .search-panel .search-btn:hover,
 .homepage .search-btn:hover {
-  background: #006f7a !important;
-  box-shadow: 0 12px 26px rgba(0, 155, 143, 0.28) !important;
+  background: #b8141b !important;
+  box-shadow: 0 12px 26px rgba(220, 30, 38, 0.28) !important;
 }
 
 .homepage .search-panel .tab.active,
@@ -5472,7 +5473,7 @@ select.field-control option {
 .homepage .popular-route-action,
 .homepage .travel-service-action,
 .homepage .hero-action-primary {
-  background: #009b8f !important;
+  background: #dc1e26 !important;
   color: #ffffff !important;
 }
 
@@ -5483,14 +5484,14 @@ select.field-control option {
 .homepage .search-panel .bus-standard-grid .field:focus-within,
 .homepage .search-panel .bus-standard-grid .place-autocomplete:focus-within,
 .homepage .search-panel .swap-btn:hover {
-  border-color: #009b8f !important;
+  border-color: #dc1e26 !important;
 }
 
 .homepage .search-panel .swap-btn,
 .homepage .search-panel .control-wrap svg,
 .homepage .search-panel .tab.active svg,
 .homepage .pop-route-meta-left {
-  color: #009b8f !important;
+  color: #dc1e26 !important;
 }
 
 .homepage .popular-routes-marquee .pop-route-card {
@@ -5498,20 +5499,20 @@ select.field-control option {
 }
 
 .homepage .popular-routes-marquee .pop-route-card:focus-visible {
-  outline: 3px solid rgba(0, 155, 143, 0.24) !important;
+  outline: 3px solid rgba(220, 30, 38, 0.24) !important;
   outline-offset: 4px !important;
 }
 
 .homepage .popular-routes-marquee .pop-route-tag-search {
-  background: #009b8f !important;
+  background: #dc1e26 !important;
   color: #ffffff !important;
-  border-color: #009b8f !important;
+  border-color: #dc1e26 !important;
 }
 
 .homepage .popular-routes-marquee .pop-route-tag-searches {
-  background: #dff8f3 !important;
-  color: #006f7a !important;
-  border-color: rgba(0, 155, 143, 0.24) !important;
+  background: #fef2f2 !important;
+  color: #b8141b !important;
+  border-color: rgba(220, 30, 38, 0.24) !important;
 }
 
 /* Final mode-aware hero artwork */
@@ -5531,24 +5532,22 @@ select.field-control option {
 }
 
 .homepage-buses .hero-section {
-  background-color: #eef7f4 !important;
-  background-image:
-    url("../assets/images/illustrations/bus-hero-theme.png") !important;
-  background-position: right center !important;
+  background-color: #F3F4F6 !important;
+  background-image: url("../assets/images/illustrations/bus-hero-theme.jpg") !important;
+  background-position: center center !important;
   background-size: cover !important;
 }
 
 .homepage-flights {
   background:
-    radial-gradient(circle at 13% 12%, rgba(0, 155, 143, 0.14), transparent 28%),
-    linear-gradient(180deg, #f7fcff 0%, #edf7ff 52%, #f7fbf8 100%) !important;
+    radial-gradient(circle at 13% 12%, rgba(220, 30, 38, 0.14), transparent 28%),
+    linear-gradient(180deg, #f7fcff 0%, #edf7ff 52%, #F9FAFB 100%) !important;
 }
 
 .homepage-flights .hero-section {
-  background-color: #eef7f4 !important;
-  background-image:
-    url("../assets/images/illustrations/flight-hero-theme.png") !important;
-  background-position: right center !important;
+  background-color: #F3F4F6 !important;
+  background-image: url("../assets/images/illustrations/flight-hero-theme.jpg") !important;
+  background-position: center center !important;
   background-size: cover !important;
 }
 
@@ -5571,7 +5570,7 @@ select.field-control option {
 
 .homepage-buses .hero-tag-left,
 .homepage-flights .hero-tag-left {
-  border-color: rgba(0, 155, 143, 0.24) !important;
+  border-color: rgba(220, 30, 38, 0.24) !important;
   color: #10233f !important;
   background: rgba(255, 255, 255, 0.76) !important;
   box-shadow: 0 8px 20px rgba(16, 35, 63, 0.12) !important;
@@ -5581,8 +5580,8 @@ select.field-control option {
 .homepage-flights .search-panel .place-autocomplete,
 .homepage-flights .search-panel .traveller-field,
 .homepage-flights .search-panel .class-field {
-  border-color: rgba(0, 155, 143, 0.28) !important;
-  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(220, 30, 38, 0.28) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
 }
 
 .homepage-flights .search-panel .field label,
@@ -5594,7 +5593,7 @@ select.field-control option {
 .homepage-flights .search-panel .control-wrap svg,
 .homepage-flights .search-panel .traveller-summary.placeholder svg,
 .homepage-flights .search-panel .traveller-caret {
-  color: #009b8f !important;
+  color: #dc1e26 !important;
 }
 
 .homepage-flights .search-panel .traveller-summary.placeholder span,
@@ -5623,24 +5622,24 @@ select.field-control option {
 
 /* Atlas homepage theme */
 .homepage {
-  --page-bg: var(--theme-page, #eef7f4) !important;
+  --page-bg: var(--theme-page, #F3F4F6) !important;
   --surface: #ffffff !important;
-  --surface-soft: #f7fbf8 !important;
-  --surface-border: #cfded8 !important;
+  --surface-soft: #F9FAFB !important;
+  --surface-border: #E5E7EB !important;
   --text: var(--theme-navy, #17242d) !important;
   --text-soft: var(--theme-muted, #66757b) !important;
-  --primary: var(--theme-primary, #009b8f) !important;
-  --primary-strong: var(--theme-primary-strong, #006f7a) !important;
-  --accent: var(--theme-coral, #f36f5f) !important;
-  --success: var(--theme-primary, #009b8f) !important;
-  --danger: var(--theme-coral, #f36f5f) !important;
+  --primary: var(--theme-primary, #dc1e26) !important;
+  --primary-strong: var(--theme-primary-strong, #b8141b) !important;
+  --accent: var(--theme-coral, #dc1e26) !important;
+  --success: var(--theme-primary, #dc1e26) !important;
+  --danger: var(--theme-coral, #dc1e26) !important;
   --shadow-xl: 0 22px 55px rgba(12, 46, 51, 0.15) !important;
   --shadow-lg: 0 16px 34px rgba(12, 46, 51, 0.11) !important;
   --shadow-md: 0 8px 22px rgba(12, 46, 51, 0.1) !important;
   background:
-    linear-gradient(135deg, rgba(0, 155, 143, 0.1) 0%, transparent 34%),
-    linear-gradient(225deg, rgba(243, 111, 95, 0.1) 0%, transparent 32%),
-    #eef7f4 !important;
+    linear-gradient(135deg, rgba(220, 30, 38, 0.1) 0%, transparent 34%),
+    linear-gradient(225deg, rgba(220, 30, 38, 0.1) 0%, transparent 32%),
+    #F3F4F6 !important;
 }
 
 .homepage .search-card,
@@ -5657,7 +5656,7 @@ select.field-control option {
 .homepage .assurance-card,
 .homepage .guide-card,
 .homepage .insight-card {
-  border-color: #cfded8 !important;
+  border-color: #E5E7EB !important;
   background: rgba(255, 255, 255, 0.9) !important;
   box-shadow: 0 14px 32px rgba(12, 46, 51, 0.1) !important;
 }
@@ -5668,22 +5667,21 @@ select.field-control option {
 
 .homepage-buses {
   background:
-    linear-gradient(135deg, rgba(0, 155, 143, 0.1), transparent 34%),
-    linear-gradient(180deg, #f7fbf8 0%, #eef7f4 52%, #ffffff 100%) !important;
+    linear-gradient(135deg, rgba(220, 30, 38, 0.1), transparent 34%),
+    linear-gradient(180deg, #F9FAFB 0%, #F3F4F6 52%, #ffffff 100%) !important;
 }
 
 .homepage-flights {
   background:
-    linear-gradient(135deg, rgba(54, 86, 212, 0.1), transparent 34%),
-    linear-gradient(225deg, rgba(243, 111, 95, 0.1), transparent 32%),
-    linear-gradient(180deg, #f7fbf8 0%, #eef7f4 52%, #ffffff 100%) !important;
+    linear-gradient(135deg, rgba(220, 30, 38, 0.05), transparent 34%),
+    linear-gradient(225deg, rgba(220, 30, 38, 0.1), transparent 32%),
+    linear-gradient(180deg, #F9FAFB 0%, #F3F4F6 52%, #ffffff 100%) !important;
 }
 
 .homepage-flights .hero-section {
-  background-color: #eef7f4 !important;
-  background-image:
-    url("../assets/images/illustrations/flight-hero-theme.png") !important;
-  background-position: right center !important;
+  background-color: #F3F4F6 !important;
+  background-image: url("../assets/images/illustrations/flight-hero-theme.jpg") !important;
+  background-position: center center !important;
   background-size: cover !important;
 }
 
@@ -5692,7 +5690,7 @@ select.field-control option {
 .homepage-buses .hero-tag-left,
 .homepage-flights .hero-tag-left {
   border-color: rgba(255, 255, 255, 0.34) !important;
-  color: #f7fbf8 !important;
+  color: #F9FAFB !important;
   background: rgba(16, 30, 35, 0.42) !important;
   box-shadow: 0 10px 26px rgba(12, 46, 51, 0.18) !important;
 }
@@ -5722,15 +5720,15 @@ select.field-control option {
 .homepage .travel-service-action,
 .homepage .hero-action-primary,
 .homepage .popular-routes-marquee .pop-route-tag-search {
-  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  background: var(--theme-gradient-action, linear-gradient(135deg, #dc1e26, #b8141b)) !important;
   color: #ffffff !important;
   border-color: transparent !important;
-  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.24) !important;
+  box-shadow: 0 14px 30px rgba(184, 20, 27, 0.24) !important;
 }
 
 .homepage .search-panel .search-btn:hover,
 .homepage .search-btn:hover {
-  background: linear-gradient(135deg, #00aa9e 0%, #006f7a 54%, #3656d4 100%) !important;
+  background: linear-gradient(135deg, #dc1e26 0%, #b8141b 54%, #b8141b 100%) !important;
 }
 
 .homepage .search-panel .field:focus-within,
@@ -5740,8 +5738,8 @@ select.field-control option {
 .homepage .search-panel .bus-standard-grid .field:focus-within,
 .homepage .search-panel .bus-standard-grid .place-autocomplete:focus-within,
 .homepage .search-panel .swap-btn:hover {
-  border-color: var(--theme-primary, #009b8f) !important;
-  box-shadow: 0 0 0 3px rgba(0, 155, 143, 0.12) !important;
+  border-color: var(--theme-primary, #dc1e26) !important;
+  box-shadow: 0 0 0 3px rgba(220, 30, 38, 0.12) !important;
 }
 
 .homepage .search-panel .swap-btn,
@@ -5751,43 +5749,41 @@ select.field-control option {
 .homepage-flights .search-panel .control-wrap svg,
 .homepage-flights .search-panel .traveller-summary.placeholder svg,
 .homepage-flights .search-panel .traveller-caret {
-  color: var(--theme-primary, #009b8f) !important;
+  color: var(--theme-primary, #dc1e26) !important;
 }
 
 .homepage .popular-routes-marquee .pop-route-tag-searches {
-  background: rgba(243, 111, 95, 0.1) !important;
+  background: rgba(220, 30, 38, 0.1) !important;
   color: #b94c43 !important;
-  border-color: rgba(243, 111, 95, 0.24) !important;
+  border-color: rgba(220, 30, 38, 0.24) !important;
 }
 
 .homepage .section-kicker,
 .homepage .travel-service-eyebrow,
 .homepage .offer-kicker,
 .homepage .pop-route-kicker {
-  color: var(--theme-primary-strong, #006f7a) !important;
+  color: var(--theme-primary-strong, #b8141b) !important;
 }
 
 /* Hotel mode */
 .homepage-hotels {
   background:
-    linear-gradient(135deg, rgba(0, 155, 143, 0.12), transparent 34%),
-    linear-gradient(225deg, rgba(54, 86, 212, 0.11), transparent 32%),
-    linear-gradient(180deg, #f7fbf8 0%, #eef7f4 52%, #ffffff 100%) !important;
+    linear-gradient(135deg, rgba(220, 30, 38, 0.12), transparent 34%),
+    linear-gradient(225deg, rgba(220, 30, 38, 0.11), transparent 32%),
+    linear-gradient(180deg, #F9FAFB 0%, #F3F4F6 52%, #ffffff 100%) !important;
 }
 
 .homepage-hotels .hero-section {
-  background-image:
-    linear-gradient(90deg, rgba(16, 30, 35, 0.7) 0%, rgba(16, 30, 35, 0.32) 42%, rgba(16, 30, 35, 0.04) 100%),
-    linear-gradient(180deg, rgba(0, 155, 143, 0.08) 0%, rgba(54, 86, 212, 0.04) 54%, rgba(243, 111, 95, 0.06) 100%),
-    url("../assets/images/illustrations/hotel-hero-atlas.svg") !important;
-  background-position: center center, center center, center center !important;
-  background-size: 100% 100%, 100% 100%, cover !important;
+  background-color: #F3F4F6 !important;
+  background-image: url("../assets/images/illustrations/hotel-hero-theme.jpg") !important;
+  background-position: center center !important;
+  background-size: cover !important;
 }
 
 .homepage-hotels .search-panel .field,
 .homepage-hotels .search-panel .place-autocomplete,
 .homepage-hotels .search-panel .traveller-field {
-  border-color: rgba(0, 155, 143, 0.28) !important;
+  border-color: rgba(220, 30, 38, 0.28) !important;
   background: rgba(255, 255, 255, 0.92) !important;
 }
 
@@ -5838,7 +5834,7 @@ select.field-control option {
   display: grid;
   place-items: center;
   color: #ffffff;
-  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4));
+  background: var(--theme-gradient-action, linear-gradient(135deg, #dc1e26, #b8141b));
 }
 
 .hotel-card-city-row strong,
@@ -5871,8 +5867,8 @@ select.field-control option {
 
 .homepage-hotels .travel-service-card {
   background:
-    radial-gradient(circle at 92% 12%, rgba(54, 86, 212, 0.1), transparent 24%),
-    radial-gradient(circle at 6% 88%, rgba(0, 155, 143, 0.1), transparent 22%),
+    radial-gradient(circle at 92% 12%, rgba(220, 30, 38, 0.05), transparent 24%),
+    radial-gradient(circle at 6% 88%, rgba(220, 30, 38, 0.1), transparent 22%),
     rgba(255, 255, 255, 0.92) !important;
 }
 
@@ -5880,7 +5876,7 @@ select.field-control option {
   background:
     linear-gradient(145deg, rgba(223, 248, 243, 0.74), rgba(234, 240, 255, 0.72)),
     #ffffff !important;
-  border: 1px solid rgba(0, 155, 143, 0.18) !important;
+  border: 1px solid rgba(220, 30, 38, 0.18) !important;
 }
 
 .homepage-hotels .travel-service-card.fare .travel-service-visual {
@@ -5964,10 +5960,10 @@ select.field-control option {
 .homepage-flights .search-panel .field label,
 .homepage-flights .search-panel .traveller-field label,
 .homepage-flights .search-panel .class-field label {
-  color: var(--theme-primary-strong, #006f7a) !important;
-  font-size: 10px !important;
+  color: var(--theme-primary-strong, #b8141b) !important;
+  font-size: 9.5px !important;
   line-height: 1 !important;
-  font-weight: 850 !important;
+  font-weight: 600 !important;
   letter-spacing: 0.09em !important;
   margin: 0 0 0 2px !important;
   text-transform: uppercase !important;
@@ -5977,10 +5973,10 @@ select.field-control option {
 .homepage-flights .search-panel .traveller-trigger,
 .homepage-flights .search-panel .class-control-wrap {
   width: 100% !important;
-  min-height: 48px !important;
-  height: 48px !important;
-  border: 1px solid #cfded8 !important;
-  border-radius: 14px !important;
+  min-height: 40px !important;
+  height: 40px !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 10px !important;
   background: rgba(255, 255, 255, 0.94) !important;
   box-shadow: 0 8px 20px rgba(12, 46, 51, 0.08) !important;
 }
@@ -5995,18 +5991,18 @@ select.field-control option {
 .homepage-flights .search-panel .field:focus-within .control-wrap,
 .homepage-flights .search-panel .traveller-field:focus-within .traveller-trigger,
 .homepage-flights .search-panel .class-field:focus-within .class-control-wrap {
-  border-color: #cfded8 !important;
+  border-color: #E5E7EB !important;
   box-shadow: 0 8px 20px rgba(12, 46, 51, 0.08) !important;
 }
 
 .homepage-flights .search-panel .field-control,
 .homepage-flights .search-panel .traveller-trigger,
 .homepage-flights .search-panel select.field-control {
-  min-height: 46px !important;
-  height: 46px !important;
-  line-height: 46px !important;
-  font-size: 14px !important;
-  font-weight: 750 !important;
+  min-height: 38px !important;
+  height: 38px !important;
+  line-height: 38px !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
   color: var(--theme-navy, #17242d) !important;
   background: transparent !important;
   border: 0 !important;
@@ -6033,7 +6029,7 @@ select.field-control option {
 
 .homepage-flights .search-panel .control-wrap svg {
   left: 14px !important;
-  color: var(--theme-primary, #009b8f) !important;
+  color: var(--theme-primary, #dc1e26) !important;
   transform: translateY(-50%) scale(1) !important;
 }
 
@@ -6121,10 +6117,10 @@ select.field-control option {
 .homepage-hotels .search-panel .field label,
 .homepage-hotels .search-panel .traveller-field label,
 .homepage-hotels .search-panel .class-field label {
-  color: var(--theme-primary-strong, #006f7a) !important;
-  font-size: 10px !important;
+  color: var(--theme-primary-strong, #b8141b) !important;
+  font-size: 9.5px !important;
   line-height: 1 !important;
-  font-weight: 850 !important;
+  font-weight: 600 !important;
   letter-spacing: 0.09em !important;
   margin: 0 0 0 2px !important;
   text-transform: uppercase !important;
@@ -6137,11 +6133,11 @@ select.field-control option {
 .homepage-hotels .search-panel .traveller-trigger,
 .homepage-hotels .search-panel .class-control-wrap {
   width: 100% !important;
-  min-height: 48px !important;
-  height: 48px !important;
-  border: 1px solid #cfded8 !important;
-  border-radius: 14px !important;
-  background: rgba(255, 255, 255, 0.94) !important;
+  min-height: 40px !important;
+  height: 40px !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 10px !important;
+  background: rgba(255, 255, 255, 0.72) !important;
   box-shadow: 0 8px 20px rgba(12, 46, 51, 0.08) !important;
 }
 
@@ -6159,7 +6155,7 @@ select.field-control option {
 .homepage-hotels .search-panel .field:focus-within .control-wrap,
 .homepage-hotels .search-panel .traveller-field:focus-within .traveller-trigger,
 .homepage-hotels .search-panel .class-field:focus-within .class-control-wrap {
-  border-color: #cfded8 !important;
+  border-color: #E5E7EB !important;
   box-shadow: 0 8px 20px rgba(12, 46, 51, 0.08) !important;
 }
 
@@ -6169,11 +6165,11 @@ select.field-control option {
 .homepage-hotels .search-panel .field-control,
 .homepage-hotels .search-panel .traveller-trigger,
 .homepage-hotels .search-panel select.field-control {
-  min-height: 46px !important;
-  height: 46px !important;
-  line-height: 46px !important;
-  font-size: 14px !important;
-  font-weight: 750 !important;
+  min-height: 38px !important;
+  height: 38px !important;
+  line-height: 38px !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
   color: var(--theme-navy, #17242d) !important;
   background: transparent !important;
   border: 0 !important;
@@ -6194,7 +6190,7 @@ select.field-control option {
 .homepage-buses .search-panel .control-wrap svg,
 .homepage-hotels .search-panel .control-wrap svg {
   left: 14px !important;
-  color: var(--theme-primary, #009b8f) !important;
+  color: var(--theme-primary, #dc1e26) !important;
   transform: translateY(-50%) scale(1) !important;
 }
 
@@ -6265,7 +6261,7 @@ select.field-control option {
 .homepage .search-panel .bus-standard-grid .place-autocomplete:focus-within {
   background: transparent !important;
   box-shadow: none !important;
-  border-color: #cfded8 !important; /* Retain default border color */
+  border-color: #E5E7EB !important; /* Retain default border color */
 }
 
 /* Flights, Buses, Hotels search fields container wrap focus shadow/border neutralization */
@@ -6278,7 +6274,7 @@ select.field-control option {
 .homepage-hotels .search-panel .field:focus-within .control-wrap,
 .homepage-hotels .search-panel .traveller-field:focus-within .traveller-trigger,
 .homepage-hotels .search-panel .class-field:focus-within .class-control-wrap {
-  border-color: #cfded8 !important; /* normal border */
+  border-color: #E5E7EB !important; /* normal border */
   box-shadow: 0 8px 20px rgba(12, 46, 51, 0.08) !important; /* normal shadow */
 }
 
@@ -6287,7 +6283,7 @@ select.field-control option {
 .travel-auth-register .travel-field-line:focus-within,
 .travel-auth-page .travel-custom-dropdown-container:focus-within,
 .cp-field-line:focus-within {
-  border-color: var(--theme-border, #cfded8) !important; /* normal border */
+  border-color: var(--theme-border, #E5E7EB) !important; /* normal border */
   box-shadow: none !important;
 }
 
@@ -6307,3 +6303,834 @@ button:focus-visible {
   outline: none !important;
   box-shadow: none !important;
 }
+
+/* Split title & Subtitle style */
+.hero-title-left {
+  display: block !important;
+  font-family: var(--app-font-family);
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.02em !important;
+  margin-bottom: 12px !important;
+}
+
+.hero-title-highlight {
+  color: var(--theme-primary, #dc1e26) !important;
+}
+
+/* Make titles dark slate without shadows to match the bright mockup design */
+.homepage-buses .hero-title-left,
+.homepage-flights .hero-title-left,
+.homepage-hotels .hero-title-left {
+  color: #111827 !important;
+  text-shadow: none !important;
+}
+
+/* Subtitle style */
+.hero-subtitle-left {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  margin: 0 0 28px 0 !important;
+  max-width: 600px !important;
+  display: block !important;
+}
+
+/* Make subtitles dark grey without shadows to match the bright mockup design */
+.homepage-buses .hero-subtitle-left,
+.homepage-flights .hero-subtitle-left,
+.homepage-hotels .hero-subtitle-left {
+  color: #4b5563 !important;
+  text-shadow: none !important;
+}
+
+/* Value Props and Colored features container styling */
+.hero-value-props-container {
+  margin-top: 36px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  width: 100% !important;
+}
+
+/* White Bar Styling */
+.value-props-white-bar {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  background: #ffffff !important;
+  border: 1px solid var(--theme-border, #E5E7EB) !important;
+  border-radius: 16px !important;
+  padding: 16px 20px !important;
+  box-shadow: var(--theme-shadow-sm, 0 12px 28px rgba(220, 30, 38, 0.06)) !important;
+  gap: 20px !important;
+}
+
+.value-prop-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+}
+
+.value-prop-icon {
+  color: var(--theme-primary, #dc1e26) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--theme-primary-soft, #fef2f2) !important;
+  padding: 8px !important;
+  border-radius: 10px !important;
+  flex-shrink: 0 !important;
+}
+
+.value-prop-text {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.value-prop-text strong {
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  color: var(--theme-navy, #111827) !important;
+  line-height: 1.25 !important;
+}
+
+.value-prop-text span {
+  font-size: 11px !important;
+  color: var(--theme-muted, #4B5563) !important;
+  margin-top: 2px !important;
+  line-height: 1.3 !important;
+}
+
+/* Custom tags styling matching mockup */
+.hero-tag-left {
+  border-radius: 999px !important;
+  min-height: 34px !important;
+  padding: 0 16px !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  color: #1f2937 !important;
+  border: 1px solid rgba(17, 24, 39, 0.08) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02) !important;
+  backdrop-filter: blur(8px) !important;
+  text-shadow: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.hero-tag-left:hover {
+  background: #ffffff !important;
+  border-color: rgba(17, 24, 39, 0.16) !important;
+  transform: translateY(-1px) !important;
+}
+
+
+.value-props-white-bar {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  background: #ffffff !important;
+  border: 1px solid var(--theme-border, #E5E7EB) !important;
+  border-radius: 18px !important;
+  padding: 22px 24px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02) !important;
+  gap: 24px !important;
+}
+
+.value-prop-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+.value-prop-icon {
+  color: #2563eb !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #e0f2fe !important; /* light sky-blue background */
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+}
+
+.value-prop-text {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.value-prop-text strong {
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  line-height: 1.25 !important;
+}
+
+.value-prop-text span {
+  font-size: 12px !important;
+  color: #4b5563 !important;
+  margin-top: 2px !important;
+  line-height: 1.3 !important;
+}
+
+/* Responsiveness */
+@media (max-width: 1024px) {
+  .value-props-white-bar {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .value-props-white-bar {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    padding: 16px !important;
+  }
+}
+
+/* ================================================================
+   DESKTOP HERO LAYOUT — Image 2 style
+   LEFT-aligned title (2 lines), compact left-side card (~480px),
+   2×2 field grid with centered swap button, full-width Search btn,
+   value-props bar pinned to bottom of hero.
+   ================================================================ */
+
+@media (min-width: 901px) {
+  .hero-section {
+    min-height: calc(100vh - 70px) !important;
+    height: calc(100vh - 70px) !important;
+    padding: 24px 20px 60px !important;
+  }
+
+  /* ─── Hero content: left-aligned column ─────────────────────── */
+  .hero-content {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;   /* top-align to decrease vertical gap */
+    align-items: flex-start !important;
+    text-align: left !important;
+    padding: 0 clamp(36px, 5vw, 72px) !important;
+    gap: 0 !important;
+  }
+
+  /* Spacer disabled — justify-content:flex-start handles it */
+  .hero-content::before {
+    display: none !important;
+  }
+
+  /* ─── Title block ────────────────────────────────────────────── */
+  .hero-header-left {
+    max-width: 540px !important;
+    align-self: flex-start !important;
+    text-align: left !important;
+    margin-bottom: 20px !important;
+  }
+
+  /* Split title: "Travel Beyond" line 1, "The Ordinary" line 2 */
+  .hero-title-left {
+    font-size: clamp(34px, 4.2vw, 56px) !important;
+    line-height: 1.1 !important;
+    margin-bottom: 10px !important;
+    white-space: normal !important;
+  }
+
+  /* Title highlight: inline so "Travel Beyond The Ordinary" stays on ONE LINE */
+  .hero-title-left .hero-title-highlight {
+    display: inline !important;
+  }
+
+  .hero-subtitle-left {
+    text-align: left !important;
+    margin: 0 !important;
+    max-width: 440px !important;
+    font-size: 15px !important;
+    line-height: 1.55 !important;
+  }
+
+  /* ─── Compact search card: left-aligned, ~480px wide ─────────── */
+  .hero-grid {
+    width: 100% !important;
+    max-width: 480px !important;
+    align-self: flex-start !important;
+    margin: 0 !important;
+  }
+
+  /* Kill the base negative margin that made the panel float below hero */
+  .hero-grid .search-panel {
+    margin-bottom: 0 !important;
+  }
+
+  /* ─── Value props: auto-margin pushes it to hero bottom ─────── */
+  .hero-value-props-container {
+    margin-top: auto !important;
+    width: 100% !important;
+    align-self: stretch !important;  /* Full width even with align-items: flex-start on parent */
+  }
+
+  /* ─── 2-COLUMN GRID (flights & buses): 2 equal cols ─────────── */
+  /* The swap-field is removed from grid flow via position:absolute,
+     so the grid auto-places: source→col1 row1, destination→col2 row1,
+     departure→col1 row2, (return|traveller)→col2 row2, etc. */
+
+  .search-panel .standard-grid,
+  .search-panel .bus-standard-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+    position: relative !important;   /* anchor for absolute swap-field */
+    align-items: stretch !important;
+  }
+
+  /* ─── Swap button: absolute, centred between the two columns ─── */
+  /* label ≈14px + gap 6px + half-input 22px = 42px from grid top  */
+  .search-panel .swap-field {
+    position: absolute !important;
+    left: 50% !important;
+    top: 42px !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 10 !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .search-panel .swap-field .swap-btn {
+    position: static !important;
+    width: 30px !important;
+    height: 30px !important;
+    background: #ffffff !important;
+    border: 1.5px solid #E5E7EB !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    transform: none !important;
+  }
+
+  /* ─── Explicit grid positions — FLIGHTS ──────────────────────── */
+  /* ONE-WAY: row1 = From|To, row2 = Departure (full), row3 = Pax|Class */
+  .search-panel .standard-grid.one-way .source-field      { grid-column: 1 !important; grid-row: 1 !important; }
+  .search-panel .standard-grid.one-way .destination-field { grid-column: 2 !important; grid-row: 1 !important; }
+  .search-panel .standard-grid.one-way .departure-field   { grid-column: 1 / -1 !important; grid-row: 2 !important; }
+  .search-panel .standard-grid.one-way .traveller-field   { grid-column: 1 !important; grid-row: 3 !important; width: 100% !important; }
+  .search-panel .standard-grid.one-way .class-field       { grid-column: 2 !important; grid-row: 3 !important; width: 100% !important; }
+
+  /* TWO-WAY: row1 = From|To, row2 = Dep|Return, row3 = Pax|Class */
+  .search-panel .standard-grid.two-way .source-field      { grid-column: 1 !important; grid-row: 1 !important; }
+  .search-panel .standard-grid.two-way .destination-field { grid-column: 2 !important; grid-row: 1 !important; }
+  .search-panel .standard-grid.two-way .departure-field   { grid-column: 1 !important; grid-row: 2 !important; }
+  .search-panel .standard-grid.two-way .return-field      { grid-column: 2 !important; grid-row: 2 !important; }
+  .search-panel .standard-grid.two-way .traveller-field   { grid-column: 1 !important; grid-row: 3 !important; width: 100% !important; }
+  .search-panel .standard-grid.two-way .class-field       { grid-column: 2 !important; grid-row: 3 !important; width: 100% !important; }
+
+  /* ─── Explicit grid positions — BUSES ───────────────────────── */
+  /* ONE-WAY: row1 = From|To, row2 = Departure (full width) */
+  .search-panel .bus-standard-grid.one-way .source-field      { grid-column: 1 !important; grid-row: 1 !important; }
+  .search-panel .bus-standard-grid.one-way .destination-field { grid-column: 2 !important; grid-row: 1 !important; }
+  .search-panel .bus-standard-grid.one-way .departure-field   { grid-column: 1 / -1 !important; grid-row: 2 !important; }
+
+  /* TWO-WAY: row1 = From|To, row2 = Dep|Return */
+  .search-panel .bus-standard-grid.two-way .source-field      { grid-column: 1 !important; grid-row: 1 !important; }
+  .search-panel .bus-standard-grid.two-way .destination-field { grid-column: 2 !important; grid-row: 1 !important; }
+  .search-panel .bus-standard-grid.two-way .departure-field   { grid-column: 1 !important; grid-row: 2 !important; }
+  .search-panel .bus-standard-grid.two-way .return-field      { grid-column: 2 !important; grid-row: 2 !important; }
+
+  /* ─── HOTELS: Dest (full), Checkin|Checkout, Guests (full) ───── */
+  .search-panel .hotel-standard-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+    align-items: stretch !important;
+  }
+  .search-panel .hotel-standard-grid .hotel-destination-field { grid-column: 1 / -1 !important; grid-row: 1 !important; }
+  .search-panel .hotel-standard-grid .checkin-field           { grid-column: 1 !important;      grid-row: 2 !important; }
+  .search-panel .hotel-standard-grid .checkout-field          { grid-column: 2 !important;      grid-row: 2 !important; }
+  .search-panel .hotel-standard-grid .hotel-guests-field      { grid-column: 1 / -1 !important; grid-row: 3 !important; }
+
+  /* ─── SEARCH BUTTON: full-width red pill ─────────────────────── */
+  .search-panel .search-btn {
+    width: 100% !important;
+    height: 46px !important;
+    margin-top: 12px !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.03em !important;
+    gap: 8px !important;
+  }
+
+  /* Suppress old swap-btn top-offset rules that don't apply to the 2-col layout */
+  .homepage-flights .search-panel .swap-btn,
+  .homepage-buses .search-panel .swap-btn {
+    top: auto !important;
+  }
+
+  /* Uniform control-wrap heights in compact card on desktop */
+  .homepage-flights .search-panel .control-wrap,
+  .homepage-flights .search-panel .traveller-trigger,
+  .homepage-flights .search-panel .class-control-wrap,
+  .homepage-buses .search-panel .control-wrap,
+  .homepage-buses .search-panel .traveller-trigger,
+  .homepage-buses .search-panel .class-control-wrap {
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  .homepage-flights .search-panel .field-control,
+  .homepage-flights .search-panel .traveller-trigger,
+  .homepage-buses .search-panel .field-control,
+  .homepage-buses .search-panel .traveller-trigger {
+    min-height: 42px !important;
+    height: 42px !important;
+    line-height: 42px !important;
+  }
+}
+
+/* Custom Class Dropdown Styling */
+.class-dropdown {
+  padding: 8px !important;
+  width: 200px !important;
+  max-width: 200px !important;
+}
+
+.class-options-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.class-option-btn {
+  width: 100% !important;
+  text-align: left !important;
+  padding: 8px 12px !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  color: var(--theme-navy, #17242d) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.class-option-btn:hover {
+  background: var(--theme-primary-soft, #fef2f2) !important;
+  color: var(--theme-primary, #dc1e26) !important;
+}
+
+.class-option-btn.selected {
+  background: var(--theme-primary, #dc1e26) !important;
+  color: #ffffff !important;
+}
+
+/* =================================================================
+   COMPACT DESKTOP — make every element smaller so the full hero
+   (title + search card + value-props) fits in one viewport height.
+   These rules come last to guarantee they win over everything above.
+   Target viewport: 698px usable (768px screen − 70px navbar).
+   ================================================================= */
+@media (min-width: 901px) {
+
+  /* ── 1. Fixed top spacer (not proportional) ─────────────────── */
+  .hero-content::before {
+    flex: 0 0 0px !important;
+    min-height: 0px !important;
+    max-height: 0px !important;
+    display: none !important;
+  }
+
+  /* ── 2. Bottom padding of hero content ──────────────────────── */
+  .hero-content {
+    padding-bottom: 16px !important;
+  }
+
+  /* ── 3. Title: ONE LINE — "Travel Beyond The Ordinary" ─────── */
+  .hero-title-left {
+    font-size: clamp(28px, 3.5vw, 46px) !important;
+    line-height: 1.15 !important;
+    margin-bottom: 8px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Override the display:block that was splitting title onto 2 lines */
+  .hero-title-left .hero-title-highlight {
+    display: inline !important;
+  }
+
+  /* ── 4. Subtitle: compact & visible ──────────────────────────── */
+  .hero-subtitle-left {
+    font-size: clamp(14px, 1.2vw, 16.5px) !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+    max-width: 520px !important;
+  }
+
+  /* Make sure subheading is highly visible on both flight and bus screens */
+  .homepage-buses .hero-subtitle-left {
+    color: rgba(255, 255, 255, 0.95) !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+    font-weight: 600 !important;
+  }
+
+  .homepage-flights .hero-subtitle-left {
+    color: #1e293b !important;
+    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8) !important;
+    font-weight: 600 !important;
+  }
+
+  /* ── 4b. Hero Grid and multi-city container expansion ────────── */
+  .hero-grid {
+    transition: max-width 0.25s ease-in-out !important;
+  }
+
+  .hero-grid.multicity-active {
+    max-width: 760px !important;
+  }
+
+  /* ── 5. Header block bottom margin ──────────────────────────── */
+  .hero-header-left {
+    margin-bottom: 10px !important;
+  }
+
+  /* ── 6. Search panel padding & gap ─────────────────────────── */
+  .hero-grid .search-panel {
+    padding: 8px 14px 14px !important;
+    gap: 6px !important;
+  }
+
+  /* ── 6b. Compact Flights|Buses|Hotels tab bar ───────────────── */
+  .hero-grid .search-panel .tabs {
+    padding: 3px !important;
+    gap: 4px !important;
+    margin: 0 !important;
+    border-radius: 10px !important;
+  }
+
+  .hero-grid .search-panel .tab {
+    min-height: 28px !important;
+    height: 28px !important;
+    min-width: 80px !important;
+    padding: 0 10px !important;
+    font-size: 11px !important;
+    border-radius: 7px !important;
+    gap: 5px !important;
+  }
+
+  /* ── 7. Booking content gap ──────────────────────────────────── */
+  .hero-grid .search-panel .booking-content {
+    gap: 4px !important;
+  }
+
+  /* ── 8. Trip-type switch gap ─────────────────────────────────── */
+  .hero-grid .search-panel .trip-switch {
+    gap: 4px !important;
+    margin: 0 !important;
+  }
+
+  /* ── 9. Compact trip-type chips (ONE WAY / TWO WAY / MULTI) ── */
+  .hero-grid .search-panel .trip-chip {
+    min-height: 24px !important;
+    height: 24px !important;
+    line-height: 24px !important;
+    padding: 0 10px !important;
+    font-size: 10px !important;
+    letter-spacing: 0.04em !important;
+    border-radius: 20px !important;
+  }
+
+  /* ── 10. 3-COL GRID: source | swap(36px) | destination in row 1 ─ */
+  .hero-grid .search-panel .standard-grid,
+  .hero-grid .search-panel .bus-standard-grid {
+    grid-template-columns: 1fr 36px 1fr !important;
+    gap: 10px 0 !important;
+    position: static !important;   /* no longer needs relative for abs swap */
+  }
+
+  /* Hotels keeps 2-col (no swap needed) */
+  .hero-grid .search-panel .hotel-standard-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px 12px !important;
+  }
+
+  /* ── 11. Field wrapper: tighten label-to-control gap ────────── */
+  .homepage-flights .hero-grid .search-panel .field,
+  .homepage-flights .hero-grid .search-panel .place-autocomplete,
+  .homepage-flights .hero-grid .search-panel .traveller-field,
+  .homepage-flights .hero-grid .search-panel .class-field,
+  .homepage-buses .hero-grid .search-panel .field,
+  .homepage-buses .hero-grid .search-panel .place-autocomplete,
+  .homepage-buses .hero-grid .search-panel .traveller-field,
+  .homepage-buses .hero-grid .search-panel .class-field,
+  .homepage-hotels .hero-grid .search-panel .field,
+  .homepage-hotels .hero-grid .search-panel .place-autocomplete,
+  .homepage-hotels .hero-grid .search-panel .traveller-field {
+    gap: 2px !important;
+  }
+
+  /* ── 12. Field labels: smaller text ─────────────────────────── */
+  .homepage-flights .hero-grid .search-panel .field label,
+  .homepage-flights .hero-grid .search-panel .traveller-field label,
+  .homepage-flights .hero-grid .search-panel .class-field label,
+  .homepage-buses .hero-grid .search-panel .field label,
+  .homepage-buses .hero-grid .search-panel .traveller-field label,
+  .homepage-buses .hero-grid .search-panel .class-field label,
+  .homepage-hotels .hero-grid .search-panel .field label,
+  .homepage-hotels .hero-grid .search-panel .traveller-field label {
+    font-size: 8px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  /* ── 13. Control-wrap height (the bordered input box) ─────── */
+  .homepage-flights .hero-grid .search-panel .control-wrap,
+  .homepage-flights .hero-grid .search-panel .traveller-trigger,
+  .homepage-flights .hero-grid .search-panel .class-control-wrap,
+  .homepage-buses .hero-grid .search-panel .control-wrap,
+  .homepage-buses .hero-grid .search-panel .traveller-trigger,
+  .homepage-buses .hero-grid .search-panel .class-control-wrap,
+  .homepage-hotels .hero-grid .search-panel .control-wrap,
+  .homepage-hotels .hero-grid .search-panel .traveller-trigger {
+    min-height: 34px !important;
+    height: 34px !important;
+  }
+
+  /* ── 14. Field-control inner input heights ───────────────────── */
+  .homepage-flights .hero-grid .search-panel .field-control,
+  .homepage-flights .hero-grid .search-panel .traveller-trigger,
+  .homepage-flights .hero-grid .search-panel select.field-control,
+  .homepage-buses .hero-grid .search-panel .field-control,
+  .homepage-buses .hero-grid .search-panel .traveller-trigger,
+  .homepage-buses .hero-grid .search-panel select.field-control,
+  .homepage-hotels .hero-grid .search-panel .field-control,
+  .homepage-hotels .hero-grid .search-panel .traveller-trigger,
+  .homepage-hotels .hero-grid .search-panel select.field-control {
+    min-height: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+  }
+
+  /* ── 15. SWAP FIELD: 3rd column, row 1 — static grid cell ──── */
+  .hero-grid .search-panel .swap-field {
+    position: static !important;   /* back to normal grid flow */
+    transform: none !important;
+    left: auto !important;
+    top: auto !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    display: flex !important;
+    align-items: flex-end !important;  /* align with inputs, not labels */
+    justify-content: center !important;
+    padding-bottom: 1px !important;
+    z-index: 10 !important;
+  }
+
+  /* Fix source col 1, destination col 3 in 3-col grid */
+  .hero-grid .search-panel .standard-grid .source-field,
+  .hero-grid .search-panel .bus-standard-grid .source-field {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  .hero-grid .search-panel .standard-grid .destination-field,
+  .hero-grid .search-panel .bus-standard-grid .destination-field {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+  }
+
+  /* Row 2+ spans all 3 columns for full width elements, or col 1 & 3 for split elements */
+  .hero-grid .search-panel .standard-grid .departure-field {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+  }
+  .hero-grid .search-panel .standard-grid.two-way .departure-field {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+  }
+  .hero-grid .search-panel .standard-grid.two-way .return-field {
+    grid-column: 3 !important;
+    grid-row: 2 !important;
+  }
+  .hero-grid .search-panel .standard-grid .traveller-field {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+  }
+  .hero-grid .search-panel .standard-grid .class-field {
+    grid-column: 3 !important;
+    grid-row: 3 !important;
+  }
+
+  /* Bus grid row 2 */
+  .hero-grid .search-panel .bus-standard-grid .departure-field {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+  }
+  .hero-grid .search-panel .bus-standard-grid.two-way .departure-field {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+  }
+  .hero-grid .search-panel .bus-standard-grid.two-way .return-field {
+    grid-column: 3 !important;
+    grid-row: 2 !important;
+  }
+
+  /* ── 16. Search button ────────────────────────────────────── */
+  .hero-grid .search-panel .search-btn {
+    height: 36px !important;
+    min-height: 36px !important;
+    margin-top: 8px !important;
+    font-size: 13.5px !important;
+    border-radius: 10px !important;
+  }
+
+  /* ── 16b. Dropdowns open upwards to prevent bottom viewport overflow ── */
+  .hero-grid .search-panel .traveller-dropdown {
+    top: auto !important;
+    bottom: calc(100% + 6px) !important;
+    box-shadow: 0 -10px 24px rgba(18, 28, 41, 0.15) !important;
+  }
+
+  /* ── 17. Value-props white bar: compact ─────────────────────── */
+  .value-props-white-bar {
+    padding: 8px 14px !important;
+    gap: 8px !important;
+    border-radius: 12px !important;
+  }
+
+  .value-prop-item {
+    gap: 8px !important;
+  }
+
+  .value-prop-icon {
+    width: 28px !important;
+    height: 28px !important;
+    padding: 5px !important;
+    border-radius: 8px !important;
+  }
+
+  .value-prop-text strong {
+    font-size: 10.5px !important;
+    line-height: 1.2 !important;
+  }
+
+  .value-prop-text span {
+    font-size: 9px !important;
+    margin-top: 1px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* ── 18. Responsiveness: on very short screens hide descriptions */
+  @media (max-height: 760px) {
+    .value-prop-text span {
+      display: none !important;
+    }
+    .value-props-white-bar {
+      padding: 6px 12px !important;
+    }
+  }
+}
+
+/* ─── Heading and Subheading Readability Enhancements ─── */
+
+/* 1. Subtle, elegant background overlays on the hero section */
+.homepage-buses .hero-section::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.2) 35%, transparent 75%) !important;
+  display: block !important;
+  pointer-events: none !important;
+}
+
+.homepage-flights .hero-section::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.25) 35%, transparent 75%) !important;
+  display: block !important;
+  pointer-events: none !important;
+}
+
+.homepage-hotels .hero-section::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.25) 35%, transparent 75%) !important;
+  display: block !important;
+  pointer-events: none !important;
+}
+
+/* 2. Text Colors & Shadows for Buses (White/Red theme on Dark Overlay) */
+.homepage-buses .hero-title-left {
+  color: #ffffff !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.65), 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+.homepage-buses .hero-title-left .hero-title-highlight {
+  color: #ff333d !important; /* Slightly brighter red for high visibility on dark gradient */
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.65), 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+.homepage-buses .hero-subtitle-left {
+  color: rgba(255, 255, 255, 0.95) !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.65), 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* 3. Text Colors & Shadows for Flights (Dark Slate/Red theme on Light Overlay) */
+.homepage-flights .hero-title-left {
+  color: #0f172a !important; /* Very dark slate */
+  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.95), 0 0 2px rgba(255, 255, 255, 0.9) !important;
+}
+
+.homepage-flights .hero-title-left .hero-title-highlight {
+  color: #dc1e26 !important; /* Solid red */
+  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.95), 0 0 2px rgba(255, 255, 255, 0.9) !important;
+}
+
+.homepage-flights .hero-subtitle-left {
+  color: #334155 !important; /* Slate gray */
+  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.95), 0 0 2px rgba(255, 255, 255, 0.9) !important;
+}
+
+/* 4. Text Colors & Shadows for Hotels (Dark Slate/Red theme on Light Overlay) */
+.homepage-hotels .hero-title-left {
+  color: #0f172a !important;
+  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.95), 0 0 2px rgba(255, 255, 255, 0.9) !important;
+}
+
+.homepage-hotels .hero-title-left .hero-title-highlight {
+  color: #dc1e26 !important;
+  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.95), 0 0 2px rgba(255, 255, 255, 0.9) !important;
+}
+
+.homepage-hotels .hero-subtitle-left {
+  color: #334155 !important;
+  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.95), 0 0 2px rgba(255, 255, 255, 0.9) !important;
+}
+
+
+

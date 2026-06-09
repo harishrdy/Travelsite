@@ -1,4 +1,4 @@
-﻿namespace PickNBook.Api.Models
+namespace PickNBook.Api.Models
 {
     public class AmadeusSettings
     {

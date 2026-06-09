@@ -7,7 +7,6 @@ import {
   List,
   Pencil,
   Plus,
-  SlidersHorizontal,
   Trash2,
   X,
   Search,
@@ -47,8 +46,8 @@ export default function AdminBusGstSettingsPage() {
   const [error, setError] = useState("");
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState(DEFAULT_SORT_BY);
-  const [sortOrder, setSortOrder] = useState(DEFAULT_SORT_ORDER);
+  const sortBy = DEFAULT_SORT_BY;
+  const sortOrder = DEFAULT_SORT_ORDER;
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [activeDropdownId, setActiveDropdownId] = useState(null);
@@ -139,13 +138,6 @@ export default function AdminBusGstSettingsPage() {
 
     return sortedRows;
   }, [rows, searchTerm, categoryFilter, sortBy, sortOrder, statusFilter]);
-
-  const handleResetFilters = () => {
-    setSortBy(DEFAULT_SORT_BY);
-    setSortOrder(DEFAULT_SORT_ORDER);
-    setStatusFilter("all");
-    setCategoryFilter("all");
-  };
 
   const handleExport = () => {
     if (visibleRows.length === 0) {

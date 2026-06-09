@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
@@ -253,6 +253,8 @@ namespace PickNBook.Api.Controllers
             {
                 return NotFound("Flight not found.");
             }
+
+            await EnsureFlightSeatsGeneratedAsync(flightId, normalizedClass);
 
             var seats = await dbContext.FlightSeats
                 .AsNoTracking()
@@ -936,6 +938,8 @@ namespace PickNBook.Api.Controllers
             if (seatCount <= 0)
                 return new List<string>();
 
+            await EnsureFlightSeatsGeneratedAsync(flightId, travelClass);
+
             // 🔒 Step 1: Lock seats using transaction-level isolation
             var seats = await dbContext.FlightSeats
                 .Where(x => x.FlightBookingId == flightId &&
@@ -1069,31 +1073,36 @@ namespace PickNBook.Api.Controllers
                 await dbContext.SaveChangesAsync();
             }
 
-            var seatsToInsert = new List<FlightSeat>();
-            foreach (var flight in flights)
-            {
-                foreach (var travelClass in AllowedTravelClasses)
-                {
-                    if (!ClassSeatConfig.TryGetValue(travelClass, out var classSeats) || classSeats <= 0)
-                    {
-                        continue;
-                    }
+        }
 
-                    var seatCodes = BuildFlightSeatCodes(classSeats);
-                    seatsToInsert.AddRange(seatCodes.Select(seatCode => new FlightSeat
-                    {
-                        FlightBookingId = flight.Id,
-                        TravelClass = travelClass,
-                        SeatCode = seatCode,
-                        IsBooked = false
-                    }));
-                }
+        private async Task EnsureFlightSeatsGeneratedAsync(int flightId, string travelClass)
+        {
+            var exists = await dbContext.FlightSeats
+                .AnyAsync(x => x.FlightBookingId == flightId && x.TravelClass == travelClass);
+            if (exists) return;
+
+            if (!ClassSeatConfig.TryGetValue(travelClass, out var classSeats) || classSeats <= 0)
+            {
+                return;
             }
 
-            if (seatsToInsert.Count > 0)
+            var seatCodes = BuildFlightSeatCodes(classSeats);
+            var seatsToInsert = seatCodes.Select(seatCode => new FlightSeat
+            {
+                FlightBookingId = flightId,
+                TravelClass = travelClass,
+                SeatCode = seatCode,
+                IsBooked = false
+            }).ToList();
+
+            try
             {
                 await dbContext.FlightSeats.AddRangeAsync(seatsToInsert);
                 await dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("Duplicate entry") == true || ex.Message.Contains("Duplicate entry"))
+            {
+                dbContext.ChangeTracker.Clear();
             }
         }
 

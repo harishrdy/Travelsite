@@ -107,11 +107,11 @@ const WebCheckInPage = () => {
         @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
 
         .web-checkin-page {
-          --web-primary: var(--theme-primary, #009b8f);
-          --web-primary-strong: var(--theme-primary-strong, #006f7a);
+          --web-primary: var(--theme-primary, #dc1e26);
+          --web-primary-strong: var(--theme-primary-strong, #b8141b);
           --web-navy: var(--theme-navy, #1f2a44);
           --web-muted: #596985;
-          --web-border: #cfded8;
+          --web-border: #E5E7EB;
           --web-bg-image: url(${travelBg});
           min-height: calc(100vh - 88px);
           padding: 18px 14px 30px;
@@ -120,7 +120,7 @@ const WebCheckInPage = () => {
           background:
             linear-gradient(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.5)),
             var(--web-bg-image) center / cover no-repeat,
-            linear-gradient(180deg, #eef7f4 0%, #ffffff 100%);
+            linear-gradient(180deg, #F3F4F6 0%, #ffffff 100%);
         }
 
         .web-checkin-shell {
@@ -153,7 +153,7 @@ const WebCheckInPage = () => {
           column-gap: 8px;
           padding: 6px 10px;
           background: #ffffff;
-          border: 1px solid #cfded8;
+          border: 1px solid #E5E7EB;
           animation: web-checkin-scroll 24s linear infinite;
         }
 
@@ -183,7 +183,7 @@ const WebCheckInPage = () => {
           border: 1px solid var(--web-border);
           border-radius: 22px;
           background:
-            radial-gradient(circle at 92% 10%, rgba(0, 155, 143, 0.16), transparent 24%),
+            radial-gradient(circle at 92% 10%, rgba(220, 30, 38, 0.16), transparent 24%),
             rgba(255, 255, 255, 0.94);
           box-shadow: 0 20px 48px rgba(13, 74, 83, 0.15);
           overflow: hidden;
@@ -207,7 +207,7 @@ const WebCheckInPage = () => {
           align-items: center;
           gap: 8px;
           padding: 0 12px;
-          background: var(--theme-primary-soft, #dff8f3);
+          background: var(--theme-primary-soft, #fef2f2);
           color: var(--web-primary);
           font-size: 0.72rem;
           font-weight: 850;
@@ -240,8 +240,8 @@ const WebCheckInPage = () => {
         .web-checkin-steps article {
           min-height: 34px;
           border-radius: 999px;
-          border: 1px solid #cfded8;
-          background: #f7fbf8;
+          border: 1px solid #E5E7EB;
+          background: #F9FAFB;
           display: inline-flex;
           align-items: center;
           gap: 7px;
@@ -261,7 +261,7 @@ const WebCheckInPage = () => {
           align-content: center;
           background:
             radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.84), transparent 28%),
-            linear-gradient(135deg, #fffcf8 0%, #dff8f3 30%, #009b8f 100%);
+            linear-gradient(135deg, #fffcf8 0%, #fef2f2 30%, #dc1e26 100%);
         }
 
         .web-checkin-pass-card {
@@ -348,7 +348,7 @@ const WebCheckInPage = () => {
           min-height: 42px;
           border-radius: 12px;
           background: #fff8f4;
-          border: 1px solid #cfded8;
+          border: 1px solid #E5E7EB;
           display: grid;
           place-items: center;
           color: #34415d;
@@ -413,10 +413,10 @@ const WebCheckInPage = () => {
         }
 
         .web-checkin-button {
-          border: 1px solid #cfded8;
+          border: 1px solid #E5E7EB;
           border-radius: 12px;
           min-height: 38px;
-          background: #f7fbf8;
+          background: #F9FAFB;
           color: var(--web-navy);
           display: inline-flex;
           align-items: center;

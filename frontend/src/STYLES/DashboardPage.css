@@ -1172,7 +1172,7 @@
   }
 
   .dashboard-sidebar:not(:hover):not(:focus-within) .sidebar-item.active {
-    box-shadow: 0 12px 22px rgba(0, 111, 122, 0.2);
+    box-shadow: 0 12px 22px rgba(184, 20, 27, 0.2);
   }
 
   .dashboard-sidebar:not(:hover):not(:focus-within) .sidebar-divider {

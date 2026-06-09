@@ -6,8 +6,8 @@
   --ticket-border: #cfdbea;
   --ticket-text: #1c395f;
   --ticket-muted: #5a7394;
-  --ticket-primary: var(--theme-primary-strong, #006f7a);
-  --ticket-primary-strong: #006f7a;
+  --ticket-primary: var(--theme-primary-strong, #b8141b);
+  --ticket-primary-strong: #b8141b;
   --ticket-success: #265088;
   --ticket-shadow: 0 14px 28px rgba(13, 30, 52, 0.11);
   --ticket-heading-font: var(--app-font-family);
@@ -363,9 +363,9 @@
   --ticket-border: #d8e5ee !important;
   --ticket-text: #050b18 !important;
   --ticket-muted: #5f6875 !important;
-  --ticket-primary: #009b8f !important;
-  --ticket-primary-strong: #006f7a !important;
-  --ticket-success: #009b8f !important;
+  --ticket-primary: #dc1e26 !important;
+  --ticket-primary-strong: #b8141b !important;
+  --ticket-success: #dc1e26 !important;
   background: #edf7ff !important;
 }
 
@@ -381,7 +381,7 @@
 
 .ticket-empty button,
 .ticket-actions .primary {
-  background: #009b8f !important;
+  background: #dc1e26 !important;
   color: #ffffff !important;
   box-shadow: none !important;
 }

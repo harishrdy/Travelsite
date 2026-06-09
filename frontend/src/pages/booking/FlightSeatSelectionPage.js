@@ -7,6 +7,7 @@ import {
   readFlightBookingFlowState,
   writeFlightBookingFlowState,
 } from "./flightBookingFlowStore";
+import { getAuthToken, isTokenExpired } from "../../services/authSession";
 
 function formatCurrency(amount) {
   return `INR ${new Intl.NumberFormat("en-IN", {
@@ -469,6 +470,14 @@ export default function FlightSeatSelectionPage() {
     };
 
     writeFlightBookingFlowState(flowPayload);
+    const token = getAuthToken();
+    if (!token || isTokenExpired(token)) {
+      navigate("/login", {
+        state: { returnTo: "/flight/passenger-details" },
+      });
+      return;
+    }
+
     navigate("/flight/passenger-details", { state: flowPayload });
   };
 

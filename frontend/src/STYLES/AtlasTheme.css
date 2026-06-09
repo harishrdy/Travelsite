@@ -3,33 +3,33 @@
 
 :root {
   --app-font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
-  --theme-page: #eef7f4;
-  --theme-page-soft: #f7fbf8;
+  --theme-page: #F3F4F6;
+  --theme-page-soft: #F9FAFB;
   --theme-surface: #ffffff;
   --theme-surface-warm: #f9fbf6;
-  --theme-border: #cfded8;
-  --theme-border-soft: #e1ebe7;
+  --theme-border: #E5E7EB;
+  --theme-border-soft: #F3F4F6;
   --theme-text: #162126;
   --theme-muted: #66757b;
-  --theme-primary: #009b8f;
-  --theme-primary-strong: #006f7a;
-  --theme-primary-soft: #dff8f3;
+  --theme-primary: #dc1e26;
+  --theme-primary-strong: #b8141b;
+  --theme-primary-soft: #fef2f2;
   --theme-navy: #17242d;
-  --theme-blue: #3656d4;
-  --theme-coral: #f36f5f;
-  --theme-gold: #eab84e;
+  --theme-blue: #b8141b;
+  --theme-coral: #dc1e26;
+  --theme-gold: #dc1e26;
   --theme-danger: #d94f48;
   --theme-danger-soft: #fff0ee;
   --theme-shadow: 0 22px 55px rgba(12, 46, 51, 0.15);
   --theme-shadow-sm: 0 12px 28px rgba(12, 46, 51, 0.09);
-  --theme-gradient: linear-gradient(135deg, #009b8f 0%, #3656d4 58%, #f36f5f 100%);
-  --theme-gradient-action: linear-gradient(135deg, #009b8f 0%, #006f7a 54%, #3656d4 100%);
+  --theme-gradient: linear-gradient(135deg, #dc1e26 0%, #b8141b 58%, #dc1e26 100%);
+  --theme-gradient-action: linear-gradient(135deg, #dc1e26 0%, #b8141b 54%, #b8141b 100%);
 }
 
 body {
   background:
-    linear-gradient(135deg, rgba(0, 155, 143, 0.08) 0%, transparent 30%),
-    linear-gradient(225deg, rgba(243, 111, 95, 0.1) 0%, transparent 34%),
+    linear-gradient(135deg, rgba(220, 30, 38, 0.08) 0%, transparent 30%),
+    linear-gradient(225deg, rgba(220, 30, 38, 0.1) 0%, transparent 34%),
     var(--theme-page) !important;
   color: var(--theme-text) !important;
 }
@@ -93,8 +93,8 @@ body {
 .flight-flow-page,
 .admin-shell {
   background:
-    linear-gradient(135deg, rgba(0, 155, 143, 0.1) 0%, transparent 34%),
-    linear-gradient(225deg, rgba(54, 86, 212, 0.1) 0%, transparent 32%),
+    linear-gradient(135deg, rgba(220, 30, 38, 0.1) 0%, transparent 34%),
+    linear-gradient(225deg, rgba(220, 30, 38, 0.05) 0%, transparent 32%),
     var(--theme-page) !important;
 }
 
@@ -238,7 +238,7 @@ body {
   border-bottom-color: rgba(207, 222, 216, 0.92) !important;
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.97), rgba(247, 251, 248, 0.95)),
-    linear-gradient(135deg, rgba(0, 155, 143, 0.1), rgba(54, 86, 212, 0.08)) !important;
+    linear-gradient(135deg, rgba(220, 30, 38, 0.1), rgba(220, 30, 38, 0.03)) !important;
   box-shadow: 0 12px 34px rgba(12, 46, 51, 0.1) !important;
 }
 
@@ -283,7 +283,7 @@ body {
   background: var(--theme-gradient-action) !important;
   color: #ffffff !important;
   border-color: transparent !important;
-  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.22) !important;
+  box-shadow: 0 14px 30px rgba(184, 20, 27, 0.22) !important;
 }
 
 .menu-item.active,
@@ -308,7 +308,7 @@ body {
   background: var(--theme-gradient-action) !important;
   color: #ffffff !important;
   border-color: transparent !important;
-  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.22) !important;
+  box-shadow: 0 14px 30px rgba(184, 20, 27, 0.22) !important;
 }
 
 .dashboard-card,
@@ -366,7 +366,6 @@ body {
 .admin-shell .content-card,
 .admin-shell .filter-card,
 .admin-shell .form-card,
-.homepage .search-panel,
 .homepage .search-card,
 .homepage .booking-card,
 .homepage .route-card,
@@ -401,8 +400,8 @@ body {
 
 .admin-shell .sidebar {
   background:
-    linear-gradient(160deg, rgba(0, 155, 143, 0.18), transparent 40%),
-    linear-gradient(20deg, rgba(243, 111, 95, 0.12), transparent 44%),
+    linear-gradient(160deg, rgba(220, 30, 38, 0.18), transparent 40%),
+    linear-gradient(20deg, rgba(220, 30, 38, 0.12), transparent 44%),
     linear-gradient(180deg, #15252b 0%, #101d23 58%, #091317 100%) !important;
 }
 
@@ -458,7 +457,7 @@ body {
 }
 
 .quick-icon.atlas {
-  background: rgba(243, 111, 95, 0.14) !important;
+  background: rgba(220, 30, 38, 0.14) !important;
 }
 
 
@@ -474,7 +473,7 @@ input[type="radio"] {
 }
 
 .travel-captcha-display {
-  border-color: rgba(0, 155, 143, 0.5) !important;
+  border-color: rgba(220, 30, 38, 0.5) !important;
   color: var(--theme-primary-strong) !important;
   background: repeating-linear-gradient(
     135deg,
@@ -487,7 +486,7 @@ input[type="radio"] {
 
 .travel-captcha-display::before,
 .travel-captcha-display::after {
-  background: rgba(54, 86, 212, 0.38) !important;
+  background: rgba(220, 30, 38, 0.38) !important;
 }
 
 .captcha-text,
@@ -498,8 +497,8 @@ input[type="radio"] {
 
 .travel-auth-page::before {
   background:
-    linear-gradient(135deg, rgba(0, 155, 143, 0.22), transparent 34%),
-    linear-gradient(225deg, rgba(54, 86, 212, 0.18), transparent 38%),
+    linear-gradient(135deg, rgba(220, 30, 38, 0.22), transparent 34%),
+    linear-gradient(225deg, rgba(220, 30, 38, 0.18), transparent 38%),
     linear-gradient(0deg, rgba(238, 247, 244, 0.42), rgba(238, 247, 244, 0.42)) !important;
 }
 
@@ -540,7 +539,7 @@ input[type="radio"] {
 .travel-auth-page .travel-otp-boxes input:focus,
 .travel-auth-page .travel-custom-dropdown-container:focus-within {
   border-color: var(--theme-primary) !important;
-  box-shadow: 0 0 0 3px rgba(0, 155, 143, 0.12) !important;
+  box-shadow: 0 0 0 3px rgba(220, 30, 38, 0.12) !important;
 }
 
 .travel-auth-page .travel-social-btn:hover,
@@ -551,8 +550,8 @@ input[type="radio"] {
 
 .homepage {
   background:
-    linear-gradient(135deg, rgba(0, 155, 143, 0.1) 0%, transparent 34%),
-    linear-gradient(225deg, rgba(243, 111, 95, 0.1) 0%, transparent 32%),
+    linear-gradient(135deg, rgba(220, 30, 38, 0.1) 0%, transparent 34%),
+    linear-gradient(225deg, rgba(220, 30, 38, 0.1) 0%, transparent 32%),
     var(--theme-page) !important;
 }
 
@@ -576,14 +575,14 @@ input[type="radio"] {
 .homepage-buses .hero-tag-left,
 .homepage-flights .hero-tag-left {
   border-color: rgba(255, 255, 255, 0.34) !important;
-  color: #f7fbf8 !important;
+  color: #F9FAFB !important;
   background: rgba(16, 30, 35, 0.42) !important;
 }
 
 .travel-footer {
   background:
-    linear-gradient(145deg, rgba(0, 155, 143, 0.18), transparent 38%),
-    linear-gradient(25deg, rgba(243, 111, 95, 0.16), transparent 42%),
+    linear-gradient(145deg, rgba(220, 30, 38, 0.18), transparent 38%),
+    linear-gradient(25deg, rgba(220, 30, 38, 0.16), transparent 42%),
     linear-gradient(135deg, #101e24, #162a30 58%, #0b171b) !important;
   border-top-color: rgba(207, 222, 216, 0.28) !important;
 }
@@ -633,14 +632,14 @@ input[type="radio"] {
   z-index: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(8, 23, 42, 0.22) 0%, rgba(8, 23, 42, 0.05) 48%, rgba(255, 255, 255, 0) 100%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 48%, rgba(8, 23, 42, 0.1) 100%) !important;
+    linear-gradient(90deg, rgba(17, 24, 39, 0.22) 0%, rgba(17, 24, 39, 0.05) 48%, rgba(255, 255, 255, 0) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 48%, rgba(17, 24, 39, 0.1) 100%) !important;
 }
 
 .travel-auth-register::before {
   background:
-    linear-gradient(90deg, rgba(8, 23, 42, 0.26) 0%, rgba(8, 23, 42, 0.06) 48%, rgba(255, 255, 255, 0) 100%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 48%, rgba(8, 23, 42, 0.12) 100%) !important;
+    linear-gradient(90deg, rgba(17, 24, 39, 0.26) 0%, rgba(17, 24, 39, 0.06) 48%, rgba(255, 255, 255, 0) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 48%, rgba(17, 24, 39, 0.12) 100%) !important;
 }
 
 .travel-auth-card,
@@ -649,7 +648,7 @@ input[type="radio"] {
   z-index: 1;
   background: rgba(255, 255, 255, 0.94) !important;
   border: 1px solid rgba(255, 255, 255, 0.82) !important;
-  box-shadow: 0 28px 76px rgba(8, 23, 42, 0.26) !important;
+  box-shadow: 0 28px 76px rgba(17, 24, 39, 0.26) !important;
 }
 
 .auth-brand-logo {
@@ -659,7 +658,7 @@ input[type="radio"] {
   object-fit: contain;
   object-position: center;
   margin: 0 auto 10px;
-  filter: drop-shadow(0 8px 16px rgba(0, 111, 122, 0.12));
+  filter: drop-shadow(0 8px 16px rgba(184, 20, 27, 0.12));
 }
 
 .auth-brand-logo-register {
@@ -720,15 +719,15 @@ input[type="radio"] {
   background: var(--theme-gradient-action) !important;
   color: #ffffff !important;
   border-color: transparent !important;
-  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.24) !important;
+  box-shadow: 0 14px 30px rgba(184, 20, 27, 0.24) !important;
 }
 
 .travel-btn-primary:hover,
 .travel-captcha-refresh:hover,
 .travel-inline-otp-btn:hover:not(:disabled),
 .cp-btn-primary:hover {
-  background: linear-gradient(135deg, #00aa9e 0%, #006f7a 54%, #3656d4 100%) !important;
-  box-shadow: 0 16px 34px rgba(0, 111, 122, 0.3) !important;
+  background: linear-gradient(135deg, #dc1e26 0%, #b8141b 54%, #b8141b 100%) !important;
+  box-shadow: 0 16px 34px rgba(184, 20, 27, 0.3) !important;
 }
 
 .travel-field-check,
@@ -754,9 +753,9 @@ input[type="radio"] {
 .travel-auth-register .travel-hero-subtitle,
 .travel-auth-register .travel-benefit-text strong,
 .travel-auth-register .travel-benefit-text span {
-  color: #1d4f86 !important;
+  color: #dc1e26 !important;
   background: rgba(255, 255, 255, 0.78) !important;
-  box-shadow: 0 10px 24px rgba(8, 23, 42, 0.1) !important;
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.1) !important;
 }
 
 .travel-auth-register .travel-benefit-icon,
@@ -765,7 +764,7 @@ input[type="radio"] {
 .travel-auth-page .travel-inline-edit-box:hover {
   background: rgba(255, 255, 255, 0.9) !important;
   border-color: var(--theme-border) !important;
-  box-shadow: 0 14px 32px rgba(8, 23, 42, 0.12) !important;
+  box-shadow: 0 14px 32px rgba(17, 24, 39, 0.12) !important;
 }
 
 .travel-auth-page .travel-social-btn:hover,
@@ -825,7 +824,7 @@ input[type="radio"] {
 
 .travel-auth-register .travel-step4-icon {
   background: var(--theme-primary-soft) !important;
-  box-shadow: 0 12px 30px rgba(0, 155, 143, 0.24) !important;
+  box-shadow: 0 12px 30px rgba(220, 30, 38, 0.24) !important;
 }
 
 .travel-auth-register .travel-custom-dropdown-options {
@@ -833,7 +832,7 @@ input[type="radio"] {
 }
 
 .travel-auth-register .travel-password-checklist-popup {
-  background: #f7fbf8 !important;
+  background: #F9FAFB !important;
   border-color: var(--theme-border) !important;
   box-shadow: 0 12px 28px rgba(12, 46, 51, 0.1) !important;
 }
@@ -848,9 +847,9 @@ input[type="radio"] {
 .cp-auth-page {
   --auth-orange: var(--theme-primary) !important;
   --auth-orange-strong: var(--theme-blue) !important;
-  --auth-orange-soft: rgba(0, 155, 143, 0.12) !important;
-  --auth-orange-lighter: rgba(0, 155, 143, 0.08) !important;
-  --auth-orange-border: rgba(0, 155, 143, 0.36) !important;
+  --auth-orange-soft: rgba(220, 30, 38, 0.12) !important;
+  --auth-orange-lighter: rgba(220, 30, 38, 0.08) !important;
+  --auth-orange-border: rgba(220, 30, 38, 0.36) !important;
   min-height: 100vh !important;
   overflow-y: auto;
   background-attachment: fixed !important;
@@ -962,8 +961,8 @@ input[type="radio"] {
   min-height: 54px !important;
   border-radius: 11px !important;
   background: rgba(255, 255, 255, 0.96) !important;
-  border: 1px solid rgba(0, 155, 143, 0.26) !important;
-  box-shadow: 0 10px 26px rgba(8, 23, 42, 0.06) !important;
+  border: 1px solid rgba(220, 30, 38, 0.26) !important;
+  box-shadow: 0 10px 26px rgba(17, 24, 39, 0.06) !important;
 }
 
 .travel-field-line input,
@@ -989,7 +988,7 @@ input[type="radio"] {
   min-height: 54px !important;
   border-radius: 10px !important;
   background: var(--theme-gradient-action) !important;
-  box-shadow: 0 15px 32px rgba(0, 111, 122, 0.28) !important;
+  box-shadow: 0 15px 32px rgba(184, 20, 27, 0.28) !important;
   color: #ffffff !important;
 }
 
@@ -998,8 +997,8 @@ input[type="radio"] {
 .travel-auth-login .travel-btn-primary:hover,
 .travel-auth-forgot .travel-btn-primary:hover,
 .cp-btn-primary:hover {
-  background: linear-gradient(135deg, #00aa9e 0%, #006f7a 52%, #3656d4 100%) !important;
-  box-shadow: 0 18px 40px rgba(0, 111, 122, 0.34) !important;
+  background: linear-gradient(135deg, #dc1e26 0%, #b8141b 52%, #b8141b 100%) !important;
+  box-shadow: 0 18px 40px rgba(184, 20, 27, 0.34) !important;
 }
 
 .travel-captcha-row {
@@ -1009,9 +1008,9 @@ input[type="radio"] {
 .travel-captcha-display {
   min-height: 54px !important;
   border-radius: 10px !important;
-  border: 2px solid rgba(0, 155, 143, 0.72) !important;
+  border: 2px solid rgba(220, 30, 38, 0.72) !important;
   background:
-    repeating-linear-gradient(-18deg, rgba(0, 155, 143, 0.13) 0 8px, rgba(255, 255, 255, 0.78) 8px 16px),
+    repeating-linear-gradient(-18deg, rgba(220, 30, 38, 0.13) 0 8px, rgba(255, 255, 255, 0.78) 8px 16px),
     rgba(255, 255, 255, 0.9) !important;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.74) !important;
 }
@@ -1020,13 +1019,13 @@ input[type="radio"] {
 .travel-captcha-display span,
 .travel-captcha-display span:nth-child(even),
 .travel-captcha-display span:nth-child(odd) {
-  color: #006f7a !important;
+  color: #b8141b !important;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) !important;
 }
 
 .travel-captcha-display::before,
 .travel-captcha-display::after {
-  background: rgba(0, 155, 143, 0.5) !important;
+  background: rgba(220, 30, 38, 0.5) !important;
 }
 
 .travel-captcha-refresh {
@@ -1040,7 +1039,7 @@ input[type="radio"] {
   color: #ffffff !important;
   background: var(--theme-gradient-action) !important;
   border: 8px solid rgba(255, 255, 255, 0.92) !important;
-  box-shadow: 0 16px 38px rgba(0, 111, 122, 0.34) !important;
+  box-shadow: 0 16px 38px rgba(184, 20, 27, 0.34) !important;
 }
 
 .travel-auth-forgot .travel-auth-lock-icon {
@@ -1073,12 +1072,12 @@ input[type="radio"] {
   height: 54px !important;
   border-radius: 50% !important;
   background: rgba(255, 255, 255, 0.94) !important;
-  border: 1px solid rgba(0, 155, 143, 0.18) !important;
+  border: 1px solid rgba(220, 30, 38, 0.18) !important;
 }
 
 .travel-auth-page .travel-social-btn:hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.22) !important;
+  box-shadow: 0 14px 30px rgba(184, 20, 27, 0.22) !important;
 }
 
 .travel-stepper {
@@ -1095,7 +1094,7 @@ input[type="radio"] {
   background: var(--theme-gradient-action) !important;
   color: #ffffff !important;
   border-color: transparent !important;
-  box-shadow: 0 12px 26px rgba(0, 111, 122, 0.26) !important;
+  box-shadow: 0 12px 26px rgba(184, 20, 27, 0.26) !important;
 }
 
 .step-label {
@@ -1103,7 +1102,7 @@ input[type="radio"] {
 }
 
 .stepper-item.active .step-label {
-  color: #006f7a !important;
+  color: #b8141b !important;
 }
 
 .stepper-line,
@@ -1113,7 +1112,7 @@ input[type="radio"] {
 }
 
 .stepper-line.active {
-  background: linear-gradient(90deg, #009b8f, #2f62d9) !important;
+  background: linear-gradient(90deg, #dc1e26, #2f62d9) !important;
 }
 
 .travel-auth-register .travel-hero-title {
@@ -1122,7 +1121,7 @@ input[type="radio"] {
   background: rgba(255, 255, 255, 0.82) !important;
   border-radius: 8px !important;
   padding: 8px 14px !important;
-  box-shadow: 0 12px 32px rgba(8, 23, 42, 0.16) !important;
+  box-shadow: 0 12px 32px rgba(17, 24, 39, 0.16) !important;
 }
 
 .travel-auth-register .travel-hero-subtitle {
@@ -1141,7 +1140,7 @@ input[type="radio"] {
   color: #ffffff !important;
   background: var(--theme-gradient-action) !important;
   border: 3px solid rgba(255, 255, 255, 0.92) !important;
-  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.2) !important;
+  box-shadow: 0 14px 30px rgba(184, 20, 27, 0.2) !important;
 }
 
 .travel-auth-register .travel-benefit-text strong,
@@ -1155,7 +1154,7 @@ input[type="radio"] {
 
 .travel-auth-register .travel-stats-bar {
   background: rgba(255, 255, 255, 0.92) !important;
-  border: 1px solid rgba(0, 155, 143, 0.16) !important;
+  border: 1px solid rgba(220, 30, 38, 0.16) !important;
   border-radius: 18px !important;
 }
 
@@ -1180,7 +1179,7 @@ input[type="radio"] {
   color: #ffffff !important;
   background: var(--theme-gradient-action) !important;
   border: 3px solid rgba(255, 255, 255, 0.92) !important;
-  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.2) !important;
+  box-shadow: 0 14px 30px rgba(184, 20, 27, 0.2) !important;
 }
 
 .travel-auth-page .travel-stat-icon,
@@ -2083,7 +2082,7 @@ body:has(.cp-auth-page),
 .homepage .search-panel .bus-standard-grid .place-autocomplete:focus-within {
   background: transparent !important;
   box-shadow: none !important;
-  border-color: #cfded8 !important; /* Retain default border color */
+  border-color: #E5E7EB !important; /* Retain default border color */
 }
 
 /* Flights, Buses, Hotels search fields container wrap focus shadow/border neutralization */
@@ -2096,7 +2095,7 @@ body:has(.cp-auth-page),
 .homepage-hotels .search-panel .field:focus-within .control-wrap,
 .homepage-hotels .search-panel .traveller-field:focus-within .traveller-trigger,
 .homepage-hotels .search-panel .class-field:focus-within .class-control-wrap {
-  border-color: #cfded8 !important; /* normal border */
+  border-color: #E5E7EB !important; /* normal border */
   box-shadow: 0 8px 20px rgba(12, 46, 51, 0.08) !important; /* normal shadow */
 }
 
@@ -2105,7 +2104,7 @@ body:has(.cp-auth-page),
 .travel-auth-register .travel-field-line:focus-within,
 .travel-auth-page .travel-custom-dropdown-container:focus-within,
 .cp-field-line:focus-within {
-  border-color: var(--theme-border, #cfded8) !important; /* normal border */
+  border-color: var(--theme-border, #E5E7EB) !important; /* normal border */
   box-shadow: none !important;
 }
 
@@ -2119,7 +2118,7 @@ body:has(.cp-auth-page),
     linear-gradient(145deg, rgba(255, 255, 255, 0.68), rgba(233, 246, 246, 0.42) 48%, rgba(17, 31, 36, 0.36)) !important;
   border: 1px solid rgba(255, 255, 255, 0.76) !important;
   box-shadow:
-    0 26px 70px rgba(8, 23, 42, 0.28),
+    0 26px 70px rgba(17, 24, 39, 0.28),
     inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
 }
 
@@ -2135,7 +2134,7 @@ body:has(.cp-auth-page),
 }
 
 .travel-auth-register .travel-auth-card:has(.travel-step2-wrapper) .stepper-line.active {
-  background: linear-gradient(90deg, #009b8f, #2f62d9) !important;
+  background: linear-gradient(90deg, #dc1e26, #2f62d9) !important;
 }
 
 .travel-auth-register .travel-step2-wrapper {
@@ -2144,11 +2143,11 @@ body:has(.cp-auth-page),
 }
 
 .travel-auth-register .travel-step2-icon {
-  background: linear-gradient(135deg, #009b8f, #006f7a 52%, #3656d4) !important;
+  background: linear-gradient(135deg, #dc1e26, #b8141b 52%, #b8141b) !important;
   border: 9px solid rgba(255, 255, 255, 0.92) !important;
   box-shadow:
-    0 14px 30px rgba(0, 111, 122, 0.22),
-    0 0 0 1px rgba(0, 155, 143, 0.12) !important;
+    0 14px 30px rgba(184, 20, 27, 0.22),
+    0 0 0 1px rgba(220, 30, 38, 0.12) !important;
 }
 
 .travel-auth-register .travel-step2-text {
@@ -2164,10 +2163,10 @@ body:has(.cp-auth-page),
   justify-content: center !important;
   gap: 10px !important;
   padding: 8px 14px !important;
-  border: 1px solid rgba(0, 155, 143, 0.34) !important;
+  border: 1px solid rgba(220, 30, 38, 0.34) !important;
   border-radius: 12px !important;
   background: rgba(255, 255, 255, 0.88) !important;
-  box-shadow: 0 12px 24px rgba(8, 23, 42, 0.12) !important;
+  box-shadow: 0 12px 24px rgba(17, 24, 39, 0.12) !important;
 }
 
 .travel-auth-register .travel-inline-edit-box span {
@@ -2180,7 +2179,7 @@ body:has(.cp-auth-page),
 }
 
 .travel-auth-register .travel-inline-edit-icon {
-  color: #009b8f !important;
+  color: #dc1e26 !important;
   flex: 0 0 auto !important;
 }
 
@@ -2203,20 +2202,20 @@ body:has(.cp-auth-page),
   height: clamp(40px, 5.6vh, 52px) !important;
   min-height: 0 !important;
   border-radius: 12px !important;
-  border: 1.5px solid rgba(0, 155, 143, 0.46) !important;
+  border: 1.5px solid rgba(220, 30, 38, 0.46) !important;
   background: rgba(255, 255, 255, 0.92) !important;
   color: #102033 !important;
   font-weight: 800 !important;
   box-shadow:
-    0 10px 18px rgba(8, 23, 42, 0.1),
+    0 10px 18px rgba(17, 24, 39, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
 }
 
 .travel-auth-register .travel-otp-boxes input:focus {
-  border-color: #009b8f !important;
+  border-color: #dc1e26 !important;
   box-shadow:
-    0 0 0 3px rgba(0, 155, 143, 0.14),
-    0 12px 22px rgba(0, 111, 122, 0.16) !important;
+    0 0 0 3px rgba(220, 30, 38, 0.14),
+    0 12px 22px rgba(184, 20, 27, 0.16) !important;
 }
 
 .travel-auth-register .travel-otp-timer-text {
@@ -2230,8 +2229,8 @@ body:has(.cp-auth-page),
   min-height: 22px !important;
   padding: 2px 7px !important;
   border-radius: 7px !important;
-  background: rgba(0, 111, 122, 0.12) !important;
-  color: #006f7a !important;
+  background: rgba(184, 20, 27, 0.12) !important;
+  color: #b8141b !important;
   font-weight: 800 !important;
 }
 
@@ -2243,8 +2242,8 @@ body:has(.cp-auth-page),
   margin: clamp(8px, 1.2vh, 12px) auto 0 !important;
   border-radius: 12px !important;
   border: 0 !important;
-  background: linear-gradient(135deg, #009b8f 0%, #007985 50%, #3656d4 100%) !important;
-  box-shadow: 0 16px 32px rgba(0, 111, 122, 0.24) !important;
+  background: linear-gradient(135deg, #dc1e26 0%, #007985 50%, #b8141b 100%) !important;
+  box-shadow: 0 16px 32px rgba(184, 20, 27, 0.24) !important;
   font-weight: 800 !important;
 }
 
@@ -2308,9 +2307,9 @@ body:has(.cp-auth-page),
   gap: 10px !important;
   padding: 0 14px !important;
   border-radius: 9px !important;
-  border: 1px solid rgba(0, 155, 143, 0.28) !important;
+  border: 1px solid rgba(220, 30, 38, 0.28) !important;
   background: rgba(255, 255, 255, 0.96) !important;
-  box-shadow: 0 10px 22px rgba(8, 23, 42, 0.07) !important;
+  box-shadow: 0 10px 22px rgba(17, 24, 39, 0.07) !important;
   cursor: pointer !important;
 }
 
@@ -2322,7 +2321,7 @@ body:has(.cp-auth-page),
   transform: none !important;
   width: 18px !important;
   height: 18px !important;
-  color: #009b8f !important;
+  color: #dc1e26 !important;
   flex: 0 0 18px !important;
 }
 
@@ -2338,7 +2337,7 @@ body:has(.cp-auth-page),
 }
 
 .travel-auth-register .travel-step2-contact-field .travel-inline-edit-icon {
-  color: #006f7a !important;
+  color: #b8141b !important;
   flex: 0 0 auto !important;
 }
 
@@ -2362,12 +2361,12 @@ body:has(.cp-auth-page),
   width: 100% !important;
   height: clamp(36px, 5vh, 44px) !important;
   border-radius: 9px !important;
-  border: 1px solid rgba(0, 155, 143, 0.32) !important;
+  border: 1px solid rgba(220, 30, 38, 0.32) !important;
   background: rgba(255, 255, 255, 0.96) !important;
   color: #172235 !important;
   font-size: clamp(16px, 2.4vh, 22px) !important;
   font-weight: 800 !important;
-  box-shadow: 0 8px 18px rgba(8, 23, 42, 0.06) !important;
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.06) !important;
 }
 
 .travel-auth-register .travel-otp-timer-text {
@@ -2479,7 +2478,7 @@ button:focus-visible {
 .bus-modify-field select:focus,
 .bus-filter-panel input:focus,
 .bus-filter-panel select:focus {
-  border-color: #cfded8 !important;
+  border-color: #E5E7EB !important;
   box-shadow: none !important;
   outline: none !important;
 }
@@ -2536,9 +2535,9 @@ button:focus-visible {
   gap: 10px !important;
   padding: 0 14px !important;
   border-radius: 9px !important;
-  border: 1px solid rgba(0, 155, 143, 0.28) !important;
+  border: 1px solid rgba(220, 30, 38, 0.28) !important;
   background: rgba(255, 255, 255, 0.96) !important;
-  box-shadow: 0 10px 22px rgba(8, 23, 42, 0.07) !important;
+  box-shadow: 0 10px 22px rgba(17, 24, 39, 0.07) !important;
 }
 
 .travel-auth-register .travel-step2-contact-field .travel-input-icon-left {
@@ -2547,7 +2546,7 @@ button:focus-visible {
   width: 18px !important;
   height: 18px !important;
   flex: 0 0 18px !important;
-  color: #009b8f !important;
+  color: #dc1e26 !important;
 }
 
 .travel-auth-register .travel-step2-contact-field span:not(.travel-input-icon-left) {
@@ -2578,12 +2577,12 @@ button:focus-visible {
   height: clamp(36px, 5vh, 44px) !important;
   min-height: 0 !important;
   border-radius: 9px !important;
-  border: 1px solid rgba(0, 155, 143, 0.32) !important;
+  border: 1px solid rgba(220, 30, 38, 0.32) !important;
   background: rgba(255, 255, 255, 0.96) !important;
   color: #172235 !important;
   font-size: clamp(16px, 2.4vh, 22px) !important;
   font-weight: 800 !important;
-  box-shadow: 0 8px 18px rgba(8, 23, 42, 0.06) !important;
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.06) !important;
 }
 
 .travel-auth-register .travel-step2-nav {
@@ -3015,7 +3014,7 @@ button:focus-visible {
 .travel-auth-page .travel-required-star,
 .travel-auth-page label span,
 .cp-auth-page label span {
-  color: #009b8f !important;
+  color: #dc1e26 !important;
   text-shadow: none !important;
 }
 
@@ -3082,7 +3081,7 @@ button:focus-visible {
   font-weight: 900 !important;
   letter-spacing: 0 !important;
   text-shadow: none !important;
-  box-shadow: 0 6px 14px rgba(8, 23, 42, 0.06) !important;
+  box-shadow: 0 6px 14px rgba(17, 24, 39, 0.06) !important;
 }
 
 .travel-auth-register .travel-field,
@@ -3096,7 +3095,7 @@ button:focus-visible {
 .travel-auth-page .travel-required-star,
 .travel-auth-page label span,
 .cp-auth-page label span {
-  color: #009b8f !important;
+  color: #dc1e26 !important;
   font-weight: 900 !important;
 }
 
@@ -3188,7 +3187,7 @@ button:focus-visible {
   margin: clamp(1px, 0.4vh, 4px) auto !important;
   border: 7px solid rgba(255, 255, 255, 0.88) !important;
   background: var(--theme-gradient-action) !important;
-  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.24) !important;
+  box-shadow: 0 14px 30px rgba(184, 20, 27, 0.24) !important;
 }
 
 .travel-auth-register .travel-step2-icon svg {
@@ -3277,7 +3276,7 @@ button:focus-visible {
   border: clamp(8px, 1.4vh, 12px) solid rgba(255, 255, 255, 0.94) !important;
   color: #ffffff !important;
   background: var(--theme-gradient-action) !important;
-  box-shadow: 0 16px 36px rgba(0, 111, 122, 0.28) !important;
+  box-shadow: 0 16px 36px rgba(184, 20, 27, 0.28) !important;
 }
 
 .travel-auth-lock-icon svg {
@@ -3363,9 +3362,9 @@ button:focus-visible {
   gap: 10px !important;
   padding: 0 14px !important;
   border-radius: 9px !important;
-  border: 1px solid rgba(0, 155, 143, 0.28) !important;
+  border: 1px solid rgba(220, 30, 38, 0.28) !important;
   background: rgba(255, 255, 255, 0.96) !important;
-  box-shadow: 0 10px 22px rgba(8, 23, 42, 0.07) !important;
+  box-shadow: 0 10px 22px rgba(17, 24, 39, 0.07) !important;
 }
 
 .travel-auth-register .travel-step2-contact-field .travel-input-icon-left {
@@ -3374,7 +3373,7 @@ button:focus-visible {
   width: 18px !important;
   height: 18px !important;
   flex: 0 0 18px !important;
-  color: #009b8f !important;
+  color: #dc1e26 !important;
 }
 
 .travel-auth-register .travel-step2-contact-field span:not(.travel-input-icon-left) {
@@ -3409,12 +3408,12 @@ button:focus-visible {
   height: clamp(36px, 5vh, 44px) !important;
   min-height: 0 !important;
   border-radius: 9px !important;
-  border: 1px solid rgba(0, 155, 143, 0.32) !important;
+  border: 1px solid rgba(220, 30, 38, 0.32) !important;
   background: rgba(255, 255, 255, 0.96) !important;
   color: #172235 !important;
   font-size: clamp(16px, 2.4vh, 22px) !important;
   font-weight: 800 !important;
-  box-shadow: 0 8px 18px rgba(8, 23, 42, 0.06) !important;
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.06) !important;
 }
 
 .travel-auth-register .travel-otp-timer-text {

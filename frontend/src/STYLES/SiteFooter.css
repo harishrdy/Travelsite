@@ -251,7 +251,10 @@
 }
 
 .footer-policy-modal {
-  width: min(540px, 100%);
+  width: min(680px, 90vw);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
   border-radius: 18px;
   border: 1px solid rgba(211, 226, 246, 0.9);
   background:
@@ -259,7 +262,7 @@
     #ffffff;
   color: #20314a;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
-  padding: 20px;
+  padding: 24px;
 }
 
 .footer-policy-modal-head {
@@ -306,17 +309,17 @@
 }
 
 .footer-policy-modal p {
-  margin: 15px 0 0;
+  margin: 0 0 6px 0;
   color: #4c627e;
   font-size: 13.2px;
-  line-height: 1.55;
+  line-height: 1.4;
 }
 
 .footer-policy-modal ul {
-  margin: 15px 0 0;
+  margin: 8px 0 0;
   padding: 0;
   display: grid;
-  gap: 10px;
+  gap: 6px;
   list-style: none;
 }
 
@@ -325,7 +328,7 @@
   padding-left: 18px;
   color: #2f435f;
   font-size: 12.6px;
-  line-height: 1.48;
+  line-height: 1.38;
 }
 
 .footer-policy-modal li::before {
@@ -394,4 +397,28 @@
 .footer-policy-modal li::before {
   background: var(--theme-primary, #009b8f) !important;
   border-color: var(--theme-primary, #009b8f) !important;
+}
+
+/* Scrollable Policy Content Area */
+.footer-policy-modal-body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--theme-primary, #009b8f) #f1f1f1;
+}
+
+.footer-policy-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.footer-policy-modal-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 99px;
+}
+
+.footer-policy-modal-body::-webkit-scrollbar-thumb {
+  background: var(--theme-primary, #009b8f);
+  border-radius: 99px;
+}
+
+.footer-policy-modal-body::-webkit-scrollbar-thumb:hover {
+  background: #007a70;
 }

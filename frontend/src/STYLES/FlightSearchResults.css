@@ -8,10 +8,10 @@
   --fr-muted: #597293;
   --fr-primary: #17242d;
   --fr-primary-strong: #17242d;
-  --fr-accent: #3656d4;
+  --fr-accent: #b8141b;
   --fr-accent-strong: #144f9c;
-  --fr-success: #3656d4;
-  --fr-danger: #3656d4;
+  --fr-success: #b8141b;
+  --fr-danger: #b8141b;
   --fr-shadow: 0 12px 26px rgba(13, 30, 52, 0.1);
   --fr-heading-font: var(--app-font-family);
   --fr-body-font: var(--app-font-family);
@@ -28,21 +28,21 @@
 
 /* Atlas flight results theme */
 .flight-results-page {
-  --fr-bg: var(--theme-page, #eef7f4) !important;
+  --fr-bg: var(--theme-page, #F3F4F6) !important;
   --fr-surface: #ffffff !important;
-  --fr-border: #cfded8 !important;
+  --fr-border: #E5E7EB !important;
   --fr-text: var(--theme-navy, #17242d) !important;
   --fr-muted: var(--theme-muted, #66757b) !important;
-  --fr-primary: var(--theme-primary, #009b8f) !important;
-  --fr-primary-strong: var(--theme-primary-strong, #006f7a) !important;
-  --fr-accent: var(--theme-blue, #3656d4) !important;
+  --fr-primary: var(--theme-primary, #dc1e26) !important;
+  --fr-primary-strong: var(--theme-primary-strong, #b8141b) !important;
+  --fr-accent: var(--theme-blue, #b8141b) !important;
   --fr-accent-strong: #273fb0 !important;
-  --fr-success: var(--theme-primary, #009b8f) !important;
-  --fr-danger: var(--theme-coral, #f36f5f) !important;
+  --fr-success: var(--theme-primary, #dc1e26) !important;
+  --fr-danger: var(--theme-coral, #dc1e26) !important;
   --fr-shadow: 0 14px 32px rgba(12, 46, 51, 0.1) !important;
   background:
-    linear-gradient(135deg, rgba(0, 155, 143, 0.1) 0%, transparent 34%),
-    linear-gradient(225deg, rgba(54, 86, 212, 0.1) 0%, transparent 32%),
+    linear-gradient(135deg, rgba(220, 30, 38, 0.1) 0%, transparent 34%),
+    linear-gradient(225deg, rgba(220, 30, 38, 0.05) 0%, transparent 32%),
     var(--fr-bg) !important;
 }
 
@@ -53,7 +53,7 @@
 .flight-filter-panel,
 .flight-sort-strip,
 .fare-card {
-  border-color: #cfded8 !important;
+  border-color: #E5E7EB !important;
   background: rgba(255, 255, 255, 0.92) !important;
   box-shadow: 0 14px 32px rgba(12, 46, 51, 0.1) !important;
 }
@@ -64,15 +64,15 @@
 .fare-select-btn,
 .flight-filter-apply,
 .flight-sort-pill.active {
-  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  background: var(--theme-gradient-action, linear-gradient(135deg, #dc1e26, #b8141b)) !important;
   color: #ffffff !important;
   border-color: transparent !important;
-  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.22) !important;
+  box-shadow: 0 14px 30px rgba(184, 20, 27, 0.22) !important;
 }
 
 .route-block h2,
 .meta-line svg {
-  color: var(--theme-primary-strong, #006f7a) !important;
+  color: var(--theme-primary-strong, #b8141b) !important;
 }
 
 .flight-results-page *,
@@ -163,7 +163,7 @@
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 10px 20px rgba(54, 86, 212, 0.28);
+  box-shadow: 0 10px 20px rgba(220, 30, 38, 0.28);
 }
 
 .modify-search-panel {
@@ -274,7 +274,7 @@
 .search-feedback.success {
   border: 1px solid #e4eefc;
   background: #f6f9fe;
-  color: #3656d4;
+  color: #b8141b;
 }
 
 .flight-results-page.is-loading {
@@ -1007,20 +1007,20 @@
 
 /* Final atlas flight results sweep */
 .flight-results-page {
-  --fr-bg: var(--theme-page, #eef7f4) !important;
+  --fr-bg: var(--theme-page, #F3F4F6) !important;
   --fr-surface: #ffffff !important;
-  --fr-border: #cfded8 !important;
+  --fr-border: #E5E7EB !important;
   --fr-text: var(--theme-navy, #17242d) !important;
   --fr-muted: var(--theme-muted, #66757b) !important;
-  --fr-primary: var(--theme-primary, #009b8f) !important;
-  --fr-primary-strong: var(--theme-primary-strong, #006f7a) !important;
-  --fr-accent: var(--theme-blue, #3656d4) !important;
+  --fr-primary: var(--theme-primary, #dc1e26) !important;
+  --fr-primary-strong: var(--theme-primary-strong, #b8141b) !important;
+  --fr-accent: var(--theme-blue, #b8141b) !important;
   --fr-accent-strong: #273fb0 !important;
-  --fr-success: var(--theme-primary, #009b8f) !important;
-  --fr-danger: var(--theme-coral, #f36f5f) !important;
+  --fr-success: var(--theme-primary, #dc1e26) !important;
+  --fr-danger: var(--theme-coral, #dc1e26) !important;
   background:
-    linear-gradient(135deg, rgba(0, 155, 143, 0.1) 0%, transparent 34%),
-    linear-gradient(225deg, rgba(54, 86, 212, 0.1) 0%, transparent 32%),
+    linear-gradient(135deg, rgba(220, 30, 38, 0.1) 0%, transparent 34%),
+    linear-gradient(225deg, rgba(220, 30, 38, 0.05) 0%, transparent 32%),
     var(--fr-bg) !important;
 }
 
@@ -1031,7 +1031,7 @@
 .flight-filter-panel,
 .flight-sort-strip,
 .fare-card {
-  border-color: #cfded8 !important;
+  border-color: #E5E7EB !important;
   background: rgba(255, 255, 255, 0.92) !important;
   box-shadow: 0 14px 32px rgba(12, 46, 51, 0.1) !important;
 }
@@ -1043,15 +1043,15 @@
 .fare-select-btn,
 .flight-filter-apply,
 .flight-sort-pill.active {
-  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  background: var(--theme-gradient-action, linear-gradient(135deg, #dc1e26, #b8141b)) !important;
   color: #ffffff !important;
   border-color: transparent !important;
-  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.22) !important;
+  box-shadow: 0 14px 30px rgba(184, 20, 27, 0.22) !important;
 }
 
 .route-block h2,
 .meta-line svg {
-  color: var(--theme-primary-strong, #006f7a) !important;
+  color: var(--theme-primary-strong, #b8141b) !important;
 }
 
 /* Neutralize focus outlines on modify search and booking form fields on flight search results */

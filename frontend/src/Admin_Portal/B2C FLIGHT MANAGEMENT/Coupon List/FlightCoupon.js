@@ -111,7 +111,7 @@ export default function AdminFlightCouponListPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [setCoupons]);
 
   const openGenerateModal = () => {
     setGenerateError("");

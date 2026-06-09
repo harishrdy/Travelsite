@@ -1,7 +1,7 @@
 import { toDdMmYyyy } from "../utils/apiDateFormat";
 
 const FALLBACK_API_BASE_URL =
-  "http://3.111.182.53:8080";
+  "https://undogmatically-knotlike-evita.ngrok-free.dev";
 
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "0.0.0.0"]);
 function getAuthHeaders() {
@@ -768,7 +768,7 @@ function validateCouponRecord(coupon, { couponCode, totalFare } = {}) {
   if (minBookingAmount > 0 && fare < minBookingAmount) {
     return {
       valid: false,
-      message: `Minimum booking amount for this coupon is â‚¹ ${new Intl.NumberFormat(
+      message: `Minimum booking amount for this coupon is ₹ ${new Intl.NumberFormat(
         "en-IN"
       ).format(minBookingAmount)}.`,
     };
@@ -854,6 +854,10 @@ function normalizeErrorMessage(payload) {
       return "";
     }
 
+    if (isDatabaseCapacityError(text)) {
+      return "Search is temporarily unavailable because the booking server is busy. Please try again in a few minutes.";
+    }
+
     // Filter style and script tags and their content to prevent CSS/JS from spilling into error message
     const cleaned = text.replace(/<(style|script)\b[^>]*>([\s\S]*?)<\/\1>/gi, "");
 
@@ -872,9 +876,15 @@ function normalizeErrorMessage(payload) {
 
   if (payload && typeof payload === "object") {
     if (typeof payload.message === "string" && payload.message.trim()) {
+      if (isDatabaseCapacityError(payload.message)) {
+        return "Search is temporarily unavailable because the booking server is busy. Please try again in a few minutes.";
+      }
       return payload.message.trim();
     }
     if (typeof payload.error === "string" && payload.error.trim()) {
+      if (isDatabaseCapacityError(payload.error)) {
+        return "Search is temporarily unavailable because the booking server is busy. Please try again in a few minutes.";
+      }
       return payload.error.trim();
     }
     if (typeof payload.title === "string" && payload.title.trim()) {
@@ -885,9 +895,15 @@ function normalizeErrorMessage(payload) {
       return [payload.title, ...validationMessages].join(" ").trim();
     }
     if (typeof payload.exception === "string" && payload.exception.trim()) {
+      if (isDatabaseCapacityError(payload.exception)) {
+        return "Search is temporarily unavailable because the booking server is busy. Please try again in a few minutes.";
+      }
       return payload.exception.trim();
     }
     if (typeof payload.detail === "string" && payload.detail.trim()) {
+      if (isDatabaseCapacityError(payload.detail)) {
+        return "Search is temporarily unavailable because the booking server is busy. Please try again in a few minutes.";
+      }
       return payload.detail.trim();
     }
   }
@@ -895,9 +911,19 @@ function normalizeErrorMessage(payload) {
   return "";
 }
 
+function isDatabaseCapacityError(value) {
+  const message = String(value || "").toLowerCase();
+  return (
+    message.includes("max_connections_per_hour") ||
+    message.includes("too many connections") ||
+    message.includes("mysqlconnector") ||
+    message.includes("mysql exception")
+  );
+}
+
 async function requestJson(urlOrPath, options = {}) {
   const headers = {
-  ...getAuthHeaders(),   // Ã°Å¸â€Â¥ THIS FIXES YOUR ISSUE
+  ...getAuthHeaders(),   // ðŸ”¥ THIS FIXES YOUR ISSUE
   ...(options.headers || {}),
 };
 
@@ -906,7 +932,7 @@ async function requestJson(urlOrPath, options = {}) {
   }
 
   if (shouldUseNgrokBypass(urlOrPath)) {
-    headers["x-skip-browser-warning"] = "true";
+    headers["ngrok-skip-browser-warning"] = "true";
   }
 
   const response = await fetch(toAbsoluteUrl(urlOrPath), {

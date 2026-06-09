@@ -53,6 +53,7 @@ namespace PickNBook.Api.Data
         public DbSet<FlightCancellationRequest> FlightCancellationRequests => Set<FlightCancellationRequest>();
         public DbSet<FlightAmendmentRequest> FlightAmendmentRequests => Set<FlightAmendmentRequest>();
         public DbSet<BusPromotion> BusPromotions => Set<BusPromotion>();
+        public DbSet<HotelReservation> HotelReservations => Set<HotelReservation>();
 
         public DbSet<BusPromotionCondition> BusPromotionConditions => Set<BusPromotionCondition>();
 
@@ -731,6 +732,29 @@ namespace PickNBook.Api.Data
                     .WithMany()
                     .HasForeignKey(x => x.FlightReservationId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<HotelReservation>(entity =>
+            {
+                entity.ToTable("hotel_reservations");
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.BookingReference).HasMaxLength(40).IsRequired();
+                entity.Property(x => x.ProviderBookingId).HasMaxLength(80);
+                entity.Property(x => x.UserId).HasMaxLength(80).IsRequired();
+                entity.Property(x => x.HotelId).HasMaxLength(80).IsRequired();
+                entity.Property(x => x.HotelName).HasMaxLength(200).IsRequired();
+                entity.Property(x => x.OfferId).HasMaxLength(120).IsRequired();
+                entity.Property(x => x.CityCode).HasMaxLength(10).IsRequired();
+                entity.Property(x => x.GuestName).HasMaxLength(120).IsRequired();
+                entity.Property(x => x.GuestEmail).HasMaxLength(150).IsRequired();
+                entity.Property(x => x.GuestPhone).HasMaxLength(30).IsRequired();
+                entity.Property(x => x.Status).HasMaxLength(20).IsRequired();
+                entity.Property(x => x.CancellationReason).HasMaxLength(300);
+                entity.Property(x => x.Price).HasPrecision(10, 2);
+                entity.Property(x => x.Currency).HasMaxLength(10).IsRequired();
+                entity.HasIndex(x => x.BookingReference).IsUnique();
+                entity.HasIndex(x => x.UserId);
+                entity.HasIndex(x => x.HotelId);
             });
         }
     }

@@ -6,7 +6,7 @@
   padding: 8px 24px 54px;
   background:
     radial-gradient(circle at 78% 0%, rgba(255, 213, 193, 0.7), transparent 32%),
-    linear-gradient(180deg, #fff2eb 0%, #fff9f5 42%, #f7fbf8 100%);
+    linear-gradient(180deg, #fff2eb 0%, #fff9f5 42%, #F9FAFB 100%);
   color: #071b3d;
 }
 
@@ -70,8 +70,8 @@
   min-height: 25px;
   margin-left: 8px;
   border-radius: 999px;
-  background: #dff8f3;
-  color: #006f7a;
+  background: #fef2f2;
+  color: #b8141b;
   padding: 0 11px;
   font-size: 0.66rem;
   font-weight: 900;
@@ -126,7 +126,7 @@
 .pb-type-pill {
   width: max-content;
   border-radius: 999px;
-  background: #009b8f;
+  background: #dc1e26;
   color: #ffffff;
   padding: 5px 10px;
   font-size: 0.6rem;
@@ -183,14 +183,14 @@
 .pb-ticket-actions button {
   border: 0;
   border-radius: 14px;
-  background: linear-gradient(135deg, #009b8f 0%, #006f7a 100%);
+  background: linear-gradient(135deg, #dc1e26 0%, #b8141b 100%);
   color: #ffffff;
   min-height: 56px;
   padding: 0 24px;
   font-size: 0.82rem;
   font-weight: 900;
   cursor: pointer;
-  box-shadow: 0 16px 30px rgba(0, 155, 143, 0.18);
+  box-shadow: 0 16px 30px rgba(220, 30, 38, 0.18);
   transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
 }
 
@@ -198,12 +198,12 @@
 .pb-ticket-actions button:hover {
   filter: brightness(1.03);
   transform: translateY(-1px);
-  box-shadow: 0 20px 38px rgba(0, 155, 143, 0.24);
+  box-shadow: 0 20px 38px rgba(220, 30, 38, 0.24);
 }
 
 .pb-ticket-actions .pb-secondary-action {
-  background: linear-gradient(135deg, #80dcd4 0%, #009b8f 100%);
-  box-shadow: 0 16px 30px rgba(0, 155, 143, 0.18);
+  background: linear-gradient(135deg, #80dcd4 0%, #dc1e26 100%);
+  box-shadow: 0 16px 30px rgba(220, 30, 38, 0.18);
 }
 
 .pb-select-note,
@@ -240,13 +240,13 @@
   width: 52px;
   height: 52px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #009b8f 0%, #006f7a 100%);
+  background: linear-gradient(135deg, #dc1e26 0%, #b8141b 100%);
   color: #ffffff;
   display: grid;
   place-items: center;
   font-size: 0.96rem;
   font-weight: 900;
-  box-shadow: 0 16px 30px rgba(0, 155, 143, 0.2);
+  box-shadow: 0 16px 30px rgba(220, 30, 38, 0.2);
 }
 
 .pb-ticket-title strong {
@@ -287,7 +287,7 @@
 
 .pb-ticket-head {
   min-height: 58px;
-  background: linear-gradient(135deg, var(--theme-primary-strong, #006f7a) 0%, var(--theme-primary, #009b8f) 100%);
+  background: linear-gradient(135deg, var(--theme-primary-strong, #b8141b) 0%, var(--theme-primary, #dc1e26) 100%);
   color: #ffffff;
   padding: 13px 24px;
   display: flex;
@@ -480,7 +480,7 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #009b8f;
+  background: #dc1e26;
   color: #ffffff;
   font-size: 0.64rem;
 }
@@ -544,7 +544,7 @@
 }
 
 .pb-ticket-stub strong {
-  color: #006f7a;
+  color: #b8141b;
   font-size: 0.64rem;
   font-weight: 900;
   line-height: 1.2;
@@ -670,7 +670,7 @@
 .pb-ticket-head,
 .pb-stub-label,
 .pb-active-chip {
-  background: #009b8f !important;
+  background: #dc1e26 !important;
   color: #ffffff !important;
 }
 

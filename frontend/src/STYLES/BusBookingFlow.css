@@ -1,21 +1,21 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
 
 .bus-flow-page {
-  --flow-bg: var(--theme-page, #eef7f4);
+  --flow-bg: var(--theme-page, #F3F4F6);
   --flow-surface: #ffffff;
   --flow-surface-soft: var(--theme-surface-warm, #fffaf6);
-  --flow-border: var(--theme-border, #cfded8);
+  --flow-border: var(--theme-border, #E5E7EB);
   --flow-text: var(--theme-text, #111827);
   --flow-muted: var(--theme-muted, #64748b);
-  --flow-primary: var(--theme-primary, #009b8f);
-  --flow-primary-strong: var(--theme-primary-strong, #006f7a);
-  --flow-accent: var(--theme-primary, #009b8f);
-  --flow-accent-strong: var(--theme-primary-strong, #006f7a);
-  --flow-success: var(--theme-primary, #009b8f);
-  --flow-danger: var(--theme-primary, #009b8f);
-  --flow-primary-soft: var(--theme-primary-soft, #dff8f3);
-  --flow-accent-soft: #f7fbf8;
-  --flow-focus: rgba(0, 155, 143, 0.18);
+  --flow-primary: var(--theme-primary, #dc1e26);
+  --flow-primary-strong: var(--theme-primary-strong, #b8141b);
+  --flow-accent: var(--theme-primary, #dc1e26);
+  --flow-accent-strong: var(--theme-primary-strong, #b8141b);
+  --flow-success: var(--theme-primary, #dc1e26);
+  --flow-danger: var(--theme-primary, #dc1e26);
+  --flow-primary-soft: var(--theme-primary-soft, #fef2f2);
+  --flow-accent-soft: #F9FAFB;
+  --flow-focus: rgba(220, 30, 38, 0.18);
   --flow-shadow-md: var(--theme-shadow, 0 18px 45px rgba(13, 74, 83, 0.12));
   --flow-shadow-sm: var(--theme-shadow-sm, 0 10px 24px rgba(13, 74, 83, 0.08));
   --flow-heading-font: var(--app-font-family);
@@ -26,8 +26,8 @@
   font-family: var(--flow-body-font);
   color: var(--flow-text);
   background:
-    radial-gradient(circle at 3% 8%, rgba(0, 155, 143, 0.08), transparent 30%),
-    radial-gradient(circle at 98% 6%, rgba(243, 111, 95, 0.12), transparent 28%),
+    radial-gradient(circle at 3% 8%, rgba(220, 30, 38, 0.08), transparent 30%),
+    radial-gradient(circle at 98% 6%, rgba(220, 30, 38, 0.12), transparent 28%),
     var(--flow-bg);
 }
 
@@ -94,7 +94,7 @@
   min-height: 120px;
   border-bottom: 1px solid #e5ecf5;
   overflow: hidden;
-  background: var(--flow-primary-strong, #006f7a);
+  background: var(--flow-primary-strong, #b8141b);
 }
 
 .bus-flow-overview-bg {
@@ -110,8 +110,8 @@
   inset: 0;
   background: linear-gradient(
     120deg,
-    rgba(0, 111, 122, 0.96) 0%,
-    rgba(0, 155, 143, 0.82) 100%
+    rgba(184, 20, 27, 0.96) 0%,
+    rgba(220, 30, 38, 0.82) 100%
   );
 }
 
@@ -213,7 +213,7 @@
 }
 
 .bus-flow-grid-item-duration {
-  background: linear-gradient(135deg, rgba(0, 155, 143, 0.04), rgba(243, 111, 95, 0.04)) !important;
+  background: linear-gradient(135deg, rgba(220, 30, 38, 0.04), rgba(220, 30, 38, 0.04)) !important;
 }
 
 .bus-flow-grid-item-duration span {
@@ -224,7 +224,7 @@
 
 .bus-flow-grid-item-duration small {
   font-size: 0.7rem;
-  color: #009b8f;
+  color: #dc1e26;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -239,7 +239,7 @@
 .bus-flow-grid-item-price strong {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #009b8f;
+  color: #dc1e26;
 }
 
 .bus-flow-grid-item-seats strong {
@@ -268,7 +268,7 @@
   padding: 0 8px;
   border: 1px solid #e5ecf5;
   background: #ffffff;
-  color: #009b8f;
+  color: #dc1e26;
   font-size: 0.68rem;
   font-weight: 600;
   cursor: pointer;
@@ -281,10 +281,10 @@
 }
 
 .bus-flow-summary-actions button.active {
-  border-color: #009b8f;
-  background: linear-gradient(135deg, #009b8f, #006f7a);
+  border-color: #dc1e26;
+  background: linear-gradient(135deg, #dc1e26, #b8141b);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 155, 143, 0.2);
+  box-shadow: 0 4px 12px rgba(220, 30, 38, 0.2);
 }
 
 .bus-flow-expand-panel {
@@ -314,8 +314,8 @@
   background:
     linear-gradient(
       90deg,
-      rgba(0, 155, 143, 0.02) 30%,
-      rgba(0, 155, 143, 0.03) 60%
+      rgba(220, 30, 38, 0.02) 30%,
+      rgba(220, 30, 38, 0.03) 60%
     ),
     #faf8f6;
   box-shadow: 0 4px 12px rgba(13, 74, 83, 0.04);
@@ -391,7 +391,7 @@
 .bus-flow-seat-loader .loader-bars span {
   width: 10px;
   border-radius: 3px;
-  background: #009b8f;
+  background: #dc1e26;
   animation: flow-loader-bars 1s ease-in-out infinite;
 }
 
@@ -461,7 +461,7 @@
 
 .bus-flow-info-btn {
   border: none;
-  background: linear-gradient(135deg, var(--flow-primary, #009b8f), var(--flow-primary-strong, #006f7a));
+  background: linear-gradient(135deg, var(--flow-primary, #dc1e26), var(--flow-primary-strong, #b8141b));
   color: #ffffff;
   border-radius: 50%;
   width: 32px;
@@ -500,7 +500,7 @@
 
 .bus-flow-fare-chips button.active {
   border-color: transparent;
-  background: linear-gradient(135deg, var(--flow-primary, #009b8f), var(--flow-primary-strong, #006f7a));
+  background: linear-gradient(135deg, var(--flow-primary, #dc1e26), var(--flow-primary-strong, #b8141b));
   color: #ffffff;
 }
 
@@ -529,13 +529,13 @@
   width: 14px;
   height: 14px;
   border-radius: 3px;
-  border: 1px solid var(--flow-border, #cfded8);
+  border: 1px solid var(--flow-border, #E5E7EB);
   background: #ffffff;
 }
 
 .bus-flow-page .legend.female::before {
-  border-color: var(--flow-border, #cfded8);
-  background: linear-gradient(135deg, var(--flow-primary-soft, #dff8f3), var(--flow-primary-soft, #dff8f3));
+  border-color: var(--flow-border, #E5E7EB);
+  background: linear-gradient(135deg, var(--flow-primary-soft, #fef2f2), var(--flow-primary-soft, #fef2f2));
 }
 
 .bus-flow-page .legend.booked::before {
@@ -555,8 +555,8 @@
 }
 
 .bus-flow-page .legend.male::before {
-  border-color: var(--flow-border, #cfded8);
-  background: linear-gradient(135deg, var(--flow-primary-soft, #dff8f3), var(--flow-primary-soft, #dff8f3));
+  border-color: var(--flow-border, #E5E7EB);
+  background: linear-gradient(135deg, var(--flow-primary-soft, #fef2f2), var(--flow-primary-soft, #fef2f2));
 }
 
 .bus-flow-page .legend.selected::before {
@@ -565,7 +565,7 @@
 }
 
 .bus-flow-page .legend.selected-male::before {
-  border-color: var(--flow-primary, #009b8f);
+  border-color: var(--flow-primary, #dc1e26);
   background: linear-gradient(135deg, #e8f1ff, #d7e8ff);
 }
 
@@ -606,7 +606,7 @@
   bottom: 18px;
   width: 84px;
   border-right: 1px solid #e1e8f2;
-  color: var(--flow-primary, #009b8f);
+  color: var(--flow-primary, #dc1e26);
   display: grid;
   place-items: center;
   font-size: 0.74rem;
@@ -696,12 +696,12 @@
   position: absolute;
   top: 16px;
   right: 24px;
-  border: 1px solid var(--flow-border, #cfded8);
+  border: 1px solid var(--flow-border, #E5E7EB);
   border-radius: 8px;
   min-height: 34px;
   padding: 0 14px;
-  background: linear-gradient(135deg, var(--flow-primary-soft, #dff8f3), var(--flow-border, #cfded8));
-  color: var(--flow-primary, #009b8f);
+  background: linear-gradient(135deg, var(--flow-primary-soft, #fef2f2), var(--flow-border, #E5E7EB));
+  color: var(--flow-primary, #dc1e26);
   font-size: 0.7rem;
   font-weight: 800;
   font-family: var(--flow-heading-font);
@@ -925,15 +925,15 @@
 }
 
 .seat-badge.female {
-  background: var(--flow-primary-soft, #dff8f3);
+  background: var(--flow-primary-soft, #fef2f2);
   color: #5178ab;
-  border: 1px solid var(--flow-border, #cfded8);
+  border: 1px solid var(--flow-border, #E5E7EB);
 }
 
 .seat-badge.male {
-  background: var(--flow-primary-soft, #dff8f3);
+  background: var(--flow-primary-soft, #fef2f2);
   color: #3a669f;
-  border: 1px solid var(--flow-border, #cfded8);
+  border: 1px solid var(--flow-border, #E5E7EB);
 }
 
 .seat-label {
@@ -958,14 +958,14 @@
 }
 
 .bus-flow-seat.status-female {
-  border-color: var(--flow-border, #cfded8);
-  background: linear-gradient(135deg, var(--flow-primary-soft, #dff8f3), var(--flow-primary-soft, #dff8f3));
+  border-color: var(--flow-border, #E5E7EB);
+  background: linear-gradient(135deg, var(--flow-primary-soft, #fef2f2), var(--flow-primary-soft, #fef2f2));
   color: #5178ab;
 }
 
 .bus-flow-seat.status-male {
-  border-color: var(--flow-border, #cfded8);
-  background: linear-gradient(135deg, var(--flow-primary-soft, #dff8f3), var(--flow-primary-soft, #dff8f3));
+  border-color: var(--flow-border, #E5E7EB);
+  background: linear-gradient(135deg, var(--flow-primary-soft, #fef2f2), var(--flow-primary-soft, #fef2f2));
   color: #3a669f;
 }
 
@@ -1004,7 +1004,7 @@
 }
 
 .bus-flow-seat.status-selected-male {
-  border-color: var(--flow-primary, #009b8f);
+  border-color: var(--flow-primary, #dc1e26);
   background: linear-gradient(135deg, #e8f1ff, #d7e8ff);
   color: #255f9f;
   box-shadow: 0 4px 12px rgba(79, 134, 201, 0.18);
@@ -1104,7 +1104,7 @@
 .bus-flow-page .point-item {
   border: 1px solid #d3deeb;
   border-radius: 10px;
-  background: var(--flow-primary-soft, #dff8f3);
+  background: var(--flow-primary-soft, #fef2f2);
   min-height: 62px;
   padding: 10px;
   display: grid;
@@ -1147,13 +1147,13 @@
 }
 
 .bus-flow-page .point-item.selected {
-  border-color: var(--flow-primary, #009b8f);
-  background: var(--flow-primary-soft, #dff8f3);
+  border-color: var(--flow-primary, #dc1e26);
+  background: var(--flow-primary-soft, #fef2f2);
 }
 
 .bus-flow-page .point-item.selected i {
-  border-color: var(--flow-primary, #009b8f);
-  background: var(--flow-primary, #009b8f);
+  border-color: var(--flow-primary, #dc1e26);
+  background: var(--flow-primary, #dc1e26);
 }
 
 .selected-seat-summary {
@@ -1207,7 +1207,7 @@
 
 .seat-gender-select {
   width: 100%;
-  border: 1px solid var(--flow-border, #cfded8);
+  border: 1px solid var(--flow-border, #E5E7EB);
   border-radius: 8px;
   min-height: 34px;
   padding: 0 8px;
@@ -1223,7 +1223,7 @@
   border-radius: 8px;
   min-height: 35px;
   padding: 0 10px;
-  background: var(--flow-primary-soft, #dff8f3);
+  background: var(--flow-primary-soft, #fef2f2);
   color: #396cae;
   font-size: 0.72rem;
   font-weight: 700;
@@ -1379,7 +1379,7 @@
 
 .passenger-row h4 span {
   margin-left: 8px;
-  color: var(--flow-primary, #009b8f);
+  color: var(--flow-primary, #dc1e26);
   font-size: 0.81rem;
   font-weight: 700;
 }
@@ -1468,7 +1468,7 @@
 .passenger-fields input:focus-visible {
   outline: none;
   border-color: var(--flow-primary);
-  box-shadow: 0 0 0 3px rgba(0, 155, 143, 0.16);
+  box-shadow: 0 0 0 3px rgba(220, 30, 38, 0.16);
 }
 
 .passenger-restriction-note {
@@ -1533,7 +1533,7 @@
   width: 17px;
   height: 17px;
   margin-top: 2px;
-  accent-color: var(--flow-primary, #009b8f);
+  accent-color: var(--flow-primary, #dc1e26);
 }
 
 .ack-checkbox span {
@@ -1545,7 +1545,7 @@
   border: 1px solid #d0d9e5;
   border-radius: 9px;
   min-height: 40px;
-  background: var(--flow-primary-soft, #dff8f3);
+  background: var(--flow-primary-soft, #fef2f2);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1596,7 +1596,7 @@
 
 .fare-list .grand-total span,
 .fare-list .grand-total strong {
-  color: var(--flow-primary-strong, #006f7a);
+  color: var(--flow-primary-strong, #b8141b);
   font-family: var(--flow-heading-font);
   font-size: 1.215rem;
 }
@@ -1719,7 +1719,7 @@
   border: 1px solid #c9d6e7;
   border-radius: 9px;
   min-height: 44px;
-  background: var(--flow-primary-soft, #dff8f3);
+  background: var(--flow-primary-soft, #fef2f2);
   color: #233d5f;
   font-size: 0.738rem;
   font-weight: 700;
@@ -1871,7 +1871,7 @@
 .ack-pay-strip,
 .payment-method-grid button {
   border-color: #cedcee;
-  background: var(--flow-primary-soft, #dff8f3);
+  background: var(--flow-primary-soft, #fef2f2);
 }
 
 .bus-flow-summary-actions button,
@@ -1896,20 +1896,20 @@
 }
 
 .bus-flow-page .point-item.selected {
-  border-color: var(--flow-primary, #009b8f);
-  background: var(--flow-primary-soft, #dff8f3);
+  border-color: var(--flow-primary, #dc1e26);
+  background: var(--flow-primary-soft, #fef2f2);
 }
 
 .bus-flow-page .point-item.selected i {
-  border-color: var(--flow-primary, #009b8f);
-  background: var(--flow-primary, #009b8f);
+  border-color: var(--flow-primary, #dc1e26);
+  background: var(--flow-primary, #dc1e26);
 }
 
 .selected-seat-summary h4,
 .selected-seat-summary strong,
 .fare-list .grand-total span,
 .fare-list .grand-total strong {
-  color: var(--flow-primary-strong, #006f7a);
+  color: var(--flow-primary-strong, #b8141b);
 }
 
 .flow-card > header,
@@ -1974,7 +1974,7 @@
   min-width: 132px;
   padding: 0 14px;
   border: 1px solid #c5d6ed;
-  background: var(--flow-primary-soft, #dff8f3);
+  background: var(--flow-primary-soft, #fef2f2);
   color: #274c7c;
   font-size: 0.747rem;
   font-weight: 700;
@@ -2205,7 +2205,7 @@
 .bus-flow-summary-actions button,
 .bus-flow-page .point-tabs button,
 .bus-flow-fare-chips button {
-  border-color: #cfded8;
+  border-color: #E5E7EB;
   background: #ffffff;
   color: #1f2a44;
 }
@@ -2221,7 +2221,7 @@
   border-color: transparent;
   background: linear-gradient(135deg, var(--flow-primary), var(--flow-primary-strong));
   color: #ffffff;
-  box-shadow: 0 14px 28px rgba(0, 155, 143, 0.2);
+  box-shadow: 0 14px 28px rgba(220, 30, 38, 0.2);
 }
 
 .bus-flow-page .point-item.selected,
@@ -2236,8 +2236,8 @@
 }
 
 .bus-flow-page .point-tabs button {
-  border-color: rgba(0, 155, 143, 0.38);
-  background: #f7fbf8;
+  border-color: rgba(220, 30, 38, 0.38);
+  background: #F9FAFB;
   color: var(--flow-primary-strong);
   box-shadow: none;
 }
@@ -2246,17 +2246,17 @@
   border-color: var(--flow-primary);
   background: linear-gradient(135deg, var(--flow-primary), var(--flow-primary-strong));
   color: #ffffff;
-  box-shadow: 0 10px 20px rgba(0, 155, 143, 0.18);
+  box-shadow: 0 10px 20px rgba(220, 30, 38, 0.18);
 }
 
 .bus-flow-seat.status-selected {
   border-color: var(--flow-primary);
-  background: #dff8f3;
+  background: #fef2f2;
   color: #b9381c;
 }
 
 .bus-flow-seat.status-selected-male {
-  border-color: #3656d4;
+  border-color: #b8141b;
   background: #eef5ff;
   color: #1559c7;
 }
@@ -2284,7 +2284,7 @@
 .bus-flow-driver-cabin,
 .bus-flow-deck-card > aside {
   border-color: #ffd0bf;
-  background: #dff8f3;
+  background: #fef2f2;
   color: var(--flow-primary-strong);
 }
 
@@ -2444,7 +2444,7 @@
 }
 
 .bus-flow-page .bus-flow-seat.status-selected-male {
-  border-color: #3656d4;
+  border-color: #b8141b;
   background: #eef5ff;
   color: #1559c7;
 }
@@ -2502,17 +2502,17 @@
 
 /* Unified Atlas booking flow theme */
 .bus-flow-page {
-  --flow-bg: var(--theme-page, #eef7f4);
+  --flow-bg: var(--theme-page, #F3F4F6);
   --flow-surface: var(--theme-surface, #ffffff);
   --flow-surface-soft: var(--theme-surface-warm, #fffaf6);
-  --flow-border: var(--theme-border, #cfded8);
+  --flow-border: var(--theme-border, #E5E7EB);
   --flow-text: var(--theme-text, #111827);
   --flow-muted: var(--theme-muted, #64748b);
-  --flow-primary: var(--theme-primary, #009b8f);
-  --flow-primary-strong: var(--theme-primary-strong, #006f7a);
-  --flow-accent: var(--theme-primary, #009b8f);
-  --flow-accent-strong: var(--theme-primary-strong, #006f7a);
-  --flow-focus: rgba(0, 155, 143, 0.18);
+  --flow-primary: var(--theme-primary, #dc1e26);
+  --flow-primary-strong: var(--theme-primary-strong, #b8141b);
+  --flow-accent: var(--theme-primary, #dc1e26);
+  --flow-accent-strong: var(--theme-primary-strong, #b8141b);
+  --flow-focus: rgba(220, 30, 38, 0.18);
 }
 
 .bus-flow-summary-card,
@@ -2548,7 +2548,7 @@
   border-color: transparent;
   background: linear-gradient(135deg, var(--flow-primary), var(--flow-primary-strong));
   color: #ffffff;
-  box-shadow: 0 14px 28px rgba(0, 155, 143, 0.2);
+  box-shadow: 0 14px 28px rgba(220, 30, 38, 0.2);
 }
 
 .bus-flow-page .point-item.selected {
@@ -2562,8 +2562,8 @@
 }
 
 .bus-flow-page .point-tabs button {
-  border-color: rgba(0, 155, 143, 0.38);
-  background: #f7fbf8;
+  border-color: rgba(220, 30, 38, 0.38);
+  background: #F9FAFB;
   color: var(--flow-primary-strong);
   box-shadow: none;
 }
@@ -2572,12 +2572,12 @@
   border-color: var(--flow-primary);
   background: linear-gradient(135deg, var(--flow-primary), var(--flow-primary-strong));
   color: #ffffff;
-  box-shadow: 0 10px 20px rgba(0, 155, 143, 0.18);
+  box-shadow: 0 10px 20px rgba(220, 30, 38, 0.18);
 }
 
 .bus-flow-seat.status-selected {
   border-color: var(--flow-primary);
-  background: #dff8f3;
+  background: #fef2f2;
   color: #b9381c;
 }
 /* ── Passenger Mode Toggle (Existing Traveler / Add New Traveler) ── */
@@ -2593,7 +2593,7 @@
 .pmode-btn {
   border: none;
   background: transparent;
-  color: var(--flow-primary, #009b8f);
+  color: var(--flow-primary, #dc1e26);
   font-size: 0.9rem;
   font-weight: 700;
   font-family: var(--flow-body-font);
@@ -2610,18 +2610,18 @@
 
 /* Active: Atlas filled pill */
 .pmode-btn--active {
-  background: linear-gradient(135deg, var(--flow-primary, #009b8f), var(--flow-primary-strong, #006f7a));
+  background: linear-gradient(135deg, var(--flow-primary, #dc1e26), var(--flow-primary-strong, #b8141b));
   color: #ffffff;
   border-radius: 999px;
   padding: 8px 20px;
   font-size: 0.855rem;
-  box-shadow: 0 6px 18px rgba(0, 155, 143, 0.28);
+  box-shadow: 0 6px 18px rgba(220, 30, 38, 0.28);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .pmode-btn--active:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(0, 155, 143, 0.34);
+  box-shadow: 0 10px 24px rgba(220, 30, 38, 0.34);
 }
 
 /* Existing traveler dropdown */
@@ -2632,7 +2632,7 @@
 
 .passenger-existing-select {
   width: 100%;
-  border: 1px solid #cfded8;
+  border: 1px solid #E5E7EB;
   border-radius: 9px;
   min-height: 42px;
   padding: 0 12px;
@@ -2644,8 +2644,8 @@
 }
 
 .passenger-existing-select:focus {
-  outline: 2px solid rgba(0, 155, 143, 0.22);
-  border-color: var(--flow-primary, #009b8f);
+  outline: 2px solid rgba(220, 30, 38, 0.22);
+  border-color: var(--flow-primary, #dc1e26);
 }
 
 /* Professional seat-layout page polish */
@@ -2659,7 +2659,7 @@
 }
 
 .bus-flow-summary-card {
-  border: 1px solid rgba(0, 155, 143, 0.2);
+  border: 1px solid rgba(220, 30, 38, 0.2);
   border-radius: 18px;
   background: #ffffff;
   box-shadow: 0 16px 40px rgba(13, 74, 83, 0.1);
@@ -2669,13 +2669,13 @@
 .bus-flow-overview-banner {
   min-height: 168px;
   border-bottom: 0;
-  background: var(--flow-primary-strong, #006f7a);
+  background: var(--flow-primary-strong, #b8141b);
 }
 
 .bus-flow-overview-overlay {
   background:
-    linear-gradient(90deg, rgba(0, 111, 122, 0.96), rgba(0, 155, 143, 0.82)),
-    linear-gradient(135deg, rgba(0, 155, 143, 0.12), transparent 48%);
+    linear-gradient(90deg, rgba(184, 20, 27, 0.96), rgba(220, 30, 38, 0.82)),
+    linear-gradient(135deg, rgba(220, 30, 38, 0.12), transparent 48%);
 }
 
 .bus-flow-overview-content {
@@ -2717,7 +2717,7 @@
   grid-template-columns: minmax(220px, 1.6fr) repeat(3, minmax(130px, 1fr)) minmax(150px, 0.9fr) minmax(150px, 0.9fr);
   gap: 0;
   border-bottom: 1px solid #f1e2dc;
-  background: #f7fbf8;
+  background: #F9FAFB;
 }
 
 .bus-flow-summary-grid article {
@@ -2823,7 +2823,7 @@
   border-color: transparent;
   background: linear-gradient(135deg, var(--flow-primary), var(--flow-primary-strong));
   color: #ffffff;
-  box-shadow: 0 14px 26px rgba(0, 155, 143, 0.22);
+  box-shadow: 0 14px 26px rgba(220, 30, 38, 0.22);
 }
 
 .bus-flow-seat-layout {
@@ -2834,7 +2834,7 @@
 
 .bus-flow-page .bus-flow-seat-zone,
 .bus-flow-page .bus-flow-point-panel {
-  border: 1px solid rgba(0, 155, 143, 0.16);
+  border: 1px solid rgba(220, 30, 38, 0.16);
   border-radius: 18px;
   background: #ffffff;
   box-shadow: 0 18px 38px rgba(13, 74, 83, 0.08);
@@ -2853,7 +2853,7 @@
 .bus-flow-page .bus-flow-seat-legend {
   border-color: #f1e2dc;
   border-radius: 14px;
-  background: #f7fbf8;
+  background: #F9FAFB;
 }
 
 .bus-flow-page .bus-flow-fares {
@@ -2976,7 +2976,7 @@
 .bus-flow-page .point-item.selected {
   border: none !important;
   border-bottom: 1px solid #f0e2dc !important;
-  background: #f7fbf8 !important;
+  background: #F9FAFB !important;
 }
 
 .bus-flow-page .point-item.selected:last-child {
@@ -3186,10 +3186,10 @@
 }
 
 .bus-flow-page .bus-flow-horizontal-deck .bus-flow-seat.status-selected {
-  border-color: #009b8f !important;
+  border-color: #dc1e26 !important;
   background: #fff2ec !important;
   color: #c2391e !important;
-  box-shadow: inset 0 0 0 3px rgba(0, 155, 143, 0.16), 0 10px 18px rgba(0, 155, 143, 0.14) !important;
+  box-shadow: inset 0 0 0 3px rgba(220, 30, 38, 0.16), 0 10px 18px rgba(220, 30, 38, 0.14) !important;
 }
 
 .bus-flow-page .bus-flow-horizontal-deck .seat-label {
@@ -3361,10 +3361,10 @@
 }
 
 .bus-flow-page .bus-flow-vertical-layout .bus-flow-seat.status-selected {
-  border-color: #009b8f;
+  border-color: #dc1e26;
   background: #fff2ec;
   color: #c2391e;
-  box-shadow: inset 0 0 0 3px rgba(0, 155, 143, 0.14);
+  box-shadow: inset 0 0 0 3px rgba(220, 30, 38, 0.14);
 }
 
 @media (max-width: 760px) {
@@ -3692,9 +3692,9 @@
   --flow-border: #d8e5ee;
   --flow-text: #050b18;
   --flow-muted: #5f6875;
-  --flow-primary: #009b8f;
-  --flow-primary-strong: #006f7a;
-  --flow-primary-soft: #dff8f3;
+  --flow-primary: #dc1e26;
+  --flow-primary-strong: #b8141b;
+  --flow-primary-soft: #fef2f2;
   --flow-shadow-sm: 0 3px 12px rgba(15, 23, 42, 0.14);
   --flow-heading-font: var(--app-font-family, "Plus Jakarta Sans", Arial, sans-serif);
   --flow-body-font: var(--app-font-family, "Plus Jakarta Sans", Arial, sans-serif);
@@ -3748,7 +3748,7 @@
   gap: 10px !important;
   border: 0 !important;
   border-radius: 0 !important;
-  background: #009b8f !important;
+  background: #dc1e26 !important;
   color: #ffffff !important;
   font-size: 1.18rem !important;
   font-weight: 700 !important;
@@ -3927,7 +3927,7 @@
   bottom: -13px;
   width: 38px;
   height: 5px;
-  background: #009b8f;
+  background: #dc1e26;
 }
 
 .passenger-row h4 span {
@@ -4079,7 +4079,7 @@
 .bus-flow-page .coupon-action-button {
   min-height: 63px !important;
   border-radius: 0 12px 12px 0 !important;
-  background: #009b8f !important;
+  background: #dc1e26 !important;
   color: #ffffff !important;
   font-size: 0.9rem !important;
   font-weight: 700 !important;
@@ -4092,7 +4092,7 @@
 .success-actions button {
   border: 0 !important;
   border-radius: 9px !important;
-  background: #009b8f !important;
+  background: #dc1e26 !important;
   color: #ffffff !important;
   box-shadow: none !important;
   font-weight: 700 !important;
@@ -4112,7 +4112,7 @@
 .bus-flow-summary-actions button.active,
 .bus-flow-fare-chips button.active,
 .bus-flow-page .point-tabs button.active {
-  background: #009b8f !important;
+  background: #dc1e26 !important;
   color: #ffffff !important;
 }
 
@@ -4168,21 +4168,21 @@
 
 /* Final atlas checkout sweep */
 .bus-flow-page {
-  --flow-bg: var(--theme-page, #eef7f4) !important;
+  --flow-bg: var(--theme-page, #F3F4F6) !important;
   --flow-surface: #ffffff !important;
-  --flow-surface-soft: #f7fbf8 !important;
-  --flow-border: #cfded8 !important;
+  --flow-surface-soft: #F9FAFB !important;
+  --flow-border: #E5E7EB !important;
   --flow-text: var(--theme-navy, #17242d) !important;
   --flow-muted: var(--theme-muted, #66757b) !important;
-  --flow-primary: var(--theme-primary, #009b8f) !important;
-  --flow-primary-strong: var(--theme-primary-strong, #006f7a) !important;
-  --flow-accent: var(--theme-coral, #f36f5f) !important;
-  --flow-danger: var(--theme-coral, #f36f5f) !important;
-  --flow-primary-soft: var(--theme-primary-soft, #dff8f3) !important;
-  --flow-focus: rgba(0, 155, 143, 0.16) !important;
+  --flow-primary: var(--theme-primary, #dc1e26) !important;
+  --flow-primary-strong: var(--theme-primary-strong, #b8141b) !important;
+  --flow-accent: var(--theme-coral, #dc1e26) !important;
+  --flow-danger: var(--theme-coral, #dc1e26) !important;
+  --flow-primary-soft: var(--theme-primary-soft, #fef2f2) !important;
+  --flow-focus: rgba(220, 30, 38, 0.16) !important;
   background:
-    linear-gradient(135deg, rgba(0, 155, 143, 0.1) 0%, transparent 34%),
-    linear-gradient(225deg, rgba(243, 111, 95, 0.1) 0%, transparent 32%),
+    linear-gradient(135deg, rgba(220, 30, 38, 0.1) 0%, transparent 34%),
+    linear-gradient(225deg, rgba(220, 30, 38, 0.1) 0%, transparent 32%),
     var(--flow-bg) !important;
 }
 
@@ -4198,7 +4198,7 @@
 .bus-flow-fares,
 .bus-flow-seat-legend,
 .bus-flow-page .point-item {
-  border-color: #cfded8 !important;
+  border-color: #E5E7EB !important;
   background: rgba(255, 255, 255, 0.92) !important;
   box-shadow: 0 14px 32px rgba(12, 46, 51, 0.1) !important;
 }
@@ -4215,23 +4215,23 @@
 .bus-flow-summary-actions button.active,
 .bus-flow-fare-chips button.active,
 .bus-flow-page .point-tabs button.active {
-  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  background: var(--theme-gradient-action, linear-gradient(135deg, #dc1e26, #b8141b)) !important;
   color: #ffffff !important;
-  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.22) !important;
+  box-shadow: 0 14px 30px rgba(184, 20, 27, 0.22) !important;
 }
 
 .fare-list .grand-total span,
 .fare-list .grand-total strong,
 .bus-flow-page .step-active,
 .bus-flow-page .point-item strong {
-  color: var(--theme-primary-strong, #006f7a) !important;
+  color: var(--theme-primary-strong, #b8141b) !important;
 }
 
 .bus-flow-page input:focus,
 .bus-flow-page select:focus,
 .bus-flow-page textarea:focus {
-  border-color: var(--theme-primary, #009b8f) !important;
-  box-shadow: 0 0 0 3px rgba(0, 155, 143, 0.12) !important;
+  border-color: var(--theme-primary, #dc1e26) !important;
+  box-shadow: 0 0 0 3px rgba(220, 30, 38, 0.12) !important;
 }
 
 /* Polished passenger details checkout */
@@ -4253,7 +4253,7 @@
 
 .bus-flow-page .flow-card,
 .bus-flow-page .coupon-sheet-card {
-  border: 1px solid rgba(0, 155, 143, 0.18) !important;
+  border: 1px solid rgba(220, 30, 38, 0.18) !important;
   border-radius: 18px !important;
   background: rgba(255, 255, 255, 0.96) !important;
   box-shadow: 0 18px 44px rgba(12, 46, 51, 0.11) !important;
@@ -4264,7 +4264,7 @@
 .bus-flow-page .flow-card > .coupon-sheet-header {
   min-height: 64px !important;
   padding: 0 28px !important;
-  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  background: var(--theme-gradient-action, linear-gradient(135deg, #dc1e26, #b8141b)) !important;
   color: #ffffff !important;
   font-size: 1.18rem !important;
   font-weight: 850 !important;
@@ -4296,7 +4296,7 @@
   padding: 16px !important;
   border: 1px solid #dceae6 !important;
   border-radius: 14px !important;
-  background: linear-gradient(180deg, #ffffff 0%, #f7fbf8 100%) !important;
+  background: linear-gradient(180deg, #ffffff 0%, #F9FAFB 100%) !important;
 }
 
 .bus-flow-page .bus-journey-grid > div:nth-child(1) {
@@ -4322,7 +4322,7 @@
 .bus-flow-page .bus-journey-grid small,
 .bus-flow-page .bus-journey-grid .journey-point span {
   margin: 0 0 8px !important;
-  color: var(--theme-primary-strong, #006f7a) !important;
+  color: var(--theme-primary-strong, #b8141b) !important;
   font-size: 0.72rem !important;
   font-weight: 850 !important;
   letter-spacing: 0.08em !important;
@@ -4351,9 +4351,9 @@
   min-height: 0 !important;
   margin-top: 12px !important;
   padding: 7px 10px !important;
-  border: 1px solid rgba(0, 155, 143, 0.26) !important;
+  border: 1px solid rgba(220, 30, 38, 0.26) !important;
   border-radius: 10px !important;
-  background: var(--theme-primary-soft, #dff8f3) !important;
+  background: var(--theme-primary-soft, #fef2f2) !important;
   color: var(--theme-navy, #17242d) !important;
   font-size: 1.1rem !important;
   line-height: 1.15 !important;
@@ -4388,8 +4388,8 @@
   border: 1px solid #dceae6 !important;
   border-radius: 16px !important;
   background:
-    radial-gradient(circle at 96% 0%, rgba(54, 86, 212, 0.08), transparent 34%),
-    #f7fbf8 !important;
+    radial-gradient(circle at 96% 0%, rgba(220, 30, 38, 0.03), transparent 34%),
+    #F9FAFB !important;
 }
 
 .bus-flow-page .bus-journey-grid .journey-point span {
@@ -4402,7 +4402,7 @@
 
 .bus-flow-page .bus-journey-grid .journey-point strong {
   margin: 10px 0 8px !important;
-  color: var(--theme-primary, #009b8f) !important;
+  color: var(--theme-primary, #dc1e26) !important;
   font-size: 1.05rem !important;
   font-weight: 850 !important;
 }
@@ -4455,12 +4455,12 @@
   min-height: 64px !important;
   margin-top: 18px !important;
   padding-top: 18px !important;
-  border-top: 1px dashed #cfded8 !important;
+  border-top: 1px dashed #E5E7EB !important;
 }
 
 .bus-flow-page .fare-list .grand-total span,
 .bus-flow-page .fare-list .grand-total strong {
-  color: var(--theme-primary, #009b8f) !important;
+  color: var(--theme-primary, #dc1e26) !important;
   font-size: 1.1rem !important;
   font-weight: 900 !important;
 }
@@ -4483,13 +4483,13 @@
 .bus-flow-page .coupon-featured-offer,
 .bus-flow-page .coupon-chip {
   border-color: #dceae6 !important;
-  background: #f7fbf8 !important;
+  background: #F9FAFB !important;
 }
 
 .bus-flow-page .coupon-featured-offer.is-selected,
 .bus-flow-page .coupon-chip.is-selected {
-  border-color: var(--theme-primary, #009b8f) !important;
-  background: var(--theme-primary-soft, #dff8f3) !important;
+  border-color: var(--theme-primary, #dc1e26) !important;
+  background: var(--theme-primary-soft, #fef2f2) !important;
 }
 
 .bus-flow-page .coupon-manual-row {
@@ -4509,7 +4509,7 @@
 
 .bus-flow-page .coupon-action-button {
   padding: 0 20px !important;
-  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  background: var(--theme-gradient-action, linear-gradient(135deg, #dc1e26, #b8141b)) !important;
 }
 
 .bus-flow-page .passenger-row h4 {
@@ -4522,7 +4522,7 @@
 .bus-flow-page .passenger-row h4::after {
   height: 3px !important;
   border-radius: 999px !important;
-  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  background: var(--theme-gradient-action, linear-gradient(135deg, #dc1e26, #b8141b)) !important;
 }
 
 .bus-flow-page .passenger-fields,
@@ -4545,9 +4545,9 @@
 
 .bus-flow-page .ack-pay-strip {
   min-height: 58px !important;
-  border-color: rgba(0, 155, 143, 0.22) !important;
+  border-color: rgba(220, 30, 38, 0.22) !important;
   border-radius: 14px !important;
-  background: var(--theme-primary-soft, #dff8f3) !important;
+  background: var(--theme-primary-soft, #fef2f2) !important;
   padding: 0 16px !important;
 }
 
@@ -4614,7 +4614,7 @@
 
 /* 2. Card Padding & Border */
 .bus-flow-page .flow-card {
-  border: 1px solid #e1ebe7 !important; /* theme border color */
+  border: 1px solid #F3F4F6 !important; /* theme border color */
   border-radius: 8px !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
 }
@@ -4632,7 +4632,7 @@
   font-size: 0.95rem !important;
   font-weight: 600 !important;
   border-radius: 0 !important;
-  background: var(--flow-primary, #009b8f) !important; /* Teal theme background */
+  background: var(--flow-primary, #dc1e26) !important; /* Teal theme background */
   gap: 6px !important;
 }
 
@@ -4705,8 +4705,8 @@
 
 .bus-flow-page .date-badge {
   display: inline-block !important;
-  background-color: var(--theme-primary-soft, #dff8f3) !important; /* theme soft primary */
-  color: var(--theme-primary, #009b8f) !important; /* theme primary */
+  background-color: var(--theme-primary-soft, #fef2f2) !important; /* theme soft primary */
+  color: var(--theme-primary, #dc1e26) !important; /* theme primary */
   padding: 2px 6px !important;
   border-radius: 4px !important;
   font-size: 0.68rem !important;
@@ -4778,10 +4778,10 @@
 .bus-flow-page .journey-point .point-header {
   display: block !important;
   width: 100% !important;
-  background: var(--theme-primary-soft, #dff8f3) !important; /* theme soft primary background */
-  border: 1px dashed var(--theme-primary, #009b8f) !important; /* theme primary dashed border */
+  background: var(--theme-primary-soft, #fef2f2) !important; /* theme soft primary background */
+  border: 1px dashed var(--theme-primary, #dc1e26) !important; /* theme primary dashed border */
   border-radius: 4px !important;
-  color: var(--theme-primary, #009b8f) !important; /* theme primary text */
+  color: var(--theme-primary, #dc1e26) !important; /* theme primary text */
   font-size: 0.76rem !important;
   font-weight: 700 !important;
   padding: 4px 6px !important;
@@ -4791,7 +4791,7 @@
 
 .bus-flow-page .journey-point strong {
   font-size: 0.85rem !important;
-  color: var(--theme-coral, #f36f5f) !important; /* theme accent color for time */
+  color: var(--theme-coral, #dc1e26) !important; /* theme accent color for time */
   font-weight: 700 !important;
   margin-top: 2px !important;
   display: block !important;
@@ -4830,7 +4830,7 @@
   bottom: 0 !important;
   width: 32px !important;
   height: 3px !important;
-  background: var(--flow-primary, #009b8f) !important; /* underline in theme primary color */
+  background: var(--flow-primary, #dc1e26) !important; /* underline in theme primary color */
 }
 
 .bus-flow-page .passenger-row h4 span {
@@ -4868,7 +4868,7 @@
 .bus-flow-page .payment-form-grid select {
   min-height: 32px !important; /* extra tight inputs */
   height: 32px !important;
-  border: 1px solid #cfded8 !important; /* theme border color */
+  border: 1px solid #E5E7EB !important; /* theme border color */
   border-radius: 6px !important;
   padding: 0 8px !important;
   font-size: 0.8rem !important;
@@ -4876,7 +4876,7 @@
 }
 
 .bus-flow-page .passenger-fields input[readonly] {
-  background: #f7fbf8 !important;
+  background: #F9FAFB !important;
   color: #435462 !important;
   cursor: default !important;
 }
@@ -4898,16 +4898,16 @@
   padding: 3px 8px !important;
   min-height: 24px !important;
   border-radius: 4px !important;
-  border: 1px solid #cfded8 !important;
-  background: #f7fbf8 !important;
+  border: 1px solid #E5E7EB !important;
+  background: #F9FAFB !important;
   color: #66757b !important;
   cursor: pointer !important;
 }
 
 .bus-flow-page .pmode-btn--active {
-  background: var(--flow-primary, #009b8f) !important;
+  background: var(--flow-primary, #dc1e26) !important;
   color: #ffffff !important;
-  border-color: var(--flow-primary, #009b8f) !important;
+  border-color: var(--flow-primary, #dc1e26) !important;
 }
 
 /* Contact Grid */
@@ -4977,21 +4977,21 @@
 /* Override 64px height and margins of grand total block */
 .bus-flow-page .fare-list .grand-total {
   min-height: 0 !important;
-  border-top: 1px dashed #cfded8 !important;
+  border-top: 1px dashed #E5E7EB !important;
   padding-top: 6px !important;
   margin-top: 6px !important;
   font-size: 0.95rem !important;
   font-weight: 700 !important;
-  color: var(--theme-primary, #009b8f) !important;
+  color: var(--theme-primary, #dc1e26) !important;
 }
 
 .bus-flow-page .fare-list .grand-total span {
-  color: var(--theme-primary, #009b8f) !important;
+  color: var(--theme-primary, #dc1e26) !important;
   font-weight: 700 !important;
 }
 
 .bus-flow-page .fare-list .grand-total strong {
-  color: var(--theme-primary, #009b8f) !important;
+  color: var(--theme-primary, #dc1e26) !important;
   font-weight: 700 !important;
 }
 
@@ -5018,7 +5018,7 @@
   display: grid !important;
   grid-template-columns: 1fr auto !important;
   width: 100% !important;
-  border: 1px solid #cfded8 !important;
+  border: 1px solid #E5E7EB !important;
   border-radius: 6px !important;
   overflow: hidden !important;
 }
@@ -5044,7 +5044,7 @@
 }
 
 .bus-flow-page .coupon-action-button.is-apply {
-  background: var(--flow-primary, #009b8f) !important; /* Teal apply button */
+  background: var(--flow-primary, #dc1e26) !important; /* Teal apply button */
   color: #ffffff !important;
 }
 
@@ -5080,10 +5080,10 @@
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  background: #f7fbf8 !important;
+  background: #F9FAFB !important;
   padding: 6px 10px !important;
   border-radius: 6px !important;
-  border: 1px solid #cfded8 !important;
+  border: 1px solid #E5E7EB !important;
 }
 
 .bus-flow-page .ack-pay-strip span {
@@ -5097,7 +5097,7 @@
 }
 
 .bus-flow-page .flow-continue-btn {
-  background: var(--flow-primary, #009b8f) !important;
+  background: var(--flow-primary, #dc1e26) !important;
   color: #ffffff !important;
   border: none !important;
   border-radius: 6px !important;
@@ -5108,7 +5108,7 @@
 }
 
 .bus-flow-page .flow-continue-btn:hover {
-  background: var(--flow-primary-strong, #006f7a) !important;
+  background: var(--flow-primary-strong, #b8141b) !important;
 }
 
 /* Inline Validation Styles */
@@ -5252,15 +5252,15 @@
 /* Selected state */
 .bus-flow-page .coupon-featured-offer.is-selected,
 .bus-flow-page .coupon-voucher-card.is-selected {
-  border: 1px solid #009b8f !important;
+  border: 1px solid #dc1e26 !important;
   background: #ffffff !important;
-  box-shadow: 0 3px 12px rgba(0, 155, 143, 0.1) !important;
+  box-shadow: 0 3px 12px rgba(220, 30, 38, 0.1) !important;
 }
 .bus-flow-page .coupon-featured-offer.is-selected::before,
 .bus-flow-page .coupon-featured-offer.is-selected::after,
 .bus-flow-page .coupon-voucher-card.is-selected::before,
 .bus-flow-page .coupon-voucher-card.is-selected::after {
-  border-color: #009b8f !important;
+  border-color: #dc1e26 !important;
 }
 
 /* Voucher Top Section (Discount & Code info) */
@@ -5349,7 +5349,7 @@
 }
 
 .bus-flow-page .voucher-apply-btn {
-  background: #009b8f !important;
+  background: #dc1e26 !important;
   color: #ffffff !important;
   font-size: 0.72rem !important;
   font-weight: 700 !important;

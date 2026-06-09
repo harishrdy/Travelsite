@@ -609,7 +609,7 @@ export default function AdminFlightCancellationRequestListPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [setCancellationRequests]);
 
   useEffect(() => {
     loadCancellationRequests(filters);

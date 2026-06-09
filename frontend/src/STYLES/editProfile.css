@@ -7,9 +7,9 @@
   --surface-border: #d2ddf1;
   --text: #11213f;
   --text-soft: #56678a;
-  --primary: var(--theme-primary, #009b8f);
-  --primary-strong: var(--theme-primary-strong, #006f7a);
-  --accent: var(--theme-primary-strong, #006f7a);
+  --primary: var(--theme-primary, #dc1e26);
+  --primary-strong: var(--theme-primary-strong, #b8141b);
+  --accent: var(--theme-primary-strong, #b8141b);
   --success: #1d7c51;
   --danger: #b42318;
   --shadow-lg: 0 18px 38px rgba(8, 18, 44, 0.18);

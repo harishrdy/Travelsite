@@ -7,6 +7,7 @@ import {
   writeBusBookingFlowState,
 } from "./busBookingFlowStore";
 import { getBusPricingPreview, getBusSeatMap } from "../../services/busBookingService";
+import { getAuthToken, isTokenExpired } from "../../services/authSession";
 
 const BOARDING_LABELS = [
   "Main Circle",
@@ -1127,6 +1128,14 @@ export default function BusSeatSelectionPage({
     };
 
     writeBusBookingFlowState(flowData);
+    const token = getAuthToken();
+    if (!token || isTokenExpired(token)) {
+      navigate("/login", {
+        state: { returnTo: "/bus/passenger-details" },
+      });
+      return;
+    }
+
     navigate("/bus/passenger-details", { state: flowData });
   };
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens;
 using PickNBook.Api.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -40,12 +40,21 @@ namespace PickNBook.Api.Services
                 key,
                 SecurityAlgorithms.HmacSha256);
 
+            double expiryMinutes;
+            if (AuthRoles.IsAdminScope(resolvedRole))
+            {
+                expiryMinutes = Convert.ToDouble(_config["Jwt:AdminExpiryMinutes"] ?? "1440");
+            }
+            else
+            {
+                expiryMinutes = Convert.ToDouble(_config["Jwt:ExpiryMinutes"] ?? "60");
+            }
+
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(
-                    Convert.ToDouble(_config["Jwt:ExpiryMinutes"])),
+                expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
                 signingCredentials: creds
             );
 

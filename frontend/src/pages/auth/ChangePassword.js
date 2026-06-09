@@ -6,7 +6,7 @@ import "../../STYLES/DashboardSidebar.css";
 import { readApiMessage, requestAuth } from "../../services/authService";
 import { validatePasswordNoSpaces } from "../../utils/authValidation";
 import DashboardSidebar from "../../components/layout/DashboardSidebar";
-import brandLogo from "../../assets/images/brand/pick-n-book-logo.svg";
+import brandLogo from "../../assets/images/brand/pick-n-book-logo.png";
 
 function ChangePassword() {
   const navigate = useNavigate();

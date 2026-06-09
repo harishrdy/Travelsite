@@ -9,7 +9,7 @@
   --flight-muted: #5a7394;
   --flight-primary: #17242d;
   --flight-primary-strong: #17242d;
-  --flight-accent: #3656d4;
+  --flight-accent: #b8141b;
   --flight-accent-soft: #e9f1fc;
   --flight-success: #254f85;
   --flight-danger: #4a7cbe;
@@ -30,23 +30,23 @@
 
 /* Atlas flight checkout theme */
 .flight-flow-page {
-  --flight-bg: var(--theme-page, #eef7f4) !important;
+  --flight-bg: var(--theme-page, #F3F4F6) !important;
   --flight-surface: #ffffff !important;
-  --flight-surface-soft: #f7fbf8 !important;
-  --flight-border: #cfded8 !important;
+  --flight-surface-soft: #F9FAFB !important;
+  --flight-border: #E5E7EB !important;
   --flight-text: var(--theme-navy, #17242d) !important;
   --flight-muted: var(--theme-muted, #66757b) !important;
-  --flight-primary: var(--theme-primary, #009b8f) !important;
-  --flight-primary-strong: var(--theme-primary-strong, #006f7a) !important;
-  --flight-accent: var(--theme-blue, #3656d4) !important;
+  --flight-primary: var(--theme-primary, #dc1e26) !important;
+  --flight-primary-strong: var(--theme-primary-strong, #b8141b) !important;
+  --flight-accent: var(--theme-blue, #b8141b) !important;
   --flight-accent-soft: #eef1ff !important;
-  --flight-success: var(--theme-primary, #009b8f) !important;
-  --flight-danger: var(--theme-coral, #f36f5f) !important;
+  --flight-success: var(--theme-primary, #dc1e26) !important;
+  --flight-danger: var(--theme-coral, #dc1e26) !important;
   --flight-shadow-md: 0 18px 42px rgba(12, 46, 51, 0.12) !important;
   --flight-shadow-sm: 0 10px 24px rgba(12, 46, 51, 0.08) !important;
   background:
-    linear-gradient(135deg, rgba(0, 155, 143, 0.1) 0%, transparent 34%),
-    linear-gradient(225deg, rgba(54, 86, 212, 0.1) 0%, transparent 32%),
+    linear-gradient(135deg, rgba(220, 30, 38, 0.1) 0%, transparent 34%),
+    linear-gradient(225deg, rgba(220, 30, 38, 0.05) 0%, transparent 32%),
     var(--flight-bg) !important;
 }
 
@@ -57,7 +57,7 @@
 .flight-passenger-card,
 .flight-payment-card,
 .flight-fare-card {
-  border-color: #cfded8 !important;
+  border-color: #E5E7EB !important;
   background: rgba(255, 255, 255, 0.92) !important;
   box-shadow: 0 14px 32px rgba(12, 46, 51, 0.1) !important;
 }
@@ -67,17 +67,17 @@
 .flight-pay-btn,
 .flight-action-primary,
 .flight-method-card.active {
-  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  background: var(--theme-gradient-action, linear-gradient(135deg, #dc1e26, #b8141b)) !important;
   color: #ffffff !important;
   border-color: transparent !important;
-  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.22) !important;
+  box-shadow: 0 14px 30px rgba(184, 20, 27, 0.22) !important;
 }
 
 .flight-flow-page input:focus,
 .flight-flow-page select:focus,
 .flight-flow-page textarea:focus {
-  border-color: var(--theme-primary, #009b8f) !important;
-  box-shadow: 0 0 0 3px rgba(0, 155, 143, 0.12) !important;
+  border-color: var(--theme-primary, #dc1e26) !important;
+  box-shadow: 0 0 0 3px rgba(220, 30, 38, 0.12) !important;
 }
 
 .flight-flow-page *,
@@ -283,7 +283,7 @@
 }
 
 .flight-seat-legend span.extra::before {
-  border-color: #3656d4;
+  border-color: #b8141b;
   background: #f4f8fd;
 }
 
@@ -359,7 +359,7 @@
 }
 
 .flight-seat.status-extra {
-  border-color: #3656d4;
+  border-color: #b8141b;
   background: #f4f8fd;
   color: #154e99;
 }
@@ -736,21 +736,21 @@
 
 /* Final atlas flight checkout sweep */
 .flight-flow-page {
-  --flight-bg: var(--theme-page, #eef7f4) !important;
+  --flight-bg: var(--theme-page, #F3F4F6) !important;
   --flight-surface: #ffffff !important;
-  --flight-surface-soft: #f7fbf8 !important;
-  --flight-border: #cfded8 !important;
+  --flight-surface-soft: #F9FAFB !important;
+  --flight-border: #E5E7EB !important;
   --flight-text: var(--theme-navy, #17242d) !important;
   --flight-muted: var(--theme-muted, #66757b) !important;
-  --flight-primary: var(--theme-primary, #009b8f) !important;
-  --flight-primary-strong: var(--theme-primary-strong, #006f7a) !important;
-  --flight-accent: var(--theme-blue, #3656d4) !important;
+  --flight-primary: var(--theme-primary, #dc1e26) !important;
+  --flight-primary-strong: var(--theme-primary-strong, #b8141b) !important;
+  --flight-accent: var(--theme-blue, #b8141b) !important;
   --flight-accent-soft: #eef1ff !important;
-  --flight-success: var(--theme-primary, #009b8f) !important;
-  --flight-danger: var(--theme-coral, #f36f5f) !important;
+  --flight-success: var(--theme-primary, #dc1e26) !important;
+  --flight-danger: var(--theme-coral, #dc1e26) !important;
   background:
-    linear-gradient(135deg, rgba(0, 155, 143, 0.1) 0%, transparent 34%),
-    linear-gradient(225deg, rgba(54, 86, 212, 0.1) 0%, transparent 32%),
+    linear-gradient(135deg, rgba(220, 30, 38, 0.1) 0%, transparent 34%),
+    linear-gradient(225deg, rgba(220, 30, 38, 0.05) 0%, transparent 32%),
     var(--flight-bg) !important;
 }
 
@@ -761,7 +761,7 @@
 .flight-passenger-card,
 .flight-payment-card,
 .flight-fare-card {
-  border-color: #cfded8 !important;
+  border-color: #E5E7EB !important;
   background: rgba(255, 255, 255, 0.92) !important;
   box-shadow: 0 14px 32px rgba(12, 46, 51, 0.1) !important;
 }
@@ -772,15 +772,15 @@
 .flight-action-primary,
 .flight-payment-methods button.active,
 .flight-method-card.active {
-  background: var(--theme-gradient-action, linear-gradient(135deg, #009b8f, #3656d4)) !important;
+  background: var(--theme-gradient-action, linear-gradient(135deg, #dc1e26, #b8141b)) !important;
   color: #ffffff !important;
   border-color: transparent !important;
-  box-shadow: 0 14px 30px rgba(0, 111, 122, 0.22) !important;
+  box-shadow: 0 14px 30px rgba(184, 20, 27, 0.22) !important;
 }
 
 .flight-flow-page input:focus,
 .flight-flow-page select:focus,
 .flight-flow-page textarea:focus {
-  border-color: var(--theme-primary, #009b8f) !important;
-  box-shadow: 0 0 0 3px rgba(0, 155, 143, 0.12) !important;
+  border-color: var(--theme-primary, #dc1e26) !important;
+  box-shadow: 0 0 0 3px rgba(220, 30, 38, 0.12) !important;
 }

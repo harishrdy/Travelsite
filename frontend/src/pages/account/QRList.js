@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import QRTable from "../../components/tables/QrTable";
-import AddQR from "../../components/forms/AddQR";
 import {
-  createBankUpiDetail,
   deleteBankUpiDetail,
   fetchBankUpiQrBlob,
   listBankUpiDetails,
@@ -29,7 +27,6 @@ function buildGeneratedQr(upiId) {
 
 const QRList = () => {
   const [data, setData] = useState([]);
-  const [showAddPage, setShowAddPage] = useState(false);
   const [selectedQR, setSelectedQR] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -108,35 +105,6 @@ const QRList = () => {
 
   useEffect(() => () => clearBlobUrls(), [clearBlobUrls]);
 
-  const handleAddQR = async (newQR) => {
-    setBusyId("create");
-
-    try {
-      const created = await createBankUpiDetail({
-        bankName: String(newQR.bankName || "").trim(),
-        accountHolderName: String(newQR.accountName || "").trim(),
-        upiId: String(newQR.upiId || "").trim(),
-        mobile: String(newQR.mobile || "").trim(),
-      });
-
-      if (newQR.file) {
-        await uploadBankUpiQr(created.id, newQR.file);
-      }
-
-      await loadQrRecords();
-      setShowAddPage(false);
-      setFeedback({ type: "success", message: "QR detail added successfully." });
-    } catch (error) {
-      setFeedback({
-        type: "error",
-        message: formatApiError(error, "Unable to add QR detail."),
-      });
-      throw error;
-    } finally {
-      setBusyId(null);
-    }
-  };
-
   const handleUpdate = async (updatedRow) => {
     setBusyId(updatedRow.id);
 
@@ -199,15 +167,6 @@ const QRList = () => {
     <div className="qr-container">
       <div className="flex-header">
         <h2 className="title-main">QR List</h2>
-        {!showAddPage && (
-          <button
-            onClick={() => setShowAddPage(true)}
-            className="btn-add"
-            disabled={busyId !== null}
-          >
-            + Add QR
-          </button>
-        )}
       </div>
 
       {feedback.message && (
@@ -219,26 +178,18 @@ const QRList = () => {
         </div>
       )}
 
-      {showAddPage ? (
-        <AddQR
-          onAdd={handleAddQR}
-          onBack={() => setShowAddPage(false)}
-          isBusy={busyId === "create"}
-        />
-      ) : (
-        <QRTable
-          data={data}
-          onQRClick={(qr) => setSelectedQR(qr)}
-          editingId={editingId}
-          setEditingId={setEditingId}
-          onUpdate={handleUpdate}
-          onDelete={handleDelete}
-          isLoading={isLoading}
-          busyId={busyId}
-        />
-      )}
+      <QRTable
+        data={data}
+        onQRClick={(qr) => setSelectedQR(qr)}
+        editingId={editingId}
+        setEditingId={setEditingId}
+        onUpdate={handleUpdate}
+        onDelete={handleDelete}
+        isLoading={isLoading}
+        busyId={busyId}
+      />
 
-      {!showAddPage && !isLoading && (
+      {!isLoading && (
         <div className="qr-footer-actions">
           <button
             type="button"

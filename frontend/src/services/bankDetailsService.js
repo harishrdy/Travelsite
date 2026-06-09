@@ -1,5 +1,5 @@
 const FALLBACK_API_BASE_URL =
-  "http://3.111.182.53:8080";
+  "https://undogmatically-knotlike-evita.ngrok-free.dev";
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "0.0.0.0"]);
 
 const BANK_DETAILS_ROOT = "/api/BankDetails";
@@ -181,7 +181,7 @@ async function requestJson(urlOrPath, options = {}) {
   }
 
   if (shouldUseNgrokBypass(urlOrPath)) {
-    headers["x-skip-browser-warning"] = "true";
+    headers["ngrok-skip-browser-warning"] = "true";
   }
 
   const response = await fetch(toAbsoluteUrl(urlOrPath), {
@@ -210,7 +210,7 @@ async function requestBlob(urlOrPath, options = {}) {
   };
 
   if (shouldUseNgrokBypass(urlOrPath)) {
-    headers["x-skip-browser-warning"] = "true";
+    headers["ngrok-skip-browser-warning"] = "true";
   }
 
   const response = await fetch(toAbsoluteUrl(urlOrPath), {

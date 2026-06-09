@@ -707,16 +707,6 @@ export default function FlightSearchResults() {
       value: cabinClass,
     },
   ];
-  const openDatePicker = (event) => {
-    try {
-      if (typeof event.currentTarget.showPicker === "function") {
-        event.currentTarget.showPicker();
-      }
-    } catch {
-      // Ignore browser picker access failures.
-    }
-  };
-
   const toggleModifySearch = () => {
     setModifyForm({
       source: sourceName,

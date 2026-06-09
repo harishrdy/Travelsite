@@ -4,17 +4,18 @@ import {
   BusFront,
   Building2,
   ChevronDown,
-  CircleUserRound,
   LayoutDashboard,
-  LogIn,
   LogOut,
   PlaneTakeoff,
   Ticket,
   User,
+  Menu,
+  X,
 } from "lucide-react";
 import '../../STYLES/Topbar.css';
 import { clearAuthSession } from "../../services/authSession";
-import pickNBookLogo from "../../assets/images/brand/pick-n-book-logo.svg";
+import pickNBookLogo from "../../assets/images/brand/pick-n-book-logo.png";
+import { openAuthModal } from "../../utils/authModalEvents";
 
 function decodeJwtPayload(token) {
   if (!token || typeof token !== "string") {
@@ -96,6 +97,9 @@ function getAuthProfile() {
 export default function Topbar() {
   const [open, setOpen] = useState(false);
   const [authProfile, setAuthProfile] = useState(() => getAuthProfile());
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -114,6 +118,7 @@ export default function Topbar() {
   useEffect(() => {
     syncAuthState();
     setOpen(false);
+    setMobileMenuOpen(false);
   }, [location.pathname, location.search]);
 
   useEffect(() => {
@@ -134,119 +139,257 @@ export default function Topbar() {
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
+  // Listen to scroll events on the #root container
+  useEffect(() => {
+    const rootEl = document.getElementById("root");
+    if (!rootEl) return;
+
+    const handleScroll = () => {
+      if (rootEl.scrollTop > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    handleScroll(); // initial check
+    rootEl.addEventListener("scroll", handleScroll);
+    return () => rootEl.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const handleLogout = () => {
     clearAuthSession();
     setAuthProfile({ isLoggedIn: false, displayName: "User", email: "" });
     setOpen(false);
-    navigate("/login");
+    navigate("/");
   };
 
-  const handleLogin = () => {
-    setOpen(false);
-    navigate("/login");
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    navigate("/");
+    window.setTimeout(() => {
+      const rootEl = document.getElementById("root");
+      if (rootEl) {
+        rootEl.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }, 50);
+  };
+
+  const handleNavClick = (tab, e) => {
+    e.preventDefault();
+    navigate(`/?tab=${tab}`);
+    window.setTimeout(() => {
+      const rootEl = document.getElementById("root");
+      if (rootEl) {
+        rootEl.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }, 50);
+  };
+
+  const handleMobileNavClick = (tab, e) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+    navigate(`/?tab=${tab}`);
+    window.setTimeout(() => {
+      const rootEl = document.getElementById("root");
+      if (rootEl) {
+        rootEl.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }, 50);
   };
 
   return (
-    <header className="topbar">
-      <button type="button" className="brand" onClick={() => navigate("/?tab=flights")}>
-        <img className="brand-logo" src={pickNBookLogo} alt="Pick N Book" />
-      </button>
-
-      <div className="right-section">
-        <div className="menu">
-          <Link
-            to="/?tab=flights"
-            className={`menu-item ${isHome && currentHomeTab === "flights" ? "active" : ""}`}
+    <>
+      <header className="topbar">
+        {/* Left Side: Logo & Main Nav Menu */}
+        <div className="left-group">
+          {/* Hamburger Menu Toggle Button */}
+          <button 
+            type="button" 
+            className="hamburger-btn" 
+            onClick={() => setMobileMenuOpen(true)}
+            aria-label="Open navigation menu"
           >
-            <PlaneTakeoff size={16} />
-            <span>Flights</span>
-          </Link>
-          <Link
-            to="/?tab=buses"
-            className={`menu-item ${isHome && currentHomeTab === "buses" ? "active" : ""}`}
-          >
-            <BusFront size={16} />
-            <span>Buses</span>
-          </Link>
-          <Link
-            to="/?tab=hotels"
-            className={`menu-item ${isHome && currentHomeTab === "hotels" ? "active" : ""}`}
-          >
-            <Building2 size={16} />
-            <span>Hotels</span>
-          </Link>
-          <NavLink
-            to="/web-checkin"
-            className={({ isActive }) => `menu-item ${isActive ? "active" : ""}`}
-          >
-            <Ticket size={16} />
-            <span>Web Check-in</span>
-          </NavLink>
-          <NavLink
-            to="/fetch-ticket"
-            className={({ isActive }) => `menu-item ${isActive ? "active" : ""}`}
-          >
-            <Ticket size={16} />
-            <span>Print Ticket</span>
-          </NavLink>
-        </div>
-
-        <div className="user-section" ref={dropdownRef}>
-          <button
-            type="button"
-            className={`user-name ${authProfile.isLoggedIn ? "authenticated" : "guest"}`}
-            onClick={() => setOpen((previous) => !previous)}
-            aria-haspopup="menu"
-            aria-expanded={open}
-            aria-label={authProfile.isLoggedIn ? `${authProfile.displayName} menu` : "Account menu"}
-          >
-            {!authProfile.isLoggedIn && <CircleUserRound size={18} />}
-            {authProfile.isLoggedIn && (
-              <span className="user-trigger-name">{authProfile.displayName}</span>
-            )}
-            <ChevronDown size={16} className={`dropdown-caret ${open ? "open" : ""}`} />
+            <Menu size={22} />
           </button>
 
-          {open && (
-            <div className="dropdown" role="menu">
-              {!authProfile.isLoggedIn && (
-                <button type="button" className="dropdown-item" onClick={handleLogin}>
-                  <LogIn size={15} />
-                  Login
-                </button>
-              )}
+          {/* Application Logo */}
+          <button type="button" className="brand" onClick={handleLogoClick}>
+            <img className="brand-logo" src={pickNBookLogo} alt="Pick N Book" />
+          </button>
 
-              {authProfile.isLoggedIn && !isDashboard && (
-                <>
-                  <Link to="/dashboard" className="dropdown-item" onClick={() => setOpen(false)}>
-                    <LayoutDashboard size={15} />
-                    Dashboard
-                  </Link>
+          {/* Navigation Links next to Logo (scrolling-dependent on Home) */}
+          <div className={`nav-menu-links ${isHome ? (scrolled ? "visible" : "hidden") : "visible"}`}>
+            <button
+              type="button"
+              className={`menu-item ${isHome && currentHomeTab === "flights" ? "active" : ""}`}
+              onClick={(e) => handleNavClick("flights", e)}
+            >
+              <PlaneTakeoff size={16} />
+              <span>Flights</span>
+            </button>
+            <button
+              type="button"
+              className={`menu-item ${isHome && currentHomeTab === "buses" ? "active" : ""}`}
+              onClick={(e) => handleNavClick("buses", e)}
+            >
+              <BusFront size={16} />
+              <span>Buses</span>
+            </button>
+            <button
+              type="button"
+              className={`menu-item ${isHome && currentHomeTab === "hotels" ? "active" : ""}`}
+              onClick={(e) => handleNavClick("hotels", e)}
+            >
+              <Building2 size={16} />
+              <span>Hotels</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Right Side: Utility Pages & Account Authentication */}
+        <div className="right-section">
+          {/* Desktop Secondary Utility Links */}
+          <div className="utility-links">
+            <NavLink
+              to="/web-checkin"
+              className={({ isActive }) => `menu-item ${isActive ? "active" : ""}`}
+            >
+              <Ticket size={16} />
+              <span>Web Check-in</span>
+            </NavLink>
+            <NavLink
+              to="/fetch-ticket"
+              className={({ isActive }) => `menu-item ${isActive ? "active" : ""}`}
+            >
+              <Ticket size={16} />
+              <span>Print Ticket</span>
+            </NavLink>
+          </div>
+
+          {/* Authentication State section */}
+          {authProfile.isLoggedIn ? (
+            /* Logged In User Dropdown */
+            <div className="user-section" ref={dropdownRef}>
+              <button
+                type="button"
+                className="user-name authenticated"
+                onClick={() => setOpen((previous) => !previous)}
+                aria-haspopup="menu"
+                aria-expanded={open}
+                aria-label={`${authProfile.displayName} menu`}
+              >
+                <span className="user-trigger-name">{authProfile.displayName}</span>
+                <ChevronDown size={16} className={`dropdown-caret ${open ? "open" : ""}`} />
+              </button>
+
+              {open && (
+                <div className="dropdown" role="menu">
+                  {!isDashboard && (
+                    <Link to="/dashboard" className="dropdown-item" onClick={() => setOpen(false)}>
+                      <LayoutDashboard size={15} />
+                      Dashboard
+                    </Link>
+                  )}
+
+                  {isDashboard && (
+                    <Link to="/dashboard/my-account" className="dropdown-item" onClick={() => setOpen(false)}>
+                      <User size={15} />
+                      My Account
+                    </Link>
+                  )}
 
                   <button type="button" className="dropdown-item logout" onClick={handleLogout}>
                     <LogOut size={15} />
                     Logout
                   </button>
-                </>
-              )}
-
-              {authProfile.isLoggedIn && isDashboard && (
-                <>
-                  <Link to="/dashboard/my-account" className="dropdown-item" onClick={() => setOpen(false)}>
-                    <User size={15} />
-                    My Account
-                  </Link>
-
-                  <button type="button" className="dropdown-item logout" onClick={handleLogout}>
-                    <LogOut size={15} />
-                    Logout
-                  </button>
-                </>
+                </div>
               )}
             </div>
+          ) : (
+            <button
+              type="button"
+              className="menu-item"
+              onClick={() => openAuthModal("login")}
+            >
+              <User size={16} />
+              <span>Login/Signup</span>
+            </button>
           )}
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Mobile navigation side drawer overlay */}
+      {mobileMenuOpen && (
+        <div className="mobile-drawer-overlay" onClick={() => setMobileMenuOpen(false)}>
+          <div className="mobile-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="drawer-header">
+              <button
+                type="button"
+                className="brand"
+                onClick={(e) => {
+                  setMobileMenuOpen(false);
+                  handleLogoClick(e);
+                }}
+                style={{ background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
+              >
+                <img className="brand-logo" src={pickNBookLogo} alt="Pick N Book" />
+              </button>
+              <button 
+                type="button" 
+                className="drawer-close-btn" 
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close menu"
+              >
+                <X size={22} />
+              </button>
+            </div>
+            <div className="drawer-body">
+              <button 
+                type="button" 
+                className={`drawer-item ${isHome && currentHomeTab === "flights" ? "active" : ""}`}
+                onClick={(e) => handleMobileNavClick("flights", e)}
+              >
+                <PlaneTakeoff size={18} />
+                <span>Flights</span>
+              </button>
+              <button 
+                type="button" 
+                className={`drawer-item ${isHome && currentHomeTab === "buses" ? "active" : ""}`}
+                onClick={(e) => handleMobileNavClick("buses", e)}
+              >
+                <BusFront size={18} />
+                <span>Buses</span>
+              </button>
+              <button 
+                type="button" 
+                className={`drawer-item ${isHome && currentHomeTab === "hotels" ? "active" : ""}`}
+                onClick={(e) => handleMobileNavClick("hotels", e)}
+              >
+                <Building2 size={18} />
+                <span>Hotels</span>
+              </button>
+              <NavLink 
+                to="/web-checkin" 
+                className={({ isActive }) => `drawer-item ${isActive ? "active" : ""}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Ticket size={18} />
+                <span>Web Check-in</span>
+              </NavLink>
+              <NavLink 
+                to="/fetch-ticket" 
+                className={({ isActive }) => `drawer-item ${isActive ? "active" : ""}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Ticket size={18} />
+                <span>Print Ticket</span>
+              </NavLink>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
+
