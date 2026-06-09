@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { clearAuthSession } from './services/authSession';
+import { openAuthModal } from './utils/authModalEvents';
 
 // Global Fetch Interceptor to handle session completion/expiration (401 Unauthorized)
 const originalFetch = window.fetch;
@@ -15,11 +16,18 @@ window.fetch = async function (...args) {
       if (typeof window !== "undefined") {
         const currentPath = window.location.pathname.toLowerCase();
         const isAdmin = currentPath.startsWith("/admin");
-        const loginPath = isAdmin ? "/admin/login" : "/login";
-        
-        // Prevent redirect loop if the user is already on the login page
-        if (currentPath !== loginPath) {
-          window.location.href = loginPath;
+
+        if (isAdmin) {
+          const loginPath = "/admin/login";
+          if (currentPath !== loginPath) {
+            window.location.href = loginPath;
+          }
+        } else {
+          if (currentPath !== "/") {
+            window.history.replaceState(null, "", "/");
+            window.dispatchEvent(new PopStateEvent("popstate"));
+          }
+          openAuthModal("login");
         }
       }
     }
@@ -38,4 +46,3 @@ root.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
-
