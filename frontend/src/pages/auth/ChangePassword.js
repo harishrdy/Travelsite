@@ -7,6 +7,7 @@ import { readApiMessage, requestAuth } from "../../services/authService";
 import { validatePasswordNoSpaces } from "../../utils/authValidation";
 import DashboardSidebar from "../../components/layout/DashboardSidebar";
 import brandLogo from "../../assets/images/brand/pick-n-book-logo.png";
+import { openAuthModal } from "../../utils/authModalEvents";
 
 function ChangePassword() {
   const navigate = useNavigate();
@@ -21,6 +22,11 @@ function ChangePassword() {
   const [statusMessage, setStatusMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const openLoginPopup = () => {
+    openAuthModal("login");
+    navigate("/", { replace: true });
+  };
 
   useEffect(() => {
     oldPasswordInputRef.current?.focus();
@@ -72,7 +78,7 @@ function ChangePassword() {
       setErrors({});
       setIsSuccess(false);
       setStatusMessage("Session expired. Please login again.");
-      setTimeout(() => navigate("/login"), 1200);
+      setTimeout(openLoginPopup, 1200);
       return;
     }
 
@@ -100,14 +106,14 @@ function ChangePassword() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setTimeout(() => navigate("/login"), 1200);
+      setTimeout(openLoginPopup, 1200);
     } catch (error) {
       const message = error?.message || "Something went wrong. Please try again.";
       setIsSuccess(false);
       setStatusMessage(message);
 
       if (/session expired|unauthorized|invalid token|login again/i.test(message)) {
-        setTimeout(() => navigate("/login"), 1200);
+        setTimeout(openLoginPopup, 1200);
       }
     }
 
@@ -260,7 +266,7 @@ function ChangePassword() {
                   <button
                     type="button"
                     className="cp-btn cp-btn-secondary"
-                    onClick={() => navigate("/login")}
+                    onClick={openLoginPopup}
                   >
                     Back to Sign In
                   </button>
