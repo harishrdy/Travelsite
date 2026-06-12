@@ -4,26 +4,16 @@ import {
   Building2,
   Coffee,
   IndianRupee,
-  Loader2,
-  Mail,
   MapPin,
-  Phone,
   Search,
   ShieldCheck,
   Star,
-  User,
   Wifi,
-  X,
 } from "lucide-react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { toDisplayDate } from "../../utils/apiDateFormat";
-import { isTokenExpired } from "../../services/authSession";
-import {
-  bookHotelOffer,
-  getHotelOfferDetails,
-  searchHotelOffers,
-} from "../../services/hotelBookingService";
-import { openAuthModal } from "../../utils/authModalEvents";
+import { searchHotels, getOfferDetails } from "../../services/hotelBookingService";
+import { writeHotelBookingFlowState } from "./hotelBookingFlowStore";
 import "../../STYLES/HotelSearchResults.css";
 
 const HOTEL_PROMO_ITEMS = [
@@ -33,20 +23,7 @@ const HOTEL_PROMO_ITEMS = [
   { id: "rooms", icon: BedDouble, title: "Room Choices", text: "Compare comfort levels" },
 ];
 
-const CITY_CODES = {
-  ahmedabad: "AMD",
-  bangalore: "BLR",
-  bengaluru: "BLR",
-  chennai: "MAA",
-  delhi: "DEL",
-  goa: "GOI",
-  hyderabad: "HYD",
-  kolkata: "CCU",
-  london: "LON",
-  mumbai: "BOM",
-  paris: "PAR",
-  pune: "PNQ",
-};
+// Dynamic hotel offerings integrated from Amadeus API
 
 function readValue(params, state, key, fallback = "") {
   const queryValue = params.get(key);
@@ -61,95 +38,12 @@ function readValue(params, state, key, fallback = "") {
     : fallback;
 }
 
-function toDateInput(date) {
-  return date.toISOString().slice(0, 10);
-}
-
-function addDays(date, days) {
-  const next = new Date(date);
-  next.setDate(next.getDate() + days);
-  return next;
-}
-
-function resolveCityCode(destination) {
-  const clean = String(destination || "").trim();
-  if (/^[a-z]{3}$/i.test(clean)) {
-    return clean.toUpperCase();
-  }
-
-  const normalized = clean.toLowerCase();
-  return CITY_CODES[normalized] || clean.slice(0, 3).toUpperCase() || "DEL";
-}
-
-function formatMoney(value, currency = "INR") {
+function formatCurrency(value) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: currency || "INR",
+    currency: "INR",
     maximumFractionDigits: 0,
   }).format(Number(value) || 0);
-}
-
-function parseStoredUser() {
-  try {
-    return JSON.parse(window.localStorage.getItem("user") || "{}") || {};
-  } catch {
-    return {};
-  }
-}
-
-function formatHotelDate(value) {
-  const raw = String(value || "").slice(0, 10);
-  return toDisplayDate(raw) || raw || "--";
-}
-
-function calcNights(checkInDate, checkOutDate) {
-  const start = new Date(checkInDate);
-  const end = new Date(checkOutDate);
-  const diff = end.getTime() - start.getTime();
-  return Math.max(1, Math.round(diff / 86400000) || 1);
-}
-
-function normalizeOffer(offer, hotel, index) {
-  const hotelName = offer.hotelName || offer.HotelName || hotel.name || hotel.Name || "Hotel stay";
-  const cityCode = offer.cityCode || offer.CityCode || hotel.cityCode || hotel.CityCode || "";
-  const address = offer.address || offer.Address || hotel.address || hotel.Address || cityCode;
-  const roomCategory = offer.roomCategory || offer.RoomCategory || "Room";
-  const bedType = offer.bedType || offer.BedType || "";
-  const paymentType = offer.paymentType || offer.PaymentType || "";
-
-  return {
-    offerId: String(offer.offerId || offer.OfferId || `${hotelName}-${index}`),
-    hotelId: offer.hotelId || offer.HotelId || hotel.hotelId || hotel.HotelId || "",
-    hotelName,
-    cityCode,
-    address,
-    checkInDate: offer.checkInDate || offer.CheckInDate || "",
-    checkOutDate: offer.checkOutDate || offer.CheckOutDate || "",
-    roomQuantity: offer.roomQuantity || offer.RoomQuantity || 1,
-    roomCategory,
-    bedType,
-    beds: offer.beds || offer.Beds || 1,
-    roomDescription: offer.roomDescription || offer.RoomDescription || roomCategory,
-    price: Number(offer.price ?? offer.Price ?? 0),
-    currency: offer.currency || offer.Currency || "INR",
-    cancellationDeadline: offer.cancellationDeadline || offer.CancellationDeadline || "",
-    cancellationPolicy: offer.cancellationPolicy || offer.CancellationPolicy || "Check policy before booking.",
-    checkInTime: offer.checkInTime || offer.CheckInTime || "",
-    checkOutTime: offer.checkOutTime || offer.CheckOutTime || "",
-    paymentType,
-    tag: paymentType ? paymentType.replace(/_/g, " ") : "Verified offer",
-    rating: (4.2 + (index % 6) / 10).toFixed(1),
-    amenities: [roomCategory, bedType, paymentType].filter(Boolean).slice(0, 3),
-  };
-}
-
-function flattenHotelOffers(hotels) {
-  return hotels.flatMap((hotel, hotelIndex) => {
-    const offers = Array.isArray(hotel.offers || hotel.Offers) ? (hotel.offers || hotel.Offers) : [];
-    return offers.map((offer, offerIndex) =>
-      normalizeOffer(offer, hotel, hotelIndex * 20 + offerIndex)
-    );
-  });
 }
 
 export default function HotelSearchResults() {
@@ -157,172 +51,125 @@ export default function HotelSearchResults() {
   const location = useLocation();
   const navigate = useNavigate();
   const state = location.state || {};
-  const today = useMemo(() => new Date(), []);
 
-  const destination = readValue(searchParams, state, "destination", "Delhi");
-  const cityCode = readValue(searchParams, state, "cityCode", resolveCityCode(destination));
-  const checkInDate = readValue(searchParams, state, "checkInDate", toDateInput(addDays(today, 1)));
-  const checkOutDate = readValue(searchParams, state, "checkOutDate", toDateInput(addDays(today, 2)));
+  const destination = readValue(searchParams, state, "destination", "Hyderabad");
+  const checkInDate = readValue(searchParams, state, "checkInDate", "");
+  const checkOutDate = readValue(searchParams, state, "checkOutDate", "");
   const rooms = readValue(searchParams, state, "rooms", "1");
-  const adults = readValue(searchParams, state, "adults", "1");
+  const adults = readValue(searchParams, state, "adults", "2");
   const guests = readValue(
     searchParams,
     state,
     "guests",
-    `${rooms} Room${Number(rooms) > 1 ? "s" : ""}, ${adults} Adult${Number(adults) > 1 ? "s" : ""}`
+    `${rooms} Room${Number(rooms) > 1 ? "s" : ""}, ${adults} Adult${Number(adults) > 1 ? "s" : ""}`,
   );
 
   const [sortKey, setSortKey] = useState("recommended");
-  const [offers, setOffers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
-  const [selectedOffer, setSelectedOffer] = useState(null);
-  const [offerLoadingId, setOfferLoadingId] = useState("");
-  const [bookingLoading, setBookingLoading] = useState(false);
-  const [bookingStatus, setBookingStatus] = useState({ type: "", message: "" });
-  const [bookingErrors, setBookingErrors] = useState({});
-  const [guestForm, setGuestForm] = useState({
-    guestName: "",
-    guestEmail: "",
-    guestPhone: "",
-  });
+  const [apiHotels, setApiHotels] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [expandedHotelId, setExpandedHotelId] = useState(null);
 
   useEffect(() => {
-    let isMounted = true;
-
-    async function loadHotels() {
+    let isCurrent = true;
+    async function fetchHotelResults() {
       setLoading(true);
-      setLoadError("");
-
+      setError("");
       try {
-        const hotels = await searchHotelOffers({
-          cityCode: resolveCityCode(cityCode || destination),
+        const data = await searchHotels({
+          city: destination,
           checkInDate,
           checkOutDate,
-          adults,
-          rooms,
+          adults: Number(adults) || 2,
+          rooms: Number(rooms) || 1
         });
-
-        if (isMounted) {
-          setOffers(flattenHotelOffers(hotels));
+        if (isCurrent) {
+          setApiHotels(data || []);
         }
-      } catch (error) {
-        if (isMounted) {
-          setOffers([]);
-          setLoadError(error?.message || "Unable to load hotel offers.");
+      } catch (err) {
+        if (isCurrent) {
+          setError(err.message || "Failed to search hotels. Please try again.");
         }
       } finally {
-        if (isMounted) {
+        if (isCurrent) {
           setLoading(false);
         }
       }
     }
 
-    loadHotels();
+    fetchHotelResults();
+
     return () => {
-      isMounted = false;
+      isCurrent = false;
     };
-  }, [adults, checkInDate, checkOutDate, cityCode, destination, rooms]);
+  }, [destination, checkInDate, checkOutDate, adults, rooms]);
 
-  const sortedOffers = useMemo(() => {
-    return [...offers].sort((a, b) => {
+  const hotels = useMemo(() => {
+    return [...apiHotels].map((h) => {
+      const firstOffer = h.offers?.[0] || {};
+      const basePrice = Number(firstOffer.price || 0);
+      const hotelName = h.name || "Hotel stay";
+      return {
+        id: h.hotelId || `hotel-${String(hotelName).toLowerCase().replace(/\s+/g, "-")}`,
+        hotelId: h.hotelId,
+        name: hotelName,
+        city: h.cityCode || destination,
+        area: h.address ? h.address.split(",")[0] : "City Centre",
+        address: h.address,
+        rating: h.rating || 4.5,
+        tag: h.tag || (h.rating >= 4.7 ? "Premium stay" : h.rating >= 4.5 ? "City favorite" : "Value stay"),
+        price: basePrice,
+        oldPrice: Math.round(basePrice * 1.25),
+        amenities: h.amenities || ["Wi-Fi", "Breakfast"],
+        note: firstOffer.cancellationPolicy || "Flexible cancellation available on select rooms.",
+        offers: h.offers || []
+      };
+    }).sort((a, b) => {
       if (sortKey === "price") return a.price - b.price;
-      if (sortKey === "rating") return Number(b.rating) - Number(a.rating);
-      return Number(b.rating) * 100 - b.price / 100 - (Number(a.rating) * 100 - a.price / 100);
+      if (sortKey === "rating") return b.rating - a.rating;
+      return b.rating * 100 - b.price / 100 - (a.rating * 100 - a.price / 100);
     });
-  }, [offers, sortKey]);
+  }, [apiHotels, sortKey, destination]);
 
-  const openBookingReview = async (offer) => {
-    setOfferLoadingId(offer.offerId);
-    setBookingStatus({ type: "", message: "" });
-    setBookingErrors({});
-
+  const handleSelectOffer = async (hotel, offer) => {
+    setLoading(true);
+    setError("");
     try {
-      const details = await getHotelOfferDetails(offer.offerId);
-      const normalized = normalizeOffer(details, details, 0);
-      const storedUser = parseStoredUser();
-      setGuestForm({
-        guestName: storedUser.name || storedUser.fullName || "",
-        guestEmail: storedUser.email || "",
-        guestPhone: storedUser.mobile || storedUser.phoneNumber || "",
+      const offerDetails = await getOfferDetails(offer.offerId);
+      const selectedOffer = {
+        ...offer,
+        ...offerDetails,
+        checkInDate: offerDetails?.checkInDate || offer.checkInDate || checkInDate,
+        checkOutDate: offerDetails?.checkOutDate || offer.checkOutDate || checkOutDate,
+      };
+      
+      writeHotelBookingFlowState({
+        hotel: {
+          hotelId: hotel.hotelId,
+          name: hotel.name,
+          city: hotel.city,
+          area: hotel.area,
+          address: hotel.address,
+          rating: hotel.rating,
+          tag: hotel.tag,
+          amenities: hotel.amenities
+        },
+        offer: selectedOffer,
+        searchContext: {
+          destination,
+          checkInDate,
+          checkOutDate,
+          adults,
+          rooms,
+          guests
+        }
       });
-      setSelectedOffer({ ...offer, ...normalized });
-    } catch (error) {
-      setBookingStatus({
-        type: "error",
-        message: error?.message || "Selected hotel offer is no longer available.",
-      });
+      
+      navigate("/hotel/passenger-details");
+    } catch (err) {
+      setError(err.message || "Failed to fetch offer details. Please try again.");
     } finally {
-      setOfferLoadingId("");
-    }
-  };
-
-  const closeBookingReview = () => {
-    if (bookingLoading) return;
-    setSelectedOffer(null);
-    setBookingStatus({ type: "", message: "" });
-    setBookingErrors({});
-  };
-
-  const updateGuestForm = (field, value) => {
-    setGuestForm((previous) => ({ ...previous, [field]: value }));
-    setBookingErrors({});
-    setBookingStatus({ type: "", message: "" });
-  };
-
-  const submitHotelBooking = async (event) => {
-    event.preventDefault();
-    if (!selectedOffer || bookingLoading) return;
-
-    const errors = {};
-    const payload = {
-      offerId: selectedOffer.offerId,
-      guestName: guestForm.guestName.trim(),
-      guestEmail: guestForm.guestEmail.trim(),
-      guestPhone: guestForm.guestPhone.trim(),
-    };
-
-    if (!payload.guestName) errors.guestName = "Guest name is required";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.guestEmail)) {
-      errors.guestEmail = "Enter a valid email";
-    }
-    if (!/^\+?\d[\d\s-]{7,16}$/.test(payload.guestPhone)) {
-      errors.guestPhone = "Enter a valid phone number";
-    }
-
-    if (Object.keys(errors).length) {
-      setBookingErrors(errors);
-      return;
-    }
-
-    const token = window.localStorage.getItem("token");
-    if (!token || isTokenExpired(token)) {
-      openAuthModal("login", {
-        returnTo: `${location.pathname || "/search/hotels"}${location.search || ""}`,
-      });
-      setBookingStatus({
-        type: "error",
-        message: "Please login with email before confirming this hotel booking.",
-      });
-      return;
-    }
-
-    setBookingLoading(true);
-    setBookingStatus({ type: "", message: "" });
-
-    try {
-      const booking = await bookHotelOffer(payload);
-      setBookingStatus({
-        type: "success",
-        message: `Hotel booked successfully. Reference: ${booking.bookingReference || booking.BookingReference || "Confirmed"}`,
-      });
-    } catch (error) {
-      setBookingStatus({
-        type: "error",
-        message: error?.message || "Hotel booking failed.",
-      });
-    } finally {
-      setBookingLoading(false);
+      setLoading(false);
     }
   };
 
@@ -350,7 +197,7 @@ export default function HotelSearchResults() {
           <div className="hotel-search-card">
             <div className="hotel-route-part">
               <span>Destination</span>
-              <strong>{destination} ({resolveCityCode(cityCode || destination)})</strong>
+              <strong>{destination}</strong>
             </div>
             <div className="hotel-route-part">
               <span>Check-in</span>
@@ -378,7 +225,7 @@ export default function HotelSearchResults() {
           <aside className="hotel-filter-panel">
             <div className="hotel-filter-head">
               <span>Filters</span>
-              <strong>{sortedOffers.length} stays</strong>
+              <strong>{hotels.length} stays</strong>
             </div>
             <label>
               Sort by
@@ -390,7 +237,7 @@ export default function HotelSearchResults() {
             </label>
             <div className="hotel-filter-note">
               <ShieldCheck size={16} />
-              <span>Live hotel prices are rechecked before you enter guest details.</span>
+              <span>Hotel data is live and integrated directly from the Amadeus Travel API.</span>
             </div>
           </aside>
 
@@ -398,9 +245,7 @@ export default function HotelSearchResults() {
             <header className="hotel-list-head">
               <div>
                 <span>Hotel Results</span>
-                <h1>
-                  {loading ? "Searching stays" : `${sortedOffers.length} stays in ${destination}`}
-                </h1>
+                <h1>{loading ? "Searching" : hotels.length} stays in {destination}</h1>
               </div>
               <button type="button" onClick={() => navigate("/?tab=hotels")}>
                 <Search size={15} />
@@ -408,172 +253,193 @@ export default function HotelSearchResults() {
               </button>
             </header>
 
-            {bookingStatus.message && !selectedOffer && (
-              <p className={`hotel-inline-status ${bookingStatus.type === "success" ? "is-success" : "is-error"}`}>
-                {bookingStatus.message}
-              </p>
-            )}
-
-            {loading && (
-              <div className="hotel-state-card">
-                <Loader2 size={22} className="hotel-spin" />
-                <strong>Finding available hotel offers...</strong>
-              </div>
-            )}
-
-            {!loading && loadError && (
-              <div className="hotel-state-card is-error">
-                <strong>{loadError}</strong>
-                <span>Try changing the city code or stay dates.</span>
-              </div>
-            )}
-
-            {!loading && !loadError && sortedOffers.length === 0 && (
-              <div className="hotel-state-card">
-                <strong>No hotel offers found.</strong>
-                <span>Try another city code, check-in date, or room count.</span>
-              </div>
-            )}
-
             <div className="hotel-card-list">
-              {sortedOffers.map((hotel) => (
-                <article className="hotel-result-card" key={hotel.offerId}>
-                  <div className="hotel-result-art">
-                    <Building2 size={38} />
-                    <span>{hotel.tag}</span>
-                  </div>
-
-                  <div className="hotel-result-main">
-                    <div className="hotel-result-title-row">
-                      <div>
-                        <h2>{hotel.hotelName}</h2>
-                        <p>
-                          <MapPin size={14} />
-                          {hotel.address}
-                        </p>
+              {loading ? (
+                Array.from({ length: 3 }).map((_, idx) => (
+                  <article className="hotel-result-card skeleton-pulse" key={idx} style={{ opacity: 0.7 }}>
+                    <div className="hotel-result-art" style={{ background: "#e2e8f0" }}>
+                      <Building2 size={38} style={{ color: "#cbd5e1" }} />
+                    </div>
+                    <div className="hotel-result-main">
+                      <div className="hotel-result-title-row">
+                        <div style={{ width: "100%" }}>
+                          <div className="skeleton-title" style={{ background: "#cbd5e1", marginBottom: "8px" }}></div>
+                          <div className="skeleton-text" style={{ background: "#e2e8f0", width: "40%" }}></div>
+                        </div>
                       </div>
-                      <span className="hotel-rating">
-                        <Star size={14} fill="currentColor" />
-                        {hotel.rating}
-                      </span>
+                      <div className="hotel-amenities">
+                        <div className="skeleton-badge" style={{ background: "#e2e8f0" }}></div>
+                        <div className="skeleton-badge" style={{ background: "#e2e8f0" }}></div>
+                        <div className="skeleton-badge" style={{ background: "#e2e8f0" }}></div>
+                      </div>
+                      <div className="skeleton-text" style={{ background: "#e2e8f0", width: "80%", marginTop: "10px" }}></div>
                     </div>
+                    <aside className="hotel-price-panel" style={{ background: "#ffffff" }}>
+                      <div className="skeleton-text" style={{ background: "#e2e8f0", width: "50px" }}></div>
+                      <div className="skeleton-title" style={{ background: "#cbd5e1", width: "80px", height: "28px" }}></div>
+                      <div className="skeleton-badge" style={{ background: "#e2e8f0", width: "90px", height: "34px", marginTop: "10px" }}></div>
+                    </aside>
+                  </article>
+                ))
+              ) : error ? (
+                <div className="hotel-error-state" style={{ padding: "40px", textAlign: "center", width: "100%" }}>
+                  <p style={{ color: "#ef4444", marginBottom: "15px", fontWeight: "600" }}>{error}</p>
+                  <button 
+                    type="button" 
+                    className="hotel-modify-btn" 
+                    onClick={() => navigate("/?tab=hotels")}
+                    style={{ margin: "0 auto" }}
+                  >
+                    Try Another Search
+                  </button>
+                </div>
+              ) : hotels.length === 0 ? (
+                <div className="hotel-empty-state" style={{ padding: "40px", textAlign: "center", width: "100%" }}>
+                  <p style={{ color: "#64748b", marginBottom: "15px" }}>No hotels found for your selection.</p>
+                  <button 
+                    type="button" 
+                    className="hotel-modify-btn" 
+                    onClick={() => navigate("/?tab=hotels")}
+                    style={{ margin: "0 auto" }}
+                  >
+                    Modify Search
+                  </button>
+                </div>
+              ) : (
+                hotels.map((hotel) => (
+                  <div key={hotel.id} style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <article className="hotel-result-card">
+                      <div className="hotel-result-art">
+                        <Building2 size={38} />
+                        <span>{hotel.tag}</span>
+                      </div>
 
-                    <div className="hotel-amenities">
-                      {hotel.amenities.map((amenity) => (
-                        <span key={amenity}>{amenity}</span>
-                      ))}
-                    </div>
+                      <div className="hotel-result-main">
+                        <div className="hotel-result-title-row">
+                          <div>
+                            <h2>{hotel.name}</h2>
+                            <p>
+                              <MapPin size={14} />
+                              {hotel.area}, {hotel.city}
+                            </p>
+                          </div>
+                          <span className="hotel-rating">
+                            <Star size={14} fill="currentColor" />
+                            {hotel.rating}
+                          </span>
+                        </div>
 
-                    <p className="hotel-result-note">
-                      {hotel.roomDescription}. {hotel.cancellationPolicy}
-                    </p>
+                        <div className="hotel-amenities">
+                          {hotel.amenities.map((amenity) => (
+                            <span key={amenity}>{amenity}</span>
+                          ))}
+                        </div>
+
+                        <p className="hotel-result-note">{hotel.note}</p>
+                      </div>
+
+                      <aside className="hotel-price-panel">
+                        <span>per night</span>
+                        <strong>{formatCurrency(hotel.price)}</strong>
+                        <small>{formatCurrency(hotel.oldPrice)}</small>
+                        <button 
+                          type="button" 
+                          onClick={() => setExpandedHotelId(expandedHotelId === hotel.id ? null : hotel.id)}
+                          style={{
+                            background: expandedHotelId === hotel.id 
+                              ? "linear-gradient(135deg, #475569, #1e293b)" 
+                              : "linear-gradient(135deg, var(--hotel-primary), var(--hotel-cobalt))"
+                          }}
+                        >
+                          <IndianRupee size={15} />
+                          {expandedHotelId === hotel.id ? "Hide Rooms" : "Select Stay"}
+                        </button>
+                      </aside>
+                    </article>
+
+                    {expandedHotelId === hotel.id && (
+                      <div className="hotel-offers-expanded" style={{
+                        background: "rgba(255, 255, 255, 0.98)",
+                        border: "1px solid var(--hotel-border)",
+                        borderRadius: "16px",
+                        padding: "16px",
+                        boxShadow: "0 8px 24px rgba(12, 46, 51, 0.08)",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "12px",
+                        animation: "fadeIn 0.3s ease"
+                      }}>
+                        <h3 style={{ fontSize: "0.95rem", fontWeight: "700", borderBottom: "1px solid #e2e8f0", paddingBottom: "8px", margin: "0", color: "var(--hotel-text)" }}>
+                          Available Rooms & Offers
+                        </h3>
+                        {hotel.offers && hotel.offers.length > 0 ? (
+                          hotel.offers.map((offer) => (
+                            <div key={offer.offerId} style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              padding: "12px",
+                              border: "1px solid #e2e8f0",
+                              borderRadius: "10px",
+                              background: "#f8fafc",
+                              gap: "16px"
+                            }}>
+                              <div style={{ flex: "1" }}>
+                                <h4 style={{ fontSize: "0.88rem", fontWeight: "700", margin: "0 0 4px 0", color: "var(--hotel-text)" }}>
+                                  {offer.roomCategory ? offer.roomCategory.replace(/_/g, " ") : "Standard Room"} ({offer.bedType} Bed)
+                                </h4>
+                                <p style={{ fontSize: "0.8rem", margin: "0 0 6px 0", color: "var(--hotel-muted)" }}>
+                                  {offer.roomDescription || "Standard comfort rooms"}
+                                </p>
+                                <span style={{
+                                  fontSize: "0.74rem",
+                                  color: "var(--hotel-primary-strong)",
+                                  background: "rgba(0,155,143,0.08)",
+                                  padding: "3px 8px",
+                                  borderRadius: "999px",
+                                  fontWeight: "750"
+                                }}>
+                                  {offer.cancellationPolicy || "Free cancellation"}
+                                </span>
+                              </div>
+                              <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" }}>
+                                <strong style={{ fontSize: "1.25rem", color: "var(--hotel-text)" }}>
+                                  {formatCurrency(offer.price)}
+                                </strong>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSelectOffer(hotel, offer)}
+                                  style={{
+                                    background: "linear-gradient(135deg, var(--hotel-primary), var(--hotel-cobalt))",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "8px",
+                                    padding: "6px 16px",
+                                    fontSize: "0.82rem",
+                                    fontWeight: "800",
+                                    cursor: "pointer",
+                                    boxShadow: "0 4px 10px rgba(0,0,0,0.1)"
+                                  }}
+                                >
+                                  Book Room
+                                </button>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p style={{ fontSize: "0.82rem", color: "var(--hotel-muted)", margin: "0" }}>
+                            No active offers found for this property on selected dates.
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
-
-                  <aside className="hotel-price-panel">
-                    <span>{calcNights(hotel.checkInDate || checkInDate, hotel.checkOutDate || checkOutDate)} night stay</span>
-                    <strong>{formatMoney(hotel.price, hotel.currency)}</strong>
-                    <small>{hotel.currency}</small>
-                    <button type="button" onClick={() => openBookingReview(hotel)} disabled={offerLoadingId === hotel.offerId}>
-                      {offerLoadingId === hotel.offerId ? <Loader2 size={15} className="hotel-spin" /> : <IndianRupee size={15} />}
-                      Select Stay
-                    </button>
-                  </aside>
-                </article>
-              ))}
+                ))
+              )}
             </div>
           </section>
         </section>
       </div>
-
-      {selectedOffer && (
-        <div className="hotel-booking-modal-shell" role="dialog" aria-modal="true" aria-label="Review hotel booking">
-          <button type="button" className="hotel-booking-backdrop" onClick={closeBookingReview} aria-label="Close hotel review" />
-          <section className="hotel-booking-modal">
-            <button type="button" className="hotel-booking-close" onClick={closeBookingReview} aria-label="Close">
-              <X size={18} />
-            </button>
-
-            <div className="hotel-booking-summary">
-              <span>Revalidated Offer</span>
-              <h2>{selectedOffer.hotelName}</h2>
-              <p>{selectedOffer.address}</p>
-              <dl>
-                <div>
-                  <dt>Check-in</dt>
-                  <dd>{formatHotelDate(selectedOffer.checkInDate || checkInDate)}</dd>
-                </div>
-                <div>
-                  <dt>Check-out</dt>
-                  <dd>{formatHotelDate(selectedOffer.checkOutDate || checkOutDate)}</dd>
-                </div>
-                <div>
-                  <dt>Room</dt>
-                  <dd>{selectedOffer.roomDescription}</dd>
-                </div>
-                <div>
-                  <dt>Total</dt>
-                  <dd>{formatMoney(selectedOffer.price, selectedOffer.currency)}</dd>
-                </div>
-              </dl>
-              <small>{selectedOffer.cancellationPolicy}</small>
-            </div>
-
-            <form className="hotel-booking-form" onSubmit={submitHotelBooking}>
-              <h3>Guest details</h3>
-
-              {bookingStatus.message && (
-                <p className={`hotel-inline-status ${bookingStatus.type === "success" ? "is-success" : "is-error"}`}>
-                  {bookingStatus.message}
-                </p>
-              )}
-
-              <label>
-                Full name
-                <span>
-                  <User size={16} />
-                  <input
-                    value={guestForm.guestName}
-                    onChange={(event) => updateGuestForm("guestName", event.target.value)}
-                    placeholder="Primary guest name"
-                  />
-                </span>
-                {bookingErrors.guestName && <small>{bookingErrors.guestName}</small>}
-              </label>
-
-              <label>
-                Email
-                <span>
-                  <Mail size={16} />
-                  <input
-                    type="email"
-                    value={guestForm.guestEmail}
-                    onChange={(event) => updateGuestForm("guestEmail", event.target.value)}
-                    placeholder="Guest email"
-                  />
-                </span>
-                {bookingErrors.guestEmail && <small>{bookingErrors.guestEmail}</small>}
-              </label>
-
-              <label>
-                Phone
-                <span>
-                  <Phone size={16} />
-                  <input
-                    value={guestForm.guestPhone}
-                    onChange={(event) => updateGuestForm("guestPhone", event.target.value)}
-                    placeholder="+91 9876543210"
-                  />
-                </span>
-                {bookingErrors.guestPhone && <small>{bookingErrors.guestPhone}</small>}
-              </label>
-
-              <button type="submit" disabled={bookingLoading || bookingStatus.type === "success"}>
-                {bookingLoading ? "Confirming..." : "Confirm hotel booking"}
-              </button>
-            </form>
-          </section>
-        </div>
-      )}
     </main>
   );
 }

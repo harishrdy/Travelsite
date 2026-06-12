@@ -341,9 +341,11 @@ function normalizeErrorMessage(payload) {
 
 async function requestJson(urlOrPath, options = {}) {
   const resolvedUserId = resolveCurrentUserId(options.userId);
+  const token = typeof window !== "undefined" ? (window.localStorage.getItem("adminToken") || window.localStorage.getItem("authToken") || window.localStorage.getItem("token")) : "";
   const headers = {
     Accept: "application/json",
     "X-User-Id": resolvedUserId,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers || {}),
   };
 
@@ -831,11 +833,11 @@ export default function AdminFlightBookingListPage() {
 
           <div className="admin-flight-metric-group admin-flight-profit-group">
             <span className="admin-flight-metric-chip profit">
-              <strong>â‚¹</strong>
+              <strong>₹</strong>
               <span>Today Profit {adminCurrencyFormatter.format(todayProfit)}</span>
             </span>
             <span className="admin-flight-metric-chip profit">
-              <strong>â‚¹</strong>
+              <strong>₹</strong>
               <span>Current Month Profit {adminCurrencyFormatter.format(monthProfit)}</span>
             </span>
           </div>

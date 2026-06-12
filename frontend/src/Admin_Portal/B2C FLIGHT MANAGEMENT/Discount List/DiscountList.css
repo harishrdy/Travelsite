@@ -271,61 +271,86 @@
 }
 
 .discount-table-wrapper {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--panel);
-  box-shadow: 0 10px 26px rgba(16, 16, 16, 0.06);
-  overflow: hidden;
-  max-width: 100%;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
   width: 100%;
+  max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
 }
 
 .discount-table {
   width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
+  border-collapse: separate !important;
+  border-spacing: 0 10px !important;
+  table-layout: fixed !important;
+  min-width: 100% !important;
+  font-size: 0.85rem !important;
 }
 
-.discount-table thead {
-  background: #f8fafc;
+.discount-table thead tr {
+  background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-strong)) !important;
 }
 
 .discount-table th {
-  background: #f8fafc;
-  text-align: center;
-  padding: 12px 14px;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #334155;
-  font-weight: 700;
-  border-bottom: 1px solid #e2e8f0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  padding: 10px 4px !important;
+  border: none !important;
+  text-align: center !important;
 }
 
-.discount-table th:last-child,
-.discount-table td:last-child {
-  text-align: center;
+.discount-table th:first-child {
+  border-top-left-radius: 12px !important;
+  border-bottom-left-radius: 12px !important;
+}
+
+.discount-table th:last-child {
+  border-top-right-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
 }
 
 .discount-table td {
-  padding: 6px 5px;
-  border-bottom: 1px solid var(--border);
-  font-size: 11px;
-  color: var(--text);
-  vertical-align: middle;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: center;
+  border-top: 1px solid var(--admin-border) !important;
+  border-bottom: 1px solid var(--admin-border) !important;
+  background: var(--admin-surface) !important;
+  padding: 10px 4px !important;
+  color: var(--admin-text) !important;
+  font-size: 0.78rem !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  white-space: normal !important;
+}
+
+.discount-table td:first-child {
+  border-left: 1px solid var(--admin-border) !important;
+  border-top-left-radius: 12px !important;
+  border-bottom-left-radius: 12px !important;
+}
+
+.discount-table td:last-child {
+  border-right: 1px solid var(--admin-border) !important;
+  border-top-right-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+}
+
+.discount-table tbody tr {
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.02) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
 
 .discount-table tbody tr:hover {
-  background: var(--admin-soft);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+.discount-table tbody tr:hover td {
+  border-color: rgba(30, 117, 255, 0.2) !important;
 }
 
 .table-actions {

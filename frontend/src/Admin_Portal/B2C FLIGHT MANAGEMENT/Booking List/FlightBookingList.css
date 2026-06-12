@@ -39,29 +39,37 @@
 }
 
 .admin-flight-metric-chip {
-  min-height: 34px;
-  border-radius: 999px;
+  min-height: 38px;
+  border-radius: 12px;
   border: 1px solid var(--admin-border);
   background: var(--admin-surface);
   display: inline-flex;
   align-items: center;
   overflow: hidden;
-  font-weight: 800;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.02);
+  transition: all 0.2s ease;
+}
+
+.admin-flight-metric-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(15, 23, 42, 0.04);
 }
 
 .admin-flight-metric-chip strong {
-  min-width: 38px;
-  min-height: 34px;
+  min-width: 42px;
+  min-height: 38px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-weight: 900;
+  font-weight: 850;
+  font-size: 0.95rem;
 }
 
 .admin-flight-metric-chip span {
-  padding: 0 12px;
-  font-size: 0.9rem;
+  padding: 0 14px;
+  font-size: 0.82rem;
   color: var(--admin-text);
   display: inline-flex;
   align-items: center;
@@ -82,23 +90,31 @@
 }
 
 .admin-flight-metric-chip.profit {
-  border-color: var(--admin-border);
-  background: var(--admin-success-soft);
+  border-color: rgba(16, 185, 129, 0.2) !important;
+  background: #ecfdf5 !important;
 }
 
 .admin-flight-metric-chip.profit strong {
-  background: var(--admin-success);
+  background: #10b981 !important;
 }
 
 .admin-flight-actions .admin-flight-btn {
-  min-height: 34px;
+  min-height: 36px;
   border: 0;
   border-radius: 10px;
-  padding: 0 12px;
+  padding: 0 16px;
   color: #fff;
   font-size: 0.84rem;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s ease;
+}
+
+.admin-flight-actions .admin-flight-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(15, 23, 42, 0.08);
+  filter: brightness(1.05);
 }
 
 .admin-flight-actions .admin-flight-btn-filter {
@@ -106,28 +122,31 @@
 }
 
 .admin-flight-actions .admin-flight-btn-clear {
-  background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-strong));
+  background: var(--admin-muted);
 }
 
 .admin-flight-actions .admin-flight-btn-export {
-  background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-strong));
+  background: linear-gradient(135deg, var(--admin-success), var(--admin-success));
 }
 
 .admin-flight-legend {
-  min-height: 34px;
-  padding: 0 12px;
-  display: inline-flex;
+  min-height: 32px;
+  padding: 6px 16px;
+  display: flex;
   align-items: center;
-  border-top: 1px solid var(--admin-border);
-  background: var(--admin-success-soft);
-  color: var(--admin-success);
-  font-size: 0.86rem;
-  font-weight: 800;
+  border-radius: 8px;
+  background: var(--admin-soft);
+  color: var(--admin-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin: 10px 0;
+  border: 1px solid var(--admin-border);
 }
 
 .admin-flight-booked-by {
   margin-top: 4px;
   color: var(--admin-muted);
+  font-size: 0.72rem;
 }
 
 .admin-flight-booking-page .admin-status-pill.failed {
@@ -139,4 +158,24 @@
   border-color: var(--admin-border);
   background: var(--admin-soft);
   color: var(--admin-primary);
+}
+
+/* Overrides to establish a premium card list structure rather than inner grid borders */
+.admin-flight-booking-page .admin-table-cell {
+  border: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding: 8px 6px !important;
+}
+
+.admin-flight-booking-page .admin-table-row {
+  border: 1px solid var(--admin-border) !important;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.02) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+
+.admin-flight-booking-page .admin-table-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+  border-color: rgba(30, 117, 255, 0.2) !important;
 }

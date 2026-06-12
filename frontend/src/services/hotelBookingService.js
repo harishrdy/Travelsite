@@ -20,6 +20,60 @@ function normalizePayload(payload) {
   return [];
 }
 
+function pickFirst(source, keys, fallback = null) {
+  if (!source || typeof source !== "object") {
+    return fallback;
+  }
+
+  for (const key of keys) {
+    if (source[key] !== undefined && source[key] !== null) {
+      return source[key];
+    }
+  }
+
+  return fallback;
+}
+
+function normalizeHotelOffer(offer = {}, index = 0) {
+  const price = pickFirst(offer, ["price", "Price", "totalPrice", "TotalPrice"], 0);
+  const currency = pickFirst(offer, ["currency", "Currency"], "INR");
+  const roomCategory = pickFirst(offer, ["roomCategory", "RoomCategory", "roomType", "RoomType"], "Standard Room");
+
+  return {
+    ...offer,
+    offerId: String(pickFirst(offer, ["offerId", "OfferId", "id", "Id"], `hotel-offer-${index + 1}`)),
+    price: Number(price) || 0,
+    currency,
+    roomCategory,
+    bedType: pickFirst(offer, ["bedType", "BedType"], "Double"),
+    roomDescription: pickFirst(offer, ["roomDescription", "RoomDescription", "description", "Description"], roomCategory),
+    cancellationPolicy: pickFirst(offer, ["cancellationPolicy", "CancellationPolicy"], "Cancellation policy applies"),
+    paymentType: pickFirst(offer, ["paymentType", "PaymentType"], ""),
+    checkInDate: pickFirst(offer, ["checkInDate", "CheckInDate"], ""),
+    checkOutDate: pickFirst(offer, ["checkOutDate", "CheckOutDate"], ""),
+  };
+}
+
+function normalizeHotelRecord(hotel = {}, index = 0) {
+  const name = pickFirst(hotel, ["name", "Name", "hotelName", "HotelName"], `Hotel stay ${index + 1}`);
+  const cityCode = pickFirst(hotel, ["cityCode", "CityCode", "city", "City"], "");
+  const rawOffers = pickFirst(hotel, ["offers", "Offers"], []);
+  const offers = Array.isArray(rawOffers)
+    ? rawOffers.map((offer, offerIndex) => normalizeHotelOffer(offer, offerIndex))
+    : [];
+
+  return {
+    ...hotel,
+    hotelId: String(pickFirst(hotel, ["hotelId", "HotelId", "id", "Id"], `hotel-${index + 1}`)),
+    name,
+    cityCode,
+    address: pickFirst(hotel, ["address", "Address"], cityCode),
+    rating: Number(pickFirst(hotel, ["rating", "Rating"], 4.4)) || 4.4,
+    amenities: pickFirst(hotel, ["amenities", "Amenities"], ["Wi-Fi", "Breakfast"]),
+    offers,
+  };
+}
+
 async function requestHotelJson(urlOrPath, options = {}, fallbackMessage = "Hotel request failed.") {
   const token = window.localStorage.getItem("token");
   const resolvedUrl = toAuthUrl(urlOrPath);
@@ -80,12 +134,35 @@ export async function searchHotelOffers({ cityCode, checkInDate, checkOutDate, a
   return normalizePayload(payload);
 }
 
+export async function searchHotels({ city, cityCode, destination, checkInDate, checkOutDate, adults = 1, rooms = 1 }) {
+  const hotels = await searchHotelOffers({
+    cityCode: cityCode || city || destination,
+    checkInDate,
+    checkOutDate,
+    adults,
+    rooms,
+  });
+
+  return hotels.map((hotel, index) => normalizeHotelRecord(hotel, index));
+}
+
 export async function getHotelOfferDetails(offerId) {
-  return requestHotelJson(
+  const payload = await requestHotelJson(
     `/api/hotels/offers/${encodeURIComponent(offerId)}`,
     { method: "GET" },
     "Selected hotel offer is no longer available."
   );
+
+  const offer =
+    payload && typeof payload === "object" && !Array.isArray(payload)
+      ? payload.data || payload.Data || payload.offer || payload.Offer || payload
+      : payload;
+
+  return normalizeHotelOffer(offer);
+}
+
+export function getOfferDetails(offerId) {
+  return getHotelOfferDetails(offerId);
 }
 
 export async function bookHotelOffer({ offerId, guestName, guestEmail, guestPhone }) {
@@ -102,6 +179,10 @@ export async function bookHotelOffer({ offerId, guestName, guestEmail, guestPhon
     },
     "Hotel booking failed."
   );
+}
+
+export function bookHotel(payload) {
+  return bookHotelOffer(payload);
 }
 
 export async function getMyHotelBookings() {

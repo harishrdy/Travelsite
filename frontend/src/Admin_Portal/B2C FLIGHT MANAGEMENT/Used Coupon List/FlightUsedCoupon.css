@@ -30,11 +30,7 @@
 }
 
 .flight-markup-title-underline {
-  height: 2px;
-  width: 90px;
-  background: var(--primary);
-  border-radius: 999px;
-  margin-top: 8px;
+  display: none !important;
 }
 
 .flight-markup-actions {
@@ -45,31 +41,41 @@
 }
 
 .flight-markup-action-btn {
-  border: 1px solid var(--border);
-  background: var(--panel);
-  color: var(--text-primary);
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-weight: 600;
+  min-height: 36px;
+  border: 0 !important;
+  border-radius: 10px !important;
+  padding: 0 16px !important;
+  color: #fff !important;
+  font-size: 0.84rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.04) !important;
+  transition: all 0.2s ease !important;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  cursor: pointer;
-  transition: 0.2s ease;
+}
+
+.flight-markup-action-btn:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 15px rgba(15, 23, 42, 0.08) !important;
+  filter: brightness(1.05) !important;
+  color: #ffffff !important;
 }
 
 .flight-markup-action-btn.primary {
-  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
-  color: #ffffff;
-  border-color: var(--primary);
+  background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-strong)) !important;
+}
+
+.flight-markup-action-btn.secondary {
+  background: linear-gradient(135deg, var(--admin-success), var(--admin-success)) !important;
 }
 
 .flight-markup-table-wrap {
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--panel);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -82,37 +88,90 @@
 
 .flight-markup-table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 11px !important;
-  table-layout: fixed;
+  border-collapse: separate !important;
+  border-spacing: 0 10px !important;
+  table-layout: fixed !important;
   min-width: 100% !important;
+  font-size: 0.82rem !important;
 }
 
-.flight-markup-table thead {
-  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
-  color: #ffffff;
+.flight-markup-table thead tr {
+  background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-strong)) !important;
 }
 
-.flight-markup-table th,
+.flight-markup-table th {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 0.73rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0px !important;
+  padding: 10px 2px !important;
+  border: none !important;
+  text-align: center !important;
+  white-space: normal !important;
+  line-height: 1.25 !important;
+}
+
+.flight-markup-table th:first-child {
+  border-top-left-radius: 12px !important;
+  border-bottom-left-radius: 12px !important;
+}
+
+.flight-markup-table th:last-child {
+  border-top-right-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+}
+
 .flight-markup-table td {
-  padding: 6px 8px;
-  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--admin-border) !important;
+  border-bottom: 1px solid var(--admin-border) !important;
+  background: var(--admin-surface) !important;
+  padding: 10px 2px !important;
+  color: var(--admin-text) !important;
+  font-size: 0.75rem !important;
   text-align: center !important;
   vertical-align: middle !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+
+.flight-markup-table td:first-child {
+  border-left: 1px solid var(--admin-border) !important;
+  border-top-left-radius: 12px !important;
+  border-bottom-left-radius: 12px !important;
+}
+
+.flight-markup-table td:last-child {
+  border-right: 1px solid var(--admin-border) !important;
+  border-top-right-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+}
+
+.flight-markup-table tbody tr {
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.02) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.flight-markup-table tbody tr:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+.flight-markup-table tbody tr:hover td {
+  border-color: rgba(30, 117, 255, 0.2) !important;
 }
 
 .flight-markup-th-pill {
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.2);
   font-size: 0.78rem;
   font-weight: 700;
+  color: #ffffff !important;
 }
 
 .flight-markup-empty-cell {

@@ -3,14 +3,9 @@ import "../../STYLES/traveller.css";
 
 const AddTravelerForm = ({ onBack, onSubmit }) => {
   const [form, setForm] = useState({
-    type: "",
-    title: "",
-    firstName: "",
-    lastName: "",
-    gender: "",
+    fullName: "",
     age: "",
-    mobile: "",
-    email: "",
+    gender: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -22,23 +17,21 @@ const AddTravelerForm = ({ onBack, onSubmit }) => {
   const validate = () => {
     const newErrors = {};
 
-    if (!form.type) newErrors.type = "Select traveler type";
-    if (!form.title) newErrors.title = "Select title";
-    if (!form.firstName) newErrors.firstName = "First name required";
-    if (!form.lastName) newErrors.lastName = "Last name required";
-    if (!form.gender) newErrors.gender = "Select gender";
-    if (!form.age) newErrors.age = "Age required";
-
-    if (!form.mobile.trim()) {
-      newErrors.mobile = "Mobile number required";
-    } else if (!/^\d{10}$/.test(form.mobile.trim())) {
-      newErrors.mobile = "Enter a valid 10-digit mobile number";
+    if (!form.fullName.trim()) {
+      newErrors.fullName = "Full name required";
     }
 
-    if (!form.email.trim()) {
-      newErrors.email = "Email required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-      newErrors.email = "Enter a valid email address";
+    if (!form.age) {
+      newErrors.age = "Age required";
+    } else {
+      const ageNum = Number(form.age);
+      if (Number.isNaN(ageNum) || ageNum <= 0 || ageNum > 120) {
+        newErrors.age = "Enter a valid age (1-120)";
+      }
+    }
+
+    if (!form.gender) {
+      newErrors.gender = "Select gender";
     }
 
     setErrors(newErrors);
@@ -48,16 +41,38 @@ const AddTravelerForm = ({ onBack, onSubmit }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     if (!validate()) return;
-    if (typeof onSubmit === "function") onSubmit(form);
-    setForm({
-      type: "",
-      title: "",
-      firstName: "",
-      lastName: "",
-      gender: "",
-      age: "",
-      mobile: "",
+
+    const birthYear = new Date().getFullYear() - Number(form.age);
+    const dob = `${birthYear}-01-01`;
+    const nameParts = form.fullName.trim().split(/\s+/);
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
+    const type = Number(form.age) < 18 ? "Child" : "Adult";
+    const title = form.gender === "Female" ? "Ms" : "Mr";
+
+    const submitData = {
+      type,
+      title,
+      firstName,
+      lastName,
+      name: form.fullName.trim(),
+      gender: form.gender,
+      dob,
+      dobInput: dob,
       email: "",
+      mobile: "",
+      phone: "",
+      passportNo: "",
+      country: "India",
+      age: Number(form.age),
+    };
+
+    if (typeof onSubmit === "function") onSubmit(submitData);
+
+    setForm({
+      fullName: "",
+      age: "",
+      gender: "",
     });
     setErrors({});
   };
@@ -79,70 +94,25 @@ const AddTravelerForm = ({ onBack, onSubmit }) => {
 
       <form onSubmit={handleSubmit} style={{ overflow: "visible" }}>
         <div className="traveler-form-grid">
-
-          {/* Row 1: Type | Title | Gender */}
-          <div className="form-field-wrap">
-                        <label>Select Type </label>
-
-            <select name="type" value={form.type} onChange={handleChange} className="input-field">
-              <option value="">Select Type (Adult/Child)</option>
-              <option value="Adult">Adult</option>
-              <option value="Child">Child</option>
-            </select>
-            {errors.type && <p className="error-text">{errors.type}</p>}
-          </div>
-
-          <div className="form-field-wrap">
-              <label>Select Title </label>
-            <select name="title" value={form.title} onChange={handleChange} className="input-field">
-              <option value="">Select Title</option>
-              <option>Mr</option>
-              <option>Mrs</option>
-              <option>Ms</option>
-            </select>
-            {errors.title && <p className="error-text">{errors.title}</p>}
-          </div>
-
-          
-
-          {/* Row 2: First Name | Last Name | Age */}
-          <div className="form-field-wrap">
-            <label>First Name</label>
+          {/* Full Name */}
+          <div className="form-field-wrap traveler-fullname-span">
+            <label htmlFor="fullName">Full Name</label>
             <input
-              name="firstName"
-              placeholder="First Name"
-              value={form.firstName}
+              id="fullName"
+              name="fullName"
+              placeholder="Full Name"
+              value={form.fullName}
               onChange={handleChange}
               className="input-field"
             />
-            {errors.firstName && <p className="error-text">{errors.firstName}</p>}
+            {errors.fullName && <p className="error-text">{errors.fullName}</p>}
           </div>
 
+          {/* Age */}
           <div className="form-field-wrap">
-            <label>Last Name</label>  
+            <label htmlFor="age">Age</label>
             <input
-              name="lastName"
-              placeholder="Last Name"
-              value={form.lastName}
-              onChange={handleChange}
-              className="input-field"
-            />
-            {errors.lastName && <p className="error-text">{errors.lastName}</p>}
-          </div>
-          <div className="form-field-wrap">
-            <label>Gender</label> 
-            <select name="gender" value={form.gender} onChange={handleChange} className="input-field">
-              <option value="">Select Gender</option>
-              <option>Male</option>
-              <option>Female</option>
-            </select>
-            {errors.gender && <p className="error-text">{errors.gender}</p>}
-          </div>
-
-          <div className="form-field-wrap">
-              <label>Age</label>  
-            
-            <input
+              id="age"
               name="age"
               type="number"
               placeholder="Age"
@@ -153,34 +123,22 @@ const AddTravelerForm = ({ onBack, onSubmit }) => {
             {errors.age && <p className="error-text">{errors.age}</p>}
           </div>
 
-          {/* Row 3: Mobile | Email (email spans 2 cols) */}
+          {/* Gender */}
           <div className="form-field-wrap">
-              <label>Mobile Number</label>
-            <input
-              name="mobile"
-              type="tel"
-              placeholder="Mobile Number"
-              value={form.mobile}
+            <label htmlFor="gender">Gender</label>
+            <select
+              id="gender"
+              name="gender"
+              value={form.gender}
               onChange={handleChange}
               className="input-field"
-              maxLength={10}
-            />
-            {errors.mobile && <p className="error-text">{errors.mobile}</p>}
+            >
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+            {errors.gender && <p className="error-text">{errors.gender}</p>}
           </div>
-
-          <div className="form-field-wrap traveler-email-span">
-              <label>Email Address</label>  
-            <input
-              name="email"
-              type="email"
-              placeholder="Email Address"
-              value={form.email}
-              onChange={handleChange}
-              className="input-field"
-            />
-            {errors.email && <p className="error-text">{errors.email}</p>}
-          </div>
-
         </div>
 
         <div className="submit-wrap">

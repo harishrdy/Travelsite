@@ -2,117 +2,22 @@ import React, { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Eye, PencilLine, PlusCircle, Power } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "./FlightConvenienceFee.css";
+import {
+  listConvenienceFeeRules,
+  updateConvenienceFeeRule,
+} from "../../../services/flightBookingService";
 
-const FLIGHT_CONVENIENCE_FEE_STORAGE_KEY = "admin_flight_convenience_fee_records";
-
-const normalizeText = (value, fallback = "") => {
-  const text = String(value ?? "").trim();
-  return text || fallback;
-};
-
-const toSafeNumber = (value, fallback = 0) => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-};
-
-const normalizeAmountType = (value, fallback = "Fix") => {
-  const text = normalizeText(value, fallback);
-  const key = text.toLowerCase();
-  if (key === "percentage" || key === "percent") {
-    return "Percentage";
-  }
-  return "Fix";
-};
-
-const normalizeStatus = (value, fallback = "Active") => {
-  const text = normalizeText(value, fallback);
-  const key = text.toLowerCase();
-  if (key.includes("inactive") || key.includes("disabled") || key.includes("deactive")) {
-    return "Inactive";
-  }
-  return "Active";
-};
-
-const normalizeFeeRecord = (record, index = 0) => {
+const mapFromBackendRule = (dbRow) => {
   return {
-    id: normalizeText(record?.id, `${index + 1}`),
-    amountType: normalizeAmountType(record?.amountType, "Fix"),
-    value: toSafeNumber(record?.value, 0),
-    entryDateUtc: normalizeText(record?.entryDateUtc, ""),
-    updatedAtUtc: normalizeText(record?.updatedAtUtc, ""),
-    updatedBy: normalizeText(record?.updatedBy, "Travel Admin"),
-    status: normalizeStatus(record?.status, "Active"),
+    id: dbRow.id,
+    amountType: dbRow.feeType === "Percentage" ? "Percentage" : "Fix",
+    value: dbRow.feeValue || 0,
+    entryDateUtc: dbRow.createdAt || "",
+    updatedAtUtc: dbRow.updatedAt || "",
+    updatedBy: dbRow.updatedBy || "Travel Admin",
+    status: dbRow.isActive ? "Active" : "Inactive",
+    tripType: dbRow.tripType || "OneWay",
   };
-};
-
-const readFeeRecords = () => {
-  if (typeof window === "undefined") {
-    return [];
-  }
-
-  try {
-    const raw = window.localStorage.getItem(FLIGHT_CONVENIENCE_FEE_STORAGE_KEY) || "";
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    return parsed.map((record, index) => normalizeFeeRecord(record, index));
-  } catch {
-    return [];
-  }
-};
-
-const writeFeeRecords = (records) => {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  try {
-    window.localStorage.setItem(
-      FLIGHT_CONVENIENCE_FEE_STORAGE_KEY,
-      JSON.stringify(records.map((record, index) => normalizeFeeRecord(record, index)))
-    );
-  } catch {
-    // Ignore localStorage write failures.
-  }
-};
-
-const listFlightConvenienceFees = () => {
-  const records = readFeeRecords();
-  writeFeeRecords(records);
-  return records;
-};
-
-const updateFlightConvenienceFeeById = (feeId, updates) => {
-  const normalizedId = normalizeText(feeId, "");
-  if (!normalizedId) {
-    return null;
-  }
-
-  const nowIso = new Date().toISOString();
-  const currentRecords = listFlightConvenienceFees();
-  let updatedRecord = null;
-
-  const nextRecords = currentRecords.map((record, index) => {
-    if (normalizeText(record.id, "") !== normalizedId) {
-      return record;
-    }
-
-    updatedRecord = normalizeFeeRecord(
-      {
-        ...record,
-        ...updates,
-        updatedAtUtc: nowIso,
-      },
-      index
-    );
-
-    return updatedRecord;
-  });
-
-  writeFeeRecords(nextRecords);
-  return updatedRecord;
 };
 
 const formatConvenienceDateTime = (value) => {
@@ -162,9 +67,23 @@ export default function AdminFlightConvenienceFeePage() {
   const navigate = useNavigate();
   const [fees, setFees] = useState([]);
   const [selectedFee, setSelectedFee] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const loadFees = async () => {
+    setIsLoading(true);
+    try {
+      const data = await listConvenienceFeeRules();
+      const mapped = Array.isArray(data) ? data.map(mapFromBackendRule) : [];
+      setFees(mapped);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setFees(listFlightConvenienceFees());
+    loadFees();
   }, []);
 
   const hasRecords = fees.length > 0;
@@ -177,25 +96,21 @@ export default function AdminFlightConvenienceFeePage() {
     }));
   }, [fees]);
 
-  const handleToggleStatus = (record) => {
-    const nextStatus = resolveStatusKey(record?.status) === "active" ? "Inactive" : "Active";
-    const updatedBy = "Travel Admin";
-    const updated = updateFlightConvenienceFeeById(record?.id, {
-      status: nextStatus,
-      updatedBy,
-    });
+  const handleToggleStatus = async (record) => {
+    const nextStatus = resolveStatusKey(record?.status) === "active" ? false : true;
+    const payload = {
+      tripType: record.tripType || "OneWay",
+      feeType: record.amountType === "Percentage" ? "Percentage" : "Flat",
+      feeValue: record.value,
+      isActive: nextStatus,
+    };
 
-    if (!updated) {
-      return;
+    try {
+      await updateConvenienceFeeRule(record.id, payload);
+      await loadFees();
+    } catch (err) {
+      alert(err.message || "Failed to toggle rule status.");
     }
-
-    setFees(listFlightConvenienceFees());
-    setSelectedFee((current) => {
-      if (!current || String(current.id) !== String(record.id)) {
-        return current;
-      }
-      return updated;
-    });
   };
 
   return (
@@ -222,14 +137,16 @@ export default function AdminFlightConvenienceFeePage() {
           <span>SN.</span>
           <span>Amount Type</span>
           <span>Value</span>
+          <span>Trip Type</span>
           <span>Entry Date</span>
-          <span>Update Date</span>
           <span>Updated By</span>
           <span>Status</span>
           <span>Action</span>
         </header>
 
-        {hasRecords ? (
+        {isLoading ? (
+          <div className="admin-table-empty">Loading records...</div>
+        ) : hasRecords ? (
           <div className="admin-flight-fee-table-body">
             {rows.map(({ item, index, statusKey }) => (
               <article key={item.id} className="admin-flight-fee-table-row">
@@ -246,11 +163,11 @@ export default function AdminFlightConvenienceFeePage() {
                 </div>
 
                 <div className="admin-flight-fee-cell">
-                  <strong>{formatConvenienceDateTime(item.entryDateUtc)}</strong>
+                  <strong>{safeValue(item.tripType, "OneWay")}</strong>
                 </div>
 
                 <div className="admin-flight-fee-cell">
-                  <strong>{formatConvenienceDateTime(item.updatedAtUtc)}</strong>
+                  <strong>{formatConvenienceDateTime(item.entryDateUtc)}</strong>
                 </div>
 
                 <div className="admin-flight-fee-cell">
@@ -345,6 +262,10 @@ export default function AdminFlightConvenienceFeePage() {
               <div>
                 <span>Value</span>
                 <strong>{formatFeeLabel(selectedFee)}</strong>
+              </div>
+              <div>
+                <span>Trip Type</span>
+                <strong>{safeValue(selectedFee.tripType, "OneWay")}</strong>
               </div>
               <div>
                 <span>Entry Date</span>

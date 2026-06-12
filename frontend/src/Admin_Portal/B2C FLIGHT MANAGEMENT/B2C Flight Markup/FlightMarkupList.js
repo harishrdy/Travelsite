@@ -1,35 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Download, Eye, Pencil, PlaneTakeoff, Plus, Trash2, X } from "lucide-react";
 import "./FlightMarkupList.css";
 import { formatCurrency, formatDateTime } from "../../../utils/adminPortalUtils";
-import { getNextNumericId, useAdminList } from "../../../utils/adminPortalStorage";
+import {
+  listFlightMarkups,
+  createFlightMarkup,
+  updateFlightMarkup,
+  deleteFlightMarkup,
+} from "../../../services/flightBookingService";
 
-const INITIAL_FLIGHT_MARKUP_ROWS = [
-  {
-    id: "F102",
-    domInt: "DOM",
-    markupType: "fix",
-    value: 250,
-    airlineType: "LCC",
-    airlineName: "IndiGo",
-    code: "6E",
+const mapFromBackendMarkup = (dbRow) => {
+  return {
+    id: dbRow.id,
+    domInt: dbRow.tripType === "RoundTrip" ? "INT" : "DOM",
+    markupType: dbRow.markupType === "Percentage" ? "percent" : "fix",
+    value: dbRow.markupValue || 0,
+    airlineType: dbRow.airlineCode === "*" || dbRow.airlineCode === "ALL" ? "ALL" : "SPECIFIC",
+    airlineName: dbRow.airlineCode === "*" ? "All Airlines" : `Airline ${dbRow.airlineCode}`,
+    code: dbRow.airlineCode || "*",
     fareType: "Regular",
     updatedBy: "Admin",
-    updatedOn: "2026-03-15T09:12:00.000Z",
-  },
-  {
-    id: "F103",
-    domInt: "INT",
-    markupType: "percent",
-    value: 3,
-    airlineType: "GDS",
-    airlineName: "Emirates",
-    code: "EK",
-    fareType: "Special",
-    updatedBy: "Pick N Book",
-    updatedOn: "2026-03-14T16:40:00.000Z",
-  },
-];
+    updatedOn: new Date().toISOString(),
+    priority: dbRow.priority || 5,
+    isActive: dbRow.isActive !== undefined ? dbRow.isActive : true
+  };
+};
 
 const DEFAULT_MARKUP_FORM = {
   domInt: "Domestic",
@@ -39,16 +34,10 @@ const DEFAULT_MARKUP_FORM = {
   sourceType: "All",
 };
 
-const getNextFlightMarkupId = (rows) => {
-  const numericRows = rows.map((row) => ({
-    id: Number(String(row.id || "").replace(/\D/g, "")) || 0,
-  }));
-  const nextValue = getNextNumericId(numericRows, 100);
-  return `F${nextValue}`;
-};
-
 export default function AdminFlightMarkupListPage() {
-  const [flightRows, setFlightRows] = useAdminList("flight-markup", INITIAL_FLIGHT_MARKUP_ROWS);
+  const [flightRows, setFlightRows] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [formValues, setFormValues] = useState(DEFAULT_MARKUP_FORM);
   const [addError, setAddError] = useState("");
@@ -85,6 +74,24 @@ export default function AdminFlightMarkupListPage() {
     "Action",
   ];
 
+  const loadMarkups = async () => {
+    setIsLoading(true);
+    setLoadError("");
+    try {
+      const data = await listFlightMarkups();
+      const mapped = Array.isArray(data) ? data.map(mapFromBackendMarkup) : [];
+      setFlightRows(mapped);
+    } catch (err) {
+      setLoadError(err.message || "Failed to load flight markups.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMarkups();
+  }, []);
+
   const handleOpenAdd = () => {
     setAddError("");
     setFormValues(DEFAULT_MARKUP_FORM);
@@ -99,7 +106,7 @@ export default function AdminFlightMarkupListPage() {
     setFormValues((previous) => ({ ...previous, [field]: event.target.value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const amount = Number(formValues.value);
     if (!Number.isFinite(amount) || amount < 0) {
@@ -110,24 +117,24 @@ export default function AdminFlightMarkupListPage() {
     const domIntCode = formValues.domInt === "International" ? "INT" : "DOM";
     const markupType = String(formValues.markupType || "Fix").toLowerCase();
     const airlineType = formValues.airlineType || "ALL";
-    const sourceType = formValues.sourceType || "All";
 
-    const newRow = {
-      id: getNextFlightMarkupId(flightRows),
-      domInt: domIntCode,
-      markupType,
-      value: amount,
-      airlineType,
-      airlineName: airlineType === "ALL" ? "All Airlines" : "Generic Airline",
-      code: airlineType === "ALL" ? "ALL" : "NA",
-      fareType: sourceType === "Manual" ? "Manual" : "Regular",
-      updatedBy: "Admin",
-      updatedOn: new Date().toISOString(),
+    const payload = {
+      airlineCode: airlineType === "ALL" ? "*" : "NA",
+      tripType: domIntCode === "INT" ? "RoundTrip" : "OneWay",
+      markupType: markupType === "percent" ? "Percentage" : "Flat",
+      markupValue: amount,
+      priority: 5,
+      isActive: true
     };
 
-    setFlightRows((previous) => [newRow, ...previous]);
-    setIsAddOpen(false);
-    setAddError("");
+    try {
+      await createFlightMarkup(payload);
+      await loadMarkups();
+      setIsAddOpen(false);
+      setAddError("");
+    } catch (err) {
+      setAddError(err.message || "Failed to create flight markup.");
+    }
   };
 
   const handleReset = () => {
@@ -150,7 +157,7 @@ export default function AdminFlightMarkupListPage() {
     });
   };
 
-  const handleEditSave = () => {
+  const handleEditSave = async () => {
     if (!editRow) {
       return;
     }
@@ -166,37 +173,39 @@ export default function AdminFlightMarkupListPage() {
       return;
     }
 
-    setFlightRows((previous) =>
-      previous.map((row) =>
-        row.id === editRow.id
-          ? {
-              ...row,
-              domInt: editRow.domInt,
-              markupType: editRow.markupType,
-              value: amount,
-              airlineType: editRow.airlineType,
-              airlineName: editRow.airlineName.trim(),
-              code: editRow.code.trim(),
-              fareType: editRow.fareType.trim(),
-              updatedBy: editRow.updatedBy.trim(),
-              updatedOn: new Date().toISOString(),
-            }
-          : row
-      )
-    );
-    setEditRow(null);
-    setEditError("");
+    const payload = {
+      airlineCode: editRow.code || "*",
+      tripType: editRow.domInt === "INT" ? "RoundTrip" : "OneWay",
+      markupType: String(editRow.markupType).toLowerCase() === "percent" ? "Percentage" : "Flat",
+      markupValue: amount,
+      priority: editRow.priority || 5,
+      isActive: editRow.isActive !== undefined ? editRow.isActive : true
+    };
+
+    try {
+      await updateFlightMarkup(editRow.id, payload);
+      await loadMarkups();
+      setEditRow(null);
+      setEditError("");
+    } catch (err) {
+      setEditError(err.message || "Failed to update flight markup.");
+    }
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!deleteRow) {
       return;
     }
 
-    setFlightRows((previous) => previous.filter((row) => row.id !== deleteRow.id));
-    setDeleteRow(null);
-    setViewRow((previous) => (previous?.id === deleteRow.id ? null : previous));
-    setEditRow((previous) => (previous?.id === deleteRow.id ? null : previous));
+    try {
+      await deleteFlightMarkup(deleteRow.id);
+      await loadMarkups();
+      setDeleteRow(null);
+      setViewRow((previous) => (previous?.id === deleteRow.id ? null : previous));
+      setEditRow((previous) => (previous?.id === deleteRow.id ? null : previous));
+    } catch (err) {
+      alert(err.message || "Failed to delete flight markup.");
+    }
   };
 
   return (
@@ -331,7 +340,19 @@ export default function AdminFlightMarkupListPage() {
               </tr>
             </thead>
             <tbody>
-              {flightRows.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={headers.length} className="flight-markup-empty-cell">
+                    <span className="flight-markup-empty">Loading flight markups from backend...</span>
+                  </td>
+                </tr>
+              ) : loadError ? (
+                <tr>
+                  <td colSpan={headers.length} className="flight-markup-empty-cell">
+                    <span className="flight-markup-empty danger">{loadError}</span>
+                  </td>
+                </tr>
+              ) : flightRows.length === 0 ? (
                 <tr>
                   <td colSpan={headers.length} className="flight-markup-empty-cell">
                     <span className="flight-markup-empty">No Record Found...</span>

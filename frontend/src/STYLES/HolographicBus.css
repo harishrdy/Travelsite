@@ -135,10 +135,6 @@
   z-index: 10 !important;
 }
 
-.bus-flow-front-label {
-  display: none !important; /* Hide FRONT label */
-}
-
 /* Driver / Helper Seat SVG Containers */
 .bus-flow-driver-seat {
   width: 30px !important;
@@ -157,27 +153,6 @@
   height: 100% !important;
   transform: rotate(-90deg) !important; /* Rotated so the driver faces forward (left) */
   transform-origin: center !important;
-}
-
-/* Style the driver cabin SVG elements to have Atlas teal/cobalt styling */
-.bus-flow-driver-seat .seat-frame {
-  stroke: #d97706 !important;
-  fill: #dc1e26 !important; /* Orange base frame */
-}
-.bus-flow-driver-seat .seat-cushion {
-  stroke: none !important;
-  fill: #fbbf24 !important; /* Yellow inner cushion */
-}
-.bus-flow-driver-seat .seat-back {
-  stroke: #d97706 !important;
-  fill: #dc1e26 !important;
-}
-.bus-flow-driver-seat .seat-arm {
-  stroke: #d97706 !important;
-  fill: #fbbf24 !important;
-}
-.bus-flow-driver-seat .seat-shadow {
-  display: none !important;
 }
 
 /* Driver Seat (Placed directly behind the steering wheel) */
@@ -209,14 +184,6 @@
 
 /* ===== Deck & Row Layout ===== */
 .hologram-bus-container .bus-flow-coach-floor {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-grow: 1 !important;
-  width: auto !important;
-  flex: none !important;
-}
-
-.hologram-bus-container .bus-flow-sleeper-layout {
   display: flex !important;
   flex-direction: row !important;
   flex-grow: 1 !important;
@@ -362,12 +329,6 @@
   transform-origin: center !important;
 }
 
-/* Actual Seater Seat Components visible */
-.bus-flow-page .hologram-bus-container .bus-flow-seat.is-seater .seat-svg .seat-arm,
-.bus-flow-page .hologram-bus-container .bus-flow-seat.is-seater .seat-svg .seat-shadow {
-  display: block !important;
-}
-
 /* Sleeper Dimensions */
 .bus-flow-page .hologram-bus-container .bus-flow-seat.is-sleeper {
   width: 72px !important;
@@ -388,21 +349,6 @@
 /* Hide duplicate CSS pillow detail on sleepers */
 .bus-flow-page .hologram-bus-container .bus-flow-seat--sleeper::after {
   display: none !important;
-}
-.bus-flow-page .hologram-bus-container .bus-flow-seat.is-sleeper .seat-svg .seat-shadow {
-  display: none !important;
-}
-
-/* Label text (upright, bold, centered in the cushion area) */
-.hologram-bus-container .seat-details {
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  font-size: 0.65rem !important;
-  font-weight: 800 !important;
-  z-index: 10 !important;
-  pointer-events: none !important;
 }
 
 /* Seat gap/placeholder */
@@ -479,10 +425,6 @@
 .hologram-bus-container .bus-flow-seat:hover .sleeper-pillow {
   --seat-line: var(--theme-primary, #dc1e26);
   --seat-fill: #eefdf9;
-}
-
-.hologram-bus-container .bus-flow-seat .seat-details {
-  color: var(--seat-text) !important;
 }
 
 /* ===== Expand Panel for summary actions (Boarding & Dropping / Cancellation Policies) ===== */
@@ -734,10 +676,6 @@
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
-}
-
-.bus-flow-page.bus-flow-page--embedded .hologram-bus-container .seat-details {
-  font-size: 0.58rem !important;
 }
 
 .bus-flow-page.bus-flow-page--embedded .hologram-bus-container .bus-flow-seat .seat-body,

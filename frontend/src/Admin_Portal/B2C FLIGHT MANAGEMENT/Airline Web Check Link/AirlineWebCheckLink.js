@@ -1,18 +1,46 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./AirlineWebCheckLink.css";
-import { getNextNumericId, useAdminList } from "../../../utils/adminPortalStorage";
+import {
+  listAirlineWebChecks,
+  createAirlineWebCheck,
+  deleteAirlineWebCheck,
+} from "../../../services/flightBookingService";
+
+const mapFromBackendWebCheck = (dbRow) => {
+  return {
+    id: dbRow.id,
+    name: dbRow.airlineName || "",
+    code: dbRow.airlineCode || "",
+    url: dbRow.webCheckinUrl || "",
+  };
+};
 
 function AirlineWebCheckLink() {
   const [page, setPage] = useState("list");
-
-  const [airlines, setAirlines] = useAdminList("airline-webcheck", [
-    { id: 38, name: "IndiGo", code: "6E", url: "https://www.goindigo.in/web-check-in.html" },
-  ]);
+  const [airlines, setAirlines] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
     url: ""
   });
+
+  const loadAirlines = async () => {
+    setIsLoading(true);
+    try {
+      const data = await listAirlineWebChecks();
+      const mapped = Array.isArray(data) ? data.map(mapFromBackendWebCheck) : [];
+      setAirlines(mapped);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAirlines();
+  }, []);
 
   // Navigation
   const goToAdd = () => setPage("add");
@@ -24,31 +52,42 @@ function AirlineWebCheckLink() {
   };
 
   // Submit
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.name || !formData.url) {
       alert("Please fill all fields");
       return;
     }
 
-    const newAirline = {
-      id: getNextNumericId(airlines, 1),
-      name: formData.name,
-      code: formData.name.slice(0, 2).toUpperCase(),
-      url: formData.url
+    const payload = {
+      airlineName: formData.name,
+      airlineCode: formData.name.slice(0, 2).toUpperCase(),
+      webCheckinUrl: formData.url
     };
 
-    setAirlines([...airlines, newAirline]);
-    setFormData({ name: "", url: "" });
-    setPage("list");
+    try {
+      await createAirlineWebCheck(payload);
+      setFormData({ name: "", url: "" });
+      await loadAirlines();
+      setPage("list");
+    } catch (err) {
+      alert(err.message || "Failed to create airline check-in link.");
+    }
   };
 
   // Delete
-  const handleDelete = (id) => {
-    const updated = airlines.filter((a) => a.id !== id);
-    setAirlines(updated);
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this link?")) {
+      return;
+    }
+    try {
+      await deleteAirlineWebCheck(id);
+      await loadAirlines();
+    } catch (err) {
+      alert(err.message || "Failed to delete link.");
+    }
   };
 
-  // Clear Filter (reset demo data)
+  // Clear Filter
   const handleClear = () => {
     setAirlines([]);
   };

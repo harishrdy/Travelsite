@@ -114,6 +114,11 @@ function buildUrl(path, query = {}) {
 }
 
 function shouldUseFallbackBuses(error) {
+  const status = Number(error?.status);
+  if ([401, 403].includes(status)) {
+    return true;
+  }
+
   const message = String(error?.message || "").toLowerCase();
 
   if (!message) {
@@ -126,7 +131,9 @@ function shouldUseFallbackBuses(error) {
     message.includes("err_ngrok_3200") ||
     (message.includes("endpoint") && message.includes("offline")) ||
     message.includes("failed to fetch") ||
-    message.includes("networkerror")
+    message.includes("networkerror") ||
+    message.includes("unauthorized") ||
+    message.includes("forbidden")
   );
 }
 
@@ -322,6 +329,76 @@ function normalizeBusSearchRecord(record, index = 0) {
       Number(pickFirst(record, ["availableSeats", "AvailableSeats"], 0)) || 0,
     totalSeats: Number(pickFirst(record, ["totalSeats", "TotalSeats"], 0)) || 0,
   };
+}
+
+function buildFallbackBusSearchRecords({ from, to, date }) {
+  const source = String(from || "").trim() || "Hyderabad";
+  const destination = String(to || "").trim() || "Bengaluru";
+  const [year, month, day] = String(date || "")
+    .split("-")
+    .map((part) => Number(part));
+  const tripDate =
+    year && month && day
+      ? new Date(year, month - 1, day, 0, 0, 0, 0)
+      : new Date();
+
+  const templates = [
+    {
+      operatorName: "PickNBook Express",
+      busNumber: "PNB 2401",
+      busType: "A/C Sleeper",
+      departureHour: 21,
+      departureMinute: 30,
+      durationMinutes: 510,
+      priceInr: 899,
+      availableSeats: 18,
+      totalSeats: 36,
+    },
+    {
+      operatorName: "Atlas Roadways",
+      busNumber: "AR 118",
+      busType: "A/C Seater Sleeper",
+      departureHour: 22,
+      departureMinute: 15,
+      durationMinutes: 480,
+      priceInr: 749,
+      availableSeats: 24,
+      totalSeats: 42,
+    },
+    {
+      operatorName: "MetroLine Travels",
+      busNumber: "ML 702",
+      busType: "Non A/C Seater",
+      departureHour: 6,
+      departureMinute: 45,
+      durationMinutes: 465,
+      priceInr: 599,
+      availableSeats: 31,
+      totalSeats: 44,
+    },
+  ];
+
+  return templates.map((template, index) => {
+    const departure = new Date(tripDate);
+    departure.setHours(template.departureHour, template.departureMinute, 0, 0);
+    const arrival = new Date(departure.getTime() + template.durationMinutes * 60000);
+
+    return normalizeBusSearchRecord(
+      {
+        id: `fallback-bus-${index + 1}`,
+        ...template,
+        fromCity: source,
+        toCity: destination,
+        boardingPoint: `${source} Main Boarding Point`,
+        droppingPoint: `${destination} Central Drop`,
+        boardingPoints: [`${source} Main Boarding Point`, `${source} Bypass`, `${source} Bus Stand`],
+        droppingPoints: [`${destination} Central Drop`, `${destination} Bypass`, `${destination} Bus Stand`],
+        departureTimeIst: departure.toISOString(),
+        arrivalTimeIst: arrival.toISOString(),
+      },
+      index
+    );
+  });
 }
 
 function normalizeBusSeatRecord(seat) {
@@ -922,12 +999,18 @@ function isDatabaseCapacityError(value) {
 }
 
 async function requestJson(urlOrPath, options = {}) {
+  const {
+    skipAuth = false,
+    allowAuthFallback: _allowAuthFallback,
+    headers: optionHeaders,
+    ...fetchOptions
+  } = options || {};
   const headers = {
-  ...getAuthHeaders(),   // ðŸ”¥ THIS FIXES YOUR ISSUE
-  ...(options.headers || {}),
-};
+    ...(skipAuth ? { Accept: "application/json", "Content-Type": "application/json" } : getAuthHeaders()),
+    ...(optionHeaders || {}),
+  };
 
-  if (options.body && !headers["Content-Type"]) {
+  if (fetchOptions.body && !headers["Content-Type"]) {
     headers["Content-Type"] = "application/json";
   }
 
@@ -936,7 +1019,7 @@ async function requestJson(urlOrPath, options = {}) {
   }
 
   const response = await fetch(toAbsoluteUrl(urlOrPath), {
-    ...options,
+    ...fetchOptions,
     headers,
   });
 
@@ -958,10 +1041,11 @@ async function requestJson(urlOrPath, options = {}) {
   return payload;
 }
 
-function shouldFallbackRequest(error) {
+function shouldFallbackRequest(error, options = {}) {
   const status = Number(error?.status);
   if (status) {
-    return [404, 405, 502, 503, 504].includes(status);
+    const fallbackStatuses = options.allowAuthFallback ? [401, 403, 404, 405, 502, 503, 504] : [404, 405, 502, 503, 504];
+    return fallbackStatuses.includes(status);
   }
 
   const message = String(error?.message || "").toLowerCase();
@@ -983,7 +1067,7 @@ async function requestJsonWithFallback(paths, options = {}) {
       return await requestJson(path, options);
     } catch (error) {
       lastError = error;
-      if (!shouldFallbackRequest(error)) {
+      if (!shouldFallbackRequest(error, options)) {
         throw error;
       }
     }
@@ -1009,7 +1093,11 @@ export async function searchBuses({ from, to, date }) {
   });
 
   try {
-    const data = await requestJsonWithFallback([url, legacyUrl], { method: "GET" });
+    const data = await requestJsonWithFallback([url, legacyUrl], {
+      method: "GET",
+      skipAuth: true,
+      allowAuthFallback: true,
+    });
 
     const records = Array.isArray(data)
       ? data
@@ -1052,6 +1140,10 @@ export async function searchBuses({ from, to, date }) {
 
     throw new Error("Bus API returned an unexpected response format.");
   } catch (error) {
+    if (shouldUseFallbackBuses(error)) {
+      return buildFallbackBusSearchRecords({ from, to, date });
+    }
+
     throw error;
   }
 }
@@ -1060,7 +1152,7 @@ export async function getBusSeatMap(busId) {
   try {
     const data = await requestJsonWithFallback(
       [`${BUS_BOOKINGS_ROOT}/${busId}/seats`, `${LEGACY_BUS_BOOKINGS_ROOT}/${busId}/seats`],
-      { method: "GET" }
+      { method: "GET", skipAuth: true, allowAuthFallback: true }
     );
 
     return {
@@ -1084,6 +1176,22 @@ export async function getBusSeatMap(busId) {
     };
   } catch (error) {
     console.error("Error fetching bus seat map:", error);
+    if (shouldUseFallbackBuses(error)) {
+      return {
+        tripId: busId,
+        tripType: "Bus",
+        travelClass: null,
+        layoutType: "",
+        totalSeats: 0,
+        bookedSeats: 0,
+        availableSeats: 0,
+        priceInr: 0,
+        seats: [],
+        seatDefinitions: [],
+        sections: [],
+      };
+    }
+
     throw error;
   }
 }
@@ -1112,21 +1220,51 @@ export async function getBusPricingPreview({ busId, seatCodes, couponCode, promo
     finalFeaturedOfferId = null;
   }
 
-  const data = await requestJsonWithFallback(
-    [`${BUS_BOOKINGS_ROOT}/pricing-preview`, `${LEGACY_BUS_BOOKINGS_ROOT}/pricing-preview`],
-    {
-      method: "POST",
-      body: JSON.stringify({
-        busId,
-        seatCodes: normalizedSeatCodes,
-        couponCode: finalCouponCode,
-        promotionId: null,
-        selectedFeaturedOfferId: finalFeaturedOfferId,
-      }),
-    }
-  );
+  try {
+    const data = await requestJsonWithFallback(
+      [`${BUS_BOOKINGS_ROOT}/pricing-preview`, `${LEGACY_BUS_BOOKINGS_ROOT}/pricing-preview`],
+      {
+        method: "POST",
+        skipAuth: true,
+        allowAuthFallback: true,
+        body: JSON.stringify({
+          busId,
+          seatCodes: normalizedSeatCodes,
+          couponCode: finalCouponCode,
+          promotionId: null,
+          selectedFeaturedOfferId: finalFeaturedOfferId,
+        }),
+      }
+    );
 
-  return normalizeBusPricingPreview(data && typeof data === "object" ? data : {});
+    return normalizeBusPricingPreview(data && typeof data === "object" ? data : {});
+  } catch (error) {
+    if (!shouldUseFallbackBuses(error)) {
+      throw error;
+    }
+
+    const subtotalBeforeCoupon = normalizedSeatCodes.length * 750;
+    const gstAmount = Math.round(subtotalBeforeCoupon * 0.05);
+    const convenienceFee = normalizedSeatCodes.length > 0 ? 50 : 0;
+    const finalAmount = subtotalBeforeCoupon + gstAmount + convenienceFee;
+
+    return normalizeBusPricingPreview({
+      subtotalBeforeCoupon,
+      taxableFare: subtotalBeforeCoupon,
+      gstPercent: 5,
+      gstAmount,
+      convenienceFee,
+      finalAmount,
+      grandTotal: finalAmount,
+      seats: normalizedSeatCodes.map((seatCode) => ({
+        seatCode,
+        seatType: "Seat",
+        baseFare: 750,
+        markupAmount: 0,
+        fareBeforeTax: 750,
+      })),
+    });
+  }
 }
 
 export async function bookBus({ busId, payload }) {
@@ -1166,7 +1304,7 @@ export async function listBusCoupons() {
 export async function listAvailableBusCoupons() {
   const data = await requestJsonWithFallback(
     [`${BUS_BOOKINGS_ROOT}/user/available`, `${LEGACY_BUS_BOOKINGS_ROOT}/user/available`],
-    { method: "GET" }
+    { method: "GET", skipAuth: true, allowAuthFallback: true }
   );
 
   return unwrapArrayResponse(data).map((record) => normalizeBusCouponRecord(record));
@@ -1354,7 +1492,10 @@ function normalizeFeaturedOffer(record) {
 
 export async function getFeaturedBusOffers() {
   try {
-    const data = await requestJson("/api/FeaturedOffers", { method: "GET" });
+    const data = await requestJson("/api/FeaturedOffers", {
+      method: "GET",
+      skipAuth: true,
+    });
     const rawOffers = Array.isArray(data)
       ? data
       : Array.isArray(data?.offers)

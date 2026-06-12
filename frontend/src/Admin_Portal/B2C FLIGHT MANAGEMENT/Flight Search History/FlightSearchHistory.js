@@ -402,7 +402,7 @@ function normalizeFlightSearchHistoryRecord(record, index = 0) {
     travelType: String(
       pickFirst(
         record,
-        ["travelType", "TravelType", "journeyType", "JourneyType", "type", "Type"],
+        ["travelType", "TravelType", "tripType", "TripType", "journeyType", "JourneyType", "type", "Type"],
         ""
       ) || ""
     ),
@@ -527,11 +527,30 @@ function normalizeErrorMessage(payload) {
   return "";
 }
 
+function resolveAuthToken() {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  try {
+    return normalizeText(
+      window.localStorage.getItem("adminToken") ||
+      window.localStorage.getItem("authToken") ||
+      window.localStorage.getItem("token"),
+      ""
+    );
+  } catch {
+    return "";
+  }
+}
+
 async function requestJson(urlOrPath, options = {}) {
   const resolvedUserId = resolveCurrentUserId(options.userId);
+  const resolvedToken = resolveAuthToken();
   const headers = {
     Accept: "application/json",
     "X-User-Id": resolvedUserId,
+    ...(resolvedToken ? { Authorization: `Bearer ${resolvedToken}` } : {}),
     ...(options.headers || {}),
   };
 
@@ -572,6 +591,8 @@ async function listAdminFlightSearchHistory({
   limit = 500,
 } = {}) {
   const candidateEndpoints = [
+    "/api/admin/flight/searches",
+    "/api/admin/flight/search-history",
     `${FLIGHT_BOOKINGS_ROOT}/admin/search-history`,
     `${FLIGHT_BOOKINGS_ROOT}/admin/searches`,
     `${FLIGHT_BOOKINGS_ROOT}/admin/flight-search-history`,
@@ -709,7 +730,7 @@ function mergeSearchHistory(apiRecords, localRecords) {
       ),
       customerName: normalizeText(record?.customerName, "No Login"),
       customerId: normalizeText(record?.customerId || record?.userId, "0"),
-      travelType: normalizeText(record?.travelType || record?.journeyType || record?.type, ""),
+      travelType: normalizeText(record?.travelType || record?.journeyType || record?.type || record?.tripType || record?.TripType, ""),
       adultCount:
         Number(record?.adultCount ?? record?.adults ?? record?.AdultCount ?? record?.Adults) || 0,
       childCount:

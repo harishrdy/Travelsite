@@ -616,6 +616,9 @@ async function listAdminBusSearchHistory({
   }
 
   const candidateEndpoints = [
+    "/api/admin/bus/searches",
+    "/api/admin/bus/search-history",
+    "/api/BusSearchLogs",
     `${BUS_BOOKINGS_ROOT}/admin/search-history`,
     `${BUS_BOOKINGS_ROOT}/admin/searches`,
     `${BUS_BOOKINGS_ROOT}/admin/bus-search-history`,
@@ -626,11 +629,6 @@ async function listAdminBusSearchHistory({
     `${BUS_BOOKINGS_ROOT}/bus-search-history`,
     `${BUS_BOOKINGS_ROOT}/search_history`,
     `${BUS_BOOKINGS_ROOT}/bus_search_history`,
-    "/api/admin/bus/search-history",
-    "/api/admin/bus/searches",
-    "/api/admin/bus/bus-search-history",
-    "/api/admin/bus/search_history",
-    "/api/admin/bus/bus_search_history",
     "/api/admin/bus-search-history",
     "/api/BusSearchHistory",
     "/api/BusSearchHistories",

@@ -34,12 +34,15 @@ import EditProfile from "./pages/account/EditProfile";
 import FlightSearchResults from "./pages/booking/FlightSearchResults";
 import BusSearchResults from "./pages/booking/BusSearchResults";
 import HotelSearchResults from "./pages/booking/HotelSearchResults";
+import HotelPassengerDetailsPage from "./pages/booking/HotelPassengerDetailsPage";
+import HotelPaymentPage from "./pages/booking/HotelPaymentPage";
 import BusSeatSelectionPage from "./pages/booking/BusSeatSelectionPage";
 import BusPassengerDetailsPage from "./pages/booking/BusPassengerDetailsPage";
 import BusPaymentPage from "./pages/booking/BusPaymentPage";
 import FlightSeatSelectionPage from "./pages/booking/FlightSeatSelectionPage";
 import FlightPassengerDetailsPage from "./pages/booking/FlightPassengerDetailsPage";
 import FlightPaymentPage from "./pages/booking/FlightPaymentPage";
+import HotelBookings from "./pages/booking/HotelBookings";
 import TicketConfirmationPage from "./pages/public/TicketConfirmationPage";
 import MyAccount from "./pages/account/MyAccount";
 import OffersPage from "./pages/public/OffersPage";
@@ -115,6 +118,7 @@ const ADMIN_PATHS = {
 const USER_PROTECTED_PATH_PREFIXES = [
   "/bus/payment",
   "/flight/payment",
+  "/hotel/payment",
   "/dashboard",
   "/change-password",
   "/edit-profile",
@@ -360,6 +364,8 @@ function AppContent() {
         <Route path="/flight/seats" element={<FlightSeatSelectionPage />} />
         <Route path="/flight/passenger-details" element={<FlightPassengerDetailsPage />} />
         <Route path="/flight/payment" element={<FlightPaymentPage />} />
+        <Route path="/hotel/passenger-details" element={<HotelPassengerDetailsPage />} />
+        <Route path="/hotel/payment" element={<HotelPaymentPage />} />
         <Route path="/booking/confirmation" element={<BookingConfirmationPage />} />
         <Route path="/ticket/confirmation" element={<TicketConfirmationPage />} />
         <Route path="/edit-profile" element={<EditProfile />} />
@@ -501,6 +507,7 @@ function AppContent() {
           <Route path="flight-cancel" element={<FlightCancel />} />
           <Route path="bus-bookings" element={<BusBookings />} />
           <Route path="bus-cancel" element={<BusCancel />} />
+          <Route path="hotel-bookings" element={<HotelBookings />} />
           <Route path="account-statement" element={<AccountStatement />} />
           <Route path="my-account" element={<MyAccount />} />
           <Route path="edit-profile" element={<Navigate to="/edit-profile" replace />} />

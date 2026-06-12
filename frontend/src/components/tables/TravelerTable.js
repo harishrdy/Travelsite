@@ -5,31 +5,18 @@ import "../../STYLES/traveller.css";
 const TravelerTable = ({ data, onUpdate, onDelete }) => {
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({});
-  const [phoneError, setPhoneError] = useState("");
 
   const handleEdit = (row) => {
     setEditId(row.id);
     setEditData({ ...row });
-    setPhoneError("");
   };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    if (name === "mobile") {
-      if (!/^[0-9]*$/.test(value)) return;
-      if (value.length > 10) return;
-      setEditData({ ...editData, mobile: value });
-      setPhoneError(value.length !== 10 ? "Phone must be 10 digits" : "");
-      return;
-    }
     setEditData({ ...editData, [name]: value });
   };
 
   const handleSave = () => {
-    if (!/^[0-9]{10}$/.test(editData.mobile || "")) {
-      setPhoneError("Phone must be exactly 10 digits");
-      return;
-    }
     onUpdate(editId, editData);
     setEditId(null);
   };
@@ -43,15 +30,13 @@ const TravelerTable = ({ data, onUpdate, onDelete }) => {
             <th>Name</th>
             <th>Type</th>
             <th>Gender</th>
-            <th>Email</th>
-            <th>Phone</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody>
           {data.length === 0 ? (
             <tr>
-              <td colSpan="7" className="table-empty">
+              <td colSpan="5" className="table-empty">
                 No Data Found
               </td>
             </tr>
@@ -87,34 +72,6 @@ const TravelerTable = ({ data, onUpdate, onDelete }) => {
                       </select>
                     ) : (
                       item.gender
-                    )}
-                  </td>
-                  <td>
-                    {isEdit ? (
-                      <input
-                        name="email"
-                        value={editData.email}
-                        onChange={handleChange}
-                        className="input-field"
-                      />
-                    ) : (
-                      item.email
-                    )}
-                  </td>
-                  <td>
-                    {isEdit ? (
-                      <div>
-                        <input
-                          name="mobile"
-                          value={editData.mobile}
-                          onChange={handleChange}
-                          maxLength="10"
-                          className="input-field"
-                        />
-                        {phoneError && <p className="error-text">{phoneError}</p>}
-                      </div>
-                    ) : (
-                      item.mobile
                     )}
                   </td>
                   <td>

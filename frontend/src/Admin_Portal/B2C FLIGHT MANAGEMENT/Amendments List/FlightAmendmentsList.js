@@ -1,5 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./FlightAmendmentsList.css";
+import {
+  listAdminAmendments,
+  updateAdminAmendment,
+} from "../../../services/flightBookingService";
 
 const FLIGHT_AMENDMENTS_STORAGE_KEY = "admin_flight_amendments_records";
 
@@ -146,13 +150,86 @@ function buildRemark(record) {
   return parts.length ? parts.join(" | ") : "--";
 }
 
+const mapFromBackendAmendment = (dbRow) => {
+  const booking = dbRow.booking || {};
+  return {
+    id: dbRow.id,
+    requestDateUtc: dbRow.createdAt || dbRow.requestDateUtc || "",
+    from: dbRow.fromCity || booking.fromCity || "",
+    to: dbRow.toCity || booking.toCity || "",
+    segment: dbRow.segment || (booking.fromCity && booking.toCity ? `${booking.fromCity} -> ${booking.toCity}` : ""),
+    customerName: dbRow.passengerName || booking.passengerName || "--",
+    customerPhone: dbRow.passengerPhone || booking.passengerPhone || "--",
+    status: dbRow.amendmentStatus || dbRow.status || "Pending",
+    supplierRemark: dbRow.supplierRemark || "",
+    customerRemark: dbRow.customerRemark || "",
+    adminRemark: dbRow.adminRemark || "",
+    updatedBy: dbRow.updatedBy || "Travel Admin",
+  };
+};
+
 export default function AdminFlightAmendmentsListPage() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [draftFilters, setDraftFilters] = useState(DEFAULT_FILTERS);
   const [selectedRecord, setSelectedRecord] = useState(null);
 
-  const records = useMemo(() => listFlightAmendments(), []);
+  const [records, setRecords] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const [updating, setUpdating] = useState(false);
+  const [editStatus, setEditStatus] = useState("Pending");
+  const [editSupplierRemark, setEditSupplierRemark] = useState("");
+  const [editCustomerRemark, setEditCustomerRemark] = useState("");
+  const [editAdminRemark, setEditAdminRemark] = useState("");
+
+  const loadAmendments = async () => {
+    setIsLoading(true);
+    setErrorMessage("");
+    try {
+      const data = await listAdminAmendments();
+      const mapped = Array.isArray(data) ? data.map(mapFromBackendAmendment) : [];
+      setRecords(mapped);
+    } catch (err) {
+      setErrorMessage(err.message || "Failed to load flight amendments.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAmendments();
+  }, []);
+
+  useEffect(() => {
+    if (selectedRecord) {
+      setEditStatus(selectedRecord.status || "Pending");
+      setEditSupplierRemark(selectedRecord.supplierRemark || "");
+      setEditCustomerRemark(selectedRecord.customerRemark || "");
+      setEditAdminRemark(selectedRecord.adminRemark || "");
+    }
+  }, [selectedRecord]);
+
+  const handleUpdateAmendment = async () => {
+    setUpdating(true);
+    try {
+      const payload = {
+        amendmentStatus: editStatus,
+        supplierRemark: editSupplierRemark,
+        customerRemark: editCustomerRemark,
+        adminRemark: editAdminRemark,
+      };
+      await updateAdminAmendment(selectedRecord.id, payload);
+      alert("Amendment request updated successfully!");
+      setSelectedRecord(null);
+      loadAmendments();
+    } catch (err) {
+      alert(err.message || "Failed to update amendment request.");
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   const filteredRecords = useMemo(() => {
     return records.filter((record) => {
@@ -428,6 +505,7 @@ export default function AdminFlightAmendmentsListPage() {
             aria-modal="true"
             aria-label="Amendment request details"
             onClick={(event) => event.stopPropagation()}
+            style={{ maxWidth: '800px' }}
           >
             <header className="admin-view-header">
               <div className="admin-view-header-main">
@@ -436,8 +514,8 @@ export default function AdminFlightAmendmentsListPage() {
                   {safeValue(selectedRecord.id)} | {safeValue(selectedRecord.customerName)}
                 </p>
                 <div className="admin-view-meta-row">
-                  <span className={`admin-view-meta-chip ${normalizeStatusKey(selectedRecord.status)}`}>
-                    {safeValue(selectedRecord.status)}
+                  <span className={`admin-view-meta-chip ${normalizeStatusKey(editStatus)}`}>
+                    {safeValue(editStatus)}
                   </span>
                   <span className="admin-view-meta-chip">{buildSegment(selectedRecord)}</span>
                 </div>
@@ -479,6 +557,75 @@ export default function AdminFlightAmendmentsListPage() {
               <div>
                 <span>Updated By</span>
                 <strong>{safeValue(selectedRecord.updatedBy)}</strong>
+              </div>
+            </section>
+
+            <section className="admin-view-edit-section" style={{ borderTop: '1px solid var(--border)', marginTop: '20px', paddingTop: '20px' }}>
+              <h3 style={{ margin: '0 0 16px', color: 'var(--admin-primary)' }}>Manage Request</h3>
+              <div className="admin-view-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                <label className="add-field" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <span style={{ fontWeight: '700', fontSize: '11px', textTransform: 'uppercase' }}>amendment status</span>
+                  <select
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value)}
+                    style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                  </select>
+                </label>
+
+                <label className="add-field" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <span style={{ fontWeight: '700', fontSize: '11px', textTransform: 'uppercase' }}>supplier remark</span>
+                  <input
+                    type="text"
+                    value={editSupplierRemark}
+                    onChange={(e) => setEditSupplierRemark(e.target.value)}
+                    placeholder="Processed at AI desk"
+                    style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  />
+                </label>
+
+                <label className="add-field" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <span style={{ fontWeight: '700', fontSize: '11px', textTransform: 'uppercase' }}>customer remark</span>
+                  <input
+                    type="text"
+                    value={editCustomerRemark}
+                    onChange={(e) => setEditCustomerRemark(e.target.value)}
+                    placeholder="Refund credited"
+                    style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  />
+                </label>
+
+                <label className="add-field" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <span style={{ fontWeight: '700', fontSize: '11px', textTransform: 'uppercase' }}>admin remark</span>
+                  <input
+                    type="text"
+                    value={editAdminRemark}
+                    onChange={(e) => setEditAdminRemark(e.target.value)}
+                    placeholder="Verified status via PNR desk"
+                    style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  />
+                </label>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedRecord(null)}
+                  style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid var(--border)', background: '#fff', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={updating}
+                  onClick={handleUpdateAmendment}
+                  style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: 'var(--admin-primary)', color: '#fff', cursor: 'pointer' }}
+                >
+                  {updating ? "Saving..." : "Update Request"}
+                </button>
               </div>
             </section>
           </article>

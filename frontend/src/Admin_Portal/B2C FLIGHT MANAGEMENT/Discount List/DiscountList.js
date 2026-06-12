@@ -2,92 +2,23 @@ import { useEffect, useMemo, useState } from 'react';
 import { FaEdit, FaEye, FaPlus, FaTrashAlt, FaFileExport, FaChevronDown } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import './DiscountList.css';
+import {
+  listFlightDiscounts,
+  deleteFlightDiscount,
+  listDiscountConditions,
+} from '../../../services/flightBookingService';
 
-const initialRows = [
-  {
-    id: 'FLD-1401',
-    value: 1200,
-    type: 'Fixed',
-    entryDate: '12 Mar 2026, 10:20 AM',
-    updateDate: '12 Mar 2026, 10:20 AM',
-    updatedBy: 'Pick N Book',
-    remark: 'Early bird saver fare',
-    status: 'Active',
-  },
-  {
-    id: 'FLD-1402',
-    value: 10,
-    type: 'Percentage',
-    entryDate: '13 Mar 2026, 09:10 AM',
-    updateDate: '13 Mar 2026, 11:05 AM',
-    updatedBy: 'Revenue Desk',
-    remark: 'Midweek red-eye deal',
-    status: 'Active',
-  },
-  {
-    id: 'FLD-1403',
-    value: 1800,
-    type: 'Fixed',
-    entryDate: '14 Mar 2026, 02:45 PM',
-    updateDate: '14 Mar 2026, 03:30 PM',
-    updatedBy: 'Admin Team',
-    remark: 'Corporate contract fare',
-    status: 'Inactive',
-  },
-  {
-    id: 'FLD-1404',
-    value: 7,
-    type: 'Percentage',
-    entryDate: '15 Mar 2026, 08:40 AM',
-    updateDate: '15 Mar 2026, 08:40 AM',
-    updatedBy: 'Pick N Book',
-    remark: 'Student holiday promo',
-    status: 'Active',
-  },
-  {
-    id: 'FLD-1405',
-    value: 1500,
-    type: 'Fixed',
-    entryDate: '16 Mar 2026, 12:05 PM',
-    updateDate: '16 Mar 2026, 01:10 PM',
-    updatedBy: 'Operations',
-    remark: 'Weekend getaway boost',
-    status: 'Active',
-  },
-  {
-    id: 'FLD-1406',
-    value: 5,
-    type: 'Percentage',
-    entryDate: '17 Mar 2026, 09:55 AM',
-    updateDate: '17 Mar 2026, 11:30 AM',
-    updatedBy: 'Revenue Desk',
-    remark: 'Last seat fill offer',
-    status: 'Inactive',
-  },
-];
-
-const STORAGE_KEY = 'admin_b2c_flight_discounts';
-
-const readStoredRows = () => {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return null;
-    }
-
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      return parsed;
-    }
-  } catch {
-    return null;
-  }
-
-  return null;
+const mapFromBackendDiscount = (dbRow) => {
+  return {
+    id: dbRow.id,
+    value: dbRow.value,
+    type: dbRow.discountType,
+    entryDate: dbRow.entryDate || dbRow.createdAt || new Date().toLocaleString(),
+    updateDate: dbRow.updateDate || dbRow.updatedAt || new Date().toLocaleString(),
+    updatedBy: dbRow.updatedBy || "Admin",
+    remark: dbRow.remark || "",
+    status: dbRow.status || "Active",
+  };
 };
 
 const escapeCsvValue = (value) => {
@@ -115,11 +46,16 @@ const renderDateTime = (dateStr) => {
 
 function DiscountList() {
   const navigate = useNavigate();
-  const [rows, setRows] = useState(() => readStoredRows() || initialRows);
+  const [rows, setRows] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedRow, setSelectedRow] = useState(null);
   const [activeDropdownId, setActiveDropdownId] = useState(null);
+
+  const [selectedConditions, setSelectedConditions] = useState([]);
+  const [isLoadingConditions, setIsLoadingConditions] = useState(false);
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -133,13 +69,42 @@ function DiscountList() {
     };
   }, []);
 
+  const loadDiscounts = async () => {
+    setIsLoading(true);
+    setErrorMessage("");
+    try {
+      const data = await listFlightDiscounts();
+      const mapped = Array.isArray(data) ? data.map(mapFromBackendDiscount) : [];
+      setRows(mapped);
+    } catch (err) {
+      setErrorMessage(err.message || "Failed to load discounts.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    loadDiscounts();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedRow) {
+      setSelectedConditions([]);
       return;
     }
-
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
-  }, [rows]);
+    const loadConditions = async () => {
+      setIsLoadingConditions(true);
+      try {
+        const conditions = await listDiscountConditions(selectedRow.id);
+        setSelectedConditions(Array.isArray(conditions) ? conditions : []);
+      } catch {
+        setSelectedConditions([]);
+      } finally {
+        setIsLoadingConditions(false);
+      }
+    };
+    loadConditions();
+  }, [selectedRow]);
 
   const filteredDiscounts = useMemo(() => {
     const sorted = [...rows].sort((a, b) => {
@@ -153,9 +118,9 @@ function DiscountList() {
 
     return sorted.filter((row) => {
       const matchesSearch =
-        row.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.remark.toLowerCase().includes(searchTerm.toLowerCase());
+        String(row.id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(row.type || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(row.remark || '').toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesStatus =
         statusFilter === 'All' || row.status === statusFilter;
@@ -216,10 +181,18 @@ function DiscountList() {
     navigate('/admin/b2c-flight/discounts/new', { state: { mode: 'edit', row } });
   };
 
-  const handleDelete = (rowId) => {
-    setRows((prev) => prev.filter((row) => row.id !== rowId));
-    if (selectedRow?.id === rowId) {
-      setSelectedRow(null);
+  const handleDelete = async (rowId) => {
+    if (!window.confirm("Are you sure you want to delete this discount?")) {
+      return;
+    }
+    try {
+      await deleteFlightDiscount(rowId);
+      setRows((prev) => prev.filter((row) => row.id !== rowId));
+      if (selectedRow?.id === rowId) {
+        setSelectedRow(null);
+      }
+    } catch (err) {
+      alert(err.message || "Failed to delete discount.");
     }
   };
 
@@ -282,6 +255,25 @@ function DiscountList() {
             <div className="details-item wide">
               <span className="details-label">Remark</span>
               <span className="details-value">{selectedRow.remark}</span>
+            </div>
+            <div className="details-item wide">
+              <span className="details-label">Eligibility Conditions</span>
+              <span className="details-value">
+                {isLoadingConditions ? (
+                  "Loading eligibility conditions..."
+                ) : selectedConditions.length === 0 ? (
+                  "No custom eligibility conditions configured (applies to all)."
+                ) : (
+                  <ul style={{ margin: "5px 0 0 20px", padding: 0 }}>
+                    {selectedConditions.map((cond, idx) => (
+                      <li key={cond.id || idx}>
+                        <strong>{cond.conditionType}</strong> {cond.conditionOperator || "Equals"} <code>{cond.value1}</code>
+                        {cond.value2 ? ` - ${cond.value2}` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </span>
             </div>
           </div>
         </section>

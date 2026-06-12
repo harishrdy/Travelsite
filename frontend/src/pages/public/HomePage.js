@@ -8,8 +8,6 @@ import {
   Bus,
   CalendarDays,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   Clock3,
   MessageSquareText,
   Minus,
@@ -1893,6 +1891,7 @@ export default function HomePage() {
   const { setSelectedOffer } = usePromo();
   const aiChatMessagesRef = useRef(null);
   const aiReplyTimerRef = useRef(null);
+  const aiChatShellRef = useRef(null);
 
   const [activeTab, setActiveTab] = useState(initialTab);
   const [isAiChatOpen, setIsAiChatOpen] = useState(false);
@@ -2042,6 +2041,24 @@ export default function HomePage() {
     setShowHotelGuestsDropdown(false);
     setShowClassDropdown(false);
   }, [activeTab, flightTripType]);
+
+  useEffect(() => {
+    if (!isAiChatOpen) {
+      return undefined;
+    }
+
+    const handleAiChatOutsideClick = (event) => {
+      if (
+        aiChatShellRef.current &&
+        !aiChatShellRef.current.contains(event.target)
+      ) {
+        setIsAiChatOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleAiChatOutsideClick);
+    return () => document.removeEventListener("mousedown", handleAiChatOutsideClick);
+  }, [isAiChatOpen]);
 
   useEffect(() => {
     if (!isDealsDialogOpen && !offerForDetailPopup || typeof document === "undefined") {
@@ -3088,6 +3105,8 @@ export default function HomePage() {
   );
 
   const homeContent = HOME_MODE_CONTENT[activeTab] || HOME_MODE_CONTENT.flights;
+  const ActiveAiIcon =
+    activeTab === "buses" ? Bus : activeTab === "hotels" ? BedDouble : Plane;
   const HomeModeIcon = homeContent.Icon;
 
   return (
@@ -4900,7 +4919,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className={`home-ai-chat ${isAiChatOpen ? "open" : "closed"}`}>
+      <div
+        className={`home-ai-chat ${activeTab} ${isAiChatOpen ? "open" : "closed"}`}
+        ref={aiChatShellRef}
+      >
         <button
           type="button"
           className="home-ai-toggle"
@@ -4909,12 +4931,17 @@ export default function HomePage() {
           aria-label={isAiChatOpen ? "Close AI chat" : "Open AI chat"}
           onClick={() => setIsAiChatOpen((previous) => !previous)}
         >
-          <span className="home-ai-toggle-line" aria-hidden="true" />
-          {isAiChatOpen ? (
-            <ChevronRight size={12} />
-          ) : (
-            <ChevronLeft size={12} />
-          )}
+          <span className="home-ai-help-pill">
+            <span className="home-ai-help-spark" aria-hidden="true" />
+            <span>Help</span>
+          </span>
+          <span className="home-ai-plane-orb" aria-hidden="true">
+            <span className="home-ai-plane-rings" />
+            <ActiveAiIcon
+              className={`home-ai-active-icon ${activeTab === "flights" ? "plane" : ""}`}
+              size={30}
+            />
+          </span>
         </button>
 
         {isAiChatOpen && (

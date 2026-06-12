@@ -1,36 +1,28 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Check, Eye, Pencil, Plus, SlidersHorizontal, Trash2, X } from "lucide-react";
 import "./FlightPopularDestination.css";
 import { formatCouponDateTime } from "../../../utils/adminPortalUtils";
-import { useAdminList } from "../../../utils/adminPortalStorage";
+import {
+  listPopularDestinations,
+  createPopularDestination,
+  updatePopularDestination,
+  deletePopularDestination,
+} from "../../../services/flightBookingService";
 
-const INITIAL_FLIGHT_POPULAR_DESTINATIONS = [
-  {
-    id: 701,
-    entryDate: "2026-03-12T11:05:00.000Z",
-    title: "Goa",
-    subTitle: "Sun, sand, and sea",
-    category: "Domestic",
-    placement: "main",
-    url: "https://example.com/destinations/goa",
-    status: "active",
+const mapFromBackendDestination = (dbRow) => {
+  return {
+    id: dbRow.id,
+    entryDate: dbRow.createdAt || dbRow.entryDate || new Date().toISOString(),
+    title: dbRow.destinationName || dbRow.title || "",
+    subTitle: dbRow.subTitle || "Popular Destination",
+    category: dbRow.category || "Domestic",
+    placement: dbRow.placement || "main",
+    url: dbRow.url || "",
+    status: String(dbRow.status).toLowerCase() === "active" ? "active" : "inactive",
     imageName: "",
-    imageUrl: "",
-  },
-  {
-    id: 702,
-    entryDate: "2026-03-08T18:22:00.000Z",
-    title: "Dubai",
-    subTitle: "Luxury shopping and skyline",
-    category: "International",
-    placement: "side",
-    url: "https://example.com/destinations/dubai",
-    status: "inactive",
-    imageName: "",
-    imageUrl: "",
-  },
-];
-
+    imageUrl: dbRow.imageUrl || "",
+  };
+};
 
 function createDefaultFlightPopularDestinationForm() {
   return {
@@ -66,10 +58,8 @@ function safeExternalUrl(value) {
 }
 
 export default function AdminFlightPopularDestinationsPage() {
-  const [destinations, setDestinations] = useAdminList(
-    "flight-popular-destinations",
-    INITIAL_FLIGHT_POPULAR_DESTINATIONS
-  );
+  const [destinations, setDestinations] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState("entryDate");
@@ -99,6 +89,23 @@ export default function AdminFlightPopularDestinationsPage() {
     "Status",
     "Action",
   ];
+
+  const loadDestinations = async () => {
+    setIsLoading(true);
+    try {
+      const data = await listPopularDestinations();
+      const mapped = Array.isArray(data) ? data.map(mapFromBackendDestination) : [];
+      setDestinations(mapped);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDestinations();
+  }, []);
 
   const availableCategories = useMemo(() => {
     const unique = new Set(
@@ -248,31 +255,12 @@ export default function AdminFlightPopularDestinationsPage() {
     });
   };
 
-  const handleAddDestination = () => {
+  const handleAddDestination = async () => {
     const title = String(addForm.title || "").trim();
-    const subTitle = String(addForm.subTitle || "").trim();
-    const category = String(addForm.category || "").trim();
-    const placement = String(addForm.placement || "").trim().toLowerCase();
-    const normalizedUrl = safeExternalUrl(addForm.url);
-    const status = String(addForm.status || "active").trim().toLowerCase();
+    const normalizedStatus = String(addForm.status || "active").toLowerCase() === "active" ? "Active" : "Inactive";
 
     if (!title) {
       setAddError("Title is required.");
-      return;
-    }
-
-    if (!category) {
-      setAddError("Category is required.");
-      return;
-    }
-
-    if (placement !== "main" && placement !== "side") {
-      setAddError("Choose Side or Main placement.");
-      return;
-    }
-
-    if (!normalizedUrl) {
-      setAddError("Enter a valid URL.");
       return;
     }
 
@@ -281,29 +269,21 @@ export default function AdminFlightPopularDestinationsPage() {
       return;
     }
 
-    setDestinations((previous) => {
-      const nextId =
-        previous.reduce((highest, item) => Math.max(highest, Number(item.id) || 0), 0) + 1;
+    const payload = {
+      destinationName: title,
+      imageUrl: addForm.imageUrl,
+      status: normalizedStatus,
+    };
 
-      const nextRow = {
-        id: nextId,
-        entryDate: new Date().toISOString(),
-        title,
-        subTitle,
-        category,
-        placement,
-        url: normalizedUrl,
-        status: status === "inactive" ? "inactive" : "active",
-        imageName: addForm.imageName,
-        imageUrl: addForm.imageUrl,
-      };
-
-      return [nextRow, ...previous];
-    });
-
-    setIsAddModalOpen(false);
-    setAddError("");
-    setAddForm(createDefaultFlightPopularDestinationForm());
+    try {
+      await createPopularDestination(payload);
+      await loadDestinations();
+      setIsAddModalOpen(false);
+      setAddError("");
+      setAddForm(createDefaultFlightPopularDestinationForm());
+    } catch (err) {
+      setAddError(err.message || "Failed to add popular destination.");
+    }
   };
 
   const handleOpenEditModal = (destination) => {
@@ -364,35 +344,16 @@ export default function AdminFlightPopularDestinationsPage() {
     });
   };
 
-  const handleEditDestination = () => {
+  const handleEditDestination = async () => {
     if (!editDestination) {
       return;
     }
 
     const title = String(editForm.title || "").trim();
-    const subTitle = String(editForm.subTitle || "").trim();
-    const category = String(editForm.category || "").trim();
-    const placement = String(editForm.placement || "").trim().toLowerCase();
-    const normalizedUrl = safeExternalUrl(editForm.url);
-    const status = String(editForm.status || "active").trim().toLowerCase();
+    const normalizedStatus = String(editForm.status || "active").toLowerCase() === "active" ? "Active" : "Inactive";
 
     if (!title) {
       setEditError("Title is required.");
-      return;
-    }
-
-    if (!category) {
-      setEditError("Category is required.");
-      return;
-    }
-
-    if (placement !== "main" && placement !== "side") {
-      setEditError("Choose Side or Main placement.");
-      return;
-    }
-
-    if (!normalizedUrl) {
-      setEditError("Enter a valid URL.");
       return;
     }
 
@@ -401,60 +362,54 @@ export default function AdminFlightPopularDestinationsPage() {
       return;
     }
 
-    setDestinations((previous) =>
-      previous.map((item) => {
-        if (item.id !== editDestination.id) {
-          return item;
-        }
+    const payload = {
+      destinationName: title,
+      imageUrl: editForm.imageUrl,
+      status: normalizedStatus,
+    };
 
-        return {
-          ...item,
-          title,
-          subTitle,
-          category,
-          placement,
-          url: normalizedUrl,
-          status: status === "inactive" ? "inactive" : "active",
-          imageName: editForm.imageName,
-          imageUrl: editForm.imageUrl,
-        };
-      })
-    );
-
-    if (
-      editDestination.imageUrl &&
-      String(editDestination.imageUrl).startsWith("blob:") &&
-      editDestination.imageUrl !== editForm.imageUrl
-    ) {
-      URL.revokeObjectURL(editDestination.imageUrl);
+    try {
+      await updatePopularDestination(editDestination.id, payload);
+      await loadDestinations();
+      setEditDestination(null);
+      setEditError("");
+      setEditForm(createDefaultFlightPopularDestinationForm());
+    } catch (err) {
+      setEditError(err.message || "Failed to update popular destination.");
     }
-
-    setEditDestination(null);
-    setEditError("");
-    setEditForm(createDefaultFlightPopularDestinationForm());
   };
 
-  const handleToggleStatus = (id) => {
-    setDestinations((previous) =>
-      previous.map((item) =>
-        item.id === id ? { ...item, status: item.status === "active" ? "inactive" : "active" } : item
-      )
-    );
+  const handleToggleStatus = async (id) => {
+    const current = destinations.find((item) => item.id === id);
+    if (!current) return;
+
+    const nextStatus = current.status === "active" ? "Inactive" : "Active";
+    const payload = {
+      destinationName: current.title,
+      imageUrl: current.imageUrl,
+      status: nextStatus,
+    };
+
+    try {
+      await updatePopularDestination(id, payload);
+      await loadDestinations();
+    } catch (err) {
+      alert(err.message || "Failed to toggle status.");
+    }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!deleteDestination) {
       return;
     }
 
-    const toDelete = deleteDestination;
-
-    setDestinations((previous) => previous.filter((item) => item.id !== toDelete.id));
-    setDeleteDestination(null);
-    setViewDestination((previous) => (previous?.id === toDelete.id ? null : previous));
-
-    if (toDelete.imageUrl && String(toDelete.imageUrl).startsWith("blob:")) {
-      URL.revokeObjectURL(toDelete.imageUrl);
+    try {
+      await deletePopularDestination(deleteDestination.id);
+      await loadDestinations();
+      setDeleteDestination(null);
+      setViewDestination(null);
+    } catch (err) {
+      alert(err.message || "Failed to delete popular destination.");
     }
   };
 

@@ -1,165 +1,16 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { List } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "./FlightEditConvenienceFee.css";
-
-const FLIGHT_CONVENIENCE_FEE_STORAGE_KEY = "admin_flight_convenience_fee_records";
+import {
+  createConvenienceFeeRule,
+  updateConvenienceFeeRule,
+  listConvenienceFeeRules,
+} from "../../../services/flightBookingService";
 
 const normalizeText = (value, fallback = "") => {
   const text = String(value ?? "").trim();
   return text || fallback;
-};
-
-const toSafeNumber = (value, fallback = 0) => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-};
-
-const normalizeAmountType = (value, fallback = "Fix") => {
-  const text = normalizeText(value, fallback);
-  const key = text.toLowerCase();
-  if (key === "percentage" || key === "percent") {
-    return "Percentage";
-  }
-  return "Fix";
-};
-
-const normalizeStatus = (value, fallback = "Active") => {
-  const text = normalizeText(value, fallback);
-  const key = text.toLowerCase();
-  if (key.includes("inactive") || key.includes("disabled") || key.includes("deactive")) {
-    return "Inactive";
-  }
-  return "Active";
-};
-
-const normalizeFeeRecord = (record, index = 0) => {
-  return {
-    id: normalizeText(record?.id, `${index + 1}`),
-    amountType: normalizeAmountType(record?.amountType, "Fix"),
-    value: toSafeNumber(record?.value, 0),
-    entryDateUtc: normalizeText(record?.entryDateUtc, ""),
-    updatedAtUtc: normalizeText(record?.updatedAtUtc, ""),
-    updatedBy: normalizeText(record?.updatedBy, "Travel Admin"),
-    status: normalizeStatus(record?.status, "Active"),
-  };
-};
-
-const readFeeRecords = () => {
-  if (typeof window === "undefined") {
-    return [];
-  }
-
-  try {
-    const raw = window.localStorage.getItem(FLIGHT_CONVENIENCE_FEE_STORAGE_KEY) || "";
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    return parsed.map((record, index) => normalizeFeeRecord(record, index));
-  } catch {
-    return [];
-  }
-};
-
-const writeFeeRecords = (records) => {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  try {
-    window.localStorage.setItem(
-      FLIGHT_CONVENIENCE_FEE_STORAGE_KEY,
-      JSON.stringify(records.map((record, index) => normalizeFeeRecord(record, index)))
-    );
-  } catch {
-    // Ignore localStorage write failures.
-  }
-};
-
-const resolveNextFeeId = (records) => {
-  const numericIds = records
-    .map((record) => Number(record?.id))
-    .filter((value) => Number.isFinite(value));
-
-  if (numericIds.length === 0) {
-    return String(Date.now());
-  }
-
-  return String(Math.max(...numericIds) + 1);
-};
-
-const listFlightConvenienceFees = () => {
-  const records = readFeeRecords();
-  writeFeeRecords(records);
-  return records;
-};
-
-const getFlightConvenienceFeeById = (feeId) => {
-  const normalizedId = normalizeText(feeId, "");
-  if (!normalizedId) {
-    return null;
-  }
-
-  return (
-    listFlightConvenienceFees().find((record) => normalizeText(record.id, "") === normalizedId) ||
-    null
-  );
-};
-
-const createFlightConvenienceFee = ({ amountType, value, updatedBy, status } = {}) => {
-  const nowIso = new Date().toISOString();
-  const records = listFlightConvenienceFees();
-  const id = resolveNextFeeId(records);
-
-  const nextRecord = normalizeFeeRecord(
-    {
-      id,
-      amountType,
-      value,
-      updatedBy,
-      status: status || "Active",
-      entryDateUtc: nowIso,
-      updatedAtUtc: nowIso,
-    },
-    records.length
-  );
-
-  const nextRecords = [nextRecord, ...records];
-  writeFeeRecords(nextRecords);
-  return nextRecord;
-};
-
-const updateFlightConvenienceFeeById = (feeId, updates) => {
-  const normalizedId = normalizeText(feeId, "");
-  if (!normalizedId) {
-    return null;
-  }
-
-  const nowIso = new Date().toISOString();
-  const currentRecords = listFlightConvenienceFees();
-  let updatedRecord = null;
-
-  const nextRecords = currentRecords.map((record, index) => {
-    if (normalizeText(record.id, "") !== normalizedId) {
-      return record;
-    }
-
-    updatedRecord = normalizeFeeRecord(
-      {
-        ...record,
-        ...updates,
-        updatedAtUtc: nowIso,
-      },
-      index
-    );
-
-    return updatedRecord;
-  });
-
-  writeFeeRecords(nextRecords);
-  return updatedRecord;
 };
 
 function resolveHeading(isEditing) {
@@ -172,18 +23,42 @@ export default function AdminFlightEditConvenienceFeePage() {
   const refId = normalizeText(searchParams.get("ref_id"), "");
   const isEditing = Boolean(refId);
 
-  const feeRecord = useMemo(() => getFlightConvenienceFeeById(refId), [refId]);
-  const [amountType, setAmountType] = useState(() =>
-    normalizeText(feeRecord?.amountType, "Fix")
-  );
-  const [value, setValue] = useState(() => {
-    const initial = Number(feeRecord?.value);
-    return Number.isFinite(initial) && initial > 0 ? String(initial) : "";
-  });
+  const [isLoading, setIsLoading] = useState(isEditing);
+  const [recordNotFound, setRecordNotFound] = useState(false);
+  const [tripType, setTripType] = useState("OneWay");
+  const [amountType, setAmountType] = useState("Fix");
+  const [value, setValue] = useState("");
+  const [isActive, setIsActive] = useState(true);
   const [statusMessage, setStatusMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleUpdate = () => {
+  useEffect(() => {
+    if (!isEditing) return;
+
+    const fetchRecord = async () => {
+      try {
+        setIsLoading(true);
+        const rules = await listConvenienceFeeRules();
+        const found = rules.find((r) => String(r.id) === refId);
+        if (found) {
+          setTripType(found.tripType || "OneWay");
+          setAmountType(found.feeType === "Percentage" ? "Percentage" : "Fix");
+          setValue(String(found.feeValue || ""));
+          setIsActive(found.isActive !== false);
+        } else {
+          setRecordNotFound(true);
+        }
+      } catch (err) {
+        setErrorMessage(err.message || "Failed to load convenience fee rule.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRecord();
+  }, [isEditing, refId]);
+
+  const handleUpdate = async () => {
     setStatusMessage("");
     setErrorMessage("");
 
@@ -198,32 +73,54 @@ export default function AdminFlightEditConvenienceFeePage() {
       return;
     }
 
-    const updatedBy = "Travel Admin";
+    const payload = {
+      tripType,
+      feeType: amountType === "Percentage" ? "Percentage" : "Flat",
+      feeValue: numericValue,
+      isActive: isActive,
+    };
 
-    const updated = isEditing
-      ? updateFlightConvenienceFeeById(refId, {
-          amountType,
-          value: numericValue,
-          updatedBy,
-        })
-      : createFlightConvenienceFee({
-          amountType,
-          value: numericValue,
-          updatedBy,
-          status: "Active",
-        });
-
-    if (!updated) {
-      setErrorMessage("Unable to save convenience fee.");
-      return;
+    try {
+      if (isEditing) {
+        await updateConvenienceFeeRule(refId, payload);
+        setStatusMessage("Convenience fee updated successfully.");
+      } else {
+        await createConvenienceFeeRule(payload);
+        setStatusMessage("Convenience fee added successfully.");
+        // Clear form after successful addition
+        setTripType("OneWay");
+        setAmountType("Fix");
+        setValue("");
+      }
+    } catch (err) {
+      setErrorMessage(err.message || "Failed to save convenience fee.");
     }
-
-    setStatusMessage(
-      isEditing ? "Convenience fee updated successfully." : "Convenience fee added successfully."
-    );
   };
 
-  if (isEditing && !feeRecord) {
+  if (isEditing && isLoading) {
+    return (
+      <section className="admin-b2c-page admin-flight-fee-edit-page">
+        <div className="admin-flight-fee-edit-head-row">
+          <header className="admin-b2c-header admin-flight-fee-edit-header">
+            <h1>{resolveHeading(true)}</h1>
+          </header>
+
+          <button
+            type="button"
+            className="admin-flight-fee-list-btn"
+            onClick={() => navigate("/admin/b2c-flight/convenience-fee")}
+          >
+            <List size={14} />
+            B2C Flight Convenience Fee
+          </button>
+        </div>
+
+        <div className="admin-table-empty">Loading rule details...</div>
+      </section>
+    );
+  }
+
+  if (isEditing && recordNotFound) {
     return (
       <section className="admin-b2c-page admin-flight-fee-edit-page">
         <div className="admin-flight-fee-edit-head-row">
@@ -265,6 +162,14 @@ export default function AdminFlightEditConvenienceFeePage() {
 
       <section className="admin-flight-fee-edit-shell">
         <div className="admin-flight-fee-edit-row">
+          <div className="admin-flight-fee-edit-label">Trip Type</div>
+          <div className="admin-flight-fee-edit-field">
+            <select value={tripType} onChange={(event) => setTripType(event.target.value)}>
+              <option value="OneWay">OneWay</option>
+              <option value="RoundTrip">RoundTrip</option>
+            </select>
+          </div>
+
           <div className="admin-flight-fee-edit-label">Amount Type</div>
           <div className="admin-flight-fee-edit-field">
             <select value={amountType} onChange={(event) => setAmountType(event.target.value)}>
@@ -272,9 +177,11 @@ export default function AdminFlightEditConvenienceFeePage() {
               <option value="Percentage">Percentage</option>
             </select>
           </div>
+        </div>
 
+        <div className="admin-flight-fee-edit-row">
           <div className="admin-flight-fee-edit-label">Value</div>
-          <div className="admin-flight-fee-edit-field">
+          <div className="admin-flight-fee-edit-field" style={{ gridColumn: "span 3" }}>
             <input
               type="number"
               min="0"
@@ -288,7 +195,7 @@ export default function AdminFlightEditConvenienceFeePage() {
 
         <div className="admin-flight-fee-edit-actions">
           <button type="button" className="admin-flight-fee-update-btn" onClick={handleUpdate}>
-            Update
+            {isEditing ? "Update" : "Add"}
           </button>
         </div>
       </section>
@@ -298,5 +205,3 @@ export default function AdminFlightEditConvenienceFeePage() {
     </section>
   );
 }
-
-

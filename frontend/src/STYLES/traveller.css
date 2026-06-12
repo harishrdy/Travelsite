@@ -169,6 +169,10 @@
   grid-column: span 1;
 }
 
+.traveller-container .traveler-fullname-span {
+  grid-column: span 2;
+}
+
 /* ── Submit wrap ── */
 .traveller-container .submit-wrap {
   margin-top: 20px;
@@ -405,6 +409,10 @@
   }
 
   .traveller-container .traveler-email-span {
+    grid-column: span 1;
+  }
+
+  .traveller-container .traveler-fullname-span {
     grid-column: span 1;
   }
 
